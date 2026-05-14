@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "title": "CineDot: The Beginning",
+    "overview": "A senior architect's journey to build the perfect movie app. This documentary explores the challenges of clean architecture and the beauty of modular design.",
+    "posterUrl": "https://images.tmdb.org/t/p/w500/poster1.jpg",
+    "backdropUrl": "https://images.tmdb.org/t/p/original/backdrop1.jpg",
+    "releaseDate": "2024-05-14",
+    "rating": 9.5,
+    "voteCount": 1200,
+    "genres": [
+      { "id": 1, "name": "Documentary" },
+      { "id": 2, "name": "Tech" }
+    ],
+    "runtime": 120
+  }
+}
