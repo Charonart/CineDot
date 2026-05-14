@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "data": {
+    "page": 1,
+    "results": [
+      {
+        "id": 1,
+        "title": "CineDot: The Beginning",
+        "overview": "A senior architect's journey to build the perfect movie app.",
+        "posterUrl": "https://images.tmdb.org/t/p/w500/poster1.jpg",
+        "backdropUrl": "https://images.tmdb.org/t/p/original/backdrop1.jpg",
+        "releaseDate": "2024-05-14",
+        "rating": 9.5,
+        "voteCount": 1200,
+        "genres": [
+          { "id": 1, "name": "Documentary" },
+          { "id": 2, "name": "Tech" }
+        ]
+      }
+    ],
+    "totalPages": 10,
+    "totalResults": 100
+  }
+}
