@@ -5,17 +5,63 @@
     "results": [
       {
         "id": 1,
-        "title": "CineDot: The Beginning",
-        "overview": "A senior architect's journey to build the perfect movie app.",
-        "posterUrl": "https://images.tmdb.org/t/p/w500/poster1.jpg",
-        "backdropUrl": "https://images.tmdb.org/t/p/original/backdrop1.jpg",
-        "releaseDate": "2024-05-14",
-        "rating": 9.5,
-        "voteCount": 1200,
-        "genres": [
-          { "id": 1, "name": "Documentary" },
-          { "id": 2, "name": "Tech" }
-        ]
+        "title": "Fight Club",
+        "overview": "A ticking-time-bomb insomniac and a slippery soap salesman channel primal male aggression into a shocking new form of therapy.",
+        "posterUrl": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+        "backdropUrl": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+        "releaseDate": "1999-10-15",
+        "rating": 8.4,
+        "voteCount": 26280,
+        "genres": [{ "id": 18, "name": "Drama" }, { "id": 53, "name": "Thriller" }],
+        "runtime": 139
+      },
+      {
+        "id": 2,
+        "title": "Inception",
+        "overview": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+        "posterUrl": "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+        "backdropUrl": "/s3TBrRGB1iav7gFOCNx3H31MoES.jpg",
+        "releaseDate": "2010-07-16",
+        "rating": 8.8,
+        "voteCount": 35000,
+        "genres": [{ "id": 28, "name": "Action" }, { "id": 878, "name": "Sci-Fi" }],
+        "runtime": 148
+      },
+      {
+        "id": 3,
+        "title": "The Dark Knight",
+        "overview": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+        "posterUrl": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+        "backdropUrl": "/hkBaDkMWbLaf8B1lsWsKX7Ew3Xq.jpg",
+        "releaseDate": "2008-07-18",
+        "rating": 9.0,
+        "voteCount": 30000,
+        "genres": [{ "id": 28, "name": "Action" }, { "id": 18, "name": "Drama" }],
+        "runtime": 152
+      },
+      {
+        "id": 4,
+        "title": "Interstellar",
+        "overview": "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+        "posterUrl": "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+        "backdropUrl": "/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
+        "releaseDate": "2014-11-07",
+        "rating": 8.6,
+        "voteCount": 32000,
+        "genres": [{ "id": 18, "name": "Drama" }, { "id": 878, "name": "Sci-Fi" }],
+        "runtime": 169
+      },
+      {
+        "id": 5,
+        "title": "Pulp Fiction",
+        "overview": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+        "posterUrl": "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+        "backdropUrl": "/4cDFJr4HnXN5AdPw4AKrmLlMWdO.jpg",
+        "releaseDate": "1994-09-10",
+        "rating": 8.9,
+        "voteCount": 27000,
+        "genres": [{ "id": 53, "name": "Thriller" }, { "id": 80, "name": "Crime" }],
+        "runtime": 154
       }
     ],
     "totalPages": 10,

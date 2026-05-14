@@ -19,10 +19,19 @@ axiosClient.interceptors.request.use(
     if (env.NEXT_PUBLIC_USE_MOCK && config.url) {
       const mockPath = getMockPath(config.url);
       if (mockPath) {
-        config.baseURL = window.location.origin;
+        //SSR-safe: window không tồn tại trong Server Component
+        let origin: string;
+        if (typeof window !== 'undefined') {
+          origin = window.location.origin;
+        } else {
+          // Next.js tự set PORT khi chọn port available
+          const port = process.env.PORT ?? '3000';
+          origin = `http://localhost:${port}`;
+        }
+        config.baseURL = origin;
         config.url = mockPath;
         config.method = 'GET';
-        logger.info(`🚀 [Mock Mode] Redirecting ${config.url}`);
+        logger.info(`🚀 [Mock Mode] Redirecting to ${mockPath}`);
       }
     }
 

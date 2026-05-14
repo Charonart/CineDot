@@ -4,7 +4,7 @@
     "page": 1,
     "results": [
       {
-        "id": 6,
+        "id": 807,
         "title": "Se7en",
         "overview": "Two homicide detectives are on a desperate hunt for a serial killer whose crimes are based on the seven deadly sins.",
         "posterUrl": "/6yoghtyTpznpBik8EngEmJskVUO.jpg",
@@ -16,7 +16,7 @@
         "runtime": 127
       },
       {
-        "id": 7,
+        "id": 496243,
         "title": "Parasite",
         "overview": "All unemployed, Ki-taek's family takes peculiar interest in the wealthy and glamorous Park family.",
         "posterUrl": "/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
@@ -28,7 +28,7 @@
         "runtime": 132
       },
       {
-        "id": 8,
+        "id": 769,
         "title": "GoodFellas",
         "overview": "The true story of Henry Hill, a half-Irish, half-Sicilian Brooklyn kid who is adopted by the Mob.",
         "posterUrl": "/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
@@ -38,9 +38,21 @@
         "voteCount": 11000,
         "genres": [{ "id": 18, "name": "Drama" }, { "id": 80, "name": "Crime" }],
         "runtime": 146
+      },
+      {
+        "id": 680,
+        "title": "Pulp Fiction",
+        "overview": "The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.",
+        "posterUrl": "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+        "backdropUrl": "/4cDFJr4HnXN5AdPw4AKrmLlMWdO.jpg",
+        "releaseDate": "1994-09-10",
+        "rating": 8.9,
+        "voteCount": 27000,
+        "genres": [{ "id": 53, "name": "Thriller" }, { "id": 80, "name": "Crime" }],
+        "runtime": 154
       }
     ],
-    "totalPages": 10,
-    "totalResults": 100
+    "totalPages": 3,
+    "totalResults": 60
   }
 }
