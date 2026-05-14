@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "id": "5c9294240e0a2675e7f60b7e",
+        "key": "SUXWAEX2jlg",
+        "name": "Fight Club | #TBT Trailer",
+        "type": "Trailer",
+        "site": "YouTube",
+        "official": true
+      },
+      {
+        "id": "6011e6a292514200294af9d1",
+        "key": "BdEgSCRLd54",
+        "name": "Fight Club - Official Trailer",
+        "type": "Trailer",
+        "site": "YouTube",
+        "official": true
+      },
+      {
+        "id": "6011e6a292514200294af9d2",
+        "key": "6JnN1DmbqoU",
+        "name": "Fight Club - Teaser",
+        "type": "Teaser",
+        "site": "YouTube",
+        "official": false
+      }
+    ]
+  }
+}

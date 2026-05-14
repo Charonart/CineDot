@@ -2,17 +2,23 @@
   "success": true,
   "data": {
     "id": 1,
-    "title": "CineDot: The Beginning",
-    "overview": "A senior architect's journey to build the perfect movie app. This documentary explores the challenges of clean architecture and the beauty of modular design.",
-    "posterUrl": "https://images.tmdb.org/t/p/w500/poster1.jpg",
-    "backdropUrl": "https://images.tmdb.org/t/p/original/backdrop1.jpg",
-    "releaseDate": "2024-05-14",
-    "rating": 9.5,
-    "voteCount": 1200,
+    "title": "Fight Club",
+    "overview": "A ticking-time-bomb insomniac and a slippery soap salesman channel primal male aggression into a shocking new form of therapy. Their concept catches on, with underground \"fight clubs\" forming in every town, until an eccentric gets in the way and ignites an out-of-control spiral toward oblivion.",
+    "tagline": "Mischief. Mayhem. Soap.",
+    "posterUrl": "https://images.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+    "backdropUrl": "https://images.tmdb.org/t/p/original/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+    "releaseDate": "1999-10-15",
+    "rating": 8.4,
+    "voteCount": 26280,
+    "runtime": 139,
+    "status": "Released",
+    "originalLanguage": "en",
+    "budget": 63000000,
+    "revenue": 101206041,
     "genres": [
-      { "id": 1, "name": "Documentary" },
-      { "id": 2, "name": "Tech" }
-    ],
-    "runtime": 120
+      { "id": 18, "name": "Drama" },
+      { "id": 53, "name": "Thriller" },
+      { "id": 35, "name": "Comedy" }
+    ]
   }
 }

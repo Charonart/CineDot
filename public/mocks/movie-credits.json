@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "data": {
+    "cast": [
+      { "id": 819, "name": "Edward Norton", "character": "The Narrator", "profileUrl": "https://images.tmdb.org/t/p/w185/5XBzD5WuTyVQZeS4VI25z2moMeY.jpg", "order": 0 },
+      { "id": 287, "name": "Brad Pitt", "character": "Tyler Durden", "profileUrl": "https://images.tmdb.org/t/p/w185/cckcYc2v0yh1tc9QjRelptcOBko.jpg", "order": 1 },
+      { "id": 1283, "name": "Helena Bonham Carter", "character": "Marla Singer", "profileUrl": "https://images.tmdb.org/t/p/w185/58oJPFG1wefMC0BnCsAoSEQBPko.jpg", "order": 2 },
+      { "id": 7470, "name": "Meat Loaf", "character": "Robert 'Bob' Paulsen", "profileUrl": "https://images.tmdb.org/t/p/w185/7FMHDdRHpUCPfJGBaLQU1MgF6Q2.jpg", "order": 3 },
+      { "id": 7499, "name": "Zach Grenier", "character": "Richard Chesler", "profileUrl": "https://images.tmdb.org/t/p/w185/rcMHs7uyFdSfGsM4hEjqYxEeOB2.jpg", "order": 4 },
+      { "id": 7471, "name": "Richmond Arquette", "character": "Intern", "profileUrl": null, "order": 5 },
+      { "id": 69280, "name": "David Andrews", "character": "Thomas", "profileUrl": null, "order": 6 },
+      { "id": 7486, "name": "Holt McCallany", "character": "The Mechanic", "profileUrl": null, "order": 7 }
+    ],
+    "crew": [
+      { "id": 7467, "name": "David Fincher", "job": "Director", "department": "Directing", "profileUrl": "https://images.tmdb.org/t/p/w185/tpEczFclQZuk81ATaw63meKLRxM.jpg" },
+      { "id": 7468, "name": "Jim Uhls", "job": "Screenplay", "department": "Writing", "profileUrl": null },
+      { "id": 7469, "name": "Art Linson", "job": "Producer", "department": "Production", "profileUrl": null },
+      { "id": 1034013, "name": "Ceán Chaffin", "job": "Producer", "department": "Production", "profileUrl": null }
+    ]
+  }
+}

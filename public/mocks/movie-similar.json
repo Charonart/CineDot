@@ -1,0 +1,58 @@
+{
+  "success": true,
+  "data": {
+    "page": 1,
+    "results": [
+      {
+        "id": 807,
+        "title": "Se7en",
+        "overview": "Two homicide detectives are on a desperate hunt for a serial killer whose crimes are based on the seven deadly sins.",
+        "posterUrl": "https://images.tmdb.org/t/p/w185/6yoghtyTpznpBik8EngEmJskVUO.jpg",
+        "backdropUrl": "https://images.tmdb.org/t/p/w342/yw9LkPVBXQCNBHMoVuWHcuYe6RM.jpg",
+        "releaseDate": "1995-09-22",
+        "rating": 8.6,
+        "voteCount": 21000,
+        "genres": [{ "id": 80, "name": "Crime" }, { "id": 9648, "name": "Mystery" }],
+        "runtime": 127
+      },
+      {
+        "id": 496243,
+        "title": "Parasite",
+        "overview": "All unemployed, Ki-taek's family takes peculiar interest in the wealthy and glamorous Park family.",
+        "posterUrl": "https://images.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+        "backdropUrl": "https://images.tmdb.org/t/p/original/TU9NIjwzjoKPwQHoHshkFcQUCG.jpg",
+        "releaseDate": "2019-05-30",
+        "rating": 8.5,
+        "voteCount": 17000,
+        "genres": [{ "id": 35, "name": "Comedy" }, { "id": 53, "name": "Thriller" }],
+        "runtime": 132
+      },
+      {
+        "id": 769,
+        "title": "GoodFellas",
+        "overview": "The true story of Henry Hill, a half-Irish, half-Sicilian Brooklyn kid who is adopted by the Mob.",
+        "posterUrl": "https://images.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
+        "backdropUrl": "https://images.tmdb.org/t/p/original/sw7mordbZxgITU877yTpZCud90M.jpg",
+        "releaseDate": "1990-09-12",
+        "rating": 8.5,
+        "voteCount": 11000,
+        "genres": [{ "id": 18, "name": "Drama" }, { "id": 80, "name": "Crime" }],
+        "runtime": 146
+      },
+      {
+        "id": 680,
+        "title": "Pulp Fiction",
+        "overview": "The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.",
+        "posterUrl": "https://images.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+        "backdropUrl": "https://images.tmdb.org/t/p/original/4cDFJr4HnXN5AdPw4AKrmLlMWdO.jpg",
+        "releaseDate": "1994-09-10",
+        "rating": 8.9,
+        "voteCount": 27000,
+        "genres": [{ "id": 53, "name": "Thriller" }, { "id": 80, "name": "Crime" }],
+        "runtime": 154
+      }
+    ],
+    "totalPages": 3,
+    "totalResults": 60
+  }
+}
