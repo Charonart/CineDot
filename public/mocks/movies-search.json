@@ -5,15 +5,16 @@
     "results": [
       {
         "id": 1,
-        "title": "Fight Club",
-        "overview": "A ticking-time-bomb insomniac and a slippery soap salesman channel primal male aggression into a shocking new form of therapy.",
-        "posterUrl": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
-        "backdropUrl": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
-        "releaseDate": "1999-10-15",
-        "rating": 8.4,
-        "voteCount": 26280,
-        "genres": [{ "id": 18, "name": "Drama" }],
-        "runtime": 139
+        "title": "CineDot: The Beginning",
+        "overview": "A senior architect's journey to build the perfect movie app.",
+        "posterUrl": "https://images.tmdb.org/t/p/w500/poster1.jpg",
+        "backdropUrl": "https://images.tmdb.org/t/p/original/backdrop1.jpg",
+        "releaseDate": "2024-05-14",
+        "rating": 9.5,
+        "voteCount": 1200,
+        "genres": [
+          { "id": 1, "name": "Documentary" }
+        ]
       }
     ],
     "totalPages": 1,

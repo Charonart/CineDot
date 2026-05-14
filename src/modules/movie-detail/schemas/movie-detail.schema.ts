@@ -5,7 +5,7 @@ export const castMemberSchema = z.object({
   id: z.number(),
   name: z.string(),
   character: z.string(),
-  profileUrl: z.string().nullable(),
+  profileUrl: z.string().url().nullable(),
   order: z.number(),
 });
 
@@ -14,7 +14,7 @@ export const crewMemberSchema = z.object({
   name: z.string(),
   job: z.string(),
   department: z.string(),
-  profileUrl: z.string().nullable(),
+  profileUrl: z.string().url().nullable(),
 });
 
 export const creditsSchema = z.object({

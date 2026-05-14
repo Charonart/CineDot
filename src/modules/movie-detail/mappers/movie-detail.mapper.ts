@@ -1,13 +1,14 @@
 import { MovieDetailDTO, CreditsDTO, VideoDTO, CastMemberDTO, CrewMemberDTO } from '../dto/movie-detail.dto';
 import { MovieDetail, Credits, Video, CastMember, CrewMember } from '../types/movie-detail.type';
+import { imageHelper } from '@shared/utils/imageHelper';
 
 export const movieDetailMapper = {
   toMovieDetail: (dto: MovieDetailDTO): MovieDetail => ({
     id: dto.id,
     title: dto.title,
     description: dto.overview,
-    posterUrl: dto.posterUrl,
-    backdropUrl: dto.backdropUrl,
+    posterUrl: imageHelper.getPosterUrl(dto.posterUrl, 'md'),
+    backdropUrl: imageHelper.getBackdropUrl(dto.backdropUrl, 'lg'),
     releaseDate: dto.releaseDate,
     rating: dto.rating,
     voteCount: dto.voteCount,
@@ -24,7 +25,7 @@ export const movieDetailMapper = {
     id: dto.id,
     name: dto.name,
     character: dto.character,
-    profileUrl: dto.profileUrl,
+    profileUrl: imageHelper.getProfileUrl(dto.profileUrl, 'md'),
     order: dto.order,
   }),
 
@@ -33,7 +34,7 @@ export const movieDetailMapper = {
     name: dto.name,
     job: dto.job,
     department: dto.department,
-    profileUrl: dto.profileUrl,
+    profileUrl: imageHelper.getProfileUrl(dto.profileUrl, 'md'),
   }),
 
   toCredits: (dto: CreditsDTO): Credits => ({
