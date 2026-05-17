@@ -1,0 +1,306 @@
+/* ============================================================
+   CINE Component — Cinematic Video Player
+   assets/css/components/video-player.css
+   ============================================================ */
+
+.cine-video-player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-body);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cine-video-element {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Spinner Overlay */
+.cine-video-spinner {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.cine-video-player.is-loading .cine-video-spinner {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cine-spinner-icon {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent-strong);
+  border-radius: 50%;
+  animation: cine-spin 1s infinite linear;
+}
+
+@keyframes cine-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Controls Gradient Overlay */
+.cine-controls-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Show controls state */
+.cine-video-player.show-controls .cine-controls-overlay,
+.cine-video-player.show-controls .cine-controls-bar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Controls Bar */
+.cine-controls-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Progress Area */
+.cine-progress-area {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  position: relative;
+  transition: height 0.2s;
+}
+
+.cine-progress-area:hover {
+  height: 8px;
+}
+
+.cine-progress-buffered {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-pill);
+  width: 0%;
+}
+
+.cine-progress-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, #4F46E5, var(--accent-strong));
+  border-radius: var(--radius-pill);
+  width: 0%;
+}
+
+.cine-progress-scrubber {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 14px;
+  height: 14px;
+  background: #FFF;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
+}
+
+.cine-progress-area:hover .cine-progress-scrubber {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Controls Row */
+.cine-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cine-controls-left, .cine-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cine-control-btn {
+  background: transparent;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.cine-control-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.cine-control-btn:active {
+  transform: scale(0.95);
+}
+
+.cine-control-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.cine-control-btn svg.stroke-only {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Volume Control */
+.cine-volume-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cine-volume-slider {
+  width: 0px;
+  opacity: 0;
+  height: 4px;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.25);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s;
+}
+
+.cine-volume-container:hover .cine-volume-slider,
+.cine-volume-slider:focus {
+  width: 70px;
+  opacity: 1;
+}
+
+.cine-volume-slider::-webkit-slider-runnable-track {
+  height: 4px;
+}
+
+.cine-volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #FFF;
+  margin-top: -3px;
+}
+
+/* Time Display */
+.cine-time-display {
+  color: #FFF;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+/* Poster/Center Play State */
+.cine-poster-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease;
+}
+
+.cine-poster-overlay.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cine-center-play-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  color: #FFF;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+}
+
+.cine-center-play-btn:hover {
+  transform: scale(1.1);
+  background: #FFF;
+  color: #000;
+}
+
+.cine-center-play-btn svg {
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
+  fill: currentColor;
+}
+
+/* Fullscreen and theater modes overrides */
+.cine-video-player:-webkit-full-screen {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+}
+
+.cine-video-player:fullscreen {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+}

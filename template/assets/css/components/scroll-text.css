@@ -1,0 +1,24 @@
+/* ============================================================
+   CINE Component — Scroll Text
+   assets/css/components/scroll-text.css
+   ============================================================ */
+
+.scroll-text-slide-left {
+  opacity: 0;
+  transform: translateX(100px) skewX(4deg);
+  transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.scroll-text-slide-left.in-view {
+  opacity: 1;
+  transform: translateX(0) skewX(0);
+}
+
+/* Accessibility: respect user preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-text-slide-left {
+    transform: none !important;
+    transition: opacity 0.8s ease !important;
+  }
+}
