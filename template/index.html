@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CINE — Premium Movie Booking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">CINE</a>
+      <nav class="nav-links">
+        <a href="#">Phim</a>
+        <a href="#">Rạp</a>
+        <a href="#">Ưu đãi</a>
+        <a href="#">Thành viên</a>
+        <a href="#">Hỗ trợ</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="nav-icon-btn" aria-label="Tìm kiếm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </button>
+        <a href="#" class="nav-login">Đăng nhập</a>
+        <a href="movie-detail.html" class="btn-primary"
+          style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt vé</a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Thực đơn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-mobile-menu" id="navMobileMenu">
+      <a href="#">Phim</a>
+      <a href="#">Rạp</a>
+      <a href="#">Ưu đãi</a>
+      <a href="#">Thành viên</a>
+      <a href="#">Hỗ trợ</a>
+      <a href="#" class="nav-login">Đăng nhập</a>
+      <a href="movie-detail.html" class="btn-primary"
+        style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt vé</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-background">
+      <img src="https://i.pinimg.com/1200x/de/7d/3d/de7d3d8327d605f83c3cd01a3f270e10.jpg" alt="Dune backdrop" />
+      <div class="hero-overlay"></div>
+    </div>
+
+    <div class="hero-slider">
+      <article class="hero-slide is-active">
+        <div class="hero-content">
+          <div class="hero-info-card fade-up">
+            <span class="badge" style="margin-bottom: 12px; display: inline-block;">Đang chiếu</span>
+            <div class="hero-tagline"
+              style="margin-bottom: 20px; font-size: 16px; font-weight: 500; letter-spacing: 0.5px; line-height: 1.4; color: rgba(255,255,255,0.85);">
+              Đặt vé nhanh. Xem phim hay. <span class="highlight-text" data-variant="underline" data-color="accent">Trải
+                nghiệm điện ảnh cao cấp.</span>
+            </div>
+            <h1 class="hero-title">Người Nhện:<br /><em>Phần 2</em></h1>
+            <div class="hero-meta">
+              <span class="meta-tag">IMAX</span>
+              <span class="meta-dot">·</span>
+              <span>166 phút</span>
+              <span class="meta-dot">·</span>
+              <span class="meta-rating">★ 8.7</span>
+            </div>
+            <p class="hero-desc">Paul Atreides sát cánh cùng Chani và người Fremen trong cuộc hành trình trả thù những
+              kẻ đã tàn sát gia tộc mình. Anh phải đối mặt với sự lựa chọn giữa tình yêu của cuộc đời và số phận của cả
+              vũ trụ.</p>
+            <div class="hero-actions">
+              <a href="movie-detail.html" class="btn-primary btn-large"
+                style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt
+                vé</a>
+              <button class="btn-ghost btn-large" id="openTrailerBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5,3 19,12 5,21" />
+                </svg>
+                Xem trailer
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- QUICK BOOKING PANEL -->
+    <div class="booking-strip">
+      <div class="booking-card fade-up">
+        <div class="booking-fields">
+          <div class="booking-field">
+            <label>Phim</label>
+            <select id="bookMovie">
+              <option value="">Chọn phim</option>
+              <option>Người nhện: Phần 2</option>
+              <option>Godzilla x Kong</option>
+              <option>Ghostbusters: Frozen Empire</option>
+              <option>Civil War</option>
+              <option>Furiosa</option>
+              <option>Inside Out 2</option>
+            </select>
+          </div>
+          <div class="booking-divider"></div>
+          <div class="booking-field">
+            <label>Rạp</label>
+            <select id="bookCinema">
+              <option value="">Chọn rạp</option>
+              <option>CINE Landmark — Quận 1</option>
+              <option>CINE Crescent — Quận 7</option>
+              <option>CINE Aeon — Bình Dương</option>
+              <option>CINE Vincom — Quận 3</option>
+            </select>
+          </div>
+          <div class="booking-divider"></div>
+          <div class="booking-field">
+            <label>Ngày</label>
+            <select id="bookDate">
+              <option value="">Chọn ngày</option>
+              <option>Hôm nay — 17/05</option>
+              <option>Ngày mai — 18/05</option>
+              <option>Chủ Nhật — 19/05</option>
+              <option>Thứ Hai — 20/05</option>
+              <option>Thứ Ba — 21/05</option>
+            </select>
+          </div>
+          <div class="booking-divider"></div>
+          <div class="booking-field">
+            <label>Suất chiếu</label>
+            <select id="bookTime">
+              <option value="">Chọn giờ</option>
+              <option>10:15</option>
+              <option>13:30</option>
+              <option>16:45</option>
+              <option>19:00</option>
+              <option>21:30</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary btn-booking" id="quickBookBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+            <path d="M13 5v2"/>
+            <path d="M13 17v2"/>
+            <path d="M13 11v2"/>
+          </svg>
+          Đặt vé
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span>Cuộn xuống</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- MOVIES SECTION (TABS) -->
+  <section class="section movies-section fade-up" id="movies">
+    <div class="container">
+
+      <!-- Unified Header with Premium Tab Navigation -->
+      <div class="section-header-tabs">
+        <div class="header-left">
+          <p class="section-eyebrow">Khám phá</p>
+          <h2 class="section-title scroll-text-slide-left">Khám phá <span class="highlight-text"
+              data-variant="underline" data-color="primary">Phim</span></h2>
+        </div>
+
+        <div class="tabs-nav-container">
+          <div class="tabs-nav" id="movieTabsNav">
+            <button class="tab-btn active" data-tab="now-showing">Đang chiếu</button>
+            <button class="tab-btn" data-tab="coming-soon">Sắp chiếu</button>
+            <button class="tab-btn" data-tab="imax">Phim IMAX</button>
+            <button class="tab-btn" data-tab="nationwide">Toàn quốc</button>
+            <span class="tab-glow-indicator"></span>
+          </div>
+        </div>
+
+        <!-- Slider Controls (visible only for active slider-based tabs) -->
+        <div class="slider-controls" id="tabSliderControls">
+          <button class="slider-btn" id="sliderPrev" aria-label="Previous">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15,18 9,12 15,6" />
+            </svg>
+          </button>
+          <button class="slider-btn" id="sliderNext" aria-label="Next">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9,18 15,12 9,6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs-content">
+        <!-- 1. NOW SHOWING PANEL -->
+        <div class="tab-panel active" id="tab-now-showing">
+          <div class="slider-track-wrap">
+            <div class="movie-slider" id="movieSlider">
+              <div class="movie-card" onclick="window.location.href='movie-detail.html'" style="cursor: pointer;">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80" alt="Dune"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <a href="movie-detail.html" class="btn-primary btn-sm"
+                      style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt
+                      vé ngay</a>
+                  </div>
+                  <span class="movie-format-badge">IMAX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Dune: Part Two</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 8.7</span>
+                    <span class="genre-tag">Sci-Fi</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80" alt="Godzilla"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">4DX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Godzilla x Kong</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.2</span>
+                    <span class="genre-tag">Action</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1535016120720-40c646be5580?w=400&q=80" alt="Ghostbusters"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                </div>
+                <div class="movie-info">
+                  <h3>Ghostbusters: Frozen Empire</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 6.9</span>
+                    <span class="genre-tag">Comedy</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80" alt="Civil War"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">Dolby</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Civil War</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.5</span>
+                    <span class="genre-tag">Thriller</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Furiosa"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">IMAX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Furiosa</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.8</span>
+                    <span class="genre-tag">Action</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80" alt="Inside Out 2"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                </div>
+                <div class="movie-info">
+                  <h3>Inside Out 2</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 8.1</span>
+                    <span class="genre-tag">Animation</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&q=80"
+                    alt="Kingdom of Planet" class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">4DX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Kingdom of the Planet</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.0</span>
+                    <span class="genre-tag">Sci-Fi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. COMING SOON PANEL -->
+        <div class="tab-panel" id="tab-coming-soon">
+          <div class="coming-grid">
+            <div class="coming-card">
+              <div class="coming-poster-wrap">
+                <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80" alt="Deadpool" />
+                <div class="coming-overlay"></div>
+              </div>
+              <div class="coming-info">
+                <span class="release-date">26/07/2024</span>
+                <h3>Deadpool & Wolverine</h3>
+                <button class="btn-outline btn-sm">Nhận thông báo</button>
+              </div>
+            </div>
+            <div class="coming-card">
+              <div class="coming-poster-wrap">
+                <img src="https://images.unsplash.com/photo-1559583985-c80d8ad9b29f?w=600&q=80" alt="Alien" />
+                <div class="coming-overlay"></div>
+              </div>
+              <div class="coming-info">
+                <span class="release-date">16/08/2024</span>
+                <h3>Alien: Romulus</h3>
+                <button class="btn-outline btn-sm">Nhận thông báo</button>
+              </div>
+            </div>
+            <div class="coming-card">
+              <div class="coming-poster-wrap">
+                <img src="https://images.unsplash.com/photo-1605979257913-1704eb7b6246?w=600&q=80" alt="Joker 2" />
+                <div class="coming-overlay"></div>
+              </div>
+              <div class="coming-info">
+                <span class="release-date">04/10/2024</span>
+                <h3>Joker: Folie à Deux</h3>
+                <button class="btn-outline btn-sm">Nhận thông báo</button>
+              </div>
+            </div>
+            <div class="coming-card">
+              <div class="coming-poster-wrap">
+                <img src="https://images.unsplash.com/photo-1570824104453-508955ab713e?w=600&q=80" alt="Venom 3" />
+                <div class="coming-overlay"></div>
+              </div>
+              <div class="coming-info">
+                <span class="release-date">08/11/2024</span>
+                <h3>Venom: The Last Dance</h3>
+                <button class="btn-outline btn-sm">Nhận thông báo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. IMAX PANEL -->
+        <div class="tab-panel" id="tab-imax">
+          <div class="slider-track-wrap">
+            <div class="movie-slider" id="imaxSlider">
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80" alt="Dune"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">IMAX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Dune: Part Two</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 8.7</span>
+                    <span class="genre-tag">Sci-Fi</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Furiosa"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">IMAX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Furiosa</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.8</span>
+                    <span class="genre-tag">Action</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80" alt="Deadpool"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-outline btn-sm">Nhận thông báo</button>
+                  </div>
+                  <span class="movie-format-badge">IMAX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Deadpool & Wolverine</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ Sắp chiếu</span>
+                    <span class="genre-tag">Action</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80" alt="Godzilla"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">IMAX / 4DX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Godzilla x Kong</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.2</span>
+                    <span class="genre-tag">Action</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. NATIONWIDE PANEL -->
+        <div class="tab-panel" id="tab-nationwide">
+          <div class="slider-track-wrap">
+            <div class="movie-slider" id="nationwideSlider">
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1535016120720-40c646be5580?w=400&q=80" alt="Ghostbusters"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                </div>
+                <div class="movie-info">
+                  <h3>Ghostbusters: Frozen Empire</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 6.9</span>
+                    <span class="genre-tag">Comedy</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80" alt="Civil War"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">Dolby</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Civil War</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.5</span>
+                    <span class="genre-tag">Thriller</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80" alt="Inside Out 2"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                </div>
+                <div class="movie-info">
+                  <h3>Inside Out 2</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 8.1</span>
+                    <span class="genre-tag">Animation</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&q=80"
+                    alt="Kingdom of Planet" class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">4DX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Kingdom of the Planet</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.0</span>
+                    <span class="genre-tag">Sci-Fi</span>
+                  </div>
+                </div>
+              </div>
+              <div class="movie-card">
+                <div class="movie-poster-wrap">
+                  <img src="https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80" alt="Godzilla"
+                    class="movie-poster" />
+                  <div class="movie-overlay">
+                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                  </div>
+                  <span class="movie-format-badge">4DX</span>
+                </div>
+                <div class="movie-info">
+                  <h3>Godzilla x Kong</h3>
+                  <div class="movie-meta-row">
+                    <span class="rating">★ 7.2</span>
+                    <span class="genre-tag">Action</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; margin-top: 40px;">
+        <button class="btn-outline">Xem thêm</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CINEMA LOCATIONS -->
+  <section class="section locations fade-up">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <p class="section-eyebrow">Tìm rạp</p>
+          <h2 class="section-title scroll-text-slide-left">Hệ thống <em>Rạp</em></h2>
+        </div>
+      </div>
+      <div class="locations-grid">
+        <div class="location-card">
+          <div class="location-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <div class="location-content">
+            <h3>CINE Landmark</h3>
+            <p class="location-address">72 Lê Thánh Tôn, Quận 1</p>
+            <p class="location-distance">Cách đây 0.8 km</p>
+            <div class="format-tags">
+              <span class="format-tag imax">IMAX</span>
+              <span class="format-tag dolby">Dolby</span>
+              <span class="format-tag">4DX</span>
+            </div>
+          </div>
+          <button class="btn-outline">Xem suất chiếu</button>
+        </div>
+        <div class="location-card">
+          <div class="location-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <div class="location-content">
+            <h3>CINE Crescent Mall</h3>
+            <p class="location-address">101 Tôn Dật Tiên, Quận 7</p>
+            <p class="location-distance">Cách đây 4.2 km</p>
+            <div class="format-tags">
+              <span class="format-tag imax">IMAX</span>
+              <span class="format-tag">Tiêu chuẩn</span>
+            </div>
+          </div>
+          <button class="btn-outline">Xem suất chiếu</button>
+        </div>
+        <div class="location-card">
+          <div class="location-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <div class="location-content">
+            <h3>CINE Vincom Đồng Khởi</h3>
+            <p class="location-address">72 Lê Thánh Tôn, Quận 3</p>
+            <p class="location-distance">Cách đây 1.5 km</p>
+            <div class="format-tags">
+              <span class="format-tag dolby">Dolby</span>
+              <span class="format-tag">4K</span>
+            </div>
+          </div>
+          <button class="btn-outline">Xem suất chiếu</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMBERSHIP -->
+  <section class="section membership fade-up">
+    <div class="container">
+      <div class="membership-inner">
+        <div class="membership-left">
+          <p class="section-eyebrow">Quyền lợi độc quyền</p>
+          <h2 class="section-title scroll-text-slide-left">Thành viên <em>CINE</em></h2>
+          <p class="membership-desc">Mở khóa thế giới đặc quyền điện ảnh. Tích điểm với mỗi lần đặt vé, tận hưởng vị trí
+            ngồi ưu tiên và tham gia các buổi chiếu phim đặc biệt dành riêng cho thành viên trước bất kỳ ai khác.</p>
+          <div class="benefits-list">
+            <div class="benefit-item">
+              <div class="benefit-icon">✦</div>
+              <div>
+                <strong>Tích lũy & Đổi điểm</strong>
+                <p>Tích lũy 10 điểm mỗi vé. Đổi điểm nhận vé xem phim miễn phí.</p>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">✦</div>
+              <div>
+                <strong>Đặt vé trước</strong>
+                <p>Đặt vé sớm trước 48 giờ đối với các phim mới phát hành.</p>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">✦</div>
+              <div>
+                <strong>Suất chiếu thành viên</strong>
+                <p>Các buổi chiếu thử độc quyền. Miễn phí đồ uống đi kèm.</p>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-large">Đăng ký Thành viên</button>
+        </div>
+        <div class="membership-right">
+          <div class="member-card">
+            <div class="member-card-top">
+              <span class="member-logo">CINE</span>
+              <span class="member-tier">Thành viên Gold</span>
+            </div>
+            <div class="member-card-name">Nguyen Van A</div>
+            <div class="member-card-points">
+              <div class="points-label">Điểm tích lũy</div>
+              <div class="points-value">2.450</div>
+              <div class="points-bar-wrap">
+                <div class="points-bar">
+                  <div class="points-fill" style="width: 65%"></div>
+                </div>
+                <span class="points-next">Còn 650 điểm để lên Platinum</span>
+              </div>
+            </div>
+            <div class="member-card-number">•••• •••• •••• 4821</div>
+          </div>
+          <div class="offer-banner">
+            <div class="offer-icon">🎬</div>
+            <div>
+              <strong>Ưu đãi cuối tuần</strong>
+              <p>Mua 1 vé, giảm 50% cho vé thứ hai — áp dụng mỗi Thứ Bảy & Chủ Nhật.</p>
+            </div>
+            <button class="btn-sm btn-primary">Nhận ưu đãi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRAILER SECTION -->
+  <section class="section trailer-section fade-up">
+    <div class="container">
+      <div class="trailer-inner">
+        <div class="cine-video-player" id="homepageTrailerPlayer"
+          data-src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+          data-poster="https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=1200&q=80"
+          data-title="Dune: Phần Hai"></div>
+        <div class="trailer-content">
+          <p class="section-eyebrow">Trailer nổi bật</p>
+          <h2 class="section-title scroll-text-slide-left">Trải nghiệm <em>Điện ảnh</em><br />đỉnh cao</h2>
+          <p class="trailer-desc">Đắm chìm vào thế giới tráng lệ của Arrakis. Chiêm ngưỡng toàn bộ sự kỳ vĩ trong kiệt
+            tác của Denis Villeneuve — hiện đang chiếu tại các phòng chiếu IMAX và Dolby Cinema trên toàn hệ thống CINE.
+          </p>
+          <div class="trailer-stats">
+            <div class="stat-item">
+              <span class="stat-num">166</span>
+              <span class="stat-label">Phút</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-num">8.7</span>
+              <span class="stat-label">Điểm IMDb</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-num">97%</span>
+              <span class="stat-label">Rotten Tomatoes</span>
+            </div>
+          </div>
+          <button class="btn-primary btn-large" id="openTrailerBtn3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+            Xem trailer
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo">CINE</div>
+          <p>Đặt vé nhanh. Xem phim hay. <span class="highlight-text" data-variant="underline" data-color="accent">Trải
+              nghiệm điện ảnh cao cấp.</span></p>
+          <div class="social-links">
+            <a href="#" class="social-link">FB</a>
+            <a href="#" class="social-link">IG</a>
+            <a href="#" class="social-link">TW</a>
+            <a href="#" class="social-link">YT</a>
+          </div>
+        </div>
+        <div class="footer-links-group">
+          <h4>Phim</h4>
+          <a href="#">Đang chiếu</a>
+          <a href="#">Sắp chiếu</a>
+          <a href="#">Đặt vé trước</a>
+          <a href="#">Suất chiếu đặc biệt</a>
+        </div>
+        <div class="footer-links-group">
+          <h4>Hệ thống rạp</h4>
+          <a href="#">CINE Landmark</a>
+          <a href="#">CINE Crescent</a>
+          <a href="#">CINE Vincom</a>
+          <a href="#">Tìm rạp chiếu</a>
+        </div>
+        <div class="footer-links-group">
+          <h4>Hỗ trợ</h4>
+          <a href="#">Trung tâm trợ giúp</a>
+          <a href="#">Câu hỏi thường gặp</a>
+          <a href="#">Chính sách hoàn tiền</a>
+          <a href="#">Liên hệ</a>
+        </div>
+        <div class="footer-app">
+          <h4>Tải ứng dụng</h4>
+          <a href="#" class="app-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+            </svg>
+            App Store
+          </a>
+          <a href="#" class="app-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M3.18 23.76c.26.15.56.24.89.24.37 0 .75-.1 1.09-.3l12.96-7.48-2.79-2.79-12.15 10.33zM20.12 7.38L7.15.3c-.34-.2-.72-.3-1.09-.3-.33 0-.63.09-.89.24L17.32 12l2.8-4.62zM1 21.37V2.63L13.67 12 1 21.37zM7.15 23.7l12.97-7.48c.59-.34.97-.97.97-1.66v-.12L2.18 24c.26.15.56.24.89.24.37 0 .75-.1 1.08-.3v.02z" />
+            </svg>
+            Google Play
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 CINE. Bảo lưu mọi quyền.</p>
+        <div class="footer-legal">
+          <a href="#">Quyền riêng tư</a>
+          <a href="#">Điều khoản</a>
+          <a href="#">Cookie</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TRAILER MODAL -->
+  <div class="modal-overlay" id="trailerModal">
+    <div class="modal-container">
+      <button class="modal-close" id="closeModal">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div class="cine-video-player" id="modalTrailerPlayer"
+        data-src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+        data-poster="https://images.unsplash.com/photo-1534809027769-b00d750a6bac?w=1200&q=80"
+        data-title="Người Nhện: Phần 2"></div>
+    </div>
+  </div>
+
+  <script src="assets/js/components/highlight-text.js"></script>
+  <script src="assets/js/components/scroll-text.js"></script>
+  <script src="assets/js/components/theme-selector.js"></script>
+  <script src="assets/js/components/video-player.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
