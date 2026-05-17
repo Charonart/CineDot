@@ -1,0 +1,62 @@
+/* ============================================================
+   CINE Component — Highlight Text
+   assets/css/components/highlight-text.css
+   ============================================================ */
+
+.highlight-text {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  --highlight-color: #B8AFFF;
+}
+
+/* Accent overrides */
+.highlight-text[data-color="primary"] {
+  --highlight-color: var(--accent-strong);
+}
+
+.highlight-text[data-color="secondary"] {
+  --highlight-color: var(--text);
+}
+
+.highlight-text[data-color="accent"] {
+  --highlight-color: #CFC9EB;
+}
+
+.highlight-text[data-color="destructive"] {
+  --highlight-color: #FF5A5F;
+}
+
+.highlight-text .highlight-svg {
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+
+.highlight-text .highlight-path {
+  fill: none;
+  stroke: var(--highlight-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.highlight-text.is-visible .highlight-path {
+  stroke-dashoffset: 0 !important;
+}
+
+.highlight-text .highlight-marker-rect {
+  fill: var(--highlight-color);
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.highlight-text.is-visible .highlight-marker-rect {
+  opacity: 0.25;
+}
+
+.highlight-text-content {
+  position: relative;
+  z-index: 2;
+}
