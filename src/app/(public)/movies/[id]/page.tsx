@@ -7,6 +7,7 @@ import { MovieDetailOverview } from '@modules/movie-detail/components/MovieDetai
 import { MovieDetailCast } from '@modules/movie-detail/components/MovieDetailCast';
 import { MovieDetailVideos } from '@modules/movie-detail/components/MovieDetailVideos';
 import { MovieDetailSimilar } from '@modules/movie-detail/components/MovieDetailSimilar';
+import { MovieShowtimes } from '@modules/showtime/components/MovieShowtimes';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -62,6 +63,10 @@ export default async function MovieDetailPage({ params }: Props) {
       {/* Main content */}
       <div className="container mx-auto space-y-14 px-4 py-12">
         <MovieDetailOverview movie={movie} />
+
+        {/* Showtimes — Client Component, không block SSR */}
+        <MovieShowtimes movieId={movieId} />
+
         <MovieDetailCast credits={credits} />
         <MovieDetailVideos videos={videos} />
         <MovieDetailSimilar similar={similar} />

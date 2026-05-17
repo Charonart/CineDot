@@ -1,0 +1,67 @@
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "showtimeId": 1,
+        "movieId": 1,
+        "movieTitle": "Avengers: Endgame",
+        "cinemaId": 1,
+        "cinemaName": "CGV Vincom Center",
+        "roomId": 1,
+        "roomName": "Phòng 1 - IMAX",
+        "startTime": "2026-05-17T10:30:00",
+        "endTime": "2026-05-17T13:30:00",
+        "price": 120000,
+        "totalSeats": 120,
+        "bookedSeats": 85,
+        "availableSeats": 35
+      },
+      {
+        "showtimeId": 2,
+        "movieId": 1,
+        "movieTitle": "Avengers: Endgame",
+        "cinemaId": 1,
+        "cinemaName": "CGV Vincom Center",
+        "roomId": 2,
+        "roomName": "Phòng 2 - Standard",
+        "startTime": "2026-05-17T14:00:00",
+        "endTime": "2026-05-17T17:00:00",
+        "price": 90000,
+        "totalSeats": 80,
+        "bookedSeats": 20,
+        "availableSeats": 60
+      },
+      {
+        "showtimeId": 3,
+        "movieId": 1,
+        "movieTitle": "Avengers: Endgame",
+        "cinemaId": 2,
+        "cinemaName": "Lotte Cinema Landmark",
+        "roomId": 3,
+        "roomName": "Phòng 3 - 4DX",
+        "startTime": "2026-05-17T16:30:00",
+        "endTime": "2026-05-17T19:30:00",
+        "price": 150000,
+        "totalSeats": 60,
+        "bookedSeats": 60,
+        "availableSeats": 0
+      },
+      {
+        "showtimeId": 4,
+        "movieId": 1,
+        "movieTitle": "Avengers: Endgame",
+        "cinemaId": 1,
+        "cinemaName": "CGV Vincom Center",
+        "roomId": 1,
+        "roomName": "Phòng 1 - IMAX",
+        "startTime": "2026-05-17T20:00:00",
+        "endTime": "2026-05-17T23:00:00",
+        "price": 120000,
+        "totalSeats": 120,
+        "bookedSeats": 5,
+        "availableSeats": 115
+      }
+    ]
+  }
+}

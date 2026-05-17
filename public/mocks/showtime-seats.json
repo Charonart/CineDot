@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "data": {
+    "showtimeId": 1,
+    "seats": [
+      { "seatId": 1,  "label": "A1", "row": "A", "number": 1,  "status": "booked" },
+      { "seatId": 2,  "label": "A2", "row": "A", "number": 2,  "status": "booked" },
+      { "seatId": 3,  "label": "A3", "row": "A", "number": 3,  "status": "available" },
+      { "seatId": 4,  "label": "A4", "row": "A", "number": 4,  "status": "available" },
+      { "seatId": 5,  "label": "A5", "row": "A", "number": 5,  "status": "holding" },
+      { "seatId": 6,  "label": "B1", "row": "B", "number": 1,  "status": "booked" },
+      { "seatId": 7,  "label": "B2", "row": "B", "number": 2,  "status": "available" },
+      { "seatId": 8,  "label": "B3", "row": "B", "number": 3,  "status": "available" },
+      { "seatId": 9,  "label": "B4", "row": "B", "number": 4,  "status": "booked" },
+      { "seatId": 10, "label": "B5", "row": "B", "number": 5,  "status": "available" },
+      { "seatId": 11, "label": "C1", "row": "C", "number": 1,  "status": "available" },
+      { "seatId": 12, "label": "C2", "row": "C", "number": 2,  "status": "available" },
+      { "seatId": 13, "label": "C3", "row": "C", "number": 3,  "status": "booked" },
+      { "seatId": 14, "label": "C4", "row": "C", "number": 4,  "status": "holding" },
+      { "seatId": 15, "label": "C5", "row": "C", "number": 5,  "status": "available" },
+      { "seatId": 16, "label": "D1", "row": "D", "number": 1,  "status": "booked" },
+      { "seatId": 17, "label": "D2", "row": "D", "number": 2,  "status": "booked" },
+      { "seatId": 18, "label": "D3", "row": "D", "number": 3,  "status": "available" },
+      { "seatId": 19, "label": "D4", "row": "D", "number": 4,  "status": "available" },
+      { "seatId": 20, "label": "D5", "row": "D", "number": 5,  "status": "available" }
+    ]
+  }
+}
