@@ -28,12 +28,12 @@ export const imageHelper = {
     if (!path) return '/placeholders/poster.png';
     return `${env.NEXT_PUBLIC_IMAGE_BASE_URL}/${POSTER_SIZES[size]}${path}`;
   },
-  
+
   getBackdropUrl: (path: string | null | undefined, size: ImageSize = 'lg') => {
     if (!path) return '/placeholders/backdrop.png';
     return `${env.NEXT_PUBLIC_IMAGE_BASE_URL}/${BACKDROP_SIZES[size]}${path}`;
   },
-  
+
   getProfileUrl: (path: string | null | undefined, size: ImageSize = 'md') => {
     if (!path) return '/placeholders/profile.png';
     return `${env.NEXT_PUBLIC_IMAGE_BASE_URL}/${PROFILE_SIZES[size]}${path}`;

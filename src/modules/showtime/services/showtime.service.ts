@@ -6,12 +6,12 @@ import { logger } from '@lib/logger/logger';
 
 export const showtimeService = {
   /**
-   * Lấy danh sách suất chiếu theo ngày.
+   * Lấy danh sách suất chiếu của một bộ phim theo ngày.
    * Validate response bằng Zod trước khi map sang domain model.
    */
-  getShowtimes: async (params: ShowtimeQueryParams): Promise<ShowtimeList> => {
+  getShowtimes: async (movieId: number, params: ShowtimeQueryParams): Promise<ShowtimeList> => {
     try {
-      const response = await showtimeApi.getShowtimes(params);
+      const response = await showtimeApi.getShowtimes(movieId, params);
       const validated = showtimeListSchema.parse(response.data);
       return showtimeMapper.toShowtimeList(validated.results, params.date);
     } catch (error) {

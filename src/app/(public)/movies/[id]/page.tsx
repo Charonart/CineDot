@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { movieDetailService } from '@modules/movie-detail/services/movie-detail.service';
-import { imageHelper } from '@shared/utils/imageHelper';
 import { MovieDetailHero } from '@modules/movie-detail/components/MovieDetailHero';
 import { MovieDetailOverview } from '@modules/movie-detail/components/MovieDetailOverview';
 import { MovieDetailCast } from '@modules/movie-detail/components/MovieDetailCast';
@@ -26,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: movie.title,
         description: movie.description ?? '',
-        images: [imageHelper.getBackdropUrl(movie.backdropUrl, 'lg')],
+        images: [movie.backdropUrl],
       },
     };
   } catch {
@@ -56,19 +55,25 @@ export default async function MovieDetailPage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-white dark:bg-zinc-950">
-      {/* Hero — full bleed */}
+    <main className="min-h-screen bg-zinc-950 text-white">
+      {/* Hero — full bleed backdrop */}
       <MovieDetailHero movie={movie} />
 
       {/* Main content */}
-      <div className="container mx-auto space-y-14 px-4 py-12">
+      <div className="container mx-auto space-y-12 px-4 py-10">
+        {/* Movie info + description */}
         <MovieDetailOverview movie={movie} />
 
         {/* Showtimes — Client Component, không block SSR */}
         <MovieShowtimes movieId={movieId} />
 
+        {/* Cast & Crew */}
         <MovieDetailCast credits={credits} />
+
+        {/* Trailers / Videos */}
         <MovieDetailVideos videos={videos} />
+
+        {/* Similar movies */}
         <MovieDetailSimilar similar={similar} />
       </div>
     </main>

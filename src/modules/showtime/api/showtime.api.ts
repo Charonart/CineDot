@@ -4,17 +4,15 @@ import { ShowtimeListDTO, ShowtimeSeatListDTO, ShowtimeQueryParamsDTO } from '..
 
 export const showtimeApi = {
   /**
-   * GET /api/showtimes
-   * Lấy danh sách suất chiếu theo ngày.
-   * Backend filter: startTime >= date 00:00:00 AND startTime < nextDay 00:00:00
+   * GET /api/movies/:movieId/showtimes?date=YYYY-MM-DD
+   * Lấy danh sách suất chiếu của một bộ phim theo ngày.
    */
-  getShowtimes: (params: ShowtimeQueryParamsDTO): Promise<ApiResponse<ShowtimeListDTO>> =>
-    axiosClient.get('/showtimes', { params }),
+  getShowtimes: (movieId: number, params: ShowtimeQueryParamsDTO): Promise<ApiResponse<ShowtimeListDTO>> =>
+    axiosClient.get(`/movies/${movieId}/showtimes`, { params }),
 
   /**
-   * GET /api/showtimes/:id/seats
-   * Lấy trạng thái ghế của một suất chiếu.
-   * Backend chỉ tính bookedSeats với status: PAID | CONFIRMED | SUCCESS
+   * GET /api/showtimes/:showtimeId/seats
+   * Lấy sơ đồ ghế của một suất chiếu.
    */
   getSeats: (showtimeId: number): Promise<ApiResponse<ShowtimeSeatListDTO>> =>
     axiosClient.get(`/showtimes/${showtimeId}/seats`),
