@@ -1,35 +1,38 @@
 export const mockRoutes: Record<string, string> = {
   '/movies/trending': '/mocks/movies-trending.json',
   '/movies/popular': '/mocks/movies-popular.json',
-  '/movies/1': '/mocks/movie-detail.json',
   '/movies/search': '/mocks/movies-search.json',
 };
 
-/**
- * Get mock path for a given URL
- */
 export const getMockPath = (url: string): string | null => {
-  // Direct match
-  if (mockRoutes[url]) return mockRoutes[url];
+  const path = url.split('?')[0];
 
-  // Pattern match: /movies/123/credits
-  if (url.match(/^\/movies\/\d+\/credits$/)) {
+  if (mockRoutes[path]) return mockRoutes[path];
+
+  // GET /movies/:id/showtimes?date=YYYY-MM-DD
+  if (/^\/movies\/\d+\/showtimes$/.test(path)) {
+    return '/mocks/showtimes-by-movie.json';
+  }
+
+  if (/^\/movies\/\d+\/credits$/.test(path)) {
     return '/mocks/movie-credits.json';
   }
 
-  // Pattern match: /movies/123/videos
-  if (url.match(/^\/movies\/\d+\/videos$/)) {
+  if (/^\/movies\/\d+\/videos$/.test(path)) {
     return '/mocks/movie-videos.json';
   }
 
-  // Pattern match: /movies/123/similar
-  if (url.match(/^\/movies\/\d+\/similar$/)) {
+  if (/^\/movies\/\d+\/similar$/.test(path)) {
     return '/mocks/movie-similar.json';
   }
 
-  // Pattern match for detail routes (e.g., /movies/123)
-  if (url.match(/^\/movies\/\d+$/)) {
+  if (/^\/movies\/\d+$/.test(path)) {
     return '/mocks/movie-detail.json';
+  }
+
+  // GET /showtimes/:id/seats
+  if (/^\/showtimes\/\d+\/seats$/.test(path)) {
+    return '/mocks/showtime-seats.json';
   }
 
   return null;

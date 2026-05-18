@@ -1,0 +1,89 @@
+{
+  "success": true,
+  "data": {
+    "showtime": {
+      "showtimeId": 101,
+      "movie": {
+        "movieId": 550,
+        "title": "Fight Club"
+      },
+      "branch": {
+        "branchId": 1,
+        "name": "CineDot Nguyễn Huệ"
+      },
+      "room": {
+        "roomId": 3,
+        "name": "Room 3",
+        "screenType": "2D"
+      },
+      "format": {
+        "language": "EN",
+        "subtitle": "VI"
+      },
+      "time": {
+        "startTime": "2026-05-20T19:30:00",
+        "endTime": "2026-05-20T21:50:00"
+      },
+      "status": "available"
+    },
+    "pricing": {
+      "currency": "VND",
+      "basePrice": 70000,
+      "seatTypePrices": [
+        {
+          "seatType": "standard",
+          "label": "Ghế thường",
+          "unitPrice": 70000
+        },
+        {
+          "seatType": "vip",
+          "label": "Ghế VIP",
+          "unitPrice": 90000
+        },
+        {
+          "seatType": "couple",
+          "label": "Ghế đôi",
+          "unitPrice": 200000,
+          "capacity": 2,
+          "linkedSeatIds": [101, 102]
+
+        }
+      ]
+    },
+    "seatMap": {
+      "screen": {
+        "label": "SCREEN",
+        "position": "front"
+      },
+      "summary": {
+        "totalSeats": 7,
+        "availableSeats": 4,
+        "holdingSeats": 1,
+        "soldSeats": 2,
+        "blockedSeats": 0
+      },
+      "rows": [
+        {
+          "rowLabel": "A",
+          "rowType": "standard",
+          "seats": [
+            {
+              "showtimeSeatId": 1001,
+              "seatId": 1,
+              "seatCode": "A1",
+              "seatType": "standard",
+              "price": 70000,
+              "status": "available"
+            }
+          ]
+        }
+      ]
+    },
+    "bookingRules": {
+      "maxSeatsPerBooking": 8,
+      "holdDurationMinutes": 5,
+      "allowSingleSeatGap": false,
+      "coupleSeatMustBookTogether": true
+    }
+  }
+}

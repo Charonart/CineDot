@@ -1,24 +1,57 @@
 {
   "success": true,
   "data": {
-    "id": 1,
-    "title": "Fight Club",
-    "overview": "A ticking-time-bomb insomniac and a slippery soap salesman channel primal male aggression into a shocking new form of therapy. Their concept catches on, with underground \"fight clubs\" forming in every town, until an eccentric gets in the way and ignites an out-of-control spiral toward oblivion.",
-    "tagline": "Mischief. Mayhem. Soap.",
-    "posterUrl": "https://images.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
-    "backdropUrl": "https://images.tmdb.org/t/p/original/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
-    "releaseDate": "1999-10-15",
-    "rating": 8.4,
-    "voteCount": 26280,
-    "runtime": 139,
+    "movieId": 11,
+    "title": "Star Wars",
+    "originalTitle": "Star Wars",
+    "overview": "Princess Leia is captured...",
+    "tagline": "A long time ago in a galaxy far, far away...",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+    "backdropUrl": "https://image.tmdb.org/t/p/original/2w4xG178RpB4MDAIfTkqAuSJzec.jpg",
+    "tmdbPosterPath": "/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+    "tmdbBackdropPath": "/2w4xG178RpB4MDAIfTkqAuSJzec.jpg",
+    "releaseDate": "1977-05-25",
+    "runtime": 121,
     "status": "Released",
-    "originalLanguage": "en",
-    "budget": 63000000,
-    "revenue": 101206041,
+    "rating": {
+      "average": 8.2,
+      "count": 22061
+    },
     "genres": [
-      { "id": 18, "name": "Drama" },
-      { "id": 53, "name": "Thriller" },
-      { "id": 35, "name": "Comedy" }
-    ]
+      {
+        "genreId": 12,
+        "name": "Adventure"
+      },
+      {
+        "genreId": 28,
+        "name": "Action"
+      }
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "name": "English"
+      }
+    ],
+    "countries": [
+      {
+        "code": "US",
+        "name": "United States of America"
+      }
+    ],
+    "productionCompanies": [
+      {
+        "companyId": 1,
+        "name": "Lucasfilm Ltd.",
+        "logoUrl": "https://image.tmdb.org/t/p/w185/tlVSws0RvvtPBwViUyOFAO0vcQS.png",
+        "countryCode": "US"
+      }
+    ],
+    "collection": {
+      "collectionId": 10,
+      "name": "Star Wars Collection",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/pWVLFh4OuejTpUaDQbB1C4zoS2p.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/iY2ujEY2m68OTTlPFTiHub9joHS.jpg"
+    }
   }
 }

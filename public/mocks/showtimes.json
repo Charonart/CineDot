@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "data": {
+    "showtimeId": 1,
+    "movie": {
+      "movieId": 1,
+      "title": "Avengers: Endgame"
+    },
+    "branch": {
+      "branchId": 1,
+      "name": "CineDot Vincom Center",
+      "city": "HCM"
+    },
+    "room": {
+      "roomId": 1,
+      "name": "Phòng 1",
+      "screenType": "IMAX"
+    },
+    "time": {
+      "startTime": "2026-05-17T10:30:00",
+      "endTime": "2026-05-17T13:30:00"
+    },
+    "pricing": {
+      "currency": "VND",
+      "basePrice": 90000
+    },
+    "seatSummary": {
+      "totalSeats": 120,
+      "soldSeats": 85,
+      "holdingSeats": 5,
+      "availableSeats": 30,
+      "occupancy": 71
+    },
+    "format": {
+  "language": "EN",
+  "subtitle": "VI"
+},
+    "status": "available"
+  }
+}
