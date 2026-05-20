@@ -3,28 +3,20 @@
   "data": {
     "results": [
       {
-        "id": "5c9294240e0a2675e7f60b7e",
+        "id": "5c9294240e0a267cd516835f",
+        "key": "BdJKm16Co6M",
+        "name": "#TBT Trailer",
+        "type": "Trailer",
+        "site": "YouTube",
+        "official": true
+      },
+      {
+        "id": "64a3c1b20e0a267cd5abc123",
         "key": "SUXWAEX2jlg",
-        "name": "Fight Club | #TBT Trailer",
+        "name": "Official Trailer",
         "type": "Trailer",
         "site": "YouTube",
         "official": true
-      },
-      {
-        "id": "6011e6a292514200294af9d1",
-        "key": "BdEgSCRLd54",
-        "name": "Fight Club - Official Trailer",
-        "type": "Trailer",
-        "site": "YouTube",
-        "official": true
-      },
-      {
-        "id": "6011e6a292514200294af9d2",
-        "key": "6JnN1DmbqoU",
-        "name": "Fight Club - Teaser",
-        "type": "Teaser",
-        "site": "YouTube",
-        "official": false
       }
     ]
   }

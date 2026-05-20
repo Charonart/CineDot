@@ -91,3 +91,15 @@ Mọi feature PHẢI tuân theo thứ tự:
 
 ## 18. Future Planned Features
 - Authentication, Watchlist, Favorites, Ratings, Recommendation System.
+
+## 19. Security Rules
+- Never expose secrets to frontend.
+- Validate all query params.
+- Sanitize user-generated content.
+- Use typed request/response contracts.
+
+## 20. Realtime Rules
+- Realtime seat states MUST come from backend source of truth.
+- Frontend MUST NOT persist booking state locally.
+- WebSocket/Event updates should invalidate Query Cache.
+- Seat availability must support optimistic updates carefully.

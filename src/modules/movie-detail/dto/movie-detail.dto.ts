@@ -1,25 +1,95 @@
-import { GenreDTO, MovieDTO } from '@modules/movie/dto/movie.dto';
+/**
+ * Movie Detail DTOs
+ * Khớp 100% với response từ mock `movie-detail.json` và backend Laravel.
+ */
+
+// ─── Sub-types ────────────────────────────────────────────────────────────────
+
+export interface GenreItemDTO {
+  genreId: number;
+  name: string;
+}
+
+export interface LanguageItemDTO {
+  code: string;
+  name: string;
+}
+
+export interface CountryItemDTO {
+  code: string;
+  name: string;
+}
+
+export interface ProductionCompanyDTO {
+  companyId: number;
+  name: string;
+  logoUrl: string | null;
+  countryCode: string;
+}
+
+export interface RatingDTO {
+  average: number;
+  count: number;
+}
+
+export interface CollectionDTO {
+  collectionId: number;
+  name: string;
+  posterUrl: string | null;
+  backdropUrl: string | null;
+}
+
+// ─── Movie Detail ─────────────────────────────────────────────────────────────
+
+export interface MovieDetailDTO {
+  movieId: number;
+  title: string;
+  originalTitle: string;
+  overview: string;
+  tagline: string | null;
+  posterUrl: string;
+  backdropUrl: string;
+  tmdbPosterPath: string | null;
+  tmdbBackdropPath: string | null;
+  releaseDate: string;
+  runtime: number | null;
+  status: string;
+  rating: RatingDTO;
+  genres: GenreItemDTO[];
+  languages: LanguageItemDTO[];
+  countries: CountryItemDTO[];
+  productionCompanies: ProductionCompanyDTO[];
+  collection: CollectionDTO | null;
+}
+
+// ─── Credits ──────────────────────────────────────────────────────────────────
 
 export interface CastMemberDTO {
-  id: number;
+  personId: number;
   name: string;
-  character: string;
-  profileUrl: string | null;
-  order: number;
+  originalName: string;
+  role: string;            // character name
+  avatarUrl: string | null;
+  tmdbProfilePath?: string | null;
+  sortOrder: number;
 }
 
 export interface CrewMemberDTO {
-  id: number;
+  personId: number;
   name: string;
+  originalName: string;
   job: string;
   department: string;
-  profileUrl: string | null;
+  avatarUrl: string | null;
+  tmdbProfilePath?: string | null;
 }
 
 export interface CreditsDTO {
   cast: CastMemberDTO[];
   crew: CrewMemberDTO[];
 }
+
+// ─── Video ────────────────────────────────────────────────────────────────────
 
 export interface VideoDTO {
   id: string;
@@ -32,13 +102,4 @@ export interface VideoDTO {
 
 export interface VideoListDTO {
   results: VideoDTO[];
-}
-
-export interface MovieDetailDTO extends MovieDTO {
-  tagline: string | null;
-  status: string;
-  originalLanguage: string;
-  budget: number;
-  revenue: number;
-  genres: GenreDTO[];
 }

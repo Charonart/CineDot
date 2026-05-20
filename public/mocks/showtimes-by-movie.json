@@ -1,0 +1,95 @@
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "showtimeId": 101,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "room": { "roomId": 1, "name": "IMAX Hall", "screenType": "IMAX" },
+        "format": { "language": "EN", "subtitle": "VI", "displayLabel": "IMAX 2D Phụ Đề Việt" },
+        "time": { "startTime": "2026-05-18T10:00:00", "endTime": "2026-05-18T12:02:00" },
+        "pricing": { "currency": "VND", "basePrice": 180000 },
+        "seatSummary": { "totalSeats": 200, "soldSeats": 155, "holdingSeats": 5, "availableSeats": 40, "occupancy": 80 },
+        "status": "available"
+      },
+      {
+        "showtimeId": 102,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "room": { "roomId": 2, "name": "Phòng 2 - Dolby Atmos", "screenType": "2D" },
+        "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
+        "time": { "startTime": "2026-05-18T12:30:00", "endTime": "2026-05-18T14:32:00" },
+        "pricing": { "currency": "VND", "basePrice": 90000 },
+        "seatSummary": { "totalSeats": 120, "soldSeats": 30, "holdingSeats": 2, "availableSeats": 88, "occupancy": 27 },
+        "status": "available"
+      },
+      {
+        "showtimeId": 103,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "room": { "roomId": 3, "name": "VIP Lounge", "screenType": "2D" },
+        "format": { "language": "VI", "subtitle": null, "displayLabel": "VIP 2D Lồng Tiếng" },
+        "time": { "startTime": "2026-05-18T15:00:00", "endTime": "2026-05-18T17:02:00" },
+        "pricing": { "currency": "VND", "basePrice": 200000 },
+        "seatSummary": { "totalSeats": 40, "soldSeats": 40, "holdingSeats": 0, "availableSeats": 0, "occupancy": 100 },
+        "status": "sold_out"
+      },
+      {
+        "showtimeId": 104,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "room": { "roomId": 2, "name": "Phòng 2 - Dolby Atmos", "screenType": "2D" },
+        "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
+        "time": { "startTime": "2026-05-18T18:00:00", "endTime": "2026-05-18T20:02:00" },
+        "pricing": { "currency": "VND", "basePrice": 90000 },
+        "seatSummary": { "totalSeats": 120, "soldSeats": 50, "holdingSeats": 3, "availableSeats": 67, "occupancy": 44 },
+        "status": "available"
+      },
+      {
+        "showtimeId": 105,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "room": { "roomId": 1, "name": "IMAX Hall", "screenType": "IMAX" },
+        "format": { "language": "EN", "subtitle": "VI", "displayLabel": "IMAX 2D Phụ Đề Việt" },
+        "time": { "startTime": "2026-05-18T20:30:00", "endTime": "2026-05-18T22:32:00" },
+        "pricing": { "currency": "VND", "basePrice": 180000 },
+        "seatSummary": { "totalSeats": 200, "soldSeats": 8, "holdingSeats": 2, "availableSeats": 190, "occupancy": 5 },
+        "status": "available"
+      },
+      {
+        "showtimeId": 201,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
+        "room": { "roomId": 5, "name": "Phòng 5", "screenType": "2D" },
+        "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
+        "time": { "startTime": "2026-05-18T09:30:00", "endTime": "2026-05-18T11:32:00" },
+        "pricing": { "currency": "VND", "basePrice": 85000 },
+        "seatSummary": { "totalSeats": 100, "soldSeats": 20, "holdingSeats": 1, "availableSeats": 79, "occupancy": 21 },
+        "status": "available"
+      },
+      {
+        "showtimeId": 202,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
+        "room": { "roomId": 6, "name": "4DX Hall", "screenType": "4DX" },
+        "format": { "language": "EN", "subtitle": "VI", "displayLabel": "4DX Phụ Đề Việt" },
+        "time": { "startTime": "2026-05-18T13:00:00", "endTime": "2026-05-18T15:02:00" },
+        "pricing": { "currency": "VND", "basePrice": 220000 },
+        "seatSummary": { "totalSeats": 60, "soldSeats": 45, "holdingSeats": 5, "availableSeats": 10, "occupancy": 83 },
+        "status": "available"
+      },
+      {
+        "showtimeId": 203,
+        "movie": { "movieId": 11, "title": "Star Wars" },
+        "branch": { "branchId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
+        "room": { "roomId": 5, "name": "Phòng 5", "screenType": "2D" },
+        "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
+        "time": { "startTime": "2026-05-18T19:45:00", "endTime": "2026-05-18T21:47:00" },
+        "pricing": { "currency": "VND", "basePrice": 85000 },
+        "seatSummary": { "totalSeats": 100, "soldSeats": 60, "holdingSeats": 4, "availableSeats": 36, "occupancy": 64 },
+        "status": "available"
+      }
+    ]
+  }
+}
