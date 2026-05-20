@@ -5,7 +5,7 @@
       {
         "showtimeId": 101,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "cinema": { "cinemaId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
         "room": { "roomId": 1, "name": "IMAX Hall", "screenType": "IMAX" },
         "format": { "language": "EN", "subtitle": "VI", "displayLabel": "IMAX 2D Phụ Đề Việt" },
         "time": { "startTime": "2026-05-18T10:00:00", "endTime": "2026-05-18T12:02:00" },
@@ -16,7 +16,7 @@
       {
         "showtimeId": 102,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "cinema": { "cinemaId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
         "room": { "roomId": 2, "name": "Phòng 2 - Dolby Atmos", "screenType": "2D" },
         "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
         "time": { "startTime": "2026-05-18T12:30:00", "endTime": "2026-05-18T14:32:00" },
@@ -27,7 +27,7 @@
       {
         "showtimeId": 103,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "cinema": { "cinemaId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
         "room": { "roomId": 3, "name": "VIP Lounge", "screenType": "2D" },
         "format": { "language": "VI", "subtitle": null, "displayLabel": "VIP 2D Lồng Tiếng" },
         "time": { "startTime": "2026-05-18T15:00:00", "endTime": "2026-05-18T17:02:00" },
@@ -38,7 +38,7 @@
       {
         "showtimeId": 104,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "cinema": { "cinemaId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
         "room": { "roomId": 2, "name": "Phòng 2 - Dolby Atmos", "screenType": "2D" },
         "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
         "time": { "startTime": "2026-05-18T18:00:00", "endTime": "2026-05-18T20:02:00" },
@@ -49,7 +49,7 @@
       {
         "showtimeId": 105,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
+        "cinema": { "cinemaId": 1, "name": "CineDot Galaxy - Q1", "city": "HCM" },
         "room": { "roomId": 1, "name": "IMAX Hall", "screenType": "IMAX" },
         "format": { "language": "EN", "subtitle": "VI", "displayLabel": "IMAX 2D Phụ Đề Việt" },
         "time": { "startTime": "2026-05-18T20:30:00", "endTime": "2026-05-18T22:32:00" },
@@ -60,7 +60,7 @@
       {
         "showtimeId": 201,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
+        "cinema": { "cinemaId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
         "room": { "roomId": 5, "name": "Phòng 5", "screenType": "2D" },
         "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
         "time": { "startTime": "2026-05-18T09:30:00", "endTime": "2026-05-18T11:32:00" },
@@ -71,7 +71,7 @@
       {
         "showtimeId": 202,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
+        "cinema": { "cinemaId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
         "room": { "roomId": 6, "name": "4DX Hall", "screenType": "4DX" },
         "format": { "language": "EN", "subtitle": "VI", "displayLabel": "4DX Phụ Đề Việt" },
         "time": { "startTime": "2026-05-18T13:00:00", "endTime": "2026-05-18T15:02:00" },
@@ -82,7 +82,7 @@
       {
         "showtimeId": 203,
         "movie": { "movieId": 11, "title": "Star Wars" },
-        "branch": { "branchId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
+        "cinema": { "cinemaId": 2, "name": "CineDot Vincom - Q10", "city": "HCM" },
         "room": { "roomId": 5, "name": "Phòng 5", "screenType": "2D" },
         "format": { "language": "VI", "subtitle": null, "displayLabel": "2D Lồng Tiếng" },
         "time": { "startTime": "2026-05-18T19:45:00", "endTime": "2026-05-18T21:47:00" },

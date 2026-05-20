@@ -35,7 +35,7 @@ export interface SeatTypePrice {
 
 export interface ShowtimeSeatMap {
   showtimeId: number;
-  branchName: string;
+  cinemaName: string;
   roomName: string;
   screenType: string;
   startTime: string;
@@ -62,8 +62,8 @@ export interface Showtime {
   showtimeId: number;
   movieId: number;
   movieTitle: string;
-  branchId: number;
-  branchName: string;
+  cinemaId: number;
+  cinemaName: string;
   city: string;
   roomId: number;
   roomName: string;
@@ -102,8 +102,8 @@ export interface ShowtimeFormatGroup {
 }
 
 export interface ShowtimeCinemaGroup {
-  branchId: number;
-  branchName: string;
+  cinemaId: number;
+  cinemaName: string;
   city: string;
   formatGroups: ShowtimeFormatGroup[];
   totalAvailable: number;
@@ -114,5 +114,5 @@ export interface ShowtimeCinemaGroup {
 export interface ShowtimeQueryParams {
   date: string;       // YYYY-MM-DD
   movieId?: number;
-  branchId?: number;
+  cinemaId?: number;
 }

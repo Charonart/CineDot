@@ -130,7 +130,7 @@ function CinemaGroup({
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="truncate text-base font-bold text-white">
-            {group.branchName}
+            {group.cinemaName}
           </h3>
           <p className="text-xs text-zinc-400">{group.city}</p>
         </div>
@@ -190,7 +190,7 @@ export function MovieShowtimes({ movieId }: MovieShowtimesProps) {
   const dateRange = buildDateRange(7);
   const [selectedDate, setSelectedDate] = useState<string>(dateRange[0]);
   const [filterCity, setFilterCity] = useState<string>('all');
-  const [filterBranch, setFilterBranch] = useState<string>('all');
+  const [filterCinema, setFilterCinema] = useState<string>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError, error } = useShowtimes(movieId, {
@@ -211,14 +211,14 @@ export function MovieShowtimes({ movieId }: MovieShowtimesProps) {
   const filteredGroups = allGroups
     ? allGroups.filter((g) => {
       if (filterCity !== 'all' && g.city !== filterCity) return false;
-      if (filterBranch !== 'all' && String(g.branchId) !== filterBranch) return false;
+      if (filterCinema !== 'all' && String(g.cinemaId) !== filterCinema) return false;
       return true;
     })
     : null;
 
-  // Reset branch filter khi đổi city
+  // Reset cinema filter khi đổi city
   useEffect(() => {
-    setFilterBranch('all');
+    setFilterCinema('all');
   }, [filterCity]);
 
   const handleSelectShowtime = (showtimeId: number) => {
@@ -285,12 +285,12 @@ export function MovieShowtimes({ movieId }: MovieShowtimesProps) {
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" aria-hidden />
           </div>
 
-          {/* Branch filter */}
+          {/* Cinema filter */}
           <div className="relative">
             <select
-              id="filterBranch"
-              value={filterBranch}
-              onChange={(e) => setFilterBranch(e.target.value)}
+              id="filterCinema"
+              value={filterCinema}
+              onChange={(e) => setFilterCinema(e.target.value)}
               aria-label="Lọc theo rạp"
               className={[
                 'w-full appearance-none rounded-xl border border-white/10 bg-zinc-800/80',
@@ -302,8 +302,8 @@ export function MovieShowtimes({ movieId }: MovieShowtimesProps) {
               <option value="all">Tất cả rạp</option>
               {(filterCity === 'all' ? allGroups : allGroups.filter((g) => g.city === filterCity))
                 .map((g) => (
-                  <option key={g.branchId} value={String(g.branchId)}>
-                    {g.branchName}
+                  <option key={g.cinemaId} value={String(g.cinemaId)}>
+                    {g.cinemaName}
                   </option>
                 ))}
             </select>
@@ -353,7 +353,7 @@ export function MovieShowtimes({ movieId }: MovieShowtimesProps) {
           <div className="space-y-4">
             {filteredGroups.map((group) => (
               <CinemaGroup
-                key={group.branchId}
+                key={group.cinemaId}
                 group={group}
                 onSelectShowtime={handleSelectShowtime}
               />
