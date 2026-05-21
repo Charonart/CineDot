@@ -7,8 +7,8 @@
         "movieId": 550,
         "title": "Fight Club"
       },
-      "branch": {
-        "branchId": 1,
+      "cinema": {
+        "cinemaId": 1,
         "name": "CineDot Nguyễn Huệ"
       },
       "room": {

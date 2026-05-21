@@ -7,8 +7,8 @@ const showtimeMovieRefSchema = z.object({
   title: z.string(),
 });
 
-const showtimeBranchSchema = z.object({
-  branchId: z.number(),
+const showtimeCinemaSchema = z.object({
+  cinemaId: z.number(),
   name: z.string(),
   city: z.string(),
 });
@@ -48,7 +48,7 @@ const showtimeSeatSummarySchema = z.object({
 export const showtimeItemSchema = z.object({
   showtimeId: z.number().int().positive(),
   movie: showtimeMovieRefSchema,
-  branch: showtimeBranchSchema,
+  cinema: showtimeCinemaSchema,
   room: showtimeRoomSchema,
   format: showtimeFormatSchema,
   time: showtimeTimeSchema,
@@ -91,7 +91,7 @@ export const seatTypePriceSchema = z.object({
 const showtimeRefInSeatSchema = z.object({
   showtimeId: z.number(),
   movie: showtimeMovieRefSchema,
-  branch: z.object({ branchId: z.number(), name: z.string() }),
+  cinema: z.object({ cinemaId: z.number(), name: z.string() }),
   room: showtimeRoomSchema,
   format: showtimeFormatSchema,
   time: showtimeTimeSchema,

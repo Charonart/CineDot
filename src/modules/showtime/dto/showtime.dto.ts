@@ -10,8 +10,8 @@ export interface ShowtimeMovieRefDTO {
   title: string;
 }
 
-export interface ShowtimeBranchDTO {
-  branchId: number;
+export interface ShowtimeCinemaDTO {
+  cinemaId: number;
   name: string;
   city: string;
 }
@@ -49,7 +49,7 @@ export interface ShowtimeSeatSummaryDTO {
 export interface ShowtimeItemDTO {
   showtimeId: number;
   movie: ShowtimeMovieRefDTO;
-  branch: ShowtimeBranchDTO;
+  cinema: ShowtimeCinemaDTO;
   room: ShowtimeRoomDTO;
   format: ShowtimeFormatDTO;
   time: ShowtimeTimeDTO;
@@ -105,7 +105,7 @@ export interface ShowtimeSeatMapSummaryDTO {
 export interface ShowtimeRefInSeatDTO {
   showtimeId: number;
   movie: ShowtimeMovieRefDTO;
-  branch: { branchId: number; name: string };
+  cinema: { cinemaId: number; name: string };
   room: ShowtimeRoomDTO;
   format: ShowtimeFormatDTO;
   time: ShowtimeTimeDTO;
@@ -139,5 +139,5 @@ export interface ShowtimeSeatListDTO {
 export interface ShowtimeQueryParamsDTO {
   date: string;       // YYYY-MM-DD, required
   movieId?: number;
-  branchId?: number;
+  cinemaId?: number;
 }

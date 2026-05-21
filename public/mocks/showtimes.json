@@ -6,8 +6,8 @@
       "movieId": 1,
       "title": "Avengers: Endgame"
     },
-    "branch": {
-      "branchId": 1,
+    "cinema": {
+      "cinemaId": 1,
       "name": "CineDot Vincom Center",
       "city": "HCM"
     },

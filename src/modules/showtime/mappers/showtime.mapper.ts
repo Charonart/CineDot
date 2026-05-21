@@ -46,9 +46,9 @@ export const showtimeMapper = {
     showtimeId:     dto.showtimeId,
     movieId:        dto.movie.movieId,
     movieTitle:     dto.movie.title,
-    branchId:       dto.branch.branchId,
-    branchName:     dto.branch.name,
-    city:           dto.branch.city,
+    cinemaId:       dto.cinema.cinemaId,
+    cinemaName:     dto.cinema.name,
+    city:           dto.cinema.city,
     roomId:         dto.room.roomId,
     roomName:       dto.room.name,
     screenType:     dto.room.screenType,
@@ -84,16 +84,16 @@ export const showtimeMapper = {
     const cinemaMap = new Map<number, ShowtimeCinemaGroup>();
 
     for (const st of showtimes) {
-      if (!cinemaMap.has(st.branchId)) {
-        cinemaMap.set(st.branchId, {
-          branchId: st.branchId,
-          branchName: st.branchName,
+      if (!cinemaMap.has(st.cinemaId)) {
+        cinemaMap.set(st.cinemaId, {
+          cinemaId: st.cinemaId,
+          cinemaName: st.cinemaName,
           city: st.city,
           formatGroups: [],
           totalAvailable: 0,
         });
       }
-      const cinema = cinemaMap.get(st.branchId)!;
+      const cinema = cinemaMap.get(st.cinemaId)!;
 
       // Find or create format group
       let fmtGroup = cinema.formatGroups.find((fg) => fg.format === st.format);
@@ -143,7 +143,7 @@ export const showtimeMapper = {
 
   toSeatMap: (dto: ShowtimeSeatListDTO): ShowtimeSeatMap => ({
     showtimeId:    dto.showtime.showtimeId,
-    branchName:    dto.showtime.branch.name,
+    cinemaName:    dto.showtime.cinema.name,
     roomName:      dto.showtime.room.name,
     screenType:    dto.showtime.room.screenType,
     startTime:     dto.showtime.time.startTime,
