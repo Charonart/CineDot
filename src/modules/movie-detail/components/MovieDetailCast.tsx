@@ -16,12 +16,12 @@ export function MovieDetailCast({ credits }: MovieDetailCastProps) {
   return (
     <section aria-labelledby="cast-heading" className="space-y-5">
       <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 ring-1 ring-white/10">
-          <Users className="h-4 w-4 text-zinc-400" aria-hidden />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 ring-1 ring-zinc-200">
+          <Users className="h-4 w-4 text-zinc-600" aria-hidden />
         </div>
         <h2
           id="cast-heading"
-          className="text-xl font-bold text-white"
+          className="text-xl font-bold text-zinc-900"
         >
           Diễn viên &amp; Đoàn làm phim
         </h2>

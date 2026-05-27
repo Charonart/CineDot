@@ -40,7 +40,7 @@ export const useMovieDetail = (id: number) => {
 export const useSearchMovies = (query: string, page = 1) => {
   return useQuery({
     queryKey: movieKeys.search(query, page),
-    queryFn: ({ signal }) => movieService.searchMovies(query, page),
+    queryFn: () => movieService.searchMovies(query, page),
     enabled: query.length >= 2,
   });
 };

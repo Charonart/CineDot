@@ -7,7 +7,6 @@ import {
   ShowtimeSeat,
   SeatTypePrice,
   ShowtimeCinemaGroup,
-  ShowtimeFormatGroup,
   ShowtimeQueryParams,
 } from '../types/showtime.type';
 

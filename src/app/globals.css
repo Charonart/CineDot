@@ -3,6 +3,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Highlight Text Colors - matched to template */
+  --highlight-primary: 250 100% 85%;   /* #B8AFFF approx */
+  --highlight-secondary: 250 100% 70%;
+  --highlight-accent: 250 100% 60%;
+  --highlight-destructive: 0 100% 65%;
 }
 
 @theme inline {

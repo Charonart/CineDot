@@ -55,26 +55,38 @@ export default async function MovieDetailPage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
-      {/* Hero — full bleed backdrop */}
+    <main className="min-h-screen bg-zinc-50 pb-24 text-zinc-900">
+      {/* Hero — full bleed backdrop with play button */}
       <MovieDetailHero movie={movie} />
 
-      {/* Main content */}
-      <div className="container mx-auto space-y-12 px-4 py-10">
-        {/* Movie info + description */}
-        <MovieDetailOverview movie={movie} />
+      {/* Main container with 2-column layout */}
+      <div className="container mx-auto max-w-[1280px] px-4 sm:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[68%_minmax(0,1fr)]">
+          
+          {/* Left Column (68%) */}
+          <div className="flex flex-col gap-16">
+            {/* Movie info (Poster + Meta) & Description */}
+            <MovieDetailOverview movie={movie} />
 
-        {/* Showtimes — Client Component, không block SSR */}
-        <MovieShowtimes movieId={movieId} />
+            {/* Showtimes — Client Component, không block SSR */}
+            <div id="schedule" className="scroll-mt-24">
+              <MovieShowtimes movieId={movieId} />
+            </div>
 
-        {/* Cast & Crew */}
-        <MovieDetailCast credits={credits} />
+            {/* Cast & Crew */}
+            <MovieDetailCast credits={credits} />
 
-        {/* Trailers / Videos */}
-        <MovieDetailVideos videos={videos} />
+            {/* Trailers / Videos */}
+            <MovieDetailVideos videos={videos} />
+          </div>
 
-        {/* Similar movies */}
-        <MovieDetailSimilar similar={similar} />
+          {/* Right Column (32%) */}
+          <div className="pt-12 lg:pt-0">
+            {/* Similar movies as Sidebar */}
+            <MovieDetailSimilar similar={similar} />
+          </div>
+          
+        </div>
       </div>
     </main>
   );

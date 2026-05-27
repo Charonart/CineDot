@@ -49,7 +49,7 @@ axiosClient.interceptors.response.use(
   (response) => response.data,
   (error: AxiosError) => {
     const status = error.response?.status;
-    const responseData = error.response?.data as any;
+    const responseData = error.response?.data as Partial<ApiError> | undefined;
 
     const normalizedError: ApiError = {
       success: false,
