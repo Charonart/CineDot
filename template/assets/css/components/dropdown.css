@@ -1,0 +1,414 @@
+/* ============================================================
+   CINE — Premium Dropdown Component System
+   assets/css/components/dropdown.css
+   ============================================================ */
+
+/* 1. CONTAINER & HIERARCHY */
+.cine-dropdown {
+  position: relative;
+  width: 100%;
+  font-family: var(--font-body), sans-serif;
+  text-align: left;
+}
+
+/* Hidden native select under the hood */
+.cine-dropdown-select-native {
+  display: none !important;
+}
+
+/* 2. TRIGGER BUTTON */
+.cine-dropdown-trigger {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  cursor: pointer;
+  position: relative;
+  transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+  outline: none;
+  user-select: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.cine-dropdown-trigger:hover:not(:disabled) {
+  border-color: var(--accent-strong);
+  background: var(--color-background-soft);
+}
+
+/* Focus-visible halo */
+.cine-dropdown-trigger:focus-visible {
+  border-color: var(--color-accent-deep);
+  box-shadow: 0 0 0 3px rgba(124, 111, 232, 0.25);
+}
+
+/* Active / Open state */
+.cine-dropdown.is-open .cine-dropdown-trigger {
+  border-color: var(--color-accent-deep);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(124, 111, 232, 0.15), var(--shadow-sm);
+}
+
+/* Label styling inside trigger */
+.cine-dropdown-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+/* Selected value or placeholder text */
+.cine-dropdown-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 20px);
+  text-align: left;
+}
+
+.cine-dropdown-value.is-placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Chevron indicator */
+.cine-dropdown-chevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  transition: transform var(--transition), color var(--transition);
+  pointer-events: none;
+}
+
+.cine-dropdown.is-open .cine-dropdown-chevron {
+  transform: translateY(-50%) rotate(180deg);
+  color: var(--color-accent-deep);
+}
+
+.cine-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 280px;
+  background: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(19, 20, 19, 0.08);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 24px 60px rgba(17, 17, 17, 0.16);
+  z-index: 1000; /* High z-index to avoid hero/container clipping */
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(19, 20, 19, 0.2) transparent;
+}
+
+/* 3.1 MOVIE DROPDOWN SPECIFIC SIZE (Issue 3) */
+.cine-dropdown-menu[data-type="movie"] {
+  width: min(640px, calc(100vw - 48px)) !important;
+  max-height: 400px !important;
+}
+
+.cine-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cine-dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(19, 20, 19, 0.2);
+  border-radius: 999px;
+}
+
+/* Directional positioning and animations */
+.cine-dropdown.is-open-down .cine-dropdown-menu {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+
+.cine-dropdown.is-open-up .cine-dropdown-menu {
+  bottom: calc(100% + 6px);
+  top: auto;
+  transform: translateY(8px);
+}
+
+.cine-dropdown.is-open .cine-dropdown-menu {
+  opacity: 1;
+  transform: translateY(0) !important;
+  pointer-events: all;
+}
+
+/* 4. ITEMS & LIST */
+.cine-dropdown-item {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 4px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  outline: none;
+  text-align: left;
+  user-select: none;
+}
+
+/* Hover or keyboard-nav highlight state */
+.cine-dropdown-item:hover,
+.cine-dropdown-item.is-highlighted {
+  background: rgba(207, 201, 235, 0.35) !important;
+  color: #131413 !important;
+}
+
+/* Selected state */
+.cine-dropdown-item.is-selected {
+  background: rgba(207, 201, 235, 0.55) !important;
+  color: #131413 !important;
+  font-weight: 600 !important;
+}
+
+/* Check icon indicator */
+.cine-dropdown-check-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-accent-deep);
+  flex-shrink: 0;
+  margin-left: 8px;
+  display: none;
+}
+
+.cine-dropdown-item.is-selected .cine-dropdown-check-icon {
+  display: block;
+}
+
+/* 5. SEARCH INPUT & CONTAINER (FOR SEARCHABLE DROPDOWNS) */
+.cine-dropdown-search-wrap {
+  padding: 6px;
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+  z-index: 10;
+  border-radius: calc(var(--radius-sm) - 4px) calc(var(--radius-sm) - 4px) 0 0;
+}
+
+.cine-dropdown-search-input {
+  width: 100%;
+  height: 36px;
+  padding: 8px 12px;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius-sm) - 6px);
+  font-size: 13px;
+  font-family: var(--font-body), sans-serif;
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.cine-dropdown-search-input:focus {
+  border-color: var(--color-accent-deep);
+  background: var(--color-surface);
+}
+
+/* Empty state styling */
+.cine-dropdown-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  display: none;
+}
+
+.cine-dropdown-empty.is-visible {
+  display: block;
+}
+
+/* 6. SPECIAL STATES (DISABLED & ERROR) */
+/* Disabled state wrapper */
+.cine-dropdown.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.cine-dropdown.is-disabled .cine-dropdown-trigger {
+  cursor: not-allowed;
+  background: var(--color-surface-muted);
+}
+
+/* Error state styling */
+.cine-dropdown.has-error .cine-dropdown-trigger {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.cine-dropdown-error-msg {
+  font-size: 11px;
+  color: var(--color-error);
+  margin-top: 4px;
+  display: block;
+}
+
+/* 7. QUICK BOOKING CARD Z-INDEX OVERRIDES */
+/* Guarantee that parent containers do not clip absolute menus! */
+.booking-strip,
+.booking-card,
+.booking-fields,
+.booking-field {
+  overflow: visible !important;
+}
+
+.booking-fields {
+  z-index: 99;
+}
+
+/* Quick Booking Strip visual overrides for borderless integration */
+.booking-field .cine-dropdown {
+  margin-top: 2px;
+}
+
+.booking-field .cine-dropdown-trigger {
+  border: none !important;
+  background: transparent !important;
+  padding: 4px 20px 4px 0 !important;
+  min-height: auto !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.booking-field .cine-dropdown-trigger:hover:not(:disabled),
+.booking-field .cine-dropdown-trigger:focus-visible,
+.booking-field .cine-dropdown.is-open .cine-dropdown-trigger {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.booking-field .cine-dropdown-chevron {
+  right: 0 !important;
+}
+
+.booking-field .cine-dropdown-value {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--color-text-primary) !important;
+}
+
+.booking-field .cine-dropdown-value.is-placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+.booking-field .cine-dropdown-trigger:focus-visible .cine-dropdown-value {
+  color: var(--color-accent-deep) !important;
+}
+
+.booking-field .cine-dropdown.is-open .cine-dropdown-chevron {
+  color: var(--color-accent-deep) !important;
+}
+
+/* Schedule filters custom styling integration */
+.schedule-filters .cine-dropdown {
+  min-width: 180px;
+  overflow: visible !important;
+}
+
+.schedule-filters .cine-dropdown-trigger {
+  padding: 10px 36px 10px 16px !important;
+  min-height: 44px !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.schedule-filters .cine-dropdown-chevron {
+  right: 14px !important;
+}
+
+.schedule-filters .cine-dropdown-value {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* ============================================================
+   8. BOOKING FIELD CASCADE VISUAL STATES (Issue 1 & 2)
+   ============================================================ */
+.booking-field {
+  transition: background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, box-shadow 0.3s ease !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* ACTIVE / AVAILABLE STATE */
+.booking-field.is-active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.booking-field.is-active label {
+  color: #7C6FE8 !important; /* var(--color-accent-strong) purple accent */
+  font-weight: 700 !important;
+}
+
+.booking-field.is-active .cine-dropdown-value {
+  color: var(--color-text-primary) !important;
+}
+
+/* SELECTED / COMPLETED STATE */
+.booking-field.is-selected {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.booking-field.is-selected label {
+  color: #7C6FE8 !important; /* var(--color-accent-strong) purple accent */
+  font-weight: 700 !important;
+}
+
+.booking-field.is-selected .cine-dropdown-value {
+  color: #131413 !important; /* Strong readable black text */
+  font-weight: 600 !important;
+}
+
+.booking-field.is-selected .cine-dropdown-chevron {
+  color: #7C6FE8 !important; /* purple accent icon */
+}
+
+/* DISABLED STATE */
+.booking-field.is-disabled {
+  opacity: 0.45 !important;
+  pointer-events: none !important;
+}
+
+.booking-field.is-disabled label {
+  color: var(--color-text-muted) !important;
+}
+
+.booking-field.is-disabled .cine-dropdown-value {
+  color: var(--color-text-muted) !important;
+}
+
+/* OPEN / EXPANDED STATE OVERLAYS */
+.booking-field.is-open {
+  pointer-events: auto !important;
+}

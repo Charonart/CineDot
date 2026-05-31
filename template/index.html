@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="assets/css/components/dropdown.css" />
+  <link rel="stylesheet" href="assets/css/components/navbar-dropdown.css" />
 </head>
 
 <body>
@@ -17,13 +19,89 @@
   <!-- NAVBAR -->
   <header class="navbar" id="navbar">
     <div class="nav-inner">
-      <a href="#" class="nav-logo">CINE</a>
+      <a href="index.html" class="nav-logo">CINE</a>
       <nav class="nav-links">
-        <a href="#">Phim</a>
-        <a href="#">Rạp</a>
-        <a href="#">Ưu đãi</a>
-        <a href="#">Thành viên</a>
-        <a href="#">Hỗ trợ</a>
+        <!-- PHIM MEGA DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Phim</a>
+          <div class="dropdown-content mega-dropdown" id="dropdown-phim">
+            <div class="mega-dropdown-inner">
+              <!-- PHIM ĐANG CHIẾU Section -->
+              <div class="mega-section">
+                <div class="mega-section-header">
+                  <a href="movies.html?category=now-showing" class="mega-section-title-link">
+                    <h2>PHIM ĐANG CHIẾU <span class="arrow">→</span></h2>
+                  </a>
+                </div>
+                <div class="mega-movies-grid" id="megaNowShowingGrid">
+                  <!-- Dynamically populated 4 cards via JS -->
+                </div>
+              </div>
+              <!-- PHIM SẮP CHIẾU Section -->
+              <div class="mega-section">
+                <div class="mega-section-header">
+                  <a href="movies.html?category=coming-soon" class="mega-section-title-link">
+                    <h2>PHIM SẮP CHIẾU <span class="arrow">→</span></h2>
+                  </a>
+                </div>
+                <div class="mega-movies-grid" id="megaComingSoonGrid">
+                  <!-- Dynamically populated 4 cards via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAR SHOP DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-starshop">
+            <a href="#">Movie-verse</a>
+            <a href="#">Fan Wibu</a>
+            <a href="#">Inner Child</a>
+          </div>
+        </div>
+
+        <!-- GÓC ĐIỆN ẢNH DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Góc Điện Ảnh</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-gocdienanh">
+            <a href="#">Bình luận phim</a>
+            <a href="#">Blog điện ảnh</a>
+            <a href="#">Hậu trường</a>
+          </div>
+        </div>
+
+        <!-- SỰ KIỆN DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Sự Kiện</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-su-kien">
+            <a href="#">Sự kiện đang diễn ra</a>
+            <a href="#">Ưu đãi đặc biệt</a>
+            <a href="#">Tin tức</a>
+          </div>
+        </div>
+
+        <!-- RẠP/GIÁ VÉ DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Rạp/Giá Vé</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-rapgiave">
+            <a href="#">Lịch chiếu theo rạp</a>
+            <a href="#">Giá vé</a>
+            <a href="#">Danh sách rạp</a>
+          </div>
+        </div>
+
+        <!-- RẠP ĐẶC BIỆT DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Rạp Đặc Biệt</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-rapdacbiet">
+            <a href="#">IMAX</a>
+            <a href="#">4DX</a>
+            <a href="#">Dolby Atmos</a>
+            <a href="#">Cine de Kids</a>
+          </div>
+        </div>
       </nav>
       <div class="nav-actions">
         <button class="nav-icon-btn" aria-label="Tìm kiếm">
@@ -34,7 +112,7 @@
           </svg>
         </button>
         <a href="#" class="nav-login">Đăng nhập</a>
-        <a href="movie-detail.html" class="btn-primary"
+        <a href="movies.html?category=now-showing" class="btn-primary"
           style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt vé</a>
       </div>
       <button class="nav-hamburger" id="navHamburger" aria-label="Thực đơn">
@@ -42,13 +120,86 @@
       </button>
     </div>
     <div class="nav-mobile-menu" id="navMobileMenu">
-      <a href="#">Phim</a>
-      <a href="#">Rạp</a>
-      <a href="#">Ưu đãi</a>
-      <a href="#">Thành viên</a>
-      <a href="#">Hỗ trợ</a>
+      <!-- PHIM DROPDOWN (Mobile accordion drawer) -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Phim</a>
+        <div class="dropdown-content mega-dropdown" id="dropdown-phim-mobile">
+          <div class="mega-dropdown-inner">
+            <div class="mega-section">
+              <div class="mega-section-header">
+                <h2>PHIM ĐANG CHIẾU</h2>
+                <a href="movies.html?category=now-showing" class="view-all-link">Xem tất cả</a>
+              </div>
+              <div class="mega-movies-grid" id="megaNowShowingGrid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+            <div class="mega-section">
+              <div class="mega-section-header">
+                <h2>PHIM SẮP CHIẾU</h2>
+                <a href="movies.html?category=coming-soon" class="view-all-link">Xem tất cả</a>
+              </div>
+              <div class="mega-movies-grid" id="megaComingSoonGrid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAR SHOP -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Movie-verse</a>
+          <a href="#">Fan Wibu</a>
+          <a href="#">Inner Child</a>
+        </div>
+      </div>
+
+      <!-- GÓC ĐIỆN ẢNH -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Góc Điện Ảnh</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Bình luận phim</a>
+          <a href="#">Blog điện ảnh</a>
+          <a href="#">Hậu trường</a>
+        </div>
+      </div>
+
+      <!-- SỰ KIỆN -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Sự Kiện</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Sự kiện đang diễn ra</a>
+          <a href="#">Ưu đãi đặc biệt</a>
+          <a href="#">Tin tức</a>
+        </div>
+      </div>
+
+      <!-- RẠP/GIÁ VÉ -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Rạp/Giá Vé</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Lịch chiếu theo rạp</a>
+          <a href="#">Giá vé</a>
+          <a href="#">Danh sách rạp</a>
+        </div>
+      </div>
+
+      <!-- RẠP ĐẶC BIỆT -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Rạp Đặc Biệt</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">IMAX</a>
+          <a href="#">4DX</a>
+          <a href="#">Dolby Atmos</a>
+          <a href="#">Cine de Kids</a>
+        </div>
+      </div>
+
       <a href="#" class="nav-login">Đăng nhập</a>
-      <a href="movie-detail.html" class="btn-primary"
+      <a href="movies.html?category=now-showing" class="btn-primary"
         style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt vé</a>
     </div>
   </header>
@@ -103,9 +254,9 @@
         <div class="booking-fields">
           <div class="booking-field">
             <label>Phim</label>
-            <select id="bookMovie">
+            <select id="bookMovie" data-dropdown placeholder="Chọn phim" data-searchable="false">
               <option value="">Chọn phim</option>
-              <option>Người nhện: Phần 2</option>
+              <option>Người Nhện: Phần 2</option>
               <option>Godzilla x Kong</option>
               <option>Ghostbusters: Frozen Empire</option>
               <option>Civil War</option>
@@ -116,7 +267,7 @@
           <div class="booking-divider"></div>
           <div class="booking-field">
             <label>Rạp</label>
-            <select id="bookCinema">
+            <select id="bookCinema" data-dropdown placeholder="Chọn rạp">
               <option value="">Chọn rạp</option>
               <option>CINE Landmark — Quận 1</option>
               <option>CINE Crescent — Quận 7</option>
@@ -127,7 +278,7 @@
           <div class="booking-divider"></div>
           <div class="booking-field">
             <label>Ngày</label>
-            <select id="bookDate">
+            <select id="bookDate" data-dropdown placeholder="Chọn ngày">
               <option value="">Chọn ngày</option>
               <option>Hôm nay — 17/05</option>
               <option>Ngày mai — 18/05</option>
@@ -139,7 +290,7 @@
           <div class="booking-divider"></div>
           <div class="booking-field">
             <label>Suất chiếu</label>
-            <select id="bookTime">
+            <select id="bookTime" data-dropdown placeholder="Chọn giờ">
               <option value="">Chọn giờ</option>
               <option>10:15</option>
               <option>13:30</option>
@@ -150,11 +301,13 @@
           </div>
         </div>
         <button class="btn-primary btn-booking" id="quickBookBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
-            <path d="M13 5v2"/>
-            <path d="M13 17v2"/>
-            <path d="M13 11v2"/>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+            <path d="M13 5v2" />
+            <path d="M13 17v2" />
+            <path d="M13 11v2" />
           </svg>
           Đặt vé
         </button>
@@ -214,9 +367,13 @@
                   <img src="https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80" alt="Dune"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <a href="movie-detail.html" class="btn-primary btn-sm"
-                      style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt
-                      vé ngay</a>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">IMAX</span>
                 </div>
@@ -233,7 +390,13 @@
                   <img src="https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80" alt="Godzilla"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">4DX</span>
                 </div>
@@ -250,7 +413,13 @@
                   <img src="https://images.unsplash.com/photo-1535016120720-40c646be5580?w=400&q=80" alt="Ghostbusters"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                 </div>
                 <div class="movie-info">
@@ -266,7 +435,13 @@
                   <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80" alt="Civil War"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">Dolby</span>
                 </div>
@@ -283,7 +458,13 @@
                   <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Furiosa"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">IMAX</span>
                 </div>
@@ -300,7 +481,13 @@
                   <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80" alt="Inside Out 2"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                 </div>
                 <div class="movie-info">
@@ -316,7 +503,13 @@
                   <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&q=80"
                     alt="Kingdom of Planet" class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">4DX</span>
                 </div>
@@ -391,7 +584,13 @@
                   <img src="https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80" alt="Dune"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">IMAX</span>
                 </div>
@@ -408,7 +607,13 @@
                   <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Furiosa"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">IMAX</span>
                 </div>
@@ -425,7 +630,13 @@
                   <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80" alt="Deadpool"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-outline btn-sm">Nhận thông báo</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">IMAX</span>
                 </div>
@@ -442,7 +653,13 @@
                   <img src="https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80" alt="Godzilla"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">IMAX / 4DX</span>
                 </div>
@@ -467,7 +684,13 @@
                   <img src="https://images.unsplash.com/photo-1535016120720-40c646be5580?w=400&q=80" alt="Ghostbusters"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                 </div>
                 <div class="movie-info">
@@ -483,7 +706,13 @@
                   <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80" alt="Civil War"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">Dolby</span>
                 </div>
@@ -500,7 +729,13 @@
                   <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80" alt="Inside Out 2"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                 </div>
                 <div class="movie-info">
@@ -516,7 +751,13 @@
                   <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&q=80"
                     alt="Kingdom of Planet" class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">4DX</span>
                 </div>
@@ -533,7 +774,13 @@
                   <img src="https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80" alt="Godzilla"
                     class="movie-poster" />
                   <div class="movie-overlay">
-                    <button class="btn-primary btn-sm">Đặt vé ngay</button>
+                    <a href="movie-detail.html" class="btn-primary movie-action-btn" aria-label="Mua vé">Mua vé</a>
+                    <button class="btn-ghost movie-action-btn trailer-btn" aria-label="Xem trailer" data-movie-id="default">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                      Trailer
+                    </button>
                   </div>
                   <span class="movie-format-badge">4DX</span>
                 </div>
@@ -551,7 +798,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; margin-top: 40px;">
-        <button class="btn-outline">Xem thêm</button>
+        <a href="movies.html" class="btn-outline" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Xem thêm &gt;</a>
       </div>
 
     </div>
@@ -814,10 +1061,30 @@
     </div>
   </div>
 
+  <!-- SEARCH MODAL -->
+  <div class="search-modal" id="searchModal">
+    <div class="search-container">
+      <button class="search-close" id="closeSearchBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm phim..." autocomplete="off">
+      <div class="search-results" id="searchResults">
+        <!-- Results or empty state injected here -->
+      </div>
+    </div>
+  </div>
+
   <script src="assets/js/components/highlight-text.js"></script>
   <script src="assets/js/components/scroll-text.js"></script>
   <script src="assets/js/components/theme-selector.js"></script>
   <script src="assets/js/components/video-player.js"></script>
+  <script src="assets/js/components/dropdown.js"></script>
+  <script src="assets/js/data/movies-data.js"></script>
+  <script src="assets/js/components/navbar-dropdown.js"></script>
+  <script src="assets/js/booking-core.js"></script>
   <script src="script.js"></script>
 </body>
 
