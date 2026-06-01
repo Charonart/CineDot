@@ -228,7 +228,9 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
                     type="button"
                     className="btn-primary btn-large" 
                     onClick={() => {
-                      alert(`Chuyển đến chọn ghế cho suất chiếu lúc ${selectedShowtime.time} (Mã: ${selectedShowtime.scheduleId})`);
+                      const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+                      const movieSlug = pathname.split('/').pop() || 'dune-part-two';
+                      window.location.href = `/booking/seats?movie=${movieSlug}&cinema=${encodeURIComponent(selectedShowtime.cinemaName)}&date=${selectedDate}&time=${selectedShowtime.time}`;
                     }}
                   >
                     Tiếp tục chọn ghế ({selectedShowtime.time})
