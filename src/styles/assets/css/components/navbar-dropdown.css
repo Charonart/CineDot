@@ -1,0 +1,499 @@
+/* ============================================================
+   CINE Navbar Dropdown Stylesheet
+   assets/css/components/navbar-dropdown.css
+   ============================================================ */
+
+/* Capsule container context */
+.nav-inner {
+  position: relative;
+  /* Set anchor for mega dropdown */
+}
+
+/* Nav Item Dropdown Trigger Wrapper */
+.nav-item-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Disable position relative on mega-dropdown wrapper to allow centering relative to capsule .nav-inner */
+.nav-item-dropdown:has(.mega-dropdown) {
+  position: static !important;
+}
+
+.nav-dropdown-trigger {
+  cursor: pointer;
+  position: relative;
+  padding-right: 14px !important;
+}
+
+/* Down Chevron indicator */
+.nav-dropdown-trigger::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 52%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: transform 0.25s ease;
+}
+
+.nav-item-dropdown:hover .nav-dropdown-trigger::after,
+.nav-item-dropdown.active .nav-dropdown-trigger::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Base Dropdown panel styling */
+.dropdown-content {
+  position: absolute;
+  top: calc(100% + 14px);
+  background: #ffffff;
+  border: 1px solid rgba(19, 20, 19, 0.06);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1050;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Open states */
+.dropdown-content.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ----------------------------------------------------------
+   SMALL DROPDOWNS STYLE
+   ---------------------------------------------------------- */
+.small-dropdown {
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  width: 220px;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.small-dropdown.open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.small-dropdown a {
+  display: block;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--color-text-secondary, #555555) !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  background: transparent !important;
+}
+
+.small-dropdown a:hover {
+  color: var(--color-accent-deep, #6366f1) !important;
+  background: rgba(99, 102, 241, 0.06) !important;
+  padding-left: 16px !important;
+  /* Premium slide hover effect */
+}
+
+/* ----------------------------------------------------------
+   PHIM MEGA DROPDOWN STYLE
+   ---------------------------------------------------------- */
+.mega-dropdown {
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  width: min(700px, calc(100vw - 64px));
+  /* Sized down for sleekness */
+  max-height: calc(100vh - 140px);
+  /* Controlled viewport height safety */
+  overflow-y: auto;
+  /* Fit viewport and allow vertical scroll */
+  border-radius: 12px;
+  padding: 16px 20px;
+  /* Reduced padding for cleaner look */
+  background: #ffffff;
+  /* Opaque white background */
+  border: 1px solid rgba(19, 20, 19, 0.08);
+  box-shadow: 0 24px 60px rgba(17, 17, 17, 0.14);
+  /* Rich soft shadow */
+}
+
+/* Elegant custom scrollbar for mega dropdown */
+.mega-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mega-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mega-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(19, 20, 19, 0.15);
+  border-radius: 3px;
+}
+
+.mega-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(19, 20, 19, 0.3);
+}
+
+.mega-dropdown.open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.mega-dropdown-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Reduced gap between sections */
+}
+
+.mega-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Reduced gap inside sections */
+}
+
+.mega-section-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(19, 20, 19, 0.05);
+  padding-bottom: 6px;
+  padding-left: 12px;
+  /* space for left accent indicator line */
+  position: relative;
+  margin-bottom: 12px;
+  /* Section title margin-bottom: 12px */
+}
+
+/* Left blue indicator bar matching Home page section titles in image 2 */
+.mega-section-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 13px;
+  background: var(--color-accent-deep, #6366f1);
+  border-radius: 2px;
+}
+
+/* Clickable section title styling */
+.mega-section-title-link {
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.mega-section-title-link h2 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-text, #131413);
+  margin: 0;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+.mega-section-title-link h2 .arrow {
+  font-size: 13px;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--color-accent-deep, #6366f1);
+}
+
+.mega-section-title-link:hover h2 {
+  color: var(--color-accent-deep, #6366f1) !important;
+}
+
+.mega-section-title-link:hover h2 .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Mega movies grids - exactly 4 columns horizontally stretching inside the compact width */
+.mega-movies-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  /* Reduced gap between columns */
+}
+
+/* Ultra Compact Mega Movie Card specifications */
+.mega-movie-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Spacing between poster and title reduced */
+  width: 100%;
+  max-width: 120px;
+  /* Reduced width of movie cards */
+  margin: 0 auto;
+}
+
+.mega-poster-wrap {
+  position: relative;
+  aspect-ratio: 2/3;
+  width: 100%;
+  height: 170px;
+  /* Reduced height of movie posters for visual compactness */
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  background: #f3f4f6;
+}
+
+.mega-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mega-movie-card:hover .mega-poster {
+  transform: scale(1.05);
+}
+
+/* Overlay & compact micro-CTA buttons */
+.mega-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(19, 20, 19, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  padding: 8px;
+  z-index: 15;
+}
+
+.mega-poster-wrap:hover .mega-overlay {
+  opacity: 1;
+}
+
+.mega-action-btn {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 0 12px !important;
+  height: 34px !important;
+  /* Compact button height */
+  line-height: 34px !important;
+  border-radius: 6px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(6px);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mega-poster-wrap:hover .mega-action-btn {
+  transform: translateY(0);
+}
+
+/* Absolute badges group at bottom right of the poster overlay */
+.mega-badges-group {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* Compact gap */
+  z-index: 12;
+  pointer-events: none;
+}
+
+.mega-rating-badge {
+  background: rgba(19, 20, 19, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 2px 5px;
+  /* Compact padding */
+  border-radius: 4px;
+  font-size: 9.5px;
+  /* Smaller badge font */
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.mega-rating-badge .star {
+  color: #fbbf24;
+  font-size: 9px;
+}
+
+/* Classification Badge styling specifications inside Dropdown */
+.mega-age-badge {
+  font-size: 9.5px;
+  /* Smaller badge font */
+  font-weight: 800;
+  color: #fff;
+  padding: 2px 5px;
+  /* Compact padding */
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Premium classification badge color themes matching movies.css */
+.mega-age-badge.p {
+  background: #10b981;
+}
+
+.mega-age-badge.k {
+  background: #3b82f6;
+}
+
+.mega-age-badge.t13 {
+  background: #eab308;
+}
+
+.mega-age-badge.t16 {
+  background: #f97316;
+}
+
+.mega-age-badge.t18 {
+  background: #ef4444;
+}
+
+/* Info metadata text labels */
+.mega-movie-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mega-movie-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text, #131413);
+  margin: 0;
+  cursor: pointer;
+  min-height: 45px;
+  height: auto;
+  overflow: visible;
+  transition: color 0.2s ease;
+}
+
+.mega-movie-title:hover {
+  color: var(--color-accent-deep, #6366f1);
+}
+
+.mega-meta-row {
+  display: none !important;
+  /* Hide inside compact preview dropdown */
+}
+
+/* Desktop specific override to remove internal scrollbar completely */
+@media (min-width: 1024px) {
+  .mega-dropdown {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   RESPONSIVE DESIGN BREAKPOINTS
+   ---------------------------------------------------------- */
+@media (max-width: 1024px) {
+
+  /* Prevent mega dropdown from expanding offscreen */
+  .mega-dropdown {
+    width: calc(100vw - 48px);
+    max-height: min(640px, calc(100vh - 120px));
+    padding: 20px 24px;
+  }
+
+  .mega-movies-grid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Prevent chevron overlays on mobile if not needed */
+  .nav-dropdown-trigger {
+    padding-right: 14px !important;
+  }
+
+  /* Dropdowns toggle as collapsible vertical drawers in mobile sidebar menu */
+  .nav-mobile-menu .nav-item-dropdown {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-mobile-menu .dropdown-content {
+    position: static !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: none;
+    background: rgba(19, 20, 19, 0.02) !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+    padding: 10px 16px !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+  }
+
+  .nav-mobile-menu .nav-item-dropdown.active .dropdown-content {
+    display: block !important;
+  }
+
+  .nav-mobile-menu .small-dropdown a {
+    padding: 10px 12px !important;
+    border-radius: 6px !important;
+  }
+
+  /* Mobile Mega dropdown lists vertical scrolling or two columns block */
+  .nav-mobile-menu .mega-dropdown {
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    width: 100% !important;
+  }
+
+  .nav-mobile-menu .mega-dropdown-inner {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .nav-mobile-menu .mega-movies-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  .nav-mobile-menu .mega-movie-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    max-width: 100% !important;
+  }
+}

@@ -1,51 +1,102 @@
-import Image from 'next/image';
-import { Movie } from '../types/movie.type';
-import { cn } from '@shared/lib/utils';
-import { imageHelper, ImageSize } from '@shared/utils/imageHelper';
-import { Star } from 'lucide-react';
+/* eslint-disable @next/next/no-img-element */
+'use client';
 
-interface MovieCardProps {
-  movie: Movie;
-  variant?: 'poster' | 'backdrop';
-  size?: ImageSize;
-  className?: string;
+import React, { useState } from 'react';
+import { TrailerModal } from '@/shared/components/visual';
+
+interface Movie {
+  id: string | number;
+  title: string;
+  posterUrl: string;
+  format?: string;
+  rating?: string | number;
+  genre?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  genres?: any[];
 }
 
-export function MovieCard({ 
-  movie, 
-  variant = 'poster', 
-  size = 'md', 
-  className 
-}: MovieCardProps) {
-  const imageUrl = variant === 'poster' 
-    ? imageHelper.getPosterUrl(movie.posterUrl, size)
-    : imageHelper.getBackdropUrl(movie.backdropUrl, size);
+interface MovieCardProps {
+  id?: string | number;
+  title?: string;
+  posterUrl?: string;
+  format?: string;
+  rating?: string | number;
+  genre?: string;
+  movie?: Movie;
+}
+
+export const MovieCard: React.FC<MovieCardProps> = (props) => {
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+
+  const movie = props.movie || {
+    id: props.id || '',
+    title: props.title || '',
+    posterUrl: props.posterUrl || '',
+    format: props.format,
+    rating: props.rating || '',
+    genre: props.genre || ''
+  };
+
+  const { title, posterUrl, format } = movie;
+  const id = String(movie.id);
+  const rating = movie.rating !== undefined ? String(movie.rating) : '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const genre = movie.genre || (movie.genres && movie.genres.map((g: any) => typeof g === 'string' ? g : (g.name || '')).join(', ')) || '';
 
   return (
-    <div className={cn(
-      'group relative overflow-hidden rounded-xl bg-zinc-100 transition-all hover:scale-105 dark:bg-zinc-900',
-      variant === 'poster' ? 'aspect-[2/3]' : 'aspect-video',
-      className
-    )}>
-      <Image
-        src={imageUrl}
-        alt={movie.title}
-        fill
-        className="object-cover transition-opacity group-hover:opacity-80"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      />
-      
-      {/* Overlay info */}
-      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
-        <h3 className="line-clamp-1 text-sm font-bold text-white">{movie.title}</h3>
-        <div className="mt-1 flex items-center gap-2 text-xs text-zinc-300">
-          <span>{movie.releaseDate.split('-')[0]}</span>
-          <div className="flex items-center gap-1 text-yellow-400">
-            <Star className="h-3 w-3 fill-current" />
-            <span>{movie.rating.toFixed(1)}</span>
+    <>
+      <div className="movie-card">
+        <div className="movie-poster-wrap">
+          <img src={posterUrl} alt={title} className="movie-poster" />
+          <div className="movie-overlay">
+            <a 
+              href={`/movies/detail/${id}`} 
+              className="btn-primary movie-action-btn" 
+              aria-label="Mua vé"
+            >
+              Mua vé
+            </a>
+            <button 
+              type="button"
+              className="btn-ghost movie-action-btn trailer-btn" 
+              aria-label="Xem trailer" 
+              data-movie-id={id}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsTrailerOpen(true);
+              }}
+            >
+              <svg 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="currentColor" 
+                style={{ marginRight: '6px' }}
+              >
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+              Trailer
+            </button>
+          </div>
+          {format && <span className="movie-format-badge">{format}</span>}
+        </div>
+        <div className="movie-info">
+          <h3>{title}</h3>
+          <div className="movie-meta-row">
+            <span className="rating">★ {rating}</span>
+            <span className="genre-tag">{genre}</span>
           </div>
         </div>
       </div>
-    </div>
+
+      <TrailerModal
+        isOpen={isTrailerOpen}
+        onClose={() => setIsTrailerOpen(false)}
+        videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+        poster={posterUrl}
+        title={title}
+      />
+    </>
   );
-}
+};

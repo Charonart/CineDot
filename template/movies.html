@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CINE — Khám Phá Danh Sách Phim Điện Ảnh Cực Đỉnh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <!-- Global & Component Stylesheets -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="assets/css/components/dropdown.css" />
+  <link rel="stylesheet" href="assets/css/components/navbar-dropdown.css" />
+  <link rel="stylesheet" href="assets/css/pages/movies.css" />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">CINE</a>
+      <nav class="nav-links">
+        <!-- PHIM MEGA DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger active">Phim</a>
+          <div class="dropdown-content mega-dropdown" id="dropdown-phim">
+            <div class="mega-dropdown-inner">
+              <!-- PHIM ĐANG CHIẾU Section -->
+              <div class="mega-section">
+                <div class="mega-section-header">
+                  <a href="movies.html?category=now-showing" class="mega-section-title-link">
+                    <h2>PHIM ĐANG CHIẾU <span class="arrow">→</span></h2>
+                  </a>
+                </div>
+                <div class="mega-movies-grid" id="megaNowShowingGrid">
+                  <!-- Dynamically populated 4 cards via JS -->
+                </div>
+              </div>
+              <!-- PHIM SẮP CHIẾU Section -->
+              <div class="mega-section">
+                <div class="mega-section-header">
+                  <a href="movies.html?category=coming-soon" class="mega-section-title-link">
+                    <h2>PHIM SẮP CHIẾU <span class="arrow">→</span></h2>
+                  </a>
+                </div>
+                <div class="mega-movies-grid" id="megaComingSoonGrid">
+                  <!-- Dynamically populated 4 cards via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAR SHOP DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-starshop">
+            <a href="#">Movie-verse</a>
+            <a href="#">Fan Wibu</a>
+            <a href="#">Inner Child</a>
+          </div>
+        </div>
+
+        <!-- GÓC ĐIỆN ẢNH DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Góc Điện Ảnh</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-gocdienanh">
+            <a href="#">Bình luận phim</a>
+            <a href="#">Blog điện ảnh</a>
+            <a href="#">Hậu trường</a>
+          </div>
+        </div>
+
+        <!-- SỰ KIỆN DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Sự Kiện</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-su-kien">
+            <a href="#">Sự kiện đang diễn ra</a>
+            <a href="#">Ưu đãi đặc biệt</a>
+            <a href="#">Tin tức</a>
+          </div>
+        </div>
+
+        <!-- RẠP/GIÁ VÉ DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Rạp/Giá Vé</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-rapgiave">
+            <a href="#">Lịch chiếu theo rạp</a>
+            <a href="#">Giá vé</a>
+            <a href="#">Danh sách rạp</a>
+          </div>
+        </div>
+
+        <!-- RẠP ĐẶC BIỆT DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Rạp Đặc Biệt</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-rapdacbiet">
+            <a href="#">IMAX</a>
+            <a href="#">4DX</a>
+            <a href="#">Dolby Atmos</a>
+            <a href="#">Cine de Kids</a>
+          </div>
+        </div>
+      </nav>
+      <div class="nav-actions">
+        <button class="nav-icon-btn" aria-label="Tìm kiếm" id="openSearchBtnNav">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </button>
+        <a href="#" class="nav-login">Đăng nhập</a>
+        <a href="movies.html?category=now-showing" class="btn-primary"
+          style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt vé</a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Thực đơn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-mobile-menu" id="navMobileMenu">
+      <!-- PHIM DROPDOWN (Mobile accordion drawer) -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger active">Phim</a>
+        <div class="dropdown-content mega-dropdown" id="dropdown-phim-mobile">
+          <div class="mega-dropdown-inner">
+            <div class="mega-section">
+              <div class="mega-section-header">
+                <h2>PHIM ĐANG CHIẾU</h2>
+                <a href="movies.html?category=now-showing" class="view-all-link">Xem tất cả</a>
+              </div>
+              <div class="mega-movies-grid" id="megaNowShowingGrid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+            <div class="mega-section">
+              <div class="mega-section-header">
+                <h2>PHIM SẮP CHIẾU</h2>
+                <a href="movies.html?category=coming-soon" class="view-all-link">Xem tất cả</a>
+              </div>
+              <div class="mega-movies-grid" id="megaComingSoonGrid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAR SHOP -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Movie-verse</a>
+          <a href="#">Fan Wibu</a>
+          <a href="#">Inner Child</a>
+        </div>
+      </div>
+
+      <!-- GÓC ĐIỆN ẢNH -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Góc Điện Ảnh</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Bình luận phim</a>
+          <a href="#">Blog điện ảnh</a>
+          <a href="#">Hậu trường</a>
+        </div>
+      </div>
+
+      <!-- SỰ KIỆN -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Sự Kiện</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Sự kiện đang diễn ra</a>
+          <a href="#">Ưu đãi đặc biệt</a>
+          <a href="#">Tin tức</a>
+        </div>
+      </div>
+
+      <!-- RẠP/GIÁ VÉ -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Rạp/Giá Vé</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Lịch chiếu theo rạp</a>
+          <a href="#">Giá vé</a>
+          <a href="#">Danh sách rạp</a>
+        </div>
+      </div>
+
+      <!-- RẠP ĐẶC BIỆT -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Rạp Đặc Biệt</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">IMAX</a>
+          <a href="#">4DX</a>
+          <a href="#">Dolby Atmos</a>
+          <a href="#">Cine de Kids</a>
+        </div>
+      </div>
+
+      <a href="#" class="nav-login">Đăng nhập</a>
+      <a href="movies.html?category=now-showing" class="btn-primary"
+        style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Đặt vé</a>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="movies-page">
+
+    <!-- PAGE HEADER -->
+    <header class="movies-header fade-up">
+      <div class="container">
+        <div class="movies-header-content">
+          <!-- Premium Visual Tab Switching -->
+          <div class="tabs-nav-container" style="margin-bottom: 24px; display: inline-flex;">
+            <div class="tabs-nav" id="movieListingTabs">
+              <button class="tab-btn active" data-tab="now-showing">Đang chiếu</button>
+              <button class="tab-btn" data-tab="coming-soon">Sắp chiếu</button>
+              <button class="tab-btn" data-tab="imax">Phim IMAX</button>
+              <button class="tab-btn" data-tab="nationwide">Toàn quốc</button>
+              <span class="tab-glow-indicator" id="toolbarTabIndicator"></span>
+            </div>
+          </div>
+          <h1 class="movies-title" id="pageTitle" style="margin-top: 10px;">PHIM <span class="highlight-text"
+              data-variant="underline" data-color="primary">ĐANG CHIẾU</span></h1>
+          <p class="movies-desc" id="pageDescription">
+            Cập nhật danh sách phim chiếu rạp mới nhất, bom tấn hành động đỉnh cao và thế giới đầy màu sắc tại CINE.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <section class="movies-content-section fade-up">
+      <div class="container">
+
+        <!-- PRODUCTS GRID CONTAINER -->
+        <div class="movies-grid-container">
+          <div class="movies-grid" id="moviesGrid">
+            <!-- Grid movie cards dynamically loaded from JavaScript -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo">CINE</div>
+          <p>Đặt vé nhanh. Xem phim hay. <span class="highlight-text" data-variant="underline" data-color="accent">Trải
+              nghiệm điện ảnh cao cấp.</span></p>
+          <div class="social-links">
+            <a href="#" class="social-link">FB</a>
+            <a href="#" class="social-link">IG</a>
+            <a href="#" class="social-link">TW</a>
+            <a href="#" class="social-link">YT</a>
+          </div>
+        </div>
+        <div class="footer-links-group">
+          <h4>Phim</h4>
+          <a href="movies.html?category=now-showing">Đang chiếu</a>
+          <a href="movies.html?category=coming-soon">Sắp chiếu</a>
+          <a href="#">Đặt vé trước</a>
+          <a href="movies.html?category=imax">Phim IMAX</a>
+        </div>
+        <div class="footer-links-group">
+          <h4>Hệ thống rạp</h4>
+          <a href="#">CINE Landmark</a>
+          <a href="#">CINE Crescent</a>
+          <a href="#">CINE Vincom</a>
+          <a href="#">Tìm rạp chiếu</a>
+        </div>
+        <div class="footer-links-group">
+          <h4>Hỗ trợ</h4>
+          <a href="#">Trung tâm trợ giúp</a>
+          <a href="#">Câu hỏi thường gặp</a>
+          <a href="#">Chính sách hoàn tiền</a>
+          <a href="#">Liên hệ</a>
+        </div>
+        <div class="footer-app">
+          <h4>Tải ứng dụng</h4>
+          <a href="#" class="app-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+            </svg>
+            App Store
+          </a>
+          <a href="#" class="app-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M3.18 23.76c.26.15.56.24.89.24.37 0 .75-.1 1.09-.3l12.96-7.48-2.79-2.79-12.15 10.33zM20.12 7.38L7.15.3c-.34-.2-.72-.3-1.09-.3-.33 0-.63.09-.89.24L17.32 12l2.8-4.62zM1 21.37V2.63L13.67 12 1 21.37zM7.15 23.7l12.97-7.48c.59-.34.97-.97.97-1.66v-.12L2.18 24c.26.15.56.24.89.24.37 0 .75-.1 1.08-.3v.02z" />
+            </svg>
+            Google Play
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 CINE. Bảo lưu mọi quyền.</p>
+        <div class="footer-legal">
+          <a href="#">Quyền riêng tư</a>
+          <a href="#">Điều khoản</a>
+          <a href="#">Cookie</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TRAILER MODAL OVERLAY (REUSED FOR CUSTOM VIDEO PLAYER INTERACTION) -->
+  <div class="modal-overlay" id="trailerModal">
+    <div class="modal-container">
+      <button class="modal-close" id="closeModal" aria-label="Đóng">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div class="cine-video-player" id="modalTrailerPlayer"
+        data-src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+        data-poster="https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=1200&q=80"
+        data-title="Dune: Cát Song - Phần Hai">
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH MODAL -->
+  <div class="search-modal" id="searchModal">
+    <div class="search-container">
+      <button class="search-close" id="closeSearchBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm phim..." autocomplete="off">
+      <div class="search-results" id="searchResults">
+        <!-- Results or empty state injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts Loading Flow -->
+  <script src="assets/js/data/movies-data.js"></script>
+  <script src="assets/js/components/highlight-text.js"></script>
+  <script src="assets/js/components/scroll-text.js"></script>
+  <script src="assets/js/components/theme-selector.js"></script>
+  <script src="assets/js/components/video-player.js"></script>
+  <script src="assets/js/components/dropdown.js"></script>
+  <script src="assets/js/components/navbar-dropdown.js"></script>
+
+  <!-- Global logic overrides -->
+  <script src="assets/js/booking-core.js"></script>
+  <script src="assets/js/pages/movies.js"></script>
+
+</body>
+
+</html>
