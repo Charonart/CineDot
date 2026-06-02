@@ -293,6 +293,18 @@
     if (btn) btn.addEventListener('click', openModal);
   });
 
+  // Handle all dynamically added trailer buttons on movie cards
+  document.addEventListener('click', (e) => {
+    const trailerBtn = e.target.closest('.trailer-btn');
+    if (trailerBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Optional: const movieId = trailerBtn.dataset.movieId;
+      // In a real app, you would load the video source based on movieId here
+      openModal();
+    }
+  });
+
   if (closeModal) closeModal.addEventListener('click', closeModalFn);
 
   if (modal) {
@@ -306,29 +318,199 @@
   }
 
   /* ----------------------------------------------------------
-     4. QUICK BOOKING — alert with selected values
+     4. QUICK BOOKING — DYNAMIC CASCADE BOOKING SYSTEM
   ---------------------------------------------------------- */
 
+  const bookMovie = document.getElementById('bookMovie');
+  const bookCinema = document.getElementById('bookCinema');
+  const bookDate = document.getElementById('bookDate');
+  const bookTime = document.getElementById('bookTime');
   const quickBookBtn = document.getElementById('quickBookBtn');
 
-  if (quickBookBtn) {
-    quickBookBtn.addEventListener('click', () => {
-      const movie   = document.getElementById('bookMovie')?.value;
-      const cinema  = document.getElementById('bookCinema')?.value;
-      const date    = document.getElementById('bookDate')?.value;
-      const time    = document.getElementById('bookTime')?.value;
+  const bookingDb = {
+    movies: [
+      { id: "movie_1", title: "Người Nhện: Phần 2", status: "now-showing" },
+      { id: "movie_2", title: "Godzilla x Kong", status: "now-showing" },
+      { id: "movie_3", title: "Ghostbusters: Frozen Empire", status: "now-showing" },
+      { id: "movie_4", title: "Civil War", status: "now-showing" },
+      { id: "movie_5", title: "Furiosa", status: "now-showing" },
+      { id: "movie_6", title: "Inside Out 2", status: "now-showing" },
+      { id: "movie_7", title: "Deadpool & Wolverine", status: "coming-soon" },
+      { id: "movie_8", title: "Alien: Romulus", status: "coming-soon" }
+    ],
+    cinemas: [
+      { id: "cinema_1", name: "CINE Landmark — Quận 1" },
+      { id: "cinema_2", name: "CINE Crescent — Quận 7" },
+      { id: "cinema_3", name: "CINE Aeon — Bình Dương" },
+      { id: "cinema_4", name: "CINE Vincom — Quận 3" }
+    ],
+    dates: [
+      { id: "date_1", label: "Hôm nay — 27/05" },
+      { id: "date_2", label: "Ngày mai — 28/05" },
+      { id: "date_3", label: "Thứ Năm — 29/05" },
+      { id: "date_4", label: "Thứ Sáu — 30/05" }
+    ],
+    times: {
+      "movie_1": ["10:15", "13:30", "16:45", "19:00", "21:30"],
+      "movie_2": ["09:00", "11:45", "14:30", "17:15", "20:00", "22:45"],
+      "movie_3": ["10:00", "12:30", "15:00", "18:30", "21:00"],
+      "movie_4": ["11:00", "13:45", "16:30", "19:15", "22:00"],
+      "movie_5": ["08:30", "11:00", "14:15", "17:00", "19:45", "22:30"],
+      "movie_6": ["09:30", "12:00", "14:30", "17:00", "19:30", "21:45"]
+    }
+  };
 
-      if (!movie || !cinema || !date || !time) {
-        showToast('Vui lòng chọn đầy đủ thông tin để tiếp tục.', 'warning');
+  function initQuickBookingCascade() {
+    if (!bookMovie || !bookCinema || !bookDate || !bookTime || !quickBookBtn) return;
+
+    // Helper to populate a select
+    const populateSelect = (selectEl, defaultText, items = [], isTime = false) => {
+      selectEl.innerHTML = `<option value="">${defaultText}</option>`;
+      items.forEach(item => {
+        const option = document.createElement('option');
+        if (isTime) {
+          option.value = item;
+          option.textContent = item;
+        } else {
+          option.value = item.id;
+          option.textContent = item.title || item.name || item.label;
+        }
+        selectEl.appendChild(option);
+      });
+    };
+
+    // Helper to update visual cascade classes on booking fields (Issue 1 & 2)
+    const updateFieldVisualStates = () => {
+      const fields = [
+        { select: bookMovie, field: bookMovie.closest('.booking-field') },
+        { select: bookCinema, field: bookCinema.closest('.booking-field') },
+        { select: bookDate, field: bookDate.closest('.booking-field') },
+        { select: bookTime, field: bookTime.closest('.booking-field') }
+      ];
+
+      fields.forEach(({ select, field }) => {
+        if (!field) return;
+        
+        // Clear all state classes
+        field.classList.remove('is-active', 'is-disabled', 'is-selected');
+        
+        if (select.disabled) {
+          field.classList.add('is-disabled');
+        } else if (select.value) {
+          field.classList.add('is-selected');
+        } else {
+          field.classList.add('is-active');
+        }
+      });
+    };
+
+    // Helper to update button state
+    const updateSubmitButtonState = () => {
+      const isComplete = bookMovie.value && bookCinema.value && bookDate.value && bookTime.value;
+      quickBookBtn.disabled = !isComplete;
+      updateFieldVisualStates();
+    };
+
+    // 1. Initial State - filter only now-showing movies (Issue 5)
+    const nowShowingMovies = bookingDb.movies.filter(m => m.status === 'now-showing');
+    populateSelect(bookMovie, "Chọn phim", nowShowingMovies);
+    populateSelect(bookCinema, "Chọn rạp");
+    populateSelect(bookDate, "Chọn ngày");
+    populateSelect(bookTime, "Chọn giờ");
+    
+    bookCinema.disabled = true;
+    bookDate.disabled = true;
+    bookTime.disabled = true;
+    updateSubmitButtonState();
+
+    // 2. Cascade Events
+    // Movie Select Changed
+    bookMovie.addEventListener('change', () => {
+      const movieId = bookMovie.value;
+      
+      // Clear fields
+      populateSelect(bookCinema, "Chọn rạp");
+      populateSelect(bookDate, "Chọn ngày");
+      populateSelect(bookTime, "Chọn giờ");
+      
+      if (movieId) {
+        populateSelect(bookCinema, "Chọn rạp", bookingDb.cinemas);
+        bookCinema.disabled = false;
+      } else {
+        bookCinema.disabled = true;
+      }
+      
+      bookDate.disabled = true;
+      bookTime.disabled = true;
+      updateSubmitButtonState();
+    });
+
+    // Cinema Select Changed
+    bookCinema.addEventListener('change', () => {
+      const cinemaId = bookCinema.value;
+      
+      // Clear fields
+      populateSelect(bookDate, "Chọn ngày");
+      populateSelect(bookTime, "Chọn giờ");
+      
+      if (cinemaId) {
+        populateSelect(bookDate, "Chọn ngày", bookingDb.dates);
+        bookDate.disabled = false;
+      } else {
+        bookDate.disabled = true;
+      }
+      
+      bookTime.disabled = true;
+      updateSubmitButtonState();
+    });
+
+    // Date Select Changed
+    bookDate.addEventListener('change', () => {
+      const dateId = bookDate.value;
+      const movieId = bookMovie.value;
+      
+      // Clear fields
+      populateSelect(bookTime, "Chọn giờ");
+      
+      if (dateId && movieId) {
+        const times = bookingDb.times[movieId] || [];
+        populateSelect(bookTime, "Chọn giờ", times, true);
+        bookTime.disabled = false;
+      } else {
+        bookTime.disabled = true;
+      }
+      
+      updateSubmitButtonState();
+    });
+
+    // Time Select Changed
+    bookTime.addEventListener('change', () => {
+      updateSubmitButtonState();
+    });
+
+    // Submit Action
+    quickBookBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const movieText = bookMovie.options[bookMovie.selectedIndex]?.textContent;
+      const cinemaText = bookCinema.options[bookCinema.selectedIndex]?.textContent;
+      const dateText = bookDate.options[bookDate.selectedIndex]?.textContent;
+      const timeText = bookTime.value;
+
+      if (!bookMovie.value || !bookCinema.value || !bookDate.value || !bookTime.value) {
+        showToast('Vui lòng chọn đầy đủ thông tin để đặt vé.', 'warning');
         return;
       }
 
       showToast(
-        `🎬 Đặt vé thành công!\n${movie}\n${cinema}\n${date} · ${time}`,
+        `🎬 Đặt vé thành công!\n${movieText}\n${cinemaText}\n${dateText} · Suất ${timeText}`,
         'success'
       );
     });
   }
+
+  // Initialize booking cascade
+  initQuickBookingCascade();
 
   /* ----------------------------------------------------------
      5. TOAST NOTIFICATION
@@ -363,6 +545,8 @@
       max-width: 340px;
       border: 1px solid rgba(255,255,255,0.1);
     `;
+
+    toast.textContent = message;
 
     document.body.appendChild(toast);
 
@@ -494,27 +678,175 @@
   if (navbarBookBtn) navbarBookBtn.addEventListener('click', scrollToSchedule);
   if (mobileNavbarBookBtn) mobileNavbarBookBtn.addEventListener('click', scrollToSchedule);
 
-  // Date Tabs selection
-  const dateTabs = document.querySelectorAll('.date-tab');
-  dateTabs.forEach((tab) => {
-    tab.addEventListener('click', function () {
-      dateTabs.forEach((t) => t.classList.remove('active'));
-      this.classList.add('active');
-      const dateVal = this.textContent || this.dataset.date;
-      showToast(`Đã hiển thị lịch chiếu cho ngày ${dateVal}`, 'success');
-    });
-  });
+  // Date Tabs selection & Horizontal Slider initialization
+  function initDateSlider() {
+    const dateSlider = document.querySelector('.date-slider');
+    const prevBtn = document.querySelector('.date-nav.prev');
+    const nextBtn = document.querySelector('.date-nav.next');
+
+    if (!dateSlider) return;
+
+    // Generate 7 days (today + next 6 days) dynamically
+    const today = new Date();
+    const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+
+    dateSlider.innerHTML = '';
+
+    for (let i = 0; i < 7; i++) {
+      const current = new Date();
+      current.setDate(today.getDate() + i);
+
+      const day = String(current.getDate()).padStart(2, '0');
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const formattedDate = `${day}/${month}`;
+      
+      let dayLabel = '';
+      if (i === 0) {
+        dayLabel = 'Hôm nay';
+      } else {
+        dayLabel = weekdays[current.getDay()];
+      }
+
+      const tab = document.createElement('button');
+      tab.className = i === 0 ? 'date-tab active' : 'date-tab';
+      tab.dataset.date = `${current.getFullYear()}-${month}-${day}`;
+      tab.innerHTML = `
+        <span>${dayLabel}</span>
+        <strong>${formattedDate}</strong>
+      `;
+
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.date-tab').forEach((t) => t.classList.remove('active'));
+        this.classList.add('active');
+        showToast(`Đã hiển thị lịch chiếu cho ngày ${dayLabel} ${formattedDate}`, 'success');
+      });
+
+      dateSlider.appendChild(tab);
+    }
+
+    // Scroll buttons logic
+    if (prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        dateSlider.scrollBy({ left: -240, behavior: 'smooth' });
+      });
+      nextBtn.addEventListener('click', () => {
+        dateSlider.scrollBy({ left: 240, behavior: 'smooth' });
+      });
+    }
+  }
+
+  // Initialize date slider on load
+  initDateSlider();
 
   // Showtime selection
   const timeBtns = document.querySelectorAll('.time-btn');
   timeBtns.forEach((btn) => {
     btn.addEventListener('click', function () {
+      if (
+        this.disabled ||
+        this.classList.contains('is-sold-out') ||
+        this.classList.contains('is-past') ||
+        this.classList.contains('is-locked')
+      ) {
+        return;
+      }
+
       timeBtns.forEach((b) => b.classList.remove('selected'));
       this.classList.add('selected');
-      const timeVal = this.textContent;
-      const formatVal = this.dataset.format || '2D Lồng Tiếng';
-      showToast(`🎬 Bạn đã chọn suất chiếu: ${timeVal} (${formatVal}) tại Galaxy CineX - Hanoi Centre!`, 'success');
+      
+      // Get only the main time digits inside span
+      const timeSpan = this.querySelector('span');
+      const timeVal = timeSpan ? timeSpan.textContent : this.textContent.trim();
+      
+      // Inject 'Tiếp tục chọn ghế' CTA if not exists
+      let nextStepCta = document.getElementById('nextStepCtaWrap');
+      if (!nextStepCta) {
+        const scheduleBox = this.closest('.cinema-schedule-box');
+        if (scheduleBox) {
+          nextStepCta = document.createElement('div');
+          nextStepCta.id = 'nextStepCtaWrap';
+          nextStepCta.className = 'showtime-next-step';
+          scheduleBox.appendChild(nextStepCta);
+        }
+      }
+      
+      if (nextStepCta) {
+        // Read mock schedule ID if exists, else fallback
+        const scheduleId = this.dataset.scheduleId || Math.floor(Math.random() * 1000);
+        nextStepCta.innerHTML = `<button class="btn-primary btn-large" onclick="window.location.href='seat-selection.html?scheduleId=${scheduleId}'">Tiếp tục chọn ghế (${timeVal})</button>`;
+      }
     });
   });
+
+  // Search Modal Logic
+  const searchIcons = document.querySelectorAll('.nav-actions .lucide-search');
+  const searchModal = document.getElementById('searchModal');
+  const closeSearchBtn = document.getElementById('closeSearchBtn');
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+
+  const openSearch = () => {
+    if (!searchModal) return;
+    searchModal.classList.add('active');
+    setTimeout(() => searchInput.focus(), 100);
+  };
+
+  const closeSearch = () => {
+    if (!searchModal) return;
+    searchModal.classList.remove('active');
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+  };
+
+  // Attach search open event
+  searchIcons.forEach(icon => icon.parentElement.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSearch();
+  }));
+
+  if (closeSearchBtn) {
+    closeSearchBtn.addEventListener('click', closeSearch);
+  }
+
+  // Close on ESC or Outside click
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSearch();
+  });
+  if (searchModal) {
+    searchModal.addEventListener('click', (e) => {
+      if (e.target === searchModal) closeSearch();
+    });
+  }
+
+  // Debounce search input
+  let searchTimeout;
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      const query = e.target.value.trim().toLowerCase();
+      
+      if (!query) {
+        searchResults.innerHTML = '';
+        return;
+      }
+      
+      searchTimeout = setTimeout(() => {
+        // Basic mock search
+        const mockDb = [
+          'Người Nhện: Phần 2', 'Godzilla x Kong', 'Ghostbusters: Frozen Empire',
+          'Civil War', 'Furiosa', 'Inside Out 2', 'Deadpool & Wolverine', 'Alien: Romulus'
+        ];
+        
+        const results = mockDb.filter(title => title.toLowerCase().includes(query));
+        
+        if (results.length > 0) {
+          const html = results.map(r => `<div style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" onclick="window.location.href='movie-detail.html'">${r}</div>`).join('');
+          searchResults.innerHTML = `<div style="font-size: 14px; margin-bottom: 10px; color: rgba(255,255,255,0.6)">Kết quả phim: <span style="font-size: 12px; margin-left: 10px;">(Ghi chú: Sẽ cập nhật tìm rạp ở phase sau)</span></div>` + html;
+        } else {
+          searchResults.innerHTML = `<div class="search-empty">Không tìm thấy phim phù hợp.</div>`;
+        }
+      }, 300);
+    });
+  }
 
 })();

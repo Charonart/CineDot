@@ -10,19 +10,98 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="assets/css/components/dropdown.css" />
+  <link rel="stylesheet" href="assets/css/components/navbar-dropdown.css" />
 </head>
 
 <body class="movie-detail-page">
+  <!-- NAVBAR -->
   <!-- NAVBAR -->
   <header class="navbar" id="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">CINE</a>
       <nav class="nav-links">
-        <a href="index.html#movies">Phim</a>
-        <a href="index.html#locations">Rạp</a>
-        <a href="index.html#membership">Ưu đãi</a>
-        <a href="index.html#membership">Thành viên</a>
-        <a href="#footer">Hỗ trợ</a>
+        <!-- PHIM MEGA DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Phim</a>
+          <div class="dropdown-content mega-dropdown" id="dropdown-phim">
+            <div class="mega-dropdown-inner">
+              <!-- PHIM ĐANG CHIẾU Section -->
+              <div class="mega-section">
+                <div class="mega-section-header">
+                  <a href="movies.html?category=now-showing" class="mega-section-title-link">
+                    <h2>PHIM ĐANG CHIẾU <span class="arrow">→</span></h2>
+                  </a>
+                </div>
+                <div class="mega-movies-grid" id="megaNowShowingGrid">
+                  <!-- Dynamically populated 4 cards via JS -->
+                </div>
+              </div>
+              <!-- PHIM SẮP CHIẾU Section -->
+              <div class="mega-section">
+                <div class="mega-section-header">
+                  <a href="movies.html?category=coming-soon" class="mega-section-title-link">
+                    <h2>PHIM SẮP CHIẾU <span class="arrow">→</span></h2>
+                  </a>
+                </div>
+                <div class="mega-movies-grid" id="megaComingSoonGrid">
+                  <!-- Dynamically populated 4 cards via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAR SHOP DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-starshop">
+            <a href="#">Movie-verse</a>
+            <a href="#">Fan Wibu</a>
+            <a href="#">Inner Child</a>
+          </div>
+        </div>
+
+        <!-- GÓC ĐIỆN ẢNH DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Góc Điện Ảnh</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-gocdienanh">
+            <a href="#">Bình luận phim</a>
+            <a href="#">Blog điện ảnh</a>
+            <a href="#">Hậu trường</a>
+          </div>
+        </div>
+
+        <!-- SỰ KIỆN DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Sự Kiện</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-su-kien">
+            <a href="#">Sự kiện đang diễn ra</a>
+            <a href="#">Ưu đãi đặc biệt</a>
+            <a href="#">Tin tức</a>
+          </div>
+        </div>
+
+        <!-- RẠP/GIÁ VÉ DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Rạp/Giá Vé</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-rapgiave">
+            <a href="#">Lịch chiếu theo rạp</a>
+            <a href="#">Giá vé</a>
+            <a href="#">Danh sách rạp</a>
+          </div>
+        </div>
+
+        <!-- RẠP ĐẶC BIỆT DROPDOWN -->
+        <div class="nav-item-dropdown">
+          <a href="#" class="nav-dropdown-trigger">Rạp Đặc Biệt</a>
+          <div class="dropdown-content small-dropdown" id="dropdown-rapdacbiet">
+            <a href="#">IMAX</a>
+            <a href="#">4DX</a>
+            <a href="#">Dolby Atmos</a>
+            <a href="#">Cine de Kids</a>
+          </div>
+        </div>
       </nav>
       <div class="nav-actions">
         <button class="nav-icon-btn" aria-label="Tìm kiếm">
@@ -40,11 +119,84 @@
       </button>
     </div>
     <div class="nav-mobile-menu" id="navMobileMenu">
-      <a href="index.html#movies">Phim</a>
-      <a href="index.html#locations">Rạp</a>
-      <a href="index.html#membership">Ưu đãi</a>
-      <a href="index.html#membership">Thành viên</a>
-      <a href="#footer">Hỗ trợ</a>
+      <!-- PHIM DROPDOWN (Mobile accordion drawer) -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Phim</a>
+        <div class="dropdown-content mega-dropdown" id="dropdown-phim-mobile">
+          <div class="mega-dropdown-inner">
+            <div class="mega-section">
+              <div class="mega-section-header">
+                <h2>PHIM ĐANG CHIẾU</h2>
+                <a href="movies.html?category=now-showing" class="view-all-link">Xem tất cả</a>
+              </div>
+              <div class="mega-movies-grid" id="megaNowShowingGrid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+            <div class="mega-section">
+              <div class="mega-section-header">
+                <h2>PHIM SẮP CHIẾU</h2>
+                <a href="movies.html?category=coming-soon" class="view-all-link">Xem tất cả</a>
+              </div>
+              <div class="mega-movies-grid" id="megaComingSoonGrid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAR SHOP -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Movie-verse</a>
+          <a href="#">Fan Wibu</a>
+          <a href="#">Inner Child</a>
+        </div>
+      </div>
+
+      <!-- GÓC ĐIỆN ẢNH -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Góc Điện Ảnh</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Bình luận phim</a>
+          <a href="#">Blog điện ảnh</a>
+          <a href="#">Hậu trường</a>
+        </div>
+      </div>
+
+      <!-- SỰ KIỆN -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Sự Kiện</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Sự kiện đang diễn ra</a>
+          <a href="#">Ưu đãi đặc biệt</a>
+          <a href="#">Tin tức</a>
+        </div>
+      </div>
+
+      <!-- RẠP/GIÁ VÉ -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Rạp/Giá Vé</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">Lịch chiếu theo rạp</a>
+          <a href="#">Giá vé</a>
+          <a href="#">Danh sách rạp</a>
+        </div>
+      </div>
+
+      <!-- RẠP ĐẶC BIỆT -->
+      <div class="nav-item-dropdown">
+        <a href="#" class="nav-dropdown-trigger">Rạp Đặc Biệt</a>
+        <div class="dropdown-content small-dropdown">
+          <a href="#">IMAX</a>
+          <a href="#">4DX</a>
+          <a href="#">Dolby Atmos</a>
+          <a href="#">Cine de Kids</a>
+        </div>
+      </div>
+
       <a href="#" class="nav-login">Đăng nhập</a>
       <button class="btn-primary" id="mobileNavbarBookBtn">Đặt vé</button>
     </div>
@@ -131,7 +283,6 @@
                 </button>
               </div>
             </div>
-          </div>
         </section>
 
         <!-- SECTION 4 — MOVIE CONTENT SECTION -->
@@ -157,31 +308,39 @@
           <h2 class="detail-section-title scroll-text-slide-left">Lịch <span class="highlight-text"
               data-variant="underline" data-color="primary">chiếu</span></h2>
 
-          <div class="schedule-controls">
-            <!-- Horizontally scrollable date tabs -->
-            <div class="date-tabs-wrapper">
-              <div class="date-tabs" id="dateTabs">
-                <button class="date-tab active" data-date="17/05">Hôm nay 17/05</button>
-                <button class="date-tab" data-date="22/05">Thứ Sáu 22/05</button>
-                <button class="date-tab" data-date="23/05">Thứ Bảy 23/05</button>
-                <button class="date-tab" data-date="24/05">Chủ Nhật 24/05</button>
-                <button class="date-tab" data-date="25/05">Thứ Hai 25/05</button>
-              </div>
+          <div class="schedule-toolbar">
+            <button class="date-nav prev" aria-label="Ngày trước">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <div class="date-slider">
+              <!-- Dynamically generated today + 6 days by script.js -->
             </div>
 
-            <!-- Dropdowns stacked on mobile -->
-            <div class="filter-dropdowns">
-              <select class="filter-select" id="filterRegion">
-                <option>Toàn quốc</option>
-                <option>Hồ Chí Minh</option>
-                <option>Hà Nội</option>
-                <option>Đà Nẵng</option>
+            <button class="date-nav next" aria-label="Ngày tiếp theo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+
+            <div class="schedule-filters">
+              <select class="filter-select" id="filterRegion" data-dropdown placeholder="Toàn quốc"
+                aria-label="Chọn khu vực">
+                <option value="all">Toàn quốc</option>
+                <option value="hcm">Hồ Chí Minh</option>
+                <option value="hanoi">Hà Nội</option>
+                <option value="danang">Đà Nẵng</option>
               </select>
-              <select class="filter-select" id="filterCinema">
-                <option>Tất cả rạp</option>
-                <option>Galaxy CineX - Hanoi Centre</option>
-                <option>CINE Landmark - Q1</option>
-                <option>CINE Crescent - Q7</option>
+              <select class="filter-select" id="filterCinema" data-dropdown placeholder="Tất cả rạp"
+                aria-label="Chọn rạp">
+                <option value="all">Tất cả rạp</option>
+                <option value="galaxy">Galaxy CineX - Hanoi Centre</option>
+                <option value="landmark">CINE Landmark - Q1</option>
+                <option value="crescent">CINE Crescent - Q7</option>
               </select>
             </div>
           </div>
@@ -194,12 +353,31 @@
               <div class="showtime-row">
                 <h4 class="format-title">Onyx x Dolby Atmos 2D Lồng Tiếng</h4>
                 <div class="time-grid">
-                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng">10:00</button>
-                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng">12:00</button>
-                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng">14:00</button>
-                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng">16:00</button>
-                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng">18:00</button>
-                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng">20:00</button>
+                  <button class="time-btn is-past" data-format="Onyx 2D Lồng Tiếng" data-schedule-id="301" disabled
+                    title="Đã qua giờ chiếu">
+                    <span>10:00</span>
+                    <small>Đã qua</small>
+                  </button>
+                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng" data-schedule-id="302">
+                    <span>12:00</span>
+                  </button>
+                  <button class="time-btn is-almost-full" data-format="Onyx 2D Lồng Tiếng" data-schedule-id="303"
+                    title="Gần hết vé">
+                    <span>14:00</span>
+                  </button>
+                  <button class="time-btn" data-format="Onyx 2D Lồng Tiếng" data-schedule-id="304">
+                    <span>16:00</span>
+                  </button>
+                  <button class="time-btn is-locked" data-format="Onyx 2D Lồng Tiếng" data-schedule-id="305" disabled
+                    title="Tạm khóa">
+                    <span>18:00</span>
+                    <small>Tạm khóa</small>
+                  </button>
+                  <button class="time-btn is-sold-out" data-format="Onyx 2D Lồng Tiếng" data-schedule-id="306" disabled
+                    title="Suất chiếu đã hết vé">
+                    <span>20:00</span>
+                    <small>Hết vé</small>
+                  </button>
                 </div>
               </div>
 
@@ -207,12 +385,29 @@
               <div class="showtime-row">
                 <h4 class="format-title">2D Lồng Tiếng</h4>
                 <div class="time-grid">
-                  <button class="time-btn" data-format="2D Lồng Tiếng">10:30</button>
-                  <button class="time-btn" data-format="2D Lồng Tiếng">12:30</button>
-                  <button class="time-btn" data-format="2D Lồng Tiếng">14:30</button>
-                  <button class="time-btn" data-format="2D Lồng Tiếng">16:30</button>
-                  <button class="time-btn" data-format="2D Lồng Tiếng">18:30</button>
-                  <button class="time-btn" data-format="2D Lồng Tiếng">20:30</button>
+                  <button class="time-btn is-past" data-format="2D Lồng Tiếng" data-schedule-id="307" disabled
+                    title="Đã qua giờ chiếu">
+                    <span>10:30</span>
+                    <small>Đã qua</small>
+                  </button>
+                  <button class="time-btn" data-format="2D Lồng Tiếng" data-schedule-id="308">
+                    <span>12:30</span>
+                  </button>
+                  <button class="time-btn" data-format="2D Lồng Tiếng" data-schedule-id="309">
+                    <span>14:30</span>
+                  </button>
+                  <button class="time-btn is-almost-full" data-format="2D Lồng Tiếng" data-schedule-id="310"
+                    title="Gần hết vé">
+                    <span>16:30</span>
+                  </button>
+                  <button class="time-btn" data-format="2D Lồng Tiếng" data-schedule-id="311">
+                    <span>18:30</span>
+                  </button>
+                  <button class="time-btn is-sold-out" data-format="2D Lồng Tiếng" data-schedule-id="312" disabled
+                    title="Suất chiếu đã hết vé">
+                    <span>20:30</span>
+                    <small>Hết vé</small>
+                  </button>
                 </div>
               </div>
 
@@ -220,12 +415,27 @@
               <div class="showtime-row">
                 <h4 class="format-title">Cine de Kids 2D Lồng Tiếng</h4>
                 <div class="time-grid">
-                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng">11:00</button>
-                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng">13:00</button>
-                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng">15:00</button>
-                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng">17:00</button>
-                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng">19:00</button>
-                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng">21:00</button>
+                  <button class="time-btn is-past" data-format="Cine de Kids 2D Lồng Tiếng" data-schedule-id="313"
+                    disabled title="Đã qua giờ chiếu">
+                    <span>11:00</span>
+                    <small>Đã qua</small>
+                  </button>
+                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng" data-schedule-id="314">
+                    <span>13:00</span>
+                  </button>
+                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng" data-schedule-id="315">
+                    <span>15:00</span>
+                  </button>
+                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng" data-schedule-id="316">
+                    <span>17:00</span>
+                  </button>
+                  <button class="time-btn is-almost-full" data-format="Cine de Kids 2D Lồng Tiếng"
+                    data-schedule-id="317" title="Gần hết vé">
+                    <span>19:00</span>
+                  </button>
+                  <button class="time-btn" data-format="Cine de Kids 2D Lồng Tiếng" data-schedule-id="318">
+                    <span>21:00</span>
+                  </button>
                 </div>
               </div>
 
@@ -233,26 +443,37 @@
               <div class="showtime-row">
                 <h4 class="format-title">VIP - AQUALIS 2D Lồng Tiếng</h4>
                 <div class="time-grid">
-                  <button class="time-btn" data-format="VIP - AQUALIS 2D">11:30</button>
-                  <button class="time-btn" data-format="VIP - AQUALIS 2D">13:30</button>
-                  <button class="time-btn" data-format="VIP - AQUALIS 2D">17:30</button>
-                  <button class="time-btn" data-format="VIP - AQUALIS 2D">19:30</button>
-                  <button class="time-btn" data-format="VIP - AQUALIS 2D">21:30</button>
+                  <button class="time-btn is-past" data-format="VIP - AQUALIS 2D" data-schedule-id="319" disabled
+                    title="Đã qua giờ chiếu">
+                    <span>11:30</span>
+                    <small>Đã qua</small>
+                  </button>
+                  <button class="time-btn" data-format="VIP - AQUALIS 2D" data-schedule-id="320">
+                    <span>13:30</span>
+                  </button>
+                  <button class="time-btn is-almost-full" data-format="VIP - AQUALIS 2D" data-schedule-id="321"
+                    title="Gần hết vé">
+                    <span>17:30</span>
+                  </button>
+                  <button class="time-btn" data-format="VIP - AQUALIS 2D" data-schedule-id="322">
+                    <span>19:30</span>
+                  </button>
+                  <button class="time-btn is-sold-out" data-format="VIP - AQUALIS 2D" data-schedule-id="323" disabled
+                    title="Suất chiếu đã hết vé">
+                    <span>21:30</span>
+                    <small>Hết vé</small>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
-
-
       </main>
 
       <!-- RIGHT COLUMN (32%) — RECOMMENDED SIDEBAR -->
       <aside class="detail-sidebar">
         <div class="sidebar-sticky-wrap">
-          <h2 class="sidebar-title scroll-text-slide-left">Phim <span class="highlight-text" data-variant="underline"
-              data-color="primary">đang chiếu</span></h2>
+          <h2 class="sidebar-title scroll-text-slide-left">PHIM ĐANG CHIẾU</h2>
 
           <div class="sidebar-cards">
             <!-- Card 1 -->
@@ -262,10 +483,19 @@
                   alt="Một Thời Ta Đã Yêu" />
                 <span class="sidebar-badge-rating">★ 8.9</span>
                 <span class="sidebar-badge-age">T16</span>
+                <div class="sidebar-card-overlay">
+                  <a href="movie-detail.html?id=1" class="sidebar-overlay-btn">
+                    <svg class="ticket-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                      <line x1="6" y1="12" x2="18" y2="12"></line>
+                    </svg>
+                    Mua vé
+                  </a>
+                </div>
               </div>
               <div class="sidebar-info">
                 <h3>Một Thời Ta Đã Yêu</h3>
-                <a href="#" class="btn-outline btn-sm sidebar-cta">Chi tiết</a>
               </div>
             </div>
 
@@ -275,10 +505,19 @@
                 <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Gundam" />
                 <span class="sidebar-badge-rating">★ 9.1</span>
                 <span class="sidebar-badge-age">T13</span>
+                <div class="sidebar-card-overlay">
+                  <a href="movie-detail.html?id=2" class="sidebar-overlay-btn">
+                    <svg class="ticket-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                      <line x1="6" y1="12" x2="18" y2="12"></line>
+                    </svg>
+                    Mua vé
+                  </a>
+                </div>
               </div>
               <div class="sidebar-info">
                 <h3>Mobile Suit Gundam: Tia Chớp Hathaway</h3>
-                <a href="#" class="btn-outline btn-sm sidebar-cta">Chi tiết</a>
               </div>
             </div>
 
@@ -289,12 +528,31 @@
                   alt="Tạm biệt Gohan" />
                 <span class="sidebar-badge-rating">★ 8.5</span>
                 <span class="sidebar-badge-age">P</span>
+                <div class="sidebar-card-overlay">
+                  <a href="movie-detail.html?id=3" class="sidebar-overlay-btn">
+                    <svg class="ticket-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                      <line x1="6" y1="12" x2="18" y2="12"></line>
+                    </svg>
+                    Mua vé
+                  </a>
+                </div>
               </div>
               <div class="sidebar-info">
-                <h3>Tạm Biệt Gohan</h3>
-                <a href="#" class="btn-outline btn-sm sidebar-cta">Chi tiết</a>
+                <h3>Tạm Biệt Gohan (Phiên Bản Mới)</h3>
               </div>
             </div>
+          </div>
+
+          <div class="sidebar-more-wrap">
+            <a href="movies.html" class="sidebar-more-btn">
+              Xem thêm
+              <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
           </div>
         </div>
       </aside>
@@ -385,6 +643,9 @@
   <script src="assets/js/components/scroll-text.js"></script>
   <script src="assets/js/components/theme-selector.js"></script>
   <script src="assets/js/components/video-player.js"></script>
+  <script src="assets/js/components/dropdown.js"></script>
+  <script src="assets/js/data/movies-data.js"></script>
+  <script src="assets/js/components/navbar-dropdown.js"></script>
   <script src="script.js"></script>
 </body>
 

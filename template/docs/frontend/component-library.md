@@ -93,3 +93,114 @@ Thay thế hoàn toàn trình phát mặc định thô sơ thành trình phát m
 * **Volume Slider**: Thanh trượt điều chỉnh âm lượng dạng trượt thu gọn (hover để mở rộng).
 * **Double-tap Actions**: Click đúp vào nửa trái để tua lùi 10 giây, click đúp vào nửa phải để tua tiến 10 giây.
 * **Smart Modal Closing**: Khi đóng modal chứa phim, trình phát sẽ tự động tạm dừng phát âm thanh ngay lập tức, ngăn âm thanh phát ngầm gây khó chịu cho khách hàng.
+
+---
+
+## 5. Dropdown Component System (Hệ Thống Dropdown Cao Cấp)
+
+Thành phần nâng cấp các thẻ `<select>` mặc định của trình duyệt thành các khối Dropdown/Combobox kính mờ sang trọng, hỗ trợ đầy đủ khả năng tìm kiếm và khả năng truy cập tốt nhất.
+
+### Tính Năng Nổi Bật:
+*   **Progressive Enhancement (Tương thích ngược 100%):** Hoạt động bằng cách ẩn thẻ `<select>` gốc dưới nền. Mọi thay đổi trên custom dropdown sẽ tự động cập nhật và kích hoạt sự kiện `change` trên thẻ gốc, tương thích hoàn toàn với tất cả các script xử lý form.
+*   **MutationObserver Syncing:** Tự động lắng nghe thay đổi của thẻ `<select>` gốc (khi nó bị disabled/enabled hoặc khi danh sách options được thêm mới động bằng JS) và cập nhật lại giao diện ngay lập tức mà không cần gọi hàm reload thủ công.
+*   **Searchable / Combobox:** Hỗ trợ ô tìm kiếm nhanh tích hợp khi danh sách dài (độ dài > 8 options hoặc chỉ định thuộc tính `data-searchable`), đi kèm thông báo *"Không tìm thấy kết quả phù hợp"*.
+*   **Full Keyboard Accessibility (Khả năng điều khiển bằng phím):**
+    *   Nhấn `Tab` để lấy tiêu điểm (focus) vào nút kích hoạt (trigger).
+    *   Nhấn `Space`, `Enter` hoặc `ArrowDown` khi đang focus trigger để mở menu.
+    *   Nhấn `ArrowUp` / `ArrowDown` khi menu đang mở để di chuyển lựa chọn (tự động cuộn khung nhìn để giữ phần tử hiển thị).
+    *   Nhấn `Enter` để chọn phần tử đang được highlight và đóng menu.
+    *   Nhấn `Escape` hoặc `Tab` để đóng menu và trả tiêu điểm về nút kích hoạt.
+
+### Cấu Trúc HTML (Tự Động Nâng Cấp):
+Chỉ cần thêm thuộc tính `data-dropdown` vào thẻ `<select>` mặc định, thành phần sẽ tự động chuyển đổi thành giao diện cao cấp:
+```html
+<!-- Dropdown thường -->
+<select id="bookDate" data-dropdown placeholder="Chọn ngày">
+  <option value="1">Hôm nay</option>
+  <option value="2">Ngày mai</option>
+</select>
+
+<!-- Dropdown có ô tìm kiếm (Combobox) -->
+<select id="bookMovie" data-dropdown data-searchable placeholder="Chọn phim">
+  <option value="1">Người Nhện: Phần 2</option>
+  <option value="2">Godzilla x Kong</option>
+</select>
+```
+
+### Cách Sử Dụng Trong Javascript:
+```javascript
+// Tự động nâng cấp tất cả các thẻ select được đánh dấu
+CineDropdown.upgradeAll();
+
+// Khởi tạo thủ công cho một select cụ thể
+const myDropdown = new CineDropdown(document.getElementById('mySelect'), {
+  placeholder: 'Chọn rạp chiếu',
+  searchable: true,
+  onChange: (value, data) => {
+    console.log(`Đã chọn: ${value}`, data);
+  }
+});
+
+// Thiết lập trạng thái lỗi thủ công
+myDropdown.setError('Vui lòng chọn suất chiếu hợp lệ!');
+// Xóa trạng thái lỗi
+myDropdown.setError(null);
+```
+
+---
+
+## 6. Navbar Dropdown System (Hệ Thống Dropdown Thanh Điều Hướng)
+
+Thành phần nâng cấp toàn bộ hệ thống thanh điều hướng của CINE, kết hợp giữa **Phim Mega Dropdown** (Rộng rãi, hiển thị poster thẻ phim trực quan) và các **Small Dropdowns** (Danh sách mục dọc nhỏ gọn, trượt êm ái).
+
+### Tính Năng Nổi Bật:
+*   **Dynamic Data Matching:** Tự động truy vấn dữ liệu từ nguồn tập trung `CINE_MOVIES_DB` để dựng trực tiếp 4 thẻ phim thuộc mục "Đang Chiếu" và 4 thẻ phim "Sắp Chiếu", giữ nội dung đồng nhất với hệ thống.
+*   **Flicker-free Hover (Desktop):** Sử dụng bộ đệm trễ `150ms` (timeout delay) khi di chuột ra ngoài để người dùng di chuyển con trỏ tự nhiên giữa liên kết menu và hộp danh sách mà không bị nhấp nháy, đóng mở đột ngột.
+*   **Responsive Accordion Drawer (Mobile):** Trên các thiết bị cảm ứng nhỏ, dropdown tự động chuyển đổi thành các ngăn xếp hộp đứng (collapsible drawer). Nhấp chuột sẽ mở bung nội dung dạng xếp chồng trực quan mà không bị tràn màn hình.
+*   **Accessibility Compliant (A11y):** Tích hợp đầy đủ các thuộc tính trạng thái `aria-haspopup="true"`, `aria-expanded` đóng mở động, hỗ trợ đóng nhanh tức thì bằng phím `ESC` hoặc nhấp chuột ra ngoài vùng trống.
+
+### Cấu Trúc HTML Tiêu Chuẩn:
+```html
+<nav class="nav-links">
+  <!-- PHIM MEGA DROPDOWN -->
+  <div class="nav-item-dropdown">
+    <a href="movies.html" class="nav-dropdown-trigger">Phim</a>
+    <div class="dropdown-content mega-dropdown" id="dropdown-phim">
+      <div class="mega-dropdown-inner">
+        <!-- Đang chiếu -->
+        <div class="mega-section">
+          <div class="mega-section-header">
+            <h2>PHIM ĐANG CHIẾU</h2>
+            <a href="movies.html?category=now-showing" class="view-all-link">Xem tất cả</a>
+          </div>
+          <div class="mega-movies-grid" id="megaNowShowingGrid">
+            <!-- Tự động kết xuất 4 cards qua JS -->
+          </div>
+        </div>
+        <!-- Sắp chiếu -->
+        <div class="mega-section">
+          <div class="mega-section-header">
+            <h2>PHIM SẮP CHIẾU</h2>
+            <a href="movies.html?category=coming-soon" class="view-all-link">Xem tất cả</a>
+          </div>
+          <div class="mega-movies-grid" id="megaComingSoonGrid">
+            <!-- Tự động kết xuất 4 cards qua JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMALL DROPDOWN (Ví dụ Star Shop) -->
+  <div class="nav-item-dropdown">
+    <a href="#" class="nav-dropdown-trigger">Star Shop</a>
+    <div class="dropdown-content small-dropdown">
+      <a href="#">Movie-verse</a>
+      <a href="#">Fan Wibu</a>
+      <a href="#">Inner Child</a>
+    </div>
+  </div>
+</nav>
+```
+
+
