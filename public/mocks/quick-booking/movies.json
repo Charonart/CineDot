@@ -1,0 +1,45 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "movie_1",
+      "title": "Nguoi Nhen: Phan 2",
+      "status": "now-showing"
+    },
+    {
+      "id": "movie_2",
+      "title": "Godzilla x Kong",
+      "status": "now-showing"
+    },
+    {
+      "id": "movie_3",
+      "title": "Ghostbusters: Frozen Empire",
+      "status": "now-showing"
+    },
+    {
+      "id": "movie_4",
+      "title": "Civil War",
+      "status": "now-showing"
+    },
+    {
+      "id": "movie_5",
+      "title": "Furiosa",
+      "status": "now-showing"
+    },
+    {
+      "id": "movie_6",
+      "title": "Inside Out 2",
+      "status": "now-showing"
+    },
+    {
+      "id": "movie_7",
+      "title": "Deadpool & Wolverine",
+      "status": "coming-soon"
+    },
+    {
+      "id": "movie_8",
+      "title": "Alien: Romulus",
+      "status": "coming-soon"
+    }
+  ]
+}

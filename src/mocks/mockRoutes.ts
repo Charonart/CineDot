@@ -2,6 +2,14 @@ export const mockRoutes: Record<string, string> = {
   '/movies/trending': '/mocks/movies-trending.json',
   '/movies/popular': '/mocks/movies-popular.json',
   '/movies/search': '/mocks/movies-search.json',
+  '/quick-booking/movies': '/mocks/quick-booking/movies.json',
+  '/quick-booking/cinemas': '/mocks/quick-booking/cinemas.json',
+  '/quick-booking/dates': '/mocks/quick-booking/dates.json',
+  '/quick-booking/showtimes': '/mocks/quick-booking/showtimes.json',
+  '/api/v1/quick-booking/movies': '/mocks/quick-booking/movies.json',
+  '/api/v1/quick-booking/cinemas': '/mocks/quick-booking/cinemas.json',
+  '/api/v1/quick-booking/dates': '/mocks/quick-booking/dates.json',
+  '/api/v1/quick-booking/showtimes': '/mocks/quick-booking/showtimes.json',
 };
 
 export const getMockPath = (url: string): string | null => {
