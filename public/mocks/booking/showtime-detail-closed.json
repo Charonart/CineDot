@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "data": {
+    "id": "st_qb_closed",
+    "movie": {
+      "id": "movie_9",
+      "title": "Suất Chiếu Đã Đóng",
+      "slug": "suat-chieu-da-dong",
+      "posterUrl": "/images/mock/closed.jpg",
+      "runtime": 105,
+      "ageRating": "T16"
+    },
+    "cinema": {
+      "id": "cinema_1",
+      "name": "CINE Landmark - Quận 1",
+      "address": "Quận 1, TP.HCM"
+    },
+    "room": {
+      "id": "room_2",
+      "name": "Room 2",
+      "screenType": "IMAX 2D"
+    },
+    "showDate": "2026-06-04",
+    "showTime": "08:00",
+    "startsAt": "2026-06-04T08:00:00+07:00",
+    "endsAt": "2026-06-04T09:45:00+07:00",
+    "status": "closed",
+    "salesStatus": "not-on-sale"
+  }
+}

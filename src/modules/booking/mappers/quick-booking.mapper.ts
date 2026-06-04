@@ -56,6 +56,6 @@ export const quickBookingMapper = {
   toShowtimeOptions: (showtimes: QuickBookingShowtime[]): SelectOption[] =>
     showtimes.map((showtime) => ({
       value: showtime.id,
-      label: `${showtime.time} - ${showtime.roomName} - ${showtime.screenType} - Con ${showtime.availableSeats} ghe`,
+      label: `${showtime.time} - ${showtime.roomName} - ${showtime.screenType} - Còn ${showtime.availableSeats} ghế`,
     })),
 };

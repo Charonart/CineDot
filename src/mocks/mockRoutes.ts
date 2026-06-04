@@ -17,6 +17,22 @@ export const getMockPath = (url: string): string | null => {
 
   if (mockRoutes[path]) return mockRoutes[path];
 
+  if (/^(\/api\/v1)?\/booking\/showtimes\/st_qb_closed$/.test(path)) {
+    return '/mocks/booking/showtime-detail-closed.json';
+  }
+
+  if (/^(\/api\/v1)?\/booking\/showtimes\/[^/]+\/seats$/.test(path)) {
+    return '/mocks/booking/seat-map.json';
+  }
+
+  if (/^(\/api\/v1)?\/booking\/showtimes\/[^/]+$/.test(path)) {
+    return '/mocks/booking/showtime-detail.json';
+  }
+
+  if (/^(\/api\/v1)?\/booking\/seat-holds$/.test(path)) {
+    return '/mocks/booking/seat-hold-success.json';
+  }
+
   // GET /movies/:id/showtimes?date=YYYY-MM-DD
   if (/^\/movies\/\d+\/showtimes$/.test(path)) {
     return '/mocks/showtimes-by-movie.json';

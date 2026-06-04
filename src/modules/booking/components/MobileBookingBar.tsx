@@ -1,22 +1,28 @@
 'use client';
 
 import React from 'react';
-import { SeatItem } from '../data/seatMapData';
+import { Seat } from '../types/booking.type';
 
 interface MobileBookingBarProps {
-  selectedSeats: SeatItem[];
+  selectedSeats: Seat[];
+  totalAmount: number;
+  canCheckout: boolean;
+  isHoldingSeats: boolean;
   onCheckout: () => void;
 }
 
 export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
   selectedSeats,
+  totalAmount,
+  canCheckout,
+  isHoldingSeats,
   onCheckout,
 }) => {
-  const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
-  const seatLabels = selectedSeats.map((s) => s.label).join(', ');
+  const seatLabels = selectedSeats.map((seat) => seat.label).join(', ');
+  const isDisabled = !canCheckout || isHoldingSeats;
 
   return (
-    <div 
+    <div
       className="mobile-booking-bar"
       style={{
         position: 'fixed',
@@ -29,13 +35,12 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
         padding: '16px 20px',
         boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.08)',
         zIndex: 999,
-        display: 'none', // Controlled via media query style injection below
+        display: 'none',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '16px',
       }}
     >
-      {/* Media query styling block embedded directly for simplicity & robustness */}
       <style dangerouslySetInnerHTML={{__html: `
         @media (max-width: 991px) {
           .mobile-booking-bar {
@@ -44,19 +49,18 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
         }
       `}} />
 
-      {/* Seat details */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '55%' }}>
         <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text3)', fontWeight: 700 }}>
-          {selectedSeats.length === 0 ? 'Chọn ghế để tiếp tục' : `${selectedSeats.length} Vé đã chọn`}
+          {selectedSeats.length === 0 ? 'Chọn ghế để tiếp tục' : `${selectedSeats.length} vé đã chọn`}
         </span>
-        <strong 
-          style={{ 
-            fontSize: '15px', 
-            color: '#4f3c93', 
+        <strong
+          style={{
+            fontSize: '15px',
+            color: '#4f3c93',
             fontWeight: 700,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
           }}
         >
           {selectedSeats.length === 0 ? 'Chưa có ghế' : seatLabels}
@@ -66,29 +70,28 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
         </span>
       </div>
 
-      {/* Action CTA */}
       <button
         type="button"
-        disabled={selectedSeats.length === 0}
+        disabled={isDisabled}
         onClick={onCheckout}
         style={{
           flex: 1,
           maxWidth: '180px',
           padding: '14px 20px',
           borderRadius: '10px',
-          background: selectedSeats.length === 0 ? 'var(--bg2)' : '#4f3c93',
-          borderColor: selectedSeats.length === 0 ? 'var(--border)' : '#4f3c93',
-          color: selectedSeats.length === 0 ? 'var(--text3)' : '#ffffff',
+          background: isDisabled ? 'var(--bg2)' : '#4f3c93',
+          borderColor: isDisabled ? 'var(--border)' : '#4f3c93',
+          color: isDisabled ? 'var(--text3)' : '#ffffff',
           fontWeight: 700,
           fontSize: '14px',
           borderWidth: '1px',
           borderStyle: 'solid',
-          cursor: selectedSeats.length === 0 ? 'not-allowed' : 'pointer',
+          cursor: isDisabled ? 'not-allowed' : 'pointer',
           transition: 'var(--transition)',
           textAlign: 'center',
         }}
       >
-        Đặt vé ({selectedSeats.length})
+        {isHoldingSeats ? 'Đang giữ...' : `Tiếp tục (${selectedSeats.length})`}
       </button>
     </div>
   );

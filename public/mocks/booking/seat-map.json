@@ -1,0 +1,96 @@
+{
+  "success": true,
+  "data": {
+    "showtimeId": "st_qb_1001",
+    "currency": "VND",
+    "selectionRules": {
+      "maxSeatsPerBooking": 8,
+      "allowMixedSeatTypes": true,
+      "requireContiguousSeats": false,
+      "preventSingleGap": true
+    },
+    "pricing": [
+      {
+        "seatType": "standard",
+        "label": "Ghế thường",
+        "price": 120000
+      },
+      {
+        "seatType": "vip",
+        "label": "Ghế VIP",
+        "price": 150000
+      },
+      {
+        "seatType": "couple",
+        "label": "Ghế đôi",
+        "price": 300000
+      }
+    ],
+    "layout": {
+      "rowOrder": ["A", "B", "C", "D", "E", "F", "G", "H", "J"],
+      "aislesAfterSeatNumbers": [4, 8],
+      "screenLabel": "MÀN HÌNH CHÍNH"
+    },
+    "seats": [
+      { "id": "seat_A1", "row": "A", "number": 1, "label": "A1", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A2", "row": "A", "number": 2, "label": "A2", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A3", "row": "A", "number": 3, "label": "A3", "type": "standard", "status": "sold", "price": 120000 },
+      { "id": "seat_A4", "row": "A", "number": 4, "label": "A4", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A5", "row": "A", "number": 5, "label": "A5", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A6", "row": "A", "number": 6, "label": "A6", "type": "standard", "status": "held", "price": 120000 },
+      { "id": "seat_A7", "row": "A", "number": 7, "label": "A7", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A8", "row": "A", "number": 8, "label": "A8", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A9", "row": "A", "number": 9, "label": "A9", "type": "standard", "status": "unavailable", "price": 120000 },
+      { "id": "seat_A10", "row": "A", "number": 10, "label": "A10", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A11", "row": "A", "number": 11, "label": "A11", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_A12", "row": "A", "number": 12, "label": "A12", "type": "standard", "status": "available", "price": 120000 },
+
+      { "id": "seat_B1", "row": "B", "number": 1, "label": "B1", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B2", "row": "B", "number": 2, "label": "B2", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B3", "row": "B", "number": 3, "label": "B3", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B4", "row": "B", "number": 4, "label": "B4", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B5", "row": "B", "number": 5, "label": "B5", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B6", "row": "B", "number": 6, "label": "B6", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B7", "row": "B", "number": 7, "label": "B7", "type": "standard", "status": "sold", "price": 120000 },
+      { "id": "seat_B8", "row": "B", "number": 8, "label": "B8", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B9", "row": "B", "number": 9, "label": "B9", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B10", "row": "B", "number": 10, "label": "B10", "type": "standard", "status": "available", "price": 120000 },
+      { "id": "seat_B11", "row": "B", "number": 11, "label": "B11", "type": "standard", "status": "held", "price": 120000 },
+      { "id": "seat_B12", "row": "B", "number": 12, "label": "B12", "type": "standard", "status": "available", "price": 120000 },
+
+      { "id": "seat_F1", "row": "F", "number": 1, "label": "F1", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F2", "row": "F", "number": 2, "label": "F2", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F3", "row": "F", "number": 3, "label": "F3", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F4", "row": "F", "number": 4, "label": "F4", "type": "vip", "status": "sold", "price": 150000 },
+      { "id": "seat_F5", "row": "F", "number": 5, "label": "F5", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F6", "row": "F", "number": 6, "label": "F6", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F7", "row": "F", "number": 7, "label": "F7", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F8", "row": "F", "number": 8, "label": "F8", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F9", "row": "F", "number": 9, "label": "F9", "type": "vip", "status": "held", "price": 150000 },
+      { "id": "seat_F10", "row": "F", "number": 10, "label": "F10", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F11", "row": "F", "number": 11, "label": "F11", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_F12", "row": "F", "number": 12, "label": "F12", "type": "vip", "status": "available", "price": 150000 },
+
+      { "id": "seat_G1", "row": "G", "number": 1, "label": "G1", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G2", "row": "G", "number": 2, "label": "G2", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G3", "row": "G", "number": 3, "label": "G3", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G4", "row": "G", "number": 4, "label": "G4", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G5", "row": "G", "number": 5, "label": "G5", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G6", "row": "G", "number": 6, "label": "G6", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G7", "row": "G", "number": 7, "label": "G7", "type": "vip", "status": "sold", "price": 150000 },
+      { "id": "seat_G8", "row": "G", "number": 8, "label": "G8", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G9", "row": "G", "number": 9, "label": "G9", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G10", "row": "G", "number": 10, "label": "G10", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G11", "row": "G", "number": 11, "label": "G11", "type": "vip", "status": "available", "price": 150000 },
+      { "id": "seat_G12", "row": "G", "number": 12, "label": "G12", "type": "vip", "status": "available", "price": 150000 },
+
+      { "id": "seat_J1", "row": "J", "number": 1, "label": "J1-J2", "type": "couple", "status": "available", "price": 300000 },
+      { "id": "seat_J2", "row": "J", "number": 2, "label": "J3-J4", "type": "couple", "status": "sold", "price": 300000 },
+      { "id": "seat_J3", "row": "J", "number": 3, "label": "J5-J6", "type": "couple", "status": "available", "price": 300000 },
+      { "id": "seat_J4", "row": "J", "number": 4, "label": "J7-J8", "type": "couple", "status": "available", "price": 300000 },
+      { "id": "seat_J5", "row": "J", "number": 5, "label": "J9-J10", "type": "couple", "status": "held", "price": 300000 },
+      { "id": "seat_J6", "row": "J", "number": 6, "label": "J11-J12", "type": "couple", "status": "unavailable", "price": 300000 }
+    ],
+    "serverTime": "2026-06-04T09:50:00+07:00"
+  }
+}
