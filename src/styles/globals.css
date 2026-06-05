@@ -235,10 +235,11 @@ button {
 
 .section-title {
   font-family: var(--font-head);
-  font-size: clamp(32px, 5vw, 52px);
+  font-size: clamp(42px, 5vw, 72px);
   font-weight: 400;
   line-height: 1.1;
   color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 .section-title em {
@@ -288,40 +289,52 @@ button {
 
 .navbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1480px, calc(100vw - 48px));
+  margin: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
   z-index: 1000;
-  padding: 16px 32px;
-  transition: var(--transition);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .navbar.scrolled {
-  padding: 10px 32px;
-  background: #ffffff;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .navbar {
+  background: rgba(15, 15, 15, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 [data-theme="dark"] .navbar.scrolled {
-  background: var(--glass);
+  background: rgba(15, 15, 15, 0.95);
 }
 
 .nav-inner {
-  max-width: 1240px;
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 32px;
-  background: rgba(255, 255, 255, 0.80);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 10px 10px 10px 24px;
-  box-shadow: var(--shadow-md);
+  justify-content: space-between;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
   transition: var(--transition);
 }
 
@@ -335,10 +348,10 @@ button {
 
 .nav-logo {
   font-family: var(--font-head);
-  font-size: 22px;
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: -0.02em;
+  font-size: 24px;
+  font-weight: 750;
+  font-style: normal;
+  letter-spacing: -0.03em;
   color: var(--text);
   flex-shrink: 0;
 }
@@ -346,16 +359,16 @@ button {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
   flex: 1;
   justify-content: center;
 }
 
 .nav-links a {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--text2);
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: var(--radius-pill);
   transition: var(--transition);
 }
@@ -368,13 +381,13 @@ button {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   flex-shrink: 0;
 }
 
 .nav-icon-btn {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: transparent;
   color: var(--text2);
@@ -390,7 +403,7 @@ button {
 }
 
 .nav-login {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--text2);
   padding: 8px 16px;
@@ -468,12 +481,14 @@ button {
 
 .hero {
   position: relative;
-  min-height: 80vh;
+  min-height: 760px;
+  height: 85vh;
+  max-height: 880px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: visible;
-  padding-top: 80px;
+  padding-top: 130px;
   margin-bottom: 40px;
   flex-shrink: 0;
 }
@@ -507,12 +522,12 @@ button {
   position: absolute;
   inset: 0;
   background: linear-gradient(to right,
-      rgba(20, 20, 20, 0.85) 0%,
-      rgba(20, 20, 20, 0.50) 50%,
-      rgba(20, 20, 20, 0.20) 100%),
+      rgba(10, 10, 10, 0.88) 0%,
+      rgba(10, 10, 10, 0.55) 50%,
+      rgba(10, 10, 10, 0.20) 100%),
     linear-gradient(to top,
-      rgba(20, 20, 20, 0.60) 0%,
-      transparent 60%);
+      rgba(10, 10, 10, 0.70) 0%,
+      transparent 50%);
 }
 
 .hero-slider {
@@ -544,7 +559,7 @@ button {
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 1240px;
+  max-width: min(1560px, calc(100% - 48px));
   margin: 0 auto;
   padding: 0 32px;
   display: flex;
@@ -552,15 +567,23 @@ button {
 }
 
 .hero-info-card {
-  max-width: 560px;
+  max-width: 620px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+.hero-tagline {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .hero-title {
   font-family: var(--font-head);
-  font-size: clamp(52px, 8vw, 96px);
+  font-size: clamp(56px, 7vw, 112px);
   font-weight: 400;
   line-height: 0.95;
   color: #fff;
@@ -574,9 +597,9 @@ button {
 .hero-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 14px;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -600,17 +623,28 @@ button {
 }
 
 .hero-desc {
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
-  line-height: 1.65;
-  max-width: 440px;
+  line-height: 1.75;
+  max-width: 560px;
 }
 
 .hero-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
+}
+
+.hero-actions .btn-primary, .hero-actions .btn-ghost {
+  height: 56px;
+  padding: 0 32px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-scroll-hint {
@@ -654,7 +688,7 @@ button {
 
 .booking-strip {
   position: absolute;
-  bottom: -42px;
+  bottom: -46px;
   left: 0;
   right: 0;
   z-index: 20;
@@ -662,25 +696,25 @@ button {
 }
 
 .booking-card {
-  max-width: 1100px;
+  max-width: 1320px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(184, 175, 255, 0.1) inset;
-  padding: 12px 24px;
+  height: 92px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+  padding: 8px 12px 8px 32px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  gap: 24px;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .booking-card:hover {
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 30px 80px rgba(184, 175, 255, 0.12), 0 0 0 1px rgba(184, 175, 255, 0.25) inset;
-  transform: translateY(-2px);
+  background: #ffffff;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
 }
 
 .booking-fields {
@@ -740,17 +774,20 @@ button {
 
 .booking-divider {
   width: 1px;
-  height: 28px;
-  background: rgba(19, 20, 19, 0.06);
+  height: 40px;
+  background: rgba(15, 23, 42, 0.06);
   flex-shrink: 0;
 }
 
 .btn-booking {
   flex-shrink: 0;
-  padding: 10px 24px;
-  font-size: 13px;
-  height: 42px;
-  border-radius: var(--radius-pill);
+  padding: 0 36px;
+  font-size: 15px;
+  height: 56px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ============================================================
@@ -759,9 +796,9 @@ button {
 
 .movies-section {
   background: var(--bg);
-  overflow: hidden;
+  overflow: visible;
   position: relative;
-  padding-top: 120px;
+  padding-top: 96px;
 }
 
 .section-header-tabs {
@@ -790,50 +827,49 @@ button {
 
 .tabs-nav {
   display: inline-flex;
-  background: #f1eff9;
+  background: #f1f0f7;
   padding: 4px;
-  border-radius: var(--radius-pill);
+  border-radius: 999px;
   position: relative;
-  border: 1px solid rgba(184, 175, 255, 0.15);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(124, 111, 232, 0.08);
 }
 
 .tab-btn {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--muted);
   background: transparent;
   border: none;
   padding: 8px 18px;
-  border-radius: var(--radius-pill);
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   z-index: 2;
   white-space: nowrap;
 }
 
 .tab-btn:hover {
-  color: var(--text);
+  color: var(--color-accent-deep);
 }
 
 .tab-btn.active {
-  color: #5040b0;
-  text-shadow: 0 0 1px rgba(80, 64, 176, 0.15);
+  color: #7c6fe8;
+  text-shadow: 0 0 1px rgba(124, 111, 232, 0.15);
 }
 
 .tab-glow-indicator {
   position: absolute;
   height: calc(100% - 8px);
   background: #ffffff;
-  border-radius: var(--radius-pill);
+  border-radius: 999px;
   top: 4px;
   left: 4px;
   z-index: 1;
-  box-shadow: 0 4px 12px rgba(80, 64, 176, 0.08), 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 12px rgba(124, 111, 232, 0.12);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
 }
 
@@ -895,16 +931,17 @@ button {
 }
 
 .slider-btn {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--bg2);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid rgba(19, 20, 19, 0.08);
   color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .slider-btn:hover {
@@ -923,6 +960,8 @@ button {
 
 .slider-track-wrap {
   overflow: hidden;
+  padding: 16px 0;
+  margin: -16px 0;
 }
 
 .movie-slider {
@@ -932,16 +971,26 @@ button {
 }
 
 .movie-card {
-  flex: 0 0 calc(100% / 4 - 16px);
+  flex: 0 0 calc(100% / 4 - 15px);
   min-width: 220px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  background: var(--color-surface);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid rgba(19, 20, 19, 0.04);
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(19, 20, 19, 0.06);
 }
 
 .movie-poster-wrap {
   position: relative;
-  border-radius: var(--radius);
+  border-radius: 20px 20px 0 0;
   overflow: hidden;
   aspect-ratio: 2/3;
   background: var(--bg2);
@@ -951,61 +1000,101 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .movie-card:hover .movie-poster {
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .movie-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(10, 10, 10, 0.8) 0%, transparent 60%);
+  background: rgba(19, 20, 19, 0.45);
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding-bottom: 20px;
+  gap: 10px;
   opacity: 0;
-  transition: var(--transition);
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 5;
 }
 
 .movie-card:hover .movie-overlay {
   opacity: 1;
 }
 
+.movie-action-btn {
+  width: 120px;
+  height: 40px;
+  padding: 0 !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  border-radius: 99px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.movie-action-btn.trailer-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+}
+
+.movie-action-btn.trailer-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: #ffffff;
+}
+
 .movie-format-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(184, 175, 255, 0.9);
-  color: #2a2060;
-  font-size: 10px;
+  top: 16px;
+  right: 16px;
+  background: rgba(124, 111, 232, 0.9);
+  color: #ffffff;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 99px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.movie-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .movie-info h3 {
   font-family: var(--font-head);
-  font-size: 17px;
-  font-weight: 400;
-  font-style: italic;
-  line-height: 1.25;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  margin: 0;
 }
 
 .movie-meta-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   margin-top: 4px;
 }
 
 .rating {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .genre-tag {
@@ -1014,8 +1103,8 @@ button {
   color: var(--muted);
   background: var(--bg2);
   border: 1px solid var(--border);
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  border-radius: 99px;
 }
 
 /* ============================================================
@@ -1033,22 +1122,24 @@ button {
 }
 
 .coming-card {
-  background: var(--bg);
-  border-radius: var(--radius);
+  background: var(--color-surface);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
-  transition: var(--transition);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(19, 20, 19, 0.04);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .coming-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(19, 20, 19, 0.06);
 }
 
 .coming-poster-wrap {
   position: relative;
-  aspect-ratio: 3/4;
+  aspect-ratio: 2/3;
   overflow: hidden;
 }
 
@@ -1060,7 +1151,7 @@ button {
 }
 
 .coming-card:hover .coming-poster-wrap img {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .coming-overlay {
@@ -1789,7 +1880,25 @@ button {
    RESPONSIVE
    ============================================================ */
 
+@media (min-width: 1101px) {
+  .nav-mobile-menu {
+    display: none !important;
+  }
+}
+
 @media (max-width: 1100px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-actions {
+    display: none;
+  }
+
+  .nav-hamburger {
+    display: flex;
+  }
+
   .movie-card {
     flex: 0 0 calc(100% / 3 - 14px);
   }
@@ -1809,17 +1918,6 @@ button {
 }
 
 @media (max-width: 900px) {
-  .nav-links {
-    display: none;
-  }
-
-  .nav-actions {
-    display: none;
-  }
-
-  .nav-hamburger {
-    display: flex;
-  }
 
   .hero {
     height: auto;
@@ -1854,6 +1952,8 @@ button {
     flex-direction: column;
     align-items: stretch;
     padding: 16px;
+    height: auto;
+    border-radius: 20px;
   }
 
   .booking-fields {
@@ -3123,4 +3223,13 @@ select:disabled,
 
 .locations {
   padding-top: 45px !important;
+}
+
+/* Disabled buttons styling for readability */
+.btn-primary:disabled,
+.btn-booking:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }

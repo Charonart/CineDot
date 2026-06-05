@@ -29,3 +29,21 @@ export const movieListResponseSchema = z.object({
   totalPages: z.number(),
   totalResults: z.number(),
 });
+
+export const heroSlideSchema = z.object({
+  id: z.union([z.number(), z.string()]),
+  slug: z.string(),
+  title: z.string(),
+  subtitle: z.string().optional(),
+  description: z.string(),
+  backdropUrl: z.string(),
+  posterUrl: z.string(),
+  runtime: z.number(),
+  rating: z.number(),
+  ageRating: z.string(),
+  formatTags: z.array(z.string()),
+  trailerUrl: z.string(),
+  status: z.string(),
+});
+
+export const heroSlideListSchema = z.array(heroSlideSchema);

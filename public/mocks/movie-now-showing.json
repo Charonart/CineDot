@@ -4,7 +4,8 @@
     "method": "GET",
     "path": "/api/v1/movies",
     "query": {
-      "category": "now-showing"
+      "category": "now-showing",
+      "limit": "8"
     },
     "description": "Mock response for now-showing movies in general list or home grid"
   },
@@ -143,9 +144,28 @@
         "formatTags": ["4DX"],
         "status": "now-showing",
         "ageRating": "T13"
+      },
+      {
+        "id": "despicable-me-4",
+        "slug": "despicable-me-4",
+        "title": "Despicable Me 4",
+        "originalTitle": "Kẻ Trộm Mặt Trăng 4",
+        "overview": "Gru đón chào thành viên mới Gru Jr., đồng thời phải đối mặt với kẻ thù nguy hiểm mới trốn ngục Maxime Le Mal.",
+        "posterUrl": "https://images.unsplash.com/photo-1608889175123-8ee362201f81?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80",
+        "releaseDate": "2026-07-03",
+        "rating": 7.9,
+        "voteCount": 188,
+        "genres": [
+          { "id": 10, "name": "Animation" },
+          { "id": 5, "name": "Comedy" }
+        ],
+        "formatTags": ["2D", "3D"],
+        "status": "now-showing",
+        "ageRating": "P"
       }
     ],
     "totalPages": 1,
-    "totalResults": 7
+    "totalResults": 8
   }
 }

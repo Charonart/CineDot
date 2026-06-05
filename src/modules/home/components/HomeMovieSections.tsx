@@ -13,7 +13,10 @@ export const HomeMovieSections: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('now-showing');
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const { data, isLoading, isError } = useMoviesList({ category: activeTab });
+  const { data, isLoading, isError } = useMoviesList({ 
+    category: activeTab,
+    limit: activeTab === 'now-showing' ? 8 : undefined,
+  });
 
   const sliderRef = useRef<HTMLDivElement>(null);
   const tabRefs = {

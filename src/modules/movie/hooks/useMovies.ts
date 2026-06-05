@@ -64,3 +64,12 @@ export const useNavbarMovies = () => {
     gcTime: 30 * 60 * 1000,
   });
 };
+
+export const useHeroSlides = () => {
+  return useQuery({
+    queryKey: [...movieKeys.all, 'hero-slides'] as const,
+    queryFn: () => movieService.getHeroSlides(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};

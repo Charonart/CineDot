@@ -1,6 +1,6 @@
 import { axiosClient } from '@lib/axios/axiosClient';
 import { ApiResponse } from '@shared/types/api.type';
-import { MovieListResponseDTO, MovieDTO } from '../dto/movie.dto';
+import { MovieListResponseDTO, MovieDTO, HeroSlideDTO } from '../dto/movie.dto';
 
 export const movieApi = {
   getTrending: (page = 1): Promise<ApiResponse<MovieListResponseDTO>> => 
@@ -20,4 +20,7 @@ export const movieApi = {
 
   getNavbarMovies: (): Promise<ApiResponse<MovieListResponseDTO>> => 
     axiosClient.get('/movies/navbar'),
+
+  getHeroSlides: (): Promise<ApiResponse<HeroSlideDTO[]>> =>
+    axiosClient.get('/home/hero-slides'),
 };

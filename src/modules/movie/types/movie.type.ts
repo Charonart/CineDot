@@ -39,3 +39,21 @@ export interface MovieList {
   totalItems: number;
   hasNext: boolean;
 }
+
+export interface HeroSlide {
+  id: number | string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  backdropUrl: string;
+  posterUrl: string;
+  runtime: number;
+  rating: number;
+  ageRating: string;
+  formatTags: string[];
+  trailerUrl: string;
+  status: string;
+  detailHref: string;
+  bookingHref: string;
+}

@@ -12,6 +12,8 @@ export const mockRoutes: Record<string, string> = {
   '/api/v1/quick-booking/showtimes': '/mocks/quick-booking/showtimes.json',
   '/movies/navbar': '/mocks/movies-navbar.json',
   '/api/v1/movies/navbar': '/mocks/movies-navbar.json',
+  '/home/hero-slides': '/mocks/hero-slides.json',
+  '/api/v1/home/hero-slides': '/mocks/hero-slides.json',
 };
 
 export const getMockPath = (url: string): string | null => {

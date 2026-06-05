@@ -180,13 +180,13 @@ export const QuickBookingPanel: React.FC = () => {
         <div className="booking-fields">
           <div className={getFieldClassName(isMovieDisabled, selectedMovieId, 'movie')}>
             <CineReactDropdown
-              label="Phim"
-              placeholder={isMoviesLoading ? 'Dang tai...' : hasMoviesError ? 'Khong the tai phim' : 'Chon phim'}
+              label="PHIM"
+              placeholder={isMoviesLoading ? 'Đang tải...' : hasMoviesError ? 'Không thể tải phim' : 'Chọn phim'}
               disabled={isMovieDisabled}
               value={selectedMovieId}
               options={movieOptions}
               isOpen={openDropdown === 'movie'}
-              emptyMessage="Khong co phim"
+              emptyMessage="Không có phim"
               onToggle={() => handleToggleDropdown('movie')}
               onClose={handleCloseDropdown}
               onSelect={handleMovieSelect}
@@ -197,13 +197,13 @@ export const QuickBookingPanel: React.FC = () => {
 
           <div className={getFieldClassName(isCinemaDisabled, selectedCinemaId, 'cinema')}>
             <CineReactDropdown
-              label="Rap"
-              placeholder={isCinemasLoading ? 'Dang tai...' : hasCinemasError ? 'Khong the tai rap' : 'Chon rap'}
+              label="RẠP"
+              placeholder={isCinemasLoading ? 'Đang tải...' : hasCinemasError ? 'Không thể tải rạp' : 'Chọn rạp'}
               disabled={isCinemaDisabled}
               value={selectedCinemaId}
               options={cinemaOptions}
               isOpen={openDropdown === 'cinema'}
-              emptyMessage="Khong co rap"
+              emptyMessage="Không có rạp"
               onToggle={() => handleToggleDropdown('cinema')}
               onClose={handleCloseDropdown}
               onSelect={handleCinemaSelect}
@@ -214,13 +214,13 @@ export const QuickBookingPanel: React.FC = () => {
 
           <div className={getFieldClassName(isDateDisabled, selectedDate, 'date')}>
             <CineReactDropdown
-              label="Ngay"
-              placeholder={isDatesLoading ? 'Dang tai...' : hasDatesError ? 'Khong the tai ngay' : 'Chon ngay'}
+              label="NGÀY"
+              placeholder={isDatesLoading ? 'Đang tải...' : hasDatesError ? 'Không thể tải ngày' : 'Chọn ngày'}
               disabled={isDateDisabled}
               value={selectedDate}
               options={dateOptions}
               isOpen={openDropdown === 'date'}
-              emptyMessage="Khong co ngay"
+              emptyMessage="Không có ngày"
               onToggle={() => handleToggleDropdown('date')}
               onClose={handleCloseDropdown}
               onSelect={handleDateSelect}
@@ -231,13 +231,13 @@ export const QuickBookingPanel: React.FC = () => {
 
           <div className={getFieldClassName(isShowtimeDisabled, selectedShowtimeId, 'showtime')}>
             <CineReactDropdown
-              label="Suat chieu"
-              placeholder={isShowtimesLoading ? 'Dang tai...' : hasShowtimesError ? 'Khong the tai suat' : 'Chon gio'}
+              label="SUẤT CHIẾU"
+              placeholder={isShowtimesLoading ? 'Đang tải...' : hasShowtimesError ? 'Không thể tải suất' : 'Chọn giờ'}
               disabled={isShowtimeDisabled}
               value={selectedShowtimeId}
               options={showtimeOptions}
               isOpen={openDropdown === 'showtime'}
-              emptyMessage="Khong co suat chieu"
+              emptyMessage="Không có suất chiếu"
               onToggle={() => handleToggleDropdown('showtime')}
               onClose={handleCloseDropdown}
               onSelect={handleShowtimeSelect}
@@ -265,7 +265,7 @@ export const QuickBookingPanel: React.FC = () => {
             <path d="M13 17v2" />
             <path d="M13 11v2" />
           </svg>
-          Dat ve
+          Đặt vé
         </button>
       </form>
     </div>

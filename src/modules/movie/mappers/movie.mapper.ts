@@ -1,5 +1,5 @@
-import { MovieDTO, MovieListResponseDTO } from '../dto/movie.dto';
-import { Movie, MovieList } from '../types/movie.type';
+import { MovieDTO, MovieListResponseDTO, HeroSlideDTO } from '../dto/movie.dto';
+import { Movie, MovieList, HeroSlide } from '../types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
 
 /**
@@ -37,4 +37,30 @@ export const movieMapper = {
     totalItems: dto.totalResults || 0,
     hasNext: (dto.page || 1) < (dto.totalPages || 1),
   }),
+};
+
+export const heroSlideMapper = {
+  toHeroSlideModel: (dto: HeroSlideDTO): HeroSlide => {
+    const slug = dto.slug || String(dto.id);
+    return {
+      id: dto.id,
+      slug: slug,
+      title: dto.title,
+      subtitle: dto.subtitle,
+      description: dto.description,
+      backdropUrl: dto.backdropUrl,
+      posterUrl: dto.posterUrl,
+      runtime: dto.runtime,
+      rating: dto.rating,
+      ageRating: dto.ageRating || 'P',
+      formatTags: dto.formatTags || [],
+      trailerUrl: dto.trailerUrl,
+      status: dto.status,
+      detailHref: appRoutes.movieDetail(slug),
+      bookingHref: appRoutes.movieSchedule(slug),
+    };
+  },
+
+  toHeroSlideListModel: (dtos: HeroSlideDTO[]): HeroSlide[] =>
+    (dtos || []).map(heroSlideMapper.toHeroSlideModel),
 };

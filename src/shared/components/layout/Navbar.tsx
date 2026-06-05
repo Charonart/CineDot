@@ -181,7 +181,7 @@ export const Navbar: React.FC = () => {
                 <div className="mega-section">
                   <div className="mega-section-header">
                     <Link 
-                      href="/movies?category=now-showing" 
+                      href={`${appRoutes.movies}?category=now-showing`} 
                       className="mega-section-title-link"
                       onClick={() => setActiveDropdown(null)}
                     >
@@ -204,7 +204,7 @@ export const Navbar: React.FC = () => {
                 <div className="mega-section">
                   <div className="mega-section-header">
                     <Link 
-                      href="/movies?category=coming-soon" 
+                      href={`${appRoutes.movies}?category=coming-soon`} 
                       className="mega-section-title-link"
                       onClick={() => setActiveDropdown(null)}
                     >
@@ -348,7 +348,7 @@ export const Navbar: React.FC = () => {
             </svg>
           </button>
           <Link href="/coming-soon" className="nav-login">Đăng nhập</Link>
-          <Link href="/movies?category=now-showing" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+          <Link href={`${appRoutes.movies}?category=now-showing`} className="btn-primary">
             Đặt vé
           </Link>
         </div>
@@ -386,7 +386,7 @@ export const Navbar: React.FC = () => {
               <div className="mega-section">
                 <div className="mega-section-header">
                   <h2>PHIM ĐANG CHIẾU</h2>
-                  <Link href="/movies?category=now-showing" className="view-all-link" onClick={() => setIsMobileMenuOpen(false)}>Xem tất cả</Link>
+                  <Link href={`${appRoutes.movies}?category=now-showing`} className="view-all-link" onClick={() => setIsMobileMenuOpen(false)}>Xem tất cả</Link>
                 </div>
                 <div className="mega-movies-grid">
                   {isLoading ? (
@@ -397,7 +397,7 @@ export const Navbar: React.FC = () => {
               <div className="mega-section">
                 <div className="mega-section-header">
                   <h2>PHIM SẮP CHIẾU</h2>
-                  <Link href="/movies?category=coming-soon" className="view-all-link" onClick={() => setIsMobileMenuOpen(false)}>Xem tất cả</Link>
+                  <Link href={`${appRoutes.movies}?category=coming-soon`} className="view-all-link" onClick={() => setIsMobileMenuOpen(false)}>Xem tất cả</Link>
                 </div>
                 <div className="mega-movies-grid">
                   {isLoading ? (

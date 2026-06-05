@@ -62,7 +62,7 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
           <img src={posterUrl} alt={title} className="movie-poster" />
           <div className="movie-overlay">
             <Link 
-              href={detailUrl} 
+              href={appRoutes.movieSchedule(slug)} 
               className="btn-primary movie-action-btn" 
               aria-label="Mua vé"
             >

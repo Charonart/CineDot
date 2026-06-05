@@ -27,3 +27,19 @@ export interface MovieListResponseDTO {
   totalPages: number;
   totalResults: number;
 }
+
+export interface HeroSlideDTO {
+  id: number | string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  backdropUrl: string;
+  posterUrl: string;
+  runtime: number;
+  rating: number;
+  ageRating: string;
+  formatTags: string[];
+  trailerUrl: string;
+  status: string;
+}
