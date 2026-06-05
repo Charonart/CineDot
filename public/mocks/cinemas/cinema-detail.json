@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/cinemas/cinedot-q1-saigon",
+    "params": { "slug": "cinedot-q1-saigon" },
+    "description": "Mock response for cinema detail page"
+  },
+  "data": {
+    "id": "cn-001",
+    "slug": "cinedot-q1-saigon",
+    "name": "CineDot Quận 1 — Vincom Center",
+    "address": "72 Lê Thánh Tôn, Phường Bến Nghé, Quận 1",
+    "city": "TP. Hồ Chí Minh",
+    "district": "Quận 1",
+    "phone": "028 3822 0000",
+    "email": "q1@cinedot.vn",
+    "imageUrl": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1200&h=675&fit=crop",
+    "formats": ["2D", "3D", "IMAX", "4DX", "Dolby Atmos"],
+    "amenities": ["Bãi giữ xe", "Nhà hàng", "Phòng chờ VIP", "Phòng cho con bú", "WiFi miễn phí", "ATM"],
+    "totalScreens": 12,
+    "totalSeats": 2400,
+    "openingHours": "09:00 - 23:30",
+    "mapUrl": "https://maps.google.com/?q=72+Le+Thanh+Ton+Q1+HCMC",
+    "latitude": 10.7769,
+    "longitude": 106.7009,
+    "isActive": true,
+    "isFeatured": true,
+    "screens": [
+      { "id": "sc-01", "name": "Phòng IMAX 1", "type": "imax", "capacity": 400 },
+      { "id": "sc-02", "name": "Phòng 4DX", "type": "4dx", "capacity": 200 },
+      { "id": "sc-03", "name": "Phòng Dolby Atmos", "type": "dolby-atmos", "capacity": 300 },
+      { "id": "sc-04", "name": "Phòng VIP 1", "type": "vip", "capacity": 100 },
+      { "id": "sc-05", "name": "Phòng 5", "type": "standard", "capacity": 200 }
+    ]
+  }
+}

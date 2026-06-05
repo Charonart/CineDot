@@ -1,0 +1,35 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/cinema-corner/articles/review-dune-part-two-epic-saga",
+    "params": { "slug": "review-dune-part-two-epic-saga" },
+    "description": "Mock response for cinema article detail"
+  },
+  "data": {
+    "id": "cc-001",
+    "slug": "review-dune-part-two-epic-saga",
+    "title": "Review Dune: Part Two — Bản Anh Hùng Ca Vĩ Đại Của Điện Ảnh 2024",
+    "excerpt": "Denis Villeneuve một lần nữa chứng minh mình là bậc thầy dàn dựng với bức tranh sử thi hoành tráng về sa mạc Arrakis.",
+    "content": "<p>Dune: Part Two là một kiệt tác điện ảnh hiếm có trong thập kỷ. Denis Villeneuve đã làm được điều mà nhiều người cho là bất khả thi — chuyển thể thành công phần hai của bộ tiểu thuyết khoa học viễn tưởng phức tạp nhất thế giới.</p><p>Timothée Chalamet tiếp tục tỏa sáng trong vai Paul Atreides, nhưng lần này anh được trao cơ hội thể hiện chiều sâu nhân vật hơn nhiều. Zendaya, vốn chỉ xuất hiện trong một khoảnh khắc ngắn ở phần một, giờ đây trở thành trung tâm cảm xúc của toàn bộ câu chuyện.</p><p>Âm nhạc của Hans Zimmer một lần nữa là yếu tố nâng tầm trải nghiệm điện ảnh. Những bản nhạc kỳ lạ, phi truyền thống tạo nên một thế giới nghe giác riêng biệt không thể nhầm lẫn.</p><p>Về kỹ thuật quay phim, Greig Fraser tiếp tục phô diễn tài năng đỉnh cao. Mỗi khung hình là một bức tranh nghệ thuật hoàn chỉnh.</p>",
+    "category": "reviews",
+    "author": "Minh Châu",
+    "authorAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop",
+    "authorBio": "Nhà phê bình phim với hơn 10 năm kinh nghiệm, chuyên về phim khoa học viễn tưởng và điện ảnh châu Âu.",
+    "publishedAt": "2024-03-15T09:00:00Z",
+    "imageUrl": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&h=675&fit=crop",
+    "readTime": 8,
+    "isFeatured": true,
+    "tags": ["review", "dune", "sci-fi"],
+    "rating": 9.2,
+    "relatedArticles": [
+      {
+        "id": "cc-004",
+        "slug": "review-godzilla-kong-new-empire",
+        "title": "Review Godzilla x Kong: The New Empire",
+        "imageUrl": "https://images.unsplash.com/photo-1604975999044-188783d54fb3?w=400&h=225&fit=crop",
+        "category": "reviews"
+      }
+    ]
+  }
+}

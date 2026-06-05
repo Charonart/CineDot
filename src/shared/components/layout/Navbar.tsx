@@ -243,9 +243,9 @@ export const Navbar: React.FC = () => {
               Star Shop
             </button>
             <div className={`dropdown-content small-dropdown ${activeDropdown === 'starshop' ? 'open' : ''}`}>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Movie-verse</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Fan Wibu</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Inner Child</Link>
+              <Link href={appRoutes.starShopCategory('movie-verse')} onClick={() => setActiveDropdown(null)}>Movie-verse</Link>
+              <Link href={appRoutes.starShopCategory('fan-wibu')} onClick={() => setActiveDropdown(null)}>Fan Wibu</Link>
+              <Link href={appRoutes.starShopCategory('inner-child')} onClick={() => setActiveDropdown(null)}>Inner Child</Link>
             </div>
           </div>
 
@@ -265,9 +265,9 @@ export const Navbar: React.FC = () => {
               Góc Điện Ảnh
             </button>
             <div className={`dropdown-content small-dropdown ${activeDropdown === 'gocdienanh' ? 'open' : ''}`}>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Bình luận phim</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Blog điện ảnh</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Hậu trường</Link>
+              <Link href={appRoutes.cinemaCornerCategory('reviews')} onClick={() => setActiveDropdown(null)}>Bình luận phim</Link>
+              <Link href={appRoutes.cinemaCornerCategory('blog')} onClick={() => setActiveDropdown(null)}>Blog điện ảnh</Link>
+              <Link href={appRoutes.cinemaCornerCategory('backstage')} onClick={() => setActiveDropdown(null)}>Hậu trường</Link>
             </div>
           </div>
 
@@ -287,9 +287,9 @@ export const Navbar: React.FC = () => {
               Sự Kiện
             </button>
             <div className={`dropdown-content small-dropdown ${activeDropdown === 'sukien' ? 'open' : ''}`}>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Sự kiện đang diễn ra</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Ưu đãi đặc biệt</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Tin tức</Link>
+              <Link href={appRoutes.eventCategory('now')} onClick={() => setActiveDropdown(null)}>Sự kiện đang diễn ra</Link>
+              <Link href={appRoutes.eventCategory('promotions')} onClick={() => setActiveDropdown(null)}>Ưu đãi đặc biệt</Link>
+              <Link href={appRoutes.eventCategory('news')} onClick={() => setActiveDropdown(null)}>Tin tức</Link>
             </div>
           </div>
 
@@ -309,9 +309,9 @@ export const Navbar: React.FC = () => {
               Rạp/Giá Vé
             </button>
             <div className={`dropdown-content small-dropdown ${activeDropdown === 'rapgiave' ? 'open' : ''}`}>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Lịch chiếu theo rạp</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Giá vé</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Danh sách rạp</Link>
+              <Link href={appRoutes.cinemaShowtimes} onClick={() => setActiveDropdown(null)}>Lịch chiếu theo rạp</Link>
+              <Link href={appRoutes.cinemaPricing} onClick={() => setActiveDropdown(null)}>Giá vé</Link>
+              <Link href={appRoutes.cinemas} onClick={() => setActiveDropdown(null)}>Danh sách rạp</Link>
             </div>
           </div>
 
@@ -331,10 +331,10 @@ export const Navbar: React.FC = () => {
               Rạp Đặc Biệt
             </button>
             <div className={`dropdown-content small-dropdown ${activeDropdown === 'rapdacbiet' ? 'open' : ''}`}>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>IMAX</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>4DX</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Dolby Atmos</Link>
-              <Link href="/coming-soon" onClick={() => setActiveDropdown(null)}>Cine de Kids</Link>
+              <Link href={appRoutes.specialTheaterType('imax')} onClick={() => setActiveDropdown(null)}>IMAX</Link>
+              <Link href={appRoutes.specialTheaterType('4dx')} onClick={() => setActiveDropdown(null)}>4DX</Link>
+              <Link href={appRoutes.specialTheaterType('dolby-atmos')} onClick={() => setActiveDropdown(null)}>Dolby Atmos</Link>
+              <Link href={appRoutes.specialTheaterType('kids')} onClick={() => setActiveDropdown(null)}>Cine de Kids</Link>
             </div>
           </div>
         </nav>
@@ -421,9 +421,9 @@ export const Navbar: React.FC = () => {
             Star Shop
           </button>
           <div className="dropdown-content small-dropdown">
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Movie-verse</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Fan Wibu</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Inner Child</Link>
+            <Link href={appRoutes.starShopCategory('movie-verse')} onClick={() => setIsMobileMenuOpen(false)}>Movie-verse</Link>
+            <Link href={appRoutes.starShopCategory('fan-wibu')} onClick={() => setIsMobileMenuOpen(false)}>Fan Wibu</Link>
+            <Link href={appRoutes.starShopCategory('inner-child')} onClick={() => setIsMobileMenuOpen(false)}>Inner Child</Link>
           </div>
         </div>
 
@@ -439,9 +439,9 @@ export const Navbar: React.FC = () => {
             Góc Điện Ảnh
           </button>
           <div className="dropdown-content small-dropdown">
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Bình luận phim</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Blog điện ảnh</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Hậu trường</Link>
+            <Link href={appRoutes.cinemaCornerCategory('reviews')} onClick={() => setIsMobileMenuOpen(false)}>Bình luận phim</Link>
+            <Link href={appRoutes.cinemaCornerCategory('blog')} onClick={() => setIsMobileMenuOpen(false)}>Blog điện ảnh</Link>
+            <Link href={appRoutes.cinemaCornerCategory('backstage')} onClick={() => setIsMobileMenuOpen(false)}>Hậu trường</Link>
           </div>
         </div>
 
@@ -457,9 +457,9 @@ export const Navbar: React.FC = () => {
             Sự Kiện
           </button>
           <div className="dropdown-content small-dropdown">
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Sự kiện đang diễn ra</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Ưu đãi đặc biệt</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Tin tức</Link>
+            <Link href={appRoutes.eventCategory('now')} onClick={() => setIsMobileMenuOpen(false)}>Sự kiện đang diễn ra</Link>
+            <Link href={appRoutes.eventCategory('promotions')} onClick={() => setIsMobileMenuOpen(false)}>Ưu đãi đặc biệt</Link>
+            <Link href={appRoutes.eventCategory('news')} onClick={() => setIsMobileMenuOpen(false)}>Tin tức</Link>
           </div>
         </div>
 
@@ -475,9 +475,9 @@ export const Navbar: React.FC = () => {
             Rạp/Giá Vé
           </button>
           <div className="dropdown-content small-dropdown">
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Lịch chiếu theo rạp</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Giá vé</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Danh sách rạp</Link>
+            <Link href={appRoutes.cinemaShowtimes} onClick={() => setIsMobileMenuOpen(false)}>Lịch chiếu theo rạp</Link>
+            <Link href={appRoutes.cinemaPricing} onClick={() => setIsMobileMenuOpen(false)}>Giá vé</Link>
+            <Link href={appRoutes.cinemas} onClick={() => setIsMobileMenuOpen(false)}>Danh sách rạp</Link>
           </div>
         </div>
 
@@ -493,10 +493,10 @@ export const Navbar: React.FC = () => {
             Rạp Đặc Biệt
           </button>
           <div className="dropdown-content small-dropdown">
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>IMAX</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>4DX</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Dolby Atmos</Link>
-            <Link href="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Cine de Kids</Link>
+            <Link href={appRoutes.specialTheaterType('imax')} onClick={() => setIsMobileMenuOpen(false)}>IMAX</Link>
+            <Link href={appRoutes.specialTheaterType('4dx')} onClick={() => setIsMobileMenuOpen(false)}>4DX</Link>
+            <Link href={appRoutes.specialTheaterType('dolby-atmos')} onClick={() => setIsMobileMenuOpen(false)}>Dolby Atmos</Link>
+            <Link href={appRoutes.specialTheaterType('kids')} onClick={() => setIsMobileMenuOpen(false)}>Cine de Kids</Link>
           </div>
         </div>
       </div>

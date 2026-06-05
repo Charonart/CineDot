@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/events/summer-blockbuster-festival-2024",
+    "params": { "slug": "summer-blockbuster-festival-2024" },
+    "description": "Mock response for event detail page"
+  },
+  "data": {
+    "id": "ev-001",
+    "slug": "summer-blockbuster-festival-2024",
+    "title": "Summer Blockbuster Festival 2024",
+    "description": "Lễ hội phim bom tấn mùa hè với hơn 20 suất chiếu đặc biệt, ưu đãi combo, và sự kiện gặp gỡ diễn viên.",
+    "content": "<p>Summer Blockbuster Festival 2024 là sự kiện điện ảnh lớn nhất trong năm của CineDot, quy tụ những bộ phim bom tấn hot nhất mùa hè này.</p><p>Trong suốt 3 tháng từ tháng 6 đến tháng 8, khán giả sẽ được trải nghiệm hơn 20 suất chiếu đặc biệt với nhiều ưu đãi hấp dẫn.</p>",
+    "category": "now",
+    "imageUrl": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=675&fit=crop",
+    "startDate": "2024-06-01",
+    "endDate": "2024-08-31",
+    "condition": "Áp dụng cho tất cả thành viên CineDot. Không áp dụng cùng ưu đãi khác.",
+    "ctaLabel": "Đặt vé ngay",
+    "isActive": true,
+    "isFeatured": true,
+    "badge": "HOT",
+    "location": "Tất cả rạp CineDot toàn quốc",
+    "organizer": "CineDot Entertainment",
+    "highlights": [
+      "Hơn 20 suất chiếu đặc biệt mỗi tuần",
+      "Ưu đãi combo bắp + nước giảm 20%",
+      "Cơ hội gặp gỡ diễn viên tại sự kiện đặc biệt",
+      "Quà tặng exclusive cho 100 khán giả đầu tiên mỗi suất"
+    ]
+  }
+}
