@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element, @next/next/no-html-link-for-pages */
-import React from 'react';
+import Link from 'next/link';
+import { appRoutes } from '@/shared/routes/appRoutes';
 import { QuickBookingPanel } from './QuickBookingPanel';
 
 export const HomeHero: React.FC = () => {
@@ -53,8 +53,8 @@ export const HomeHero: React.FC = () => {
                 vũ trụ.
               </p>
               <div className="hero-actions">
-                <a
-                  href="/movies/detail/dune-part-two"
+                <Link
+                  href={appRoutes.movieDetail("dune-part-two")}
                   className="btn-primary btn-large"
                   style={{
                     display: 'inline-flex',
@@ -64,7 +64,7 @@ export const HomeHero: React.FC = () => {
                   }}
                 >
                   Đặt vé
-                </a>
+                </Link>
                 <button className="btn-ghost btn-large" id="openTrailerBtn">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <polygon points="5,3 19,12 5,21" />

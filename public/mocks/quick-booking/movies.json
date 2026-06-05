@@ -1,5 +1,10 @@
 {
   "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/quick-booking/movies",
+    "description": "Mock response listing movies available for quick booking selection"
+  },
   "data": [
     {
       "id": "movie_1",

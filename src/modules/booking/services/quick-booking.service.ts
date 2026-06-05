@@ -1,4 +1,5 @@
 import { logger } from '@lib/logger/logger';
+import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
 import { quickBookingApi } from '../api/quick-booking.api';
 import { quickBookingMapper } from '../mappers/quick-booking.mapper';
 import {
@@ -21,6 +22,9 @@ export const quickBookingService = {
       const validated = quickBookingMovieListSchema.parse(response.data);
       return validated.map(quickBookingMapper.toMovieModel);
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       logger.error('[QuickBookingService] getMovies failed:', error);
       throw new Error('FAILED_TO_LOAD_QUICK_BOOKING_MOVIES');
     }
@@ -36,6 +40,9 @@ export const quickBookingService = {
         .map(quickBookingMapper.toCinemaModel)
         .filter((cinema) => cinema.movieIds.includes(movieId));
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       logger.error('[QuickBookingService] getCinemas failed:', error);
       throw new Error('FAILED_TO_LOAD_QUICK_BOOKING_CINEMAS');
     }
@@ -55,6 +62,9 @@ export const quickBookingService = {
         .map(quickBookingMapper.toDateModel)
         .filter((date) => date.movieId === movieId && date.cinemaId === cinemaId);
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       logger.error('[QuickBookingService] getDates failed:', error);
       throw new Error('FAILED_TO_LOAD_QUICK_BOOKING_DATES');
     }
@@ -79,6 +89,9 @@ export const quickBookingService = {
           showtime.date === date,
         );
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       logger.error('[QuickBookingService] getShowtimes failed:', error);
       throw new Error('FAILED_TO_LOAD_QUICK_BOOKING_SHOWTIMES');
     }

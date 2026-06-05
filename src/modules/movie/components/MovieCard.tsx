@@ -2,21 +2,29 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { TrailerModal } from '@/shared/components/visual';
+import { appRoutes } from '@/shared/routes/appRoutes';
+
+interface Genre {
+  id: number | string;
+  name: string;
+}
 
 interface Movie {
   id: string | number;
+  slug?: string;
   title: string;
   posterUrl: string;
   format?: string;
   rating?: string | number;
   genre?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  genres?: any[];
+  genres?: Genre[] | string[];
 }
 
 interface MovieCardProps {
   id?: string | number;
+  slug?: string;
   title?: string;
   posterUrl?: string;
   format?: string;
@@ -30,6 +38,7 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
 
   const movie = props.movie || {
     id: props.id || '',
+    slug: props.slug,
     title: props.title || '',
     posterUrl: props.posterUrl || '',
     format: props.format,
@@ -39,9 +48,12 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
 
   const { title, posterUrl, format } = movie;
   const id = String(movie.id);
+  const slug = movie.slug || id;
   const rating = movie.rating !== undefined ? String(movie.rating) : '';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const genre = movie.genre || (movie.genres && movie.genres.map((g: any) => typeof g === 'string' ? g : (g.name || '')).join(', ')) || '';
+  
+  const genre = movie.genre || (movie.genres && movie.genres.map((g) => typeof g === 'string' ? g : g.name).join(', ')) || '';
+
+  const detailUrl = appRoutes.movieDetail(slug);
 
   return (
     <>
@@ -49,13 +61,13 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
         <div className="movie-poster-wrap">
           <img src={posterUrl} alt={title} className="movie-poster" />
           <div className="movie-overlay">
-            <a 
-              href={`/movies/detail/${id}`} 
+            <Link 
+              href={detailUrl} 
               className="btn-primary movie-action-btn" 
               aria-label="Mua vé"
             >
               Mua vé
-            </a>
+            </Link>
             <button 
               type="button"
               className="btn-ghost movie-action-btn trailer-btn" 
@@ -82,7 +94,11 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
           {format && <span className="movie-format-badge">{format}</span>}
         </div>
         <div className="movie-info">
-          <h3>{title}</h3>
+          <h3>
+            <Link href={detailUrl} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {title}
+            </Link>
+          </h3>
           <div className="movie-meta-row">
             <span className="rating">★ {rating}</span>
             <span className="genre-tag">{genre}</span>

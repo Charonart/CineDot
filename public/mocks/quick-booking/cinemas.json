@@ -1,5 +1,13 @@
 {
   "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/quick-booking/cinemas",
+    "query": {
+      "movieId": "movie_1"
+    },
+    "description": "Mock response listing cinemas available for quick booking selection"
+  },
   "data": [
     {
       "id": "cinema_1",

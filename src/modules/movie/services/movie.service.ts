@@ -48,4 +48,26 @@ export const movieService = {
       throw new Error('FAILED_TO_SEARCH_MOVIES');
     }
   },
+
+  getMovies: async (params: { category?: string; limit?: number; page?: number }): Promise<MovieList> => {
+    try {
+      const response = await movieApi.getMovies(params);
+      const validatedData = movieListResponseSchema.parse(response.data);
+      return movieMapper.toMovieListModel(validatedData);
+    } catch (error) {
+      logger.error('[MovieService] getMovies failed:', error);
+      throw new Error('FAILED_TO_LOAD_MOVIES');
+    }
+  },
+
+  getNavbarMovies: async (): Promise<MovieList> => {
+    try {
+      const response = await movieApi.getNavbarMovies();
+      const validatedData = movieListResponseSchema.parse(response.data);
+      return movieMapper.toMovieListModel(validatedData);
+    } catch (error) {
+      logger.error('[MovieService] getNavbarMovies failed:', error);
+      throw new Error('FAILED_TO_LOAD_NAVBAR_MOVIES');
+    }
+  },
 };

@@ -14,4 +14,10 @@ export const movieApi = {
 
   searchMovies: (query: string, page = 1): Promise<ApiResponse<MovieListResponseDTO>> => 
     axiosClient.get('/movies/search', { params: { query, page } }),
+
+  getMovies: (params: { category?: string; limit?: number; page?: number }): Promise<ApiResponse<MovieListResponseDTO>> => 
+    axiosClient.get('/movies', { params }),
+
+  getNavbarMovies: (): Promise<ApiResponse<MovieListResponseDTO>> => 
+    axiosClient.get('/movies/navbar'),
 };

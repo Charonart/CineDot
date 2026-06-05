@@ -1,21 +1,26 @@
 import { z } from 'zod';
 
 export const genreSchema = z.object({
-  id: z.number(),
+  id: z.union([z.number(), z.string()]),
   name: z.string(),
 });
 
 export const movieSchema = z.object({
-  id: z.number(),
+  id: z.union([z.number(), z.string()]),
+  slug: z.string().optional(),
   title: z.string(),
-  overview: z.string(),
-  posterUrl: z.string().url(),
-  backdropUrl: z.string().url(),
-  releaseDate: z.string(),
-  rating: z.number(),
-  voteCount: z.number(),
-  genres: z.array(genreSchema).default([]),
-  runtime: z.number().optional(),
+  originalTitle: z.string().optional(),
+  overview: z.string().optional().default(''),
+  posterUrl: z.string(),
+  backdropUrl: z.string().optional().nullable(),
+  releaseDate: z.string().optional().nullable(),
+  rating: z.number().optional().default(0),
+  voteCount: z.number().optional().default(0),
+  genres: z.array(genreSchema).optional().default([]),
+  runtime: z.number().optional().nullable(),
+  formatTags: z.array(z.string()).optional(),
+  status: z.enum(['now-showing', 'coming-soon']).optional(),
+  ageRating: z.string().optional(),
 });
 
 export const movieListResponseSchema = z.object({

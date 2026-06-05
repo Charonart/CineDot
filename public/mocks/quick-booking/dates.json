@@ -1,5 +1,14 @@
 {
   "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/quick-booking/dates",
+    "query": {
+      "movieId": "movie_1",
+      "cinemaId": "cinema_1"
+    },
+    "description": "Mock response listing dates available for quick booking selection"
+  },
   "data": [
     {
       "id": "2026-06-04",

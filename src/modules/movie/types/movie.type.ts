@@ -1,5 +1,5 @@
 export interface Genre {
-  id: number;
+  id: number | string;
   name: string;
 }
 
@@ -13,16 +13,23 @@ export interface Trailer {
 }
 
 export interface Movie {
-  id: number;
+  id: number | string;
+  slug?: string;
   title: string;
+  originalTitle?: string;
   description: string;
   posterUrl: string;
-  backdropUrl: string;
-  releaseDate: string;
+  backdropUrl?: string | null;
+  releaseDate?: string | null;
   rating: number;
   voteCount: number;
   genres: Genre[];
-  runtime?: number;
+  runtime?: number | null;
+  formatTags?: string[];
+  status?: 'now-showing' | 'coming-soon';
+  ageRating?: string;
+  detailHref?: string;
+  bookingHref?: string;
 }
 
 export interface MovieList {

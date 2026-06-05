@@ -1,5 +1,6 @@
 import { logger } from '@lib/logger/logger';
 import { ApiError } from '@shared/types/api.type';
+import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
 import { bookingApi } from '../api/booking.api';
 import { SeatHoldRequestDTO } from '../dto/booking.dto';
 import { bookingMapper } from '../mappers/booking.mapper';
@@ -27,6 +28,9 @@ export const bookingService = {
       const validated = bookingShowtimeSchema.parse(response.data);
       return bookingMapper.toShowtime(validated);
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       if (error instanceof Error && error.message === 'INVALID_SHOWTIME_ID') throw error;
       logger.error('[BookingService] getShowtimeDetail failed:', error);
       throw new Error('FAILED_TO_LOAD_SHOWTIME_DETAIL');
@@ -40,6 +44,9 @@ export const bookingService = {
       const validated = seatMapSchema.parse(response.data);
       return bookingMapper.toSeatMap(validated);
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       if (error instanceof Error && error.message === 'INVALID_SHOWTIME_ID') throw error;
       logger.error('[BookingService] getSeatMap failed:', error);
       throw new Error('FAILED_TO_LOAD_SEAT_MAP');
@@ -54,6 +61,9 @@ export const bookingService = {
       const validated = seatHoldSchema.parse(response.data);
       return bookingMapper.toSeatHold(validated);
     } catch (error) {
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
       if (error instanceof Error && error.message === 'INVALID_SHOWTIME_ID') throw error;
       const code = normalizeHoldError(error);
       logger.error('[BookingService] createSeatHold failed:', error);

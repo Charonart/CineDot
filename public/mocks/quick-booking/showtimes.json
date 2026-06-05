@@ -1,5 +1,15 @@
 {
   "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/quick-booking/showtimes",
+    "query": {
+      "movieId": "movie_1",
+      "cinemaId": "cinema_1",
+      "date": "2026-06-04"
+    },
+    "description": "Mock response listing showtimes available for quick booking selection"
+  },
   "data": [
     {
       "id": "st_qb_1001",
