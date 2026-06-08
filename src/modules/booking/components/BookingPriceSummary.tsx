@@ -1,42 +1,36 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { SeatItem } from '../data/seatMapData';
+import React from 'react';
+import { Seat } from '../types/booking.type';
 
 interface BookingPriceSummaryProps {
-  selectedSeats: SeatItem[];
+  selectedSeats: Seat[];
+  totalAmount: number;
+  canCheckout: boolean;
+  isHoldingSeats: boolean;
+  timeLeftSeconds: number | null;
   onCheckout: () => void;
 }
 
+const formatTimer = (seconds: number) => {
+  const min = Math.floor(seconds / 60);
+  const sec = seconds % 60;
+  return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+};
+
 export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
   selectedSeats,
+  totalAmount,
+  canCheckout,
+  isHoldingSeats,
+  timeLeftSeconds,
   onCheckout,
 }) => {
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
-
-  // Active session timer countdown logic
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timeLeft]);
-
-  const formatTimer = (seconds: number) => {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  };
-
-  // Group selected seat labels
-  const seatLabels = selectedSeats.map((s) => s.label).join(', ');
-
-  // Calculate pricing
-  const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  const seatLabels = selectedSeats.map((seat) => seat.label).join(', ');
+  const isDisabled = !canCheckout || isHoldingSeats;
 
   return (
-    <aside 
+    <aside
       className="price-summary"
       style={{
         background: 'rgba(255, 255, 255, 0.85)',
@@ -55,25 +49,28 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
         top: '110px',
       }}
     >
-      {/* Session hold timer indicator */}
-      <div 
+      <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#FFF8F0',
-          border: '1px dashed #FFD6A5',
+          background: timeLeftSeconds === null ? '#F6F6F6' : '#FFF8F0',
+          border: timeLeftSeconds === null ? '1px solid var(--border)' : '1px dashed #FFD6A5',
           borderRadius: '12px',
           padding: '12px 16px',
+          gap: '12px',
         }}
       >
-        <span style={{ fontSize: '13px', color: '#C2700D', fontWeight: 600 }}>Thời gian giữ ghế</span>
-        <strong style={{ fontSize: '16px', color: '#E07A00', fontFamily: 'monospace', fontWeight: 700 }}>
-          {formatTimer(timeLeft)}
-        </strong>
+        <span style={{ fontSize: '13px', color: timeLeftSeconds === null ? 'var(--text2)' : '#C2700D', fontWeight: 600 }}>
+          {timeLeftSeconds === null ? 'Ghế chỉ được giữ sau khi tiếp tục' : 'Thời gian giữ ghế'}
+        </span>
+        {timeLeftSeconds !== null && (
+          <strong style={{ fontSize: '16px', color: '#E07A00', fontFamily: 'monospace', fontWeight: 700 }}>
+            {formatTimer(timeLeftSeconds)}
+          </strong>
+        )}
       </div>
 
-      {/* Selected seats list block */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <h3 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text3)', margin: 0, fontWeight: 700 }}>Ghế đã chọn</h3>
         {selectedSeats.length === 0 ? (
@@ -84,7 +81,7 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
               {seatLabels}
             </strong>
             <span style={{ fontSize: '13px', color: 'var(--text2)' }}>
-              Số lượng: {selectedSeats.length} Vé
+              Số lượng: {selectedSeats.length} vé
             </span>
           </div>
         )}
@@ -92,13 +89,12 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
 
       <div style={{ height: '1px', background: 'var(--border)' }} />
 
-      {/* Pricing list breakdowns */}
       {selectedSeats.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <h4 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text3)', margin: 0, fontWeight: 700 }}>Chi tiết giá vé</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '150px', overflowY: 'auto' }}>
             {selectedSeats.map((seat) => (
-              <div key={seat.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13.5px', color: 'var(--text2)' }}>
+              <div key={seat.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13.5px', color: 'var(--text2)', gap: '12px' }}>
                 <span>{seat.label} ({seat.type.toUpperCase()})</span>
                 <span>{seat.price.toLocaleString('vi-VN')} đ</span>
               </div>
@@ -108,7 +104,6 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
         </div>
       )}
 
-      {/* Totals */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 600 }}>Tạm tính:</span>
         <strong style={{ fontSize: '24px', color: '#131413', fontFamily: 'var(--font-head)', fontWeight: 700 }}>
@@ -116,40 +111,27 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
         </strong>
       </div>
 
-      {/* Checkout CTA */}
       <button
         type="button"
-        disabled={selectedSeats.length === 0}
+        disabled={isDisabled}
         onClick={onCheckout}
         style={{
           width: '100%',
           padding: '16px',
           borderRadius: '12px',
-          background: selectedSeats.length === 0 ? 'var(--bg2)' : '#4f3c93',
-          borderColor: selectedSeats.length === 0 ? 'var(--border)' : '#4f3c93',
-          color: selectedSeats.length === 0 ? 'var(--text3)' : '#ffffff',
+          background: isDisabled ? 'var(--bg2)' : '#4f3c93',
+          borderColor: isDisabled ? 'var(--border)' : '#4f3c93',
+          color: isDisabled ? 'var(--text3)' : '#ffffff',
           fontWeight: 700,
           fontSize: '15px',
           borderWidth: '1px',
           borderStyle: 'solid',
-          cursor: selectedSeats.length === 0 ? 'not-allowed' : 'pointer',
+          cursor: isDisabled ? 'not-allowed' : 'pointer',
           transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: selectedSeats.length === 0 ? 'none' : '0 4px 15px rgba(79, 60, 147, 0.2)',
-        }}
-        onMouseEnter={(e) => {
-          if (selectedSeats.length > 0) {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(79, 60, 147, 0.3)';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (selectedSeats.length > 0) {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(79, 60, 147, 0.2)';
-          }
+          boxShadow: isDisabled ? 'none' : '0 4px 15px rgba(79, 60, 147, 0.2)',
         }}
       >
-        Tiếp tục thanh toán
+        {isHoldingSeats ? 'Đang giữ ghế...' : 'Tiếp tục'}
       </button>
     </aside>
   );

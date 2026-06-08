@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
-// ─── Genre / Language / Country ───────────────────────────────────────────────
+// ─── Legacy Sub-types ────────────────────────────────────────────────────────
 
 export const genreItemSchema = z.object({
-  genreId: z.number(),
+  genreId: z.number().optional(),
+  id: z.union([z.number(), z.string()]).optional(),
   name: z.string(),
 });
 
@@ -20,7 +21,7 @@ export const countryItemSchema = z.object({
 export const productionCompanySchema = z.object({
   companyId: z.number(),
   name: z.string(),
-  logoUrl: z.string().url().nullable(),
+  logoUrl: z.string().url().nullable().optional(),
   countryCode: z.string(),
 });
 
@@ -32,41 +33,79 @@ export const ratingSchema = z.object({
 export const collectionSchema = z.object({
   collectionId: z.number(),
   name: z.string(),
-  posterUrl: z.string().url().nullable(),
-  backdropUrl: z.string().url().nullable(),
+  posterUrl: z.string().url().nullable().optional(),
+  backdropUrl: z.string().url().nullable().optional(),
+});
+
+// ─── Cinematic Sub-types ──────────────────────────────────────────────────────
+
+export const movieRecommendationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  poster: z.string(),
+  rating: z.number(),
+  ageRating: z.string(),
+});
+
+export const showtimeItemSchema = z.object({
+  time: z.string(),
+  status: z.enum(['past', 'available', 'almost-full', 'locked', 'sold-out']),
+  scheduleId: z.string(),
+});
+
+export const formatItemSchema = z.object({
+  name: z.string(),
+  times: z.array(showtimeItemSchema),
+});
+
+export const cinemaScheduleSchema = z.object({
+  name: z.string(),
+  formats: z.array(formatItemSchema),
 });
 
 // ─── Movie Detail Schema ──────────────────────────────────────────────────────
 
 export const movieDetailSchema = z.object({
-  movieId: z.number(),
+  movieId: z.number().optional(), // legacy
+  id: z.union([z.number(), z.string()]).optional(), // cinematic
+  slug: z.string().optional(),
   title: z.string(),
-  originalTitle: z.string(),
-  overview: z.string(),
-  tagline: z.string().nullable().default(null),
-  posterUrl: z.string().url(),
-  backdropUrl: z.string().url(),
-  tmdbPosterPath: z.string().nullable().default(null),
-  tmdbBackdropPath: z.string().nullable().default(null),
+  originalTitle: z.string().optional(),
+  overview: z.string().optional().default(''),
+  tagline: z.string().nullable().default(null).optional(),
+  posterUrl: z.string(),
+  backdropUrl: z.string().optional().default(''),
+  tmdbPosterPath: z.string().nullable().default(null).optional(),
+  tmdbBackdropPath: z.string().nullable().default(null).optional(),
   releaseDate: z.string(),
-  runtime: z.number().nullable().default(null),
+  runtime: z.number().nullable().default(null).optional(),
   status: z.string().default('Released'),
-  rating: ratingSchema,
-  genres: z.array(genreItemSchema).default([]),
-  languages: z.array(languageItemSchema).default([]),
-  countries: z.array(countryItemSchema).default([]),
-  productionCompanies: z.array(productionCompanySchema).default([]),
-  collection: collectionSchema.nullable().default(null),
+  rating: z.union([ratingSchema, z.number()]), // lenient rating (object or number)
+  voteCount: z.number().optional(),
+  genres: z.array(z.union([genreItemSchema, z.string()])).default([]),
+  languages: z.array(languageItemSchema).default([]).optional(),
+  countries: z.array(countryItemSchema).default([]).optional(),
+  productionCompanies: z.array(productionCompanySchema).default([]).optional(),
+  collection: collectionSchema.nullable().default(null).optional(),
+
+  // Cinematic Specifics
+  country: z.string().optional(),
+  producer: z.string().optional(),
+  director: z.string().optional(),
+  cast: z.array(z.string()).optional(),
+  trailerUrl: z.string().optional(),
+  recommendations: z.array(movieRecommendationSchema).default([]).optional(),
+  cinemas: z.array(cinemaScheduleSchema).default([]).optional(),
 });
 
-// ─── Credits Schema ───────────────────────────────────────────────────────────
+// ─── Cast & Crew Schema ───────────────────────────────────────────────────────
 
 export const castMemberSchema = z.object({
   personId: z.number(),
   name: z.string(),
   originalName: z.string().optional().default(''),
   role: z.string(),
-  avatarUrl: z.string().url().nullable(),
+  avatarUrl: z.string().url().nullable().optional(),
   tmdbProfilePath: z.string().nullable().optional(),
   sortOrder: z.number(),
 });
@@ -77,7 +116,7 @@ export const crewMemberSchema = z.object({
   originalName: z.string().optional().default(''),
   job: z.string(),
   department: z.string(),
-  avatarUrl: z.string().url().nullable(),
+  avatarUrl: z.string().url().nullable().optional(),
   tmdbProfilePath: z.string().nullable().optional(),
 });
 
@@ -101,7 +140,7 @@ export const videoListSchema = z.object({
   results: z.array(videoSchema),
 });
 
-// ─── Inferred types ───────────────────────────────────────────────────────────
+// ─── Inferred Types ───────────────────────────────────────────────────────────
 
 export type MovieDetailSchemaType = z.infer<typeof movieDetailSchema>;
 export type CreditsSchemaType     = z.infer<typeof creditsSchema>;

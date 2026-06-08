@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/special-theaters/dolby-atmos",
+    "params": { "type": "dolby-atmos" },
+    "description": "Mock response for Dolby Atmos special theater"
+  },
+  "data": {
+    "type": "dolby-atmos",
+    "name": "Dolby Atmos",
+    "tagline": "Âm Thanh Sống Động Như Thực",
+    "description": "Dolby Atmos mang đến trải nghiệm âm thanh 360° đột phá, với âm thanh đến từ mọi hướng kể cả phía trên, tạo nên không gian âm nhạc sống động và chân thực chưa từng có.",
+    "heroImageUrl": "https://images.unsplash.com/photo-1608889175250-c3b0c1667d3a?w=1920&h=1080&fit=crop",
+    "features": [
+      { "icon": "🔊", "title": "Âm thanh 360°", "description": "Bao phủ từ mọi hướng" },
+      { "icon": "🎵", "title": "128 kênh âm thanh", "description": "Chi tiết đến từng âm vị" },
+      { "icon": "📺", "title": "Màn hình Dolby Vision", "description": "Độ tương phản cực cao" },
+      { "icon": "🎭", "title": "Ghế cao cấp", "description": "Ergonomic theater seats" }
+    ],
+    "technology": "Dolby Atmos® Audio + Dolby Vision® Display",
+    "supportedCinemas": [
+      { "id": "cn-001", "name": "CineDot Quận 1 — Vincom Center", "address": "72 Lê Thánh Tôn, Q1, TP.HCM", "slug": "cinedot-q1-saigon" },
+      { "id": "cn-002", "name": "CineDot Quận 7 — SC VivoCity", "address": "1058 Nguyễn Văn Linh, Q7, TP.HCM", "slug": "cinedot-q7-sc-vivo" },
+      { "id": "cn-004", "name": "CineDot Đà Nẵng — Vincom", "address": "910A Ngô Quyền, Sơn Trà, ĐN", "slug": "cinedot-da-nang-vincom" }
+    ],
+    "nowShowingMovies": [
+      { "id": "m-001", "slug": "dune-part-two", "title": "Dune: Part Two", "posterUrl": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=300&h=450&fit=crop", "rating": 8.5 },
+      { "id": "m-003", "slug": "ghostbusters-frozen", "title": "Ghostbusters: Frozen Empire", "posterUrl": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=300&h=450&fit=crop", "rating": 7.2 }
+    ]
+  }
+}

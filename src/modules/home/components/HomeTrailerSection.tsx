@@ -6,6 +6,7 @@ import {
   HighlightText,
   ScrollTextSlideLeft
 } from '@/shared/components/visual';
+import { appRoutes } from '@/shared/routes/appRoutes';
 
 export const HomeTrailerSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,7 +74,7 @@ export const HomeTrailerSection: React.FC = () => {
                 </div>
               </div>
               <Link
-                href="/movies"
+                href={appRoutes.movies}
                 className="btn-primary btn-large"
                 id="openTrailerBtn3"
                 style={{

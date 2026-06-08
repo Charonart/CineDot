@@ -5,11 +5,11 @@ import { MovieListResponseDTO } from '@modules/movie/dto/movie.dto';
 
 export const movieDetailApi = {
   /**
-   * GET /api/v1/movies/:id
+   * GET /api/v1/movies/detail/:slug
    * Thông tin chi tiết phim
    */
-  getDetail: (id: number): Promise<ApiResponse<MovieDetailDTO>> =>
-    axiosClient.get(`/movies/${id}`),
+  getDetail: (slug: string | number): Promise<ApiResponse<MovieDetailDTO>> =>
+    axiosClient.get(`/movies/detail/${slug}`),
 
   /**
    * GET /api/v1/movies/:id/credits

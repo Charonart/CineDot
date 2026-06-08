@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/quick-booking/cinemas",
+    "query": {
+      "movieId": "movie_1"
+    },
+    "description": "Mock response listing cinemas available for quick booking selection"
+  },
+  "data": [
+    {
+      "id": "cinema_1",
+      "name": "CINE Landmark - Quan 1",
+      "movieIds": ["movie_1", "movie_2", "movie_4", "movie_6"]
+    },
+    {
+      "id": "cinema_2",
+      "name": "CINE Crescent - Quan 7",
+      "movieIds": ["movie_1", "movie_3", "movie_5"]
+    },
+    {
+      "id": "cinema_3",
+      "name": "CINE Aeon - Binh Duong",
+      "movieIds": ["movie_2", "movie_3", "movie_6"]
+    },
+    {
+      "id": "cinema_4",
+      "name": "CINE Vincom - Quan 3",
+      "movieIds": ["movie_4", "movie_5"]
+    }
+  ]
+}
