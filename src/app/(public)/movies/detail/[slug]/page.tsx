@@ -9,6 +9,7 @@ import {
   MovieRecommendations 
 } from '@modules/movie-detail/components';
 import { getMovieDetailBySlug } from '@modules/movie-detail/data/movieDetailData';
+import { useSearchParams } from 'next/navigation';
 import { TrailerModal } from '@/shared/components/visual';
 
 interface PageProps {
@@ -19,6 +20,21 @@ function MovieDetailPageContent({ params }: PageProps) {
   const { slug } = React.use(params);
   const movie = getMovieDetailBySlug(slug);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const focus = searchParams.get('focus');
+
+  React.useEffect(() => {
+    if (focus === 'schedule') {
+      // Small timeout to allow content layout rendering
+      const timer = setTimeout(() => {
+        const scheduleEl = document.getElementById('schedule');
+        if (scheduleEl) {
+          scheduleEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [focus]);
 
   return (
     <main className="movie-detail-page">

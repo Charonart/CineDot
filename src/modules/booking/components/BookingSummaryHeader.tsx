@@ -10,6 +10,7 @@ interface BookingSummaryHeaderProps {
   showTime: string;
   format: string;
   runtime: number;
+  onBack?: () => void;
 }
 
 export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({
@@ -20,10 +21,13 @@ export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({
   showTime,
   format,
   runtime,
+  onBack,
 }) => {
   // Back logic - return to movie details page
   const handleBack = () => {
-    if (typeof window !== 'undefined') {
+    if (onBack) {
+      onBack();
+    } else if (typeof window !== 'undefined') {
       window.history.back();
     }
   };

@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
-import { SeatItem } from '../data/seatMapData';
+import { SelectedSeat } from '../types';
+import { useBookingStore } from '../store/bookingStore';
+import { useSeatHoldTimer } from '../hooks/useSeatHoldTimer';
 
 interface MobileBookingBarProps {
-  selectedSeats: SeatItem[];
+  selectedSeats: SelectedSeat[];
   onCheckout: () => void;
 }
 
@@ -12,7 +14,8 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
   selectedSeats,
   onCheckout,
 }) => {
-  const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  const { isExpired } = useSeatHoldTimer();
+  const finalTotal = useBookingStore((state) => state.session.finalTotal);
   const seatLabels = selectedSeats.map((s) => s.label).join(', ');
 
   return (
@@ -62,33 +65,33 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
           {selectedSeats.length === 0 ? 'Chưa có ghế' : seatLabels}
         </strong>
         <span style={{ fontSize: '16px', color: '#131413', fontWeight: 800, marginTop: '2px' }}>
-          {totalAmount.toLocaleString('vi-VN')} đ
+          {finalTotal.toLocaleString('vi-VN')} đ
         </span>
       </div>
 
       {/* Action CTA */}
       <button
         type="button"
-        disabled={selectedSeats.length === 0}
+        disabled={selectedSeats.length === 0 || isExpired}
         onClick={onCheckout}
         style={{
           flex: 1,
           maxWidth: '180px',
           padding: '14px 20px',
           borderRadius: '10px',
-          background: selectedSeats.length === 0 ? 'var(--bg2)' : '#4f3c93',
-          borderColor: selectedSeats.length === 0 ? 'var(--border)' : '#4f3c93',
-          color: selectedSeats.length === 0 ? 'var(--text3)' : '#ffffff',
+          background: (selectedSeats.length === 0 || isExpired) ? 'var(--bg2)' : '#4f3c93',
+          borderColor: (selectedSeats.length === 0 || isExpired) ? 'var(--border)' : '#4f3c93',
+          color: (selectedSeats.length === 0 || isExpired) ? 'var(--text3)' : '#ffffff',
           fontWeight: 700,
           fontSize: '14px',
           borderWidth: '1px',
           borderStyle: 'solid',
-          cursor: selectedSeats.length === 0 ? 'not-allowed' : 'pointer',
+          cursor: (selectedSeats.length === 0 || isExpired) ? 'not-allowed' : 'pointer',
           transition: 'var(--transition)',
           textAlign: 'center',
         }}
       >
-        Đặt vé ({selectedSeats.length})
+        {isExpired ? 'Hết hạn' : `Tiếp tục (${selectedSeats.length})`}
       </button>
     </div>
   );

@@ -5,3 +5,13 @@ export { SeatLegend } from './SeatLegend';
 export { BookingPriceSummary } from './BookingPriceSummary';
 export { MobileBookingBar } from './MobileBookingBar';
 export { SeatPriceBreakdown } from './SeatPriceBreakdown';
+export { QuickComboPopup } from './QuickComboPopup';
+export { BookingStepper } from './BookingStepper';
+export { FoodComboCard } from './FoodComboCard';
+export { FoodComboList } from './FoodComboList';
+export { BookingOrderSummary } from './BookingOrderSummary';
+export { VoucherPanel } from './VoucherPanel';
+export { PaymentMethodSelector } from './PaymentMethodSelector';
+export { TicketConfirmModal } from './TicketConfirmModal';
+
+

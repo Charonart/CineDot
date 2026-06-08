@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { SeatItem } from '../data/seatMapData';
+import { SelectedSeat } from '../types';
 
 interface SeatPriceBreakdownProps {
-  selectedSeats: SeatItem[];
+  selectedSeats: SelectedSeat[];
 }
 
 export const SeatPriceBreakdown: React.FC<SeatPriceBreakdownProps> = ({ selectedSeats }) => {

@@ -3,10 +3,11 @@
 import React from 'react';
 import { SeatItem } from '../data/seatMapData';
 import { SeatButton } from './SeatButton';
+import { SelectedSeat } from '../types';
 
 interface SeatMapProps {
   seats: SeatItem[];
-  selectedSeats: SeatItem[];
+  selectedSeats: SelectedSeat[];
   onToggleSeat: (seat: SeatItem) => void;
 }
 

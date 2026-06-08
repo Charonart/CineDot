@@ -3,6 +3,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ExpandableSearchBar } from '@shared/ui/ExpandableSearchBar';
 
 interface Movie {
   id: string;
@@ -84,6 +86,7 @@ const comingSoonMovies: Movie[] = [
 ];
 
 export const Navbar: React.FC = () => {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -170,13 +173,13 @@ export const Navbar: React.FC = () => {
             )}
           </div>
           <div className="mega-overlay">
-            <Link href={`/movies/${movie.id}#schedule`} className="btn-primary mega-action-btn">
+            <Link href={`/movies/detail/${movie.id}#schedule`} className="btn-primary mega-action-btn">
               Đặt vé
             </Link>
           </div>
         </div>
         <div className="mega-movie-info">
-          <Link href={`/movies/${movie.id}`} className="mega-movie-title">
+          <Link href={`/movies/detail/${movie.id}`} className="mega-movie-title">
             {movie.title}
           </Link>
           <div className="mega-meta-row">
@@ -351,12 +354,16 @@ export const Navbar: React.FC = () => {
 
         {/* Actions Button Panel */}
         <div className="nav-actions">
-          <button className="nav-icon-btn" aria-label="Tìm kiếm">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </button>
+          <ExpandableSearchBar
+            placeholder="Tìm phim..."
+            expandedWidth="min(260px, 28vw)"
+            onSubmit={(value) => {
+              const trimmed = value.trim();
+              if (trimmed) {
+                router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+              }
+            }}
+          />
           <a href="#" className="nav-login">Đăng nhập</a>
           <Link href="/movies?category=now-showing" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
             Đặt vé

@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { TrailerModal } from '@/shared/components/visual';
 
 interface Movie {
@@ -26,6 +27,7 @@ interface MovieCardProps {
 }
 
 export const MovieCard: React.FC<MovieCardProps> = (props) => {
+  const router = useRouter();
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
   const movie = props.movie || {
@@ -46,9 +48,13 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
   return (
     <>
       <div className="movie-card">
-        <div className="movie-poster-wrap">
+        <div 
+          className="movie-poster-wrap" 
+          onClick={() => router.push(`/movies/detail/${id}`)}
+          style={{ cursor: 'pointer' }}
+        >
           <img src={posterUrl} alt={title} className="movie-poster" />
-          <div className="movie-overlay">
+          <div className="movie-overlay" onClick={(e) => e.stopPropagation()}>
             <a 
               href={`/movies/detail/${id}`} 
               className="btn-primary movie-action-btn" 
@@ -82,7 +88,12 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
           {format && <span className="movie-format-badge">{format}</span>}
         </div>
         <div className="movie-info">
-          <h3>{title}</h3>
+          <h3 
+            onClick={() => router.push(`/movies/detail/${id}`)}
+            style={{ cursor: 'pointer' }}
+          >
+            {title}
+          </h3>
           <div className="movie-meta-row">
             <span className="rating">★ {rating}</span>
             <span className="genre-tag">{genre}</span>

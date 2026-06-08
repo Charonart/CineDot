@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { SeatItem } from '../data/seatMapData';
+import React from 'react';
+import { SelectedSeat } from '../types';
+import { useBookingStore } from '../store/bookingStore';
+import { useSeatHoldTimer } from '../hooks/useSeatHoldTimer';
 
 interface BookingPriceSummaryProps {
-  selectedSeats: SeatItem[];
+  selectedSeats: SelectedSeat[];
   onCheckout: () => void;
 }
 
@@ -12,28 +14,15 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
   selectedSeats,
   onCheckout,
 }) => {
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const { isActive, formattedTime, isExpired } = useSeatHoldTimer();
+  
+  const ticketTotal = useBookingStore((state) => state.session.ticketTotal);
+  const comboTotal = useBookingStore((state) => state.session.comboTotal);
+  const discountAmount = useBookingStore((state) => state.session.discountAmount);
+  const finalTotal = useBookingStore((state) => state.session.finalTotal);
 
-  // Active session timer countdown logic
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timeLeft]);
-
-  const formatTimer = (seconds: number) => {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  };
-
-  // Group selected seat labels
+  const combos = useBookingStore((state) => state.session.combos);
   const seatLabels = selectedSeats.map((s) => s.label).join(', ');
-
-  // Calculate pricing
-  const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
 
   return (
     <aside 
@@ -56,22 +45,26 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
       }}
     >
       {/* Session hold timer indicator */}
-      <div 
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#FFF8F0',
-          border: '1px dashed #FFD6A5',
-          borderRadius: '12px',
-          padding: '12px 16px',
-        }}
-      >
-        <span style={{ fontSize: '13px', color: '#C2700D', fontWeight: 600 }}>Thời gian giữ ghế</span>
-        <strong style={{ fontSize: '16px', color: '#E07A00', fontFamily: 'monospace', fontWeight: 700 }}>
-          {formatTimer(timeLeft)}
-        </strong>
-      </div>
+      {isActive && (
+        <div 
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+            background: '#FFF8F0',
+            border: '1px dashed #FFD6A5',
+            borderRadius: '12px',
+            padding: '12px 16px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <span style={{ fontSize: '13px', color: '#C2700D', fontWeight: 600 }}>Thời gian giữ ghế</span>
+            <strong style={{ fontSize: '16px', color: '#E07A00', fontFamily: 'monospace', fontWeight: 700 }}>
+              {formattedTime}
+            </strong>
+          </div>
+        </div>
+      )}
 
       {/* Selected seats list block */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -92,6 +85,28 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
 
       <div style={{ height: '1px', background: 'var(--border)' }} />
 
+      {/* Selected combos list block */}
+      {combos.length > 0 && (
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <h3 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text3)', margin: 0, fontWeight: 700 }}>Combo đã chọn</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {combos.map((combo) => (
+                <div key={combo.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <strong style={{ fontSize: '14.5px', color: '#131413', fontWeight: 600 }}>
+                    {combo.name} x{combo.quantity}
+                  </strong>
+                  <span style={{ fontSize: '14px', color: 'var(--text2)' }}>
+                    {(combo.price * combo.quantity).toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ height: '1px', background: 'var(--border)' }} />
+        </>
+      )}
+
       {/* Pricing list breakdowns */}
       {selectedSeats.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -108,48 +123,67 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
         </div>
       )}
 
-      {/* Totals */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 600 }}>Tạm tính:</span>
-        <strong style={{ fontSize: '24px', color: '#131413', fontFamily: 'var(--font-head)', fontWeight: 700 }}>
-          {totalAmount.toLocaleString('vi-VN')} đ
-        </strong>
+      {/* Totals & Discounts Breakdown */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14.5px', color: 'var(--text2)' }}>
+          <span>Tạm tính vé:</span>
+          <span>{ticketTotal.toLocaleString('vi-VN')} đ</span>
+        </div>
+        {comboTotal > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14.5px', color: 'var(--text2)' }}>
+            <span>Tạm tính combo:</span>
+            <span>{comboTotal.toLocaleString('vi-VN')} đ</span>
+          </div>
+        )}
+        {discountAmount > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14.5px', color: '#E53E3E', fontWeight: 600 }}>
+            <span>Giảm giá:</span>
+            <span>-{discountAmount.toLocaleString('vi-VN')} đ</span>
+          </div>
+        )}
+        <div style={{ height: '1px', background: 'var(--border)', margin: '4px 0' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 700 }}>Tổng cộng:</span>
+          <strong style={{ fontSize: '24px', color: '#131413', fontFamily: 'var(--font-head)', fontWeight: 700 }}>
+            {finalTotal.toLocaleString('vi-VN')} đ
+          </strong>
+        </div>
       </div>
 
       {/* Checkout CTA */}
       <button
         type="button"
-        disabled={selectedSeats.length === 0}
+        disabled={selectedSeats.length === 0 || isExpired}
         onClick={onCheckout}
         style={{
           width: '100%',
           padding: '16px',
           borderRadius: '12px',
-          background: selectedSeats.length === 0 ? 'var(--bg2)' : '#4f3c93',
-          borderColor: selectedSeats.length === 0 ? 'var(--border)' : '#4f3c93',
-          color: selectedSeats.length === 0 ? 'var(--text3)' : '#ffffff',
+          background: (selectedSeats.length === 0 || isExpired) ? 'var(--bg2)' : '#4f3c93',
+          borderColor: (selectedSeats.length === 0 || isExpired) ? 'var(--border)' : '#4f3c93',
+          color: (selectedSeats.length === 0 || isExpired) ? 'var(--text3)' : '#ffffff',
           fontWeight: 700,
           fontSize: '15px',
           borderWidth: '1px',
           borderStyle: 'solid',
-          cursor: selectedSeats.length === 0 ? 'not-allowed' : 'pointer',
+          cursor: (selectedSeats.length === 0 || isExpired) ? 'not-allowed' : 'pointer',
           transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: selectedSeats.length === 0 ? 'none' : '0 4px 15px rgba(79, 60, 147, 0.2)',
+          boxShadow: (selectedSeats.length === 0 || isExpired) ? 'none' : '0 4px 15px rgba(79, 60, 147, 0.2)',
         }}
         onMouseEnter={(e) => {
-          if (selectedSeats.length > 0) {
+          if (selectedSeats.length > 0 && !isExpired) {
             e.currentTarget.style.transform = 'translateY(-2px)';
             e.currentTarget.style.boxShadow = '0 6px 20px rgba(79, 60, 147, 0.3)';
           }
         }}
         onMouseLeave={(e) => {
-          if (selectedSeats.length > 0) {
+          if (selectedSeats.length > 0 && !isExpired) {
             e.currentTarget.style.transform = 'none';
             e.currentTarget.style.boxShadow = '0 4px 15px rgba(79, 60, 147, 0.2)';
           }
         }}
       >
-        Tiếp tục thanh toán
+        {isExpired ? 'Phiên giữ ghế đã hết hạn' : 'Tiếp tục'}
       </button>
     </aside>
   );
