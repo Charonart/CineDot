@@ -3,11 +3,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ExpandableSearchBar } from '@shared/ui/ExpandableSearchBar';
 import { useNavbarMovies } from '@/modules/movie/hooks/useMovies';
 import { Movie } from '@/modules/movie/types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
 
 export const Navbar: React.FC = () => {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -341,14 +344,18 @@ export const Navbar: React.FC = () => {
 
         {/* Actions Button Panel */}
         <div className="nav-actions">
-          <button className="nav-icon-btn" aria-label="Tìm kiếm">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </button>
+          <ExpandableSearchBar
+            placeholder="Tìm phim..."
+            expandedWidth="min(260px, 28vw)"
+            onSubmit={(value) => {
+              const trimmed = value.trim();
+              if (trimmed) {
+                router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+              }
+            }}
+          />
           <Link href="/coming-soon" className="nav-login">Đăng nhập</Link>
-          <Link href={`${appRoutes.movies}?category=now-showing`} className="btn-primary">
+          <Link href={`${appRoutes.movies}?category=now-showing`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
             Đặt vé
           </Link>
         </div>

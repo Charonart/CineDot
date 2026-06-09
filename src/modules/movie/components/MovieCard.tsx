@@ -58,9 +58,13 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
   return (
     <>
       <div className="movie-card">
-        <div className="movie-poster-wrap">
+        <Link 
+          href={detailUrl}
+          className="movie-poster-wrap" 
+          style={{ cursor: 'pointer', display: 'block' }}
+        >
           <img src={posterUrl} alt={title} className="movie-poster" />
-          <div className="movie-overlay">
+          <div className="movie-overlay" onClick={(e) => e.stopPropagation()}>
             <Link 
               href={appRoutes.movieSchedule(slug)} 
               className="btn-primary movie-action-btn" 
@@ -92,7 +96,7 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
             </button>
           </div>
           {format && <span className="movie-format-badge">{format}</span>}
-        </div>
+        </Link>
         <div className="movie-info">
           <h3>
             <Link href={detailUrl} style={{ color: 'inherit', textDecoration: 'none' }}>

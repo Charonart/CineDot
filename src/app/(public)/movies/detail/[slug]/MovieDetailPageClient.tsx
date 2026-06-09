@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   MovieDetailHeroStatic, 
   MovieDetailInfo, 
@@ -17,7 +18,20 @@ interface MovieDetailPageClientProps {
 
 export default function MovieDetailPageClient({ movie }: MovieDetailPageClientProps) {
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const focus = searchParams.get('focus');
 
+  React.useEffect(() => {
+    if (focus === 'schedule') {
+      const timer = setTimeout(() => {
+        const scheduleEl = document.getElementById('schedule');
+        if (scheduleEl) {
+          scheduleEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [focus]);
   return (
     <main className="movie-detail-page">
       {/* SECTION 2 — TRAILER / HERO VIDEO SECTION */}

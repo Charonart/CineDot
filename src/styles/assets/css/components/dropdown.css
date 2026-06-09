@@ -59,8 +59,8 @@
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.75px;
-  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  color: rgba(19, 20, 19, 0.55);
   margin-bottom: 2px;
 }
 
@@ -104,12 +104,12 @@
   left: 0;
   width: 100%;
   max-height: 280px;
-  background: #FFFFFF;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(19, 20, 19, 0.10);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 18px 40px rgba(19, 20, 19, 0.14);
   z-index: 1000; /* High z-index to avoid hero/container clipping */
   overflow-y: auto;
   opacity: 0;
@@ -178,13 +178,13 @@
 /* Hover or keyboard-nav highlight state */
 .cine-dropdown-item:hover,
 .cine-dropdown-item.is-highlighted {
-  background: rgba(207, 201, 235, 0.35) !important;
+  background: rgba(207, 201, 235, 0.45) !important;
   color: #131413 !important;
 }
 
 /* Selected state */
 .cine-dropdown-item.is-selected {
-  background: rgba(207, 201, 235, 0.55) !important;
+  background: rgba(207, 201, 235, 0.70) !important;
   color: #131413 !important;
   font-weight: 600 !important;
 }
@@ -250,7 +250,7 @@
 /* 6. SPECIAL STATES (DISABLED & ERROR) */
 /* Disabled state wrapper */
 .cine-dropdown.is-disabled {
-  opacity: 0.55;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -308,16 +308,17 @@
 
 .booking-field .cine-dropdown-chevron {
   right: 0 !important;
+  color: rgba(19, 20, 19, 0.45) !important;
 }
 
 .booking-field .cine-dropdown-value {
   font-size: 13px !important;
   font-weight: 600 !important;
-  color: var(--color-text-primary) !important;
+  color: #131413 !important;
 }
 
 .booking-field .cine-dropdown-value.is-placeholder {
-  color: var(--color-text-muted) !important;
+  color: rgba(19, 20, 19, 0.50) !important;
 }
 
 .booking-field .cine-dropdown-trigger:focus-visible .cine-dropdown-value {
@@ -335,8 +336,9 @@
 }
 
 .schedule-filters .cine-dropdown-trigger {
-  padding: 10px 36px 10px 16px !important;
+  padding: 4px 36px 4px 16px !important;
   min-height: 44px !important;
+  height: 44px !important;
   background: var(--color-surface) !important;
   border: 1px solid var(--color-border) !important;
 }
@@ -366,12 +368,12 @@
 }
 
 .booking-field.is-active label {
-  color: #7C6FE8 !important; /* var(--color-accent-strong) purple accent */
+  color: #6f5bd6 !important;
   font-weight: 700 !important;
 }
 
 .booking-field.is-active .cine-dropdown-value {
-  color: var(--color-text-primary) !important;
+  color: rgba(19, 20, 19, 0.88) !important;
 }
 
 /* SELECTED / COMPLETED STATE */
@@ -381,7 +383,7 @@
 }
 
 .booking-field.is-selected label {
-  color: #7C6FE8 !important; /* var(--color-accent-strong) purple accent */
+  color: #6f5bd6 !important;
   font-weight: 700 !important;
 }
 
@@ -391,21 +393,25 @@
 }
 
 .booking-field.is-selected .cine-dropdown-chevron {
-  color: #7C6FE8 !important; /* purple accent icon */
+  color: #6f5bd6 !important; /* purple accent icon */
 }
 
 /* DISABLED STATE */
 .booking-field.is-disabled {
-  opacity: 0.45 !important;
+  opacity: 1 !important;
   pointer-events: none !important;
 }
 
 .booking-field.is-disabled label {
-  color: var(--color-text-muted) !important;
+  color: rgba(19, 20, 19, 0.32) !important;
 }
 
 .booking-field.is-disabled .cine-dropdown-value {
-  color: var(--color-text-muted) !important;
+  color: rgba(19, 20, 19, 0.32) !important;
+}
+
+.booking-field.is-disabled .cine-dropdown-chevron {
+  color: rgba(19, 20, 19, 0.26) !important;
 }
 
 /* OPEN / EXPANDED STATE OVERLAYS */

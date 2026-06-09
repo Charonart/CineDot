@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Seat } from '../types/booking.type';
+import { useBookingStore } from '../store/bookingStore';
 
 interface MobileBookingBarProps {
   selectedSeats: Seat[];
@@ -18,6 +19,10 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
   isHoldingSeats,
   onCheckout,
 }) => {
+  const comboTotal = useBookingStore((state) => state.session.comboTotal);
+  const discountAmount = useBookingStore((state) => state.session.discountAmount);
+  const finalTotal = totalAmount + comboTotal - discountAmount;
+
   const seatLabels = selectedSeats.map((seat) => seat.label).join(', ');
   const isDisabled = !canCheckout || isHoldingSeats;
 
@@ -66,7 +71,7 @@ export const MobileBookingBar: React.FC<MobileBookingBarProps> = ({
           {selectedSeats.length === 0 ? 'Chưa có ghế' : seatLabels}
         </strong>
         <span style={{ fontSize: '16px', color: '#131413', fontWeight: 800, marginTop: '2px' }}>
-          {totalAmount.toLocaleString('vi-VN')} đ
+          {finalTotal.toLocaleString('vi-VN')} đ
         </span>
       </div>
 

@@ -1,4 +1,7 @@
-import React, { useState, useMemo } from 'react';
+'use client';
+
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { CinemaSchedule, ShowtimeItem } from '../data/movieDetailData';
 import { ScrollTextSlideLeft, HighlightText } from '@/shared/components/visual';
 
@@ -6,17 +9,135 @@ interface MovieScheduleProps {
   cinemas: CinemaSchedule[];
 }
 
+interface ScheduleDropdownProps {
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (val: string) => void;
+  className?: string;
+}
+
+const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({
+  label,
+  value,
+  options,
+  onChange,
+  className = '',
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className={`cine-dropdown ${isOpen ? 'is-open is-open-down' : ''} ${className}`}
+    >
+      <button
+        type="button"
+        className="cine-dropdown-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ minHeight: '44px', height: '44px', padding: '4px 16px' }}
+      >
+        <span className="cine-dropdown-label" style={{ fontSize: '9px', marginBottom: '1px', lineHeight: '1.2' }}>{label}</span>
+        <span className="cine-dropdown-value" style={{ fontSize: '13px', lineHeight: '1.2' }}>
+          {selectedOption ? selectedOption.label : 'Chọn...'}
+        </span>
+        <span className="cine-dropdown-chevron">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </span>
+      </button>
+
+      {isOpen && (
+        <div className="cine-dropdown-menu" role="listbox" style={{ top: 'calc(100% + 4px)' }}>
+          <div className="cine-dropdown-list">
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`cine-dropdown-item ${opt.value === value ? 'is-selected' : ''}`}
+                role="option"
+                aria-selected={opt.value === value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+              >
+                <span>{opt.label}</span>
+                {opt.value === value && (
+                  <span className="cine-dropdown-check-icon" style={{ display: 'inline' }}>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
+  const router = useRouter();
+  const params = useParams();
+  const movieSlug = (params?.slug as string) || '';
+
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedCinemaFilter, setSelectedCinemaFilter] = useState<string>('all');
-  
-  // Track currently selected showtime to display CTA
-  const [selectedShowtime, setSelectedShowtime] = useState<{
-    cinemaName: string;
-    time: string;
-    scheduleId: string;
-  } | null>(null);
+
+  const regionOptions = useMemo(() => [
+    { value: 'all', label: 'Toàn quốc' },
+    { value: 'hcm', label: 'Hồ Chí Minh' },
+    { value: 'hanoi', label: 'Hà Nội' },
+    { value: 'danang', label: 'Đà Nẵng' },
+  ], []);
+
+  const cinemaOptions = useMemo(() => [
+    { value: 'all', label: 'Tất cả rạp' },
+    { value: 'galaxy', label: 'Galaxy CineX - Hanoi Centre' },
+    { value: 'landmark', label: 'CINE Landmark - Q1' },
+    { value: 'crescent', label: 'CINE Crescent - Q7' },
+  ], []);
 
   // Generate 7 days (today + next 6 days) dynamically
   const dateTabs = useMemo(() => {
@@ -84,8 +205,14 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
     }
   };
 
-  const handleShowtimeClick = (cinemaName: string, time: string, scheduleId: string) => {
-    setSelectedShowtime({ cinemaName, time, scheduleId });
+  const handleShowtimeClick = (cinemaName: string, time: string) => {
+    const bookingParams = new URLSearchParams({
+      movie: movieSlug,
+      cinema: cinemaName,
+      date: selectedDate,
+      time: time,
+    });
+    router.push(`/booking/seats?${bookingParams.toString()}`);
   };
 
   return (
@@ -98,85 +225,74 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
       </ScrollTextSlideLeft>
 
       <div className="schedule-toolbar">
-        {/* Date slider */}
-        <button 
-          type="button" 
-          className="date-nav prev" 
-          aria-label="Ngày trước"
-          onClick={() => {
-            const el = document.querySelector('.date-slider');
-            el?.scrollBy({ left: -240, behavior: 'smooth' });
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
+        {/* Date Selector Wrapper */}
+        <div className="schedule-date-nav">
+          <button 
+            type="button" 
+            className="schedule-nav-btn" 
+            aria-label="Ngày trước"
+            onClick={() => {
+              const el = document.querySelector('.schedule-date-list');
+              el?.scrollBy({ left: -240, behavior: 'smooth' });
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
 
-        <div className="date-slider">
-          {dateTabs.map(({ dayLabel, formattedDate, dateStr }) => (
-            <button
-              key={dateStr}
-              type="button"
-              className={`date-tab ${selectedDate === dateStr ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedDate(dateStr);
-                setSelectedShowtime(null); // Clear selected seat CTA on date switch
-              }}
-            >
-              <span>{dayLabel}</span>
-              <strong>{formattedDate}</strong>
-            </button>
-          ))}
+          <div className="schedule-date-list">
+            {dateTabs.map(({ dayLabel, formattedDate, dateStr }) => (
+              <button
+                key={dateStr}
+                type="button"
+                className={`schedule-date-item ${selectedDate === dateStr ? 'is-active active' : ''}`}
+                onClick={() => {
+                  setSelectedDate(dateStr);
+                }}
+              >
+                <span className="schedule-date-label">{dayLabel}</span>
+                <span className="schedule-date-value">{formattedDate}</span>
+              </button>
+            ))}
+          </div>
+
+          <button 
+            type="button" 
+            className="schedule-nav-btn" 
+            aria-label="Ngày sau"
+            onClick={() => {
+              const el = document.querySelector('.schedule-date-list');
+              el?.scrollBy({ left: 240, behavior: 'smooth' });
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
-
-        <button 
-          type="button" 
-          className="date-nav next" 
-          aria-label="Ngày tiếp theo"
-          onClick={() => {
-            const el = document.querySelector('.date-slider');
-            el?.scrollBy({ left: 240, behavior: 'smooth' });
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
 
         {/* Dropdown Filters */}
         <div className="schedule-filters">
-          <select 
-            className="filter-select" 
-            id="filterRegion" 
+          <ScheduleDropdown
+            label="Khu vực"
             value={selectedRegion}
-            onChange={(e) => {
-              setSelectedRegion(e.target.value);
-              setSelectedShowtime(null);
+            options={regionOptions}
+            onChange={(val) => {
+              setSelectedRegion(val);
             }}
-            aria-label="Chọn khu vực"
-          >
-            <option value="all">Toàn quốc</option>
-            <option value="hcm">Hồ Chí Minh</option>
-            <option value="hanoi">Hà Nội</option>
-            <option value="danang">Đà Nẵng</option>
-          </select>
+            className="schedule-filter-city"
+          />
           
-          <select 
-            className="filter-select" 
-            id="filterCinema" 
+          <ScheduleDropdown
+            label="Rạp chiếu"
             value={selectedCinemaFilter}
-            onChange={(e) => {
-              setSelectedCinemaFilter(e.target.value);
-              setSelectedShowtime(null);
+            options={cinemaOptions}
+            onChange={(val) => {
+              setSelectedCinemaFilter(val);
             }}
-            aria-label="Chọn rạp"
-          >
-            <option value="all">Tất cả rạp</option>
-            <option value="galaxy">Galaxy CineX - Hanoi Centre</option>
-            <option value="landmark">CINE Landmark - Q1</option>
-            <option value="crescent">CINE Crescent - Q7</option>
-          </select>
+            className="schedule-filter-cinema"
+          />
         </div>
       </div>
 
@@ -187,8 +303,6 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </div>
       ) : (
         filteredCinemas.map((cinema) => {
-          const hasSelectedInThisCinema = selectedShowtime?.cinemaName === cinema.name;
-
           return (
             <div key={cinema.name} className="cinema-schedule-box" style={{ marginBottom: '24px' }}>
               <h3 className="cinema-group-title">{cinema.name}</h3>
@@ -200,16 +314,15 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
                     <div className="time-grid">
                       {format.times.map((item) => {
                         const { className, disabled, title, label } = getShowtimeBtnProps(item.status);
-                        const isCurrentSelected = selectedShowtime?.scheduleId === item.scheduleId;
 
                         return (
                           <button
                             key={item.scheduleId}
                             type="button"
-                            className={`${className} ${isCurrentSelected ? 'selected' : ''}`}
+                            className={className}
                             disabled={disabled}
                             title={title}
-                            onClick={() => handleShowtimeClick(cinema.name, item.time, item.scheduleId)}
+                            onClick={() => handleShowtimeClick(cinema.name, item.time)}
                           >
                             <span>{item.time}</span>
                             {label && <small>{label}</small>}
@@ -220,23 +333,6 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
                   </div>
                 ))}
               </div>
-
-              {/* Dynamic Next Step seat selection CTA inside the active cinema box */}
-              {hasSelectedInThisCinema && selectedShowtime && (
-                <div id="nextStepCtaWrap" className="showtime-next-step" style={{ marginTop: '20px', borderTop: '1px solid var(--color-surface-muted)', paddingTop: '16px' }}>
-                  <button 
-                    type="button"
-                    className="btn-primary btn-large" 
-                    onClick={() => {
-                      const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-                      const movieSlug = pathname.split('/').pop() || 'dune-part-two';
-                      window.location.href = `/booking/seats?movie=${movieSlug}&cinema=${encodeURIComponent(selectedShowtime.cinemaName)}&date=${selectedDate}&time=${selectedShowtime.time}`;
-                    }}
-                  >
-                    Tiếp tục chọn ghế ({selectedShowtime.time})
-                  </button>
-                </div>
-              )}
             </div>
           );
         })
