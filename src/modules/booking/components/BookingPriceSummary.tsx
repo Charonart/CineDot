@@ -157,6 +157,7 @@ export const BookingPriceSummary: React.FC<BookingPriceSummaryProps> = ({
           <strong style={{ fontSize: '24px', color: '#131413', fontFamily: 'var(--font-head)', fontWeight: 700 }}>
             {finalTotal.toLocaleString('vi-VN')} đ
           </strong>
+        </div>
       </div>
 
       <button
