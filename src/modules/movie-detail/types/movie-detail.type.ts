@@ -1,12 +1,10 @@
 /**
  * Movie Detail Domain Types
- * Contract mà UI sử dụng — tách biệt hoàn toàn với DTO.
+ * Contracts used directly by the Cinematic layouts.
  */
 
-// ─── Sub-types ────────────────────────────────────────────────────────────────
-
 export interface Genre {
-  id: number;
+  id: number | string;
   name: string;
 }
 
@@ -31,12 +29,39 @@ export interface Collection {
   name: string;
 }
 
+// ─── Cinematic / Detailed Sub-types ──────────────────────────────────────────
+
+export interface MovieRecommendation {
+  id: string;
+  title: string;
+  poster: string;
+  rating: number;
+  ageRating: string;
+}
+
+export interface ShowtimeItem {
+  time: string;
+  status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out';
+  scheduleId: string;
+}
+
+export interface FormatItem {
+  name: string;
+  times: ShowtimeItem[];
+}
+
+export interface CinemaSchedule {
+  name: string;
+  formats: FormatItem[];
+}
+
 // ─── Movie Detail ─────────────────────────────────────────────────────────────
 
 export interface MovieDetail {
-  id: number;               // mapped from movieId
+  id: number | string;
+  slug: string;
   title: string;
-  originalTitle: string;
+  originalTitle?: string;
   description: string;      // mapped from overview
   tagline: string | null;
   posterUrl: string;
@@ -44,13 +69,23 @@ export interface MovieDetail {
   releaseDate: string;
   runtime: number | null;
   status: string;
-  rating: number;           // rating.average
-  voteCount: number;        // rating.count
+  rating: number;           // rating.average or direct rating number
+  voteCount: number;        // rating.count or direct voteCount number
   genres: Genre[];
   languages: Language[];
   countries: Country[];
   productionCompanies: ProductionCompany[];
   collection: Collection | null;
+  
+  // Cinematic additions
+  country: string;
+  producer: string;
+  director: string;
+  cast: string[];
+  trailerUrl: string;
+  recommendations: MovieRecommendation[];
+  cinemas: CinemaSchedule[];
+
   // Derived display
   formattedRuntime: string | null;   // e.g. "2h 01m"
   releaseYear: string;               // e.g. "1977"

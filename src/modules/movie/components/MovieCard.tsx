@@ -2,22 +2,29 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { TrailerModal } from '@/shared/components/visual';
+import { appRoutes } from '@/shared/routes/appRoutes';
+
+interface Genre {
+  id: number | string;
+  name: string;
+}
 
 interface Movie {
   id: string | number;
+  slug?: string;
   title: string;
   posterUrl: string;
   format?: string;
   rating?: string | number;
   genre?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  genres?: any[];
+  genres?: Genre[] | string[];
 }
 
 interface MovieCardProps {
   id?: string | number;
+  slug?: string;
   title?: string;
   posterUrl?: string;
   format?: string;
@@ -27,11 +34,11 @@ interface MovieCardProps {
 }
 
 export const MovieCard: React.FC<MovieCardProps> = (props) => {
-  const router = useRouter();
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
   const movie = props.movie || {
     id: props.id || '',
+    slug: props.slug,
     title: props.title || '',
     posterUrl: props.posterUrl || '',
     format: props.format,
@@ -41,27 +48,30 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
 
   const { title, posterUrl, format } = movie;
   const id = String(movie.id);
+  const slug = movie.slug || id;
   const rating = movie.rating !== undefined ? String(movie.rating) : '';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const genre = movie.genre || (movie.genres && movie.genres.map((g: any) => typeof g === 'string' ? g : (g.name || '')).join(', ')) || '';
+  
+  const genre = movie.genre || (movie.genres && movie.genres.map((g) => typeof g === 'string' ? g : g.name).join(', ')) || '';
+
+  const detailUrl = appRoutes.movieDetail(slug);
 
   return (
     <>
       <div className="movie-card">
-        <div 
+        <Link 
+          href={detailUrl}
           className="movie-poster-wrap" 
-          onClick={() => router.push(`/movies/detail/${id}`)}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', display: 'block' }}
         >
           <img src={posterUrl} alt={title} className="movie-poster" />
           <div className="movie-overlay" onClick={(e) => e.stopPropagation()}>
-            <a 
-              href={`/movies/detail/${id}`} 
+            <Link 
+              href={appRoutes.movieSchedule(slug)} 
               className="btn-primary movie-action-btn" 
               aria-label="Mua vé"
             >
               Mua vé
-            </a>
+            </Link>
             <button 
               type="button"
               className="btn-ghost movie-action-btn trailer-btn" 
@@ -86,13 +96,12 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
             </button>
           </div>
           {format && <span className="movie-format-badge">{format}</span>}
-        </div>
+        </Link>
         <div className="movie-info">
-          <h3 
-            onClick={() => router.push(`/movies/detail/${id}`)}
-            style={{ cursor: 'pointer' }}
-          >
-            {title}
+          <h3>
+            <Link href={detailUrl} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {title}
+            </Link>
           </h3>
           <div className="movie-meta-row">
             <span className="rating">★ {rating}</span>

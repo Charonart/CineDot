@@ -1,0 +1,95 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/cinemas/pricing",
+    "query": {},
+    "description": "Mock response for cinema pricing table"
+  },
+  "data": {
+    "updatedAt": "2024-06-01",
+    "note": "Giá vé áp dụng từ 01/06/2024. Trẻ em dưới 3 tuổi miễn phí. Giá đã bao gồm VAT.",
+    "categories": [
+      {
+        "label": "Ghế Thường 2D",
+        "type": "standard-2d",
+        "weekday": 75000,
+        "weekend": 95000,
+        "surcharge": null,
+        "description": "Suất chiếu phim 2D, ghế ngồi tiêu chuẩn"
+      },
+      {
+        "label": "Ghế Thường 3D",
+        "type": "standard-3d",
+        "weekday": 95000,
+        "weekend": 115000,
+        "surcharge": 20000,
+        "description": "Bao gồm kính 3D dùng 1 lần"
+      },
+      {
+        "label": "Ghế VIP 2D",
+        "type": "vip-2d",
+        "weekday": 110000,
+        "weekend": 130000,
+        "surcharge": null,
+        "description": "Ghế rộng hơn, đệm cao cấp, hàng ưu tiên"
+      },
+      {
+        "label": "Ghế VIP 3D",
+        "type": "vip-3d",
+        "weekday": 130000,
+        "weekend": 150000,
+        "surcharge": 20000,
+        "description": "Ghế VIP với trải nghiệm 3D"
+      },
+      {
+        "label": "Ghế Đôi (Sweetbox)",
+        "type": "sweetbox",
+        "weekday": 200000,
+        "weekend": 250000,
+        "surcharge": null,
+        "description": "Ghế dành cho 2 người, giá tính cho 1 ghế đôi"
+      },
+      {
+        "label": "IMAX",
+        "type": "imax",
+        "weekday": 170000,
+        "weekend": 210000,
+        "surcharge": 75000,
+        "description": "Màn hình IMAX khổng lồ, âm thanh vòm 12 kênh"
+      },
+      {
+        "label": "4DX",
+        "type": "4dx",
+        "weekday": 180000,
+        "weekend": 220000,
+        "surcharge": 85000,
+        "description": "Ghế chuyển động, hiệu ứng gió, mưa, mùi hương"
+      },
+      {
+        "label": "Dolby Atmos",
+        "type": "dolby-atmos",
+        "weekday": 150000,
+        "weekend": 190000,
+        "surcharge": 55000,
+        "description": "Âm thanh Dolby Atmos 360° sống động"
+      },
+      {
+        "label": "Trẻ Em (dưới 13 tuổi)",
+        "type": "children",
+        "weekday": 55000,
+        "weekend": 75000,
+        "surcharge": null,
+        "description": "Áp dụng cho trẻ từ 3-12 tuổi kèm giấy tờ tùy thân"
+      },
+      {
+        "label": "Sinh Viên",
+        "type": "student",
+        "weekday": 60000,
+        "weekend": 80000,
+        "surcharge": null,
+        "description": "Cần xuất trình thẻ sinh viên hợp lệ"
+      }
+    ]
+  }
+}

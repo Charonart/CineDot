@@ -2,16 +2,20 @@
 import React from 'react';
 import Link from 'next/link';
 import { MovieListingItem } from '../data/moviesListingData';
+import { appRoutes } from '@/shared/routes/appRoutes';
 
 interface MoviesListingCardProps {
-  movie: MovieListingItem;
+  movie: MovieListingItem & { slug?: string }; // Allow slug parameter
   onPlayTrailer: (movie: MovieListingItem) => void;
 }
 
 export const MoviesListingCard: React.FC<MoviesListingCardProps> = ({ movie, onPlayTrailer }) => {
-  const { id, title, poster, rating, ageRating, category, genre, format } = movie;
+  const { id, slug, title, poster, rating, ageRating, category, genre, format } = movie;
 
   const ageClass = ageRating ? ageRating.toLowerCase() : 'p';
+  const resolvedSlug = slug || String(id);
+  const detailUrl = appRoutes.movieDetail(resolvedSlug);
+  const bookingUrl = appRoutes.movieSchedule(resolvedSlug);
 
   const metaInfo = category === 'coming-soon' ? (
     <span className="release-date" style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-accent-deep)', textTransform: 'uppercase' }}>
@@ -32,7 +36,7 @@ export const MoviesListingCard: React.FC<MoviesListingCardProps> = ({ movie, onP
         {/* Hover Actions Overlay */}
         <div className="movie-overlay">
           <Link 
-            href={`/movies/detail/${id}`} 
+            href={bookingUrl} 
             className="btn-primary movie-action-btn dat-ve-btn" 
             aria-label="Đặt vé"
           >
@@ -58,14 +62,10 @@ export const MoviesListingCard: React.FC<MoviesListingCardProps> = ({ movie, onP
         {format && <span className="movie-format-badge">{format.split(' ')[0]}</span>}
       </div>
       <div className="movie-info">
-        <h3 
-          className="movie-title-link" 
-          style={{ cursor: 'pointer' }}
-          onClick={() => {
-            window.location.href = `/movies/detail/${id}`;
-          }}
-        >
-          {title}
+        <h3>
+          <Link href={detailUrl} className="movie-title-link" style={{ color: 'inherit', textDecoration: 'none' }}>
+            {title}
+          </Link>
         </h3>
         <div className="movie-meta-row">
           {metaInfo}

@@ -3,6 +3,7 @@ import { env } from '../env/env';
 import { logger } from '../logger/logger';
 import { getMockPath } from '@mocks/mockRoutes';
 import { ApiError } from '@shared/types/api.type';
+import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
 
 export const axiosClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_BASE_URL,
@@ -48,6 +49,14 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response.data,
   (error: AxiosError) => {
+    if (isRequestCanceled(error)) {
+      return Promise.reject({
+        success: false,
+        message: 'canceled',
+        code: 'REQUEST_CANCELED',
+      });
+    }
+
     const status = error.response?.status;
     const responseData = error.response?.data as any;
 
