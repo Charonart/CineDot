@@ -4,12 +4,14 @@
 import React, { useState, useEffect } from 'react';
 import { QuickBookingPanel } from './QuickBookingPanel';
 import { useHeroSlides } from '@/modules/movie/hooks/useMovies';
+import { TrailerModal } from '@/shared/components/visual';
 
 export const HomeHero: React.FC = () => {
   const { data: slides = [], isLoading, isError } = useHeroSlides();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [resetCounter, setResetCounter] = useState(0);
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
   const length = slides.length;
   const leftIndex = length > 0 ? (activeIndex - 1 + length) % length : 0;
@@ -61,6 +63,8 @@ export const HomeHero: React.FC = () => {
     );
   }
 
+  const activeSlide = slides[activeIndex];
+
   return (
     <section className="hero hero-circular-showcase hero-image-carousel-section" id="hero">
       {/* Background Slideshow (Fades backdrop images dynamically) */}
@@ -79,8 +83,55 @@ export const HomeHero: React.FC = () => {
         <div className="hero-showcase-overlay"></div>
       </div>
 
-      {/* Main Showcase Content (Centered Carousel) */}
+      {/* Main Showcase Content (Centered Grid) */}
       <div className="hero-showcase-content">
+        {/* Left Column: Movie Info */}
+        {activeSlide && (
+          <div className="hero-showcase-info" key={activeSlide.id}>
+            <span className="badge" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              {activeSlide.status === 'now-showing' ? 'Đang chiếu' : 'Sắp chiếu'}
+            </span>
+            <div className="hero-tagline">
+              {activeSlide.subtitle || 'Đặt vé nhanh. Xem phim hay.'}
+            </div>
+            <h1 className="hero-showcase-title">
+              {activeSlide.title}
+            </h1>
+            <div className="hero-showcase-meta">
+              {activeSlide.ageRating && <span className="meta-tag">{activeSlide.ageRating}</span>}
+              {activeSlide.formatTags?.map((tag) => (
+                <span key={tag} className="meta-tag">{tag}</span>
+              ))}
+              <span className="meta-dot">·</span>
+              <span>{activeSlide.runtime} phút</span>
+              <span className="meta-dot">·</span>
+              <span className="meta-rating">★ {activeSlide.rating}</span>
+            </div>
+            <p className="hero-showcase-desc">
+              {activeSlide.description}
+            </p>
+            <div className="hero-showcase-actions">
+              <a href={activeSlide.bookingHref || `/movies/detail/${activeSlide.slug}`} className="btn-primary btn-large" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                Đặt vé
+              </a>
+              {activeSlide.trailerUrl && (
+                <button
+                  type="button"
+                  className="btn-ghost btn-large"
+                  onClick={() => setIsTrailerOpen(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '6px' }}>
+                    <polygon points="5,3 19,12 5,21" />
+                  </svg>
+                  Xem trailer
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Right Column: Carousel */}
         <div
           className="hero-banner-carousel-container"
           onMouseEnter={() => setIsHovered(true)}
@@ -164,6 +215,17 @@ export const HomeHero: React.FC = () => {
 
       {/* QUICK BOOKING PANEL (Positioned absolute outside the showcase grid and gallery transformations) */}
       <QuickBookingPanel />
+
+      {/* Trailer Modal */}
+      {activeSlide && (
+        <TrailerModal
+          isOpen={isTrailerOpen}
+          onClose={() => setIsTrailerOpen(false)}
+          videoSrc={activeSlide.trailerUrl}
+          poster={activeSlide.backdropUrl}
+          title={activeSlide.title}
+        />
+      )}
     </section>
   );
 };
