@@ -28,4 +28,24 @@ export const appRoutes = {
   // Rạp Đặc Biệt
   specialTheaters: '/special-theaters',
   specialTheaterType: (type: string) => `/special-theaters/${type}`,
+
+  // Auth Module Routes
+  login: (redirectTo?: string) => {
+    const params = new URLSearchParams();
+    if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+      params.set('redirectTo', redirectTo);
+    }
+    const query = params.toString();
+    return query ? `/login?${query}` : '/login';
+  },
+  register: '/register',
+  forgotPassword: '/forgot-password',
+  resetPassword: (token?: string, email?: string) => {
+    const params = new URLSearchParams();
+    if (token) params.set('token', token);
+    if (email) params.set('email', email);
+    const query = params.toString();
+    return query ? `/reset-password?${query}` : '/reset-password';
+  },
+  verifyEmail: '/verify-email',
 };

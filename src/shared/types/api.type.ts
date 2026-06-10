@@ -2,7 +2,7 @@ export interface ApiError {
   success: false;
   message: string;
   code: string;
-  errors?: Record<string, string[]>;
+  errors?: Record<string, string[] | undefined>;
 }
 
 export interface PaginationMeta {
@@ -26,6 +26,7 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   code?: string;
+  errors?: Record<string, string[] | undefined>;
   req?: ApiRequestMeta;
 }
 

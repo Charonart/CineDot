@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "req": {
+    "method": "POST",
+    "path": "/api/v1/auth/logout"
+  },
+  "message": "Đăng xuất thành công."
+}

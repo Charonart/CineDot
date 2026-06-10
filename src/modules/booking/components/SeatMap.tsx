@@ -3,7 +3,6 @@
 import React from 'react';
 import { Seat, SeatMap as SeatMapModel } from '../types/booking.type';
 import { SeatButton } from './SeatButton';
-import { SelectedSeat } from '../types';
 
 interface SeatMapProps {
   seatMap: SeatMapModel;

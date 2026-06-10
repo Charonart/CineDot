@@ -18,7 +18,6 @@ export const metadata: Metadata = {
 };
 
 import { QueryProvider } from "@shared/providers/QueryProvider";
-import { Navbar, Footer } from "@shared/components/layout";
 
 export default function RootLayout({
   children,
@@ -32,11 +31,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col font-sans">
-        <QueryProvider>
-          <Navbar />
-          <main className="flex-1 flex flex-col">{children}</main>
-          <Footer />
-        </QueryProvider>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
