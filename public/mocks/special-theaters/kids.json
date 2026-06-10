@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/special-theaters/kids",
+    "params": { "type": "kids" },
+    "description": "Mock response for Cine de Kids special theater"
+  },
+  "data": {
+    "type": "kids",
+    "name": "Cine de Kids",
+    "tagline": "Rạp Riêng Cho Những Giấc Mơ Trẻ Thơ",
+    "description": "Cine de Kids là phòng chiếu phim dành riêng cho trẻ em với thiết kế vui nhộn, ghế ngồi nhỏ nhắn phù hợp, và chương trình phim được lựa chọn kỹ lưỡng phù hợp với lứa tuổi.",
+    "heroImageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
+    "features": [
+      { "icon": "🧸", "title": "Thiết kế thân thiện", "description": "Màu sắc vui nhộn, an toàn" },
+      { "icon": "💺", "title": "Ghế mini", "description": "Thiết kế riêng cho trẻ em" },
+      { "icon": "🎬", "title": "Phim chọn lọc", "description": "Nội dung phù hợp lứa tuổi" },
+      { "icon": "🍿", "title": "Combo trẻ em", "description": "Bắp rang + nước nhỏ xinh" }
+    ],
+    "technology": "Standard 2D/3D with kid-safe content filter",
+    "supportedCinemas": [
+      { "id": "cn-001", "name": "CineDot Quận 1 — Vincom Center", "address": "72 Lê Thánh Tôn, Q1, TP.HCM", "slug": "cinedot-q1-saigon" },
+      { "id": "cn-003", "name": "CineDot Hà Nội — Vincom Bà Triệu", "address": "191 Bà Triệu, Hai Bà Trưng, HN", "slug": "cinedot-ha-noi-vincom-ba-trieu" },
+      { "id": "cn-006", "name": "CineDot Bình Dương — Aeon Mall", "address": "1 Đại Lộ Bình Dương, Thuận An, BD", "slug": "cinedot-binh-duong-aeon" }
+    ],
+    "nowShowingMovies": [
+      { "id": "m-004", "slug": "doraemon-underwater", "title": "Doraemon: Nobita's Earth Symphony", "posterUrl": "https://images.unsplash.com/photo-1589652717521-10c0d7e7d1a2?w=300&h=450&fit=crop", "rating": 8.1 }
+    ]
+  }
+}

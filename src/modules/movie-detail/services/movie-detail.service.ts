@@ -8,15 +8,19 @@ import { MovieList } from '@modules/movie/types/movie.type';
 import { logger } from '@lib/logger/logger';
 
 export const movieDetailService = {
-  getMovieDetail: async (id: number): Promise<MovieDetail> => {
+  getMovieDetail: async (slug: string | number): Promise<MovieDetail> => {
     try {
-      const response = await movieDetailApi.getDetail(id);
+      const response = await movieDetailApi.getDetail(slug);
       const validated = movieDetailSchema.parse(response.data);
       return movieDetailMapper.toMovieDetail(validated);
     } catch (error) {
       logger.error('[MovieDetailService] getMovieDetail failed:', error);
       throw new Error('FAILED_TO_LOAD_MOVIE_DETAIL');
     }
+  },
+
+  getMovieDetailBySlug: async (slug: string): Promise<MovieDetail> => {
+    return movieDetailService.getMovieDetail(slug);
   },
 
   getCredits: async (id: number): Promise<Credits> => {

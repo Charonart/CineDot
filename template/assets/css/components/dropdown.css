@@ -335,8 +335,9 @@
 }
 
 .schedule-filters .cine-dropdown-trigger {
-  padding: 10px 36px 10px 16px !important;
+  padding: 4px 36px 4px 16px !important;
   min-height: 44px !important;
+  height: 44px !important;
   background: var(--color-surface) !important;
   border: 1px solid var(--color-border) !important;
 }

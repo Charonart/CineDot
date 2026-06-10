@@ -1,0 +1,68 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/star-shop/products",
+    "query": { "category": "fan-wibu" },
+    "description": "Mock response for Fan Wibu category products"
+  },
+  "data": {
+    "page": 1,
+    "totalPages": 1,
+    "totalResults": 4,
+    "results": [
+      {
+        "id": "ss-004",
+        "slug": "naruto-akatsuki-cloak",
+        "name": "Áo choàng Akatsuki — Naruto Official",
+        "category": "fan-wibu",
+        "price": 750000,
+        "originalPrice": 950000,
+        "imageUrl": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=500&fit=crop",
+        "badge": "SALE",
+        "description": "Áo choàng Akatsuki chính hãng, vải polyester cao cấp, size M-XXL.",
+        "stock": 80,
+        "tags": ["anime", "cosplay", "naruto"]
+      },
+      {
+        "id": "ss-005",
+        "slug": "one-piece-luffy-figure",
+        "name": "Figure Monkey D. Luffy — Gear 5",
+        "category": "fan-wibu",
+        "price": 1250000,
+        "originalPrice": null,
+        "imageUrl": "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400&h=500&fit=crop",
+        "badge": "NEW",
+        "description": "Figure Luffy Gear 5 cao 25cm, chi tiết bắt mắt, hộp quà tặng cao cấp.",
+        "stock": 35,
+        "tags": ["anime", "one-piece", "figurine"]
+      },
+      {
+        "id": "ss-006",
+        "slug": "jjk-sukuna-poster",
+        "name": "Poster Ryomen Sukuna — Jujutsu Kaisen A2",
+        "category": "fan-wibu",
+        "price": 120000,
+        "originalPrice": 150000,
+        "imageUrl": "https://images.unsplash.com/photo-1569163139599-0f4517e36f31?w=400&h=500&fit=crop",
+        "badge": null,
+        "description": "Poster khổ A2 in hình Ryomen Sukuna, chất liệu giấy ảnh glossy.",
+        "stock": 500,
+        "tags": ["poster", "anime", "jjk"]
+      },
+      {
+        "id": "ss-011",
+        "slug": "demon-slayer-pin-set",
+        "name": "Bộ ghim Kimetsu no Yaiba — 6 cái",
+        "category": "fan-wibu",
+        "price": 180000,
+        "originalPrice": null,
+        "imageUrl": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=500&fit=crop",
+        "badge": null,
+        "description": "Bộ 6 ghim cài áo hình nhân vật Demon Slayer, chất liệu kim loại mạ vàng.",
+        "stock": 250,
+        "tags": ["pin", "anime", "demon-slayer"]
+      }
+    ]
+  }
+}

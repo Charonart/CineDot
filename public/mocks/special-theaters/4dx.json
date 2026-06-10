@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/special-theaters/4dx",
+    "params": { "type": "4dx" },
+    "description": "Mock response for 4DX special theater"
+  },
+  "data": {
+    "type": "4dx",
+    "name": "4DX",
+    "tagline": "Bước Vào Thế Giới Điện Ảnh",
+    "description": "4DX là công nghệ rạp chiếu phim tiên tiến với ghế chuyển động đồng bộ cùng hành động trên màn hình, kết hợp các hiệu ứng môi trường như gió, mưa, sét, mùi hương và bong bóng.",
+    "heroImageUrl": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&h=1080&fit=crop",
+    "features": [
+      { "icon": "🎭", "title": "Ghế chuyển động", "description": "6 chiều chuyển động đồng bộ" },
+      { "icon": "💨", "title": "Hiệu ứng gió", "description": "Cảm nhận từng cơn gió trong phim" },
+      { "icon": "🌧️", "title": "Hiệu ứng mưa", "description": "Giọt nước thực sự từ phía sau" },
+      { "icon": "🌸", "title": "Mùi hương", "description": "Hơn 20 loại mùi khác nhau" }
+    ],
+    "technology": "4DX® Motion Chair + Environment Effects",
+    "supportedCinemas": [
+      { "id": "cn-001", "name": "CineDot Quận 1 — Vincom Center", "address": "72 Lê Thánh Tôn, Q1, TP.HCM", "slug": "cinedot-q1-saigon" },
+      { "id": "cn-006", "name": "CineDot Bình Dương — Aeon Mall", "address": "1 Đại Lộ Bình Dương, Thuận An, BD", "slug": "cinedot-binh-duong-aeon" }
+    ],
+    "nowShowingMovies": [
+      { "id": "m-002", "slug": "godzilla-x-kong", "title": "Godzilla x Kong: The New Empire", "posterUrl": "https://images.unsplash.com/photo-1604975999044-188783d54fb3?w=300&h=450&fit=crop", "rating": 7.0 }
+    ]
+  }
+}

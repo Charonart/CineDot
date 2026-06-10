@@ -1,7 +1,7 @@
 import { movieApi } from '../api/movie.api';
-import { movieMapper } from '../mappers/movie.mapper';
-import { Movie, MovieList } from '../types/movie.type';
-import { movieListResponseSchema, movieSchema } from '../schemas/movie.schema';
+import { movieMapper, heroSlideMapper } from '../mappers/movie.mapper';
+import { Movie, MovieList, HeroSlide } from '../types/movie.type';
+import { movieListResponseSchema, movieSchema, heroSlideListSchema } from '../schemas/movie.schema';
 import { logger } from '@lib/logger/logger';
 
 export const movieService = {
@@ -46,6 +46,39 @@ export const movieService = {
     } catch (error) {
       logger.error('[MovieService] searchMovies failed:', error);
       throw new Error('FAILED_TO_SEARCH_MOVIES');
+    }
+  },
+
+  getMovies: async (params: { category?: string; limit?: number; page?: number }): Promise<MovieList> => {
+    try {
+      const response = await movieApi.getMovies(params);
+      const validatedData = movieListResponseSchema.parse(response.data);
+      return movieMapper.toMovieListModel(validatedData);
+    } catch (error) {
+      logger.error('[MovieService] getMovies failed:', error);
+      throw new Error('FAILED_TO_LOAD_MOVIES');
+    }
+  },
+
+  getNavbarMovies: async (): Promise<MovieList> => {
+    try {
+      const response = await movieApi.getNavbarMovies();
+      const validatedData = movieListResponseSchema.parse(response.data);
+      return movieMapper.toMovieListModel(validatedData);
+    } catch (error) {
+      logger.error('[MovieService] getNavbarMovies failed:', error);
+      throw new Error('FAILED_TO_LOAD_NAVBAR_MOVIES');
+    }
+  },
+
+  getHeroSlides: async (): Promise<HeroSlide[]> => {
+    try {
+      const response = await movieApi.getHeroSlides();
+      const validatedData = heroSlideListSchema.parse(response.data);
+      return heroSlideMapper.toHeroSlideListModel(validatedData);
+    } catch (error) {
+      logger.error('[MovieService] getHeroSlides failed:', error);
+      throw new Error('FAILED_TO_LOAD_HERO_SLIDES');
     }
   },
 };

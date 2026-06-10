@@ -1,64 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-
-interface MovieOption {
-  id: string;
-  title: string;
-  status: string;
-}
-
-interface CinemaOption {
-  id: string;
-  name: string;
-}
-
-interface DateOption {
-  id: string;
-  label: string;
-}
-
-const bookingDb = {
-  movies: [
-    { id: "movie_1", title: "Người Nhện: Phần 2", status: "now-showing" },
-    { id: "movie_2", title: "Godzilla x Kong", status: "now-showing" },
-    { id: "movie_3", title: "Ghostbusters: Frozen Empire", status: "now-showing" },
-    { id: "movie_4", title: "Civil War", status: "now-showing" },
-    { id: "movie_5", title: "Furiosa", status: "now-showing" },
-    { id: "movie_6", title: "Inside Out 2", status: "now-showing" },
-    { id: "movie_7", title: "Deadpool & Wolverine", status: "coming-soon" },
-    { id: "movie_8", title: "Alien: Romulus", status: "coming-soon" }
-  ] as MovieOption[],
-  cinemas: [
-    { id: "cinema_1", name: "CINE Landmark — Quận 1" },
-    { id: "cinema_2", name: "CINE Crescent — Quận 7" },
-    { id: "cinema_3", name: "CINE Aeon — Bình Dương" },
-    { id: "cinema_4", name: "CINE Vincom — Quận 3" }
-  ] as CinemaOption[],
-  dates: [
-    { id: "date_1", label: "Hôm nay — 27/05" },
-    { id: "date_2", label: "Ngày mai — 28/05" },
-    { id: "date_3", label: "Thứ Năm — 29/05" },
-    { id: "date_4", label: "Thứ Sáu — 30/05" }
-  ] as DateOption[],
-  times: {
-    "movie_1": ["10:15", "13:30", "16:45", "19:00", "21:30"],
-    "movie_2": ["09:00", "11:45", "14:30", "17:15", "20:00", "22:45"],
-    "movie_3": ["10:00", "12:30", "15:00", "18:30", "21:00"],
-    "movie_4": ["11:00", "13:45", "16:30", "19:15", "22:00"],
-    "movie_5": ["08:30", "11:00", "14:15", "17:00", "19:45", "22:30"],
-    "movie_6": ["09:30", "12:00", "14:30", "17:00", "19:30", "21:45"]
-  } as Record<string, string[]>
-};
+import React, { useEffect, useRef } from 'react';
+import { useQuickBooking } from '@modules/booking/hooks/useQuickBooking';
+import { QuickBookingDropdown, SelectOption } from '@modules/booking/types/quick-booking.type';
 
 interface DropdownProps {
   label: string;
   placeholder: string;
   disabled: boolean;
   value: string;
-  options: { value: string; label: string }[];
+  options: SelectOption[];
   isOpen: boolean;
+  emptyMessage: string;
   onToggle: () => void;
+  onClose: () => void;
   onSelect: (val: string) => void;
 }
 
@@ -69,7 +24,9 @@ const CineReactDropdown: React.FC<DropdownProps> = ({
   value,
   options,
   isOpen,
+  emptyMessage,
   onToggle,
+  onClose,
   onSelect,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,15 +39,16 @@ const CineReactDropdown: React.FC<DropdownProps> = ({
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        onToggle();
+        onClose();
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onToggle]);
+  }, [isOpen, onClose]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`cine-dropdown ${disabled ? 'is-disabled' : ''} ${isOpen ? 'is-open is-open-down' : ''}`}
     >
@@ -98,7 +56,7 @@ const CineReactDropdown: React.FC<DropdownProps> = ({
         type="button"
         className="cine-dropdown-trigger"
         aria-haspopup="listbox"
-        aria-expanded={isOpen}
+        aria-expanded={isOpen && !disabled}
         disabled={disabled}
         onClick={onToggle}
       >
@@ -122,38 +80,47 @@ const CineReactDropdown: React.FC<DropdownProps> = ({
         </span>
       </button>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="cine-dropdown-menu" role="listbox">
           <div className="cine-dropdown-list">
-            {options.map((opt) => (
+            {options.length > 0 ? (
+              options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`cine-dropdown-item ${opt.value === value ? 'is-selected' : ''}`}
+                  role="option"
+                  aria-selected={opt.value === value}
+                  onClick={() => onSelect(opt.value)}
+                >
+                  <span>{opt.label}</span>
+                  <span className="cine-dropdown-check-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                </button>
+              ))
+            ) : (
               <button
-                key={opt.value}
                 type="button"
-                className={`cine-dropdown-item ${opt.value === value ? 'is-selected' : ''}`}
+                className="cine-dropdown-item is-disabled"
                 role="option"
-                aria-selected={opt.value === value}
-                onClick={() => {
-                  onSelect(opt.value);
-                  onToggle();
-                }}
+                aria-selected={false}
+                disabled
               >
-                <span>{opt.label}</span>
-                <span className="cine-dropdown-check-icon">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </span>
+                <span>{emptyMessage}</span>
               </button>
-            ))}
+            )}
           </div>
         </div>
       )}
@@ -162,165 +129,135 @@ const CineReactDropdown: React.FC<DropdownProps> = ({
 };
 
 export const QuickBookingPanel: React.FC = () => {
-  const [selectedMovie, setSelectedMovie] = useState('');
-  const [selectedCinema, setSelectedCinema] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
+  const {
+    selectedMovieId,
+    selectedCinemaId,
+    selectedDate,
+    selectedShowtimeId,
+    openDropdown,
+    movieOptions,
+    cinemaOptions,
+    dateOptions,
+    showtimeOptions,
+    isMoviesLoading,
+    isCinemasLoading,
+    isDatesLoading,
+    isShowtimesLoading,
+    hasMoviesError,
+    hasCinemasError,
+    hasDatesError,
+    hasShowtimesError,
+    handleMovieSelect,
+    handleCinemaSelect,
+    handleDateSelect,
+    handleShowtimeSelect,
+    handleToggleDropdown,
+    handleCloseDropdown,
+    handleSubmit,
+  } = useQuickBooking();
 
-  // Dropdown open states
-  const [openDropdown, setOpenDropdown] = useState<'movie' | 'cinema' | 'date' | 'time' | null>(null);
-
-  // Auto reset dependent dropdown fields when upstream field changes
-  const handleMovieSelect = (val: string) => {
-    setSelectedMovie(val);
-    setSelectedCinema('');
-    setSelectedDate('');
-    setSelectedTime('');
-    setOpenDropdown('cinema'); // Auto cascade focus to cinema
-  };
-
-  const handleCinemaSelect = (val: string) => {
-    setSelectedCinema(val);
-    setSelectedDate('');
-    setSelectedTime('');
-    setOpenDropdown('date'); // Auto cascade focus to date
-  };
-
-  const handleDateSelect = (val: string) => {
-    setSelectedDate(val);
-    setSelectedTime('');
-    setOpenDropdown('time'); // Auto cascade focus to time
-  };
-
-  const handleTimeSelect = (val: string) => {
-    setSelectedTime(val);
-    setOpenDropdown(null);
-  };
-
-  const handleToggle = (field: 'movie' | 'cinema' | 'date' | 'time') => {
-    setOpenDropdown((current) => (current === field ? null : field));
-  };
-
-  // Submit action showing toast
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedMovie || !selectedCinema || !selectedDate || !selectedTime) return;
-
-    const movieTitle = bookingDb.movies.find(m => m.id === selectedMovie)?.title;
-    const cinemaName = bookingDb.cinemas.find(c => c.id === selectedCinema)?.name;
-    const dateLabel = bookingDb.dates.find(d => d.id === selectedDate)?.label;
-
-    alert(`🎬 Đặt vé thành công!\n${movieTitle}\n${cinemaName}\n${dateLabel} · Suất ${selectedTime}`);
-  };
-
-  // Options filtering based on cascade database
-  const movieOptions = bookingDb.movies
-    .filter(m => m.status === 'now-showing')
-    .map(m => ({ value: m.id, label: m.title }));
-
-  const cinemaOptions = selectedMovie 
-    ? bookingDb.cinemas.map(c => ({ value: c.id, label: c.name }))
-    : [];
-
-  const dateOptions = selectedCinema 
-    ? bookingDb.dates.map(d => ({ value: d.id, label: d.label }))
-    : [];
-
-  const timeOptions = selectedDate && selectedMovie
-    ? (bookingDb.times[selectedMovie] || []).map(t => ({ value: t, label: t }))
-    : [];
-
-  const getFieldClassName = (disabled: boolean, value: string, fieldType: 'movie' | 'cinema' | 'date' | 'time') => {
-    let base = "booking-field";
-    if (disabled) base += " is-disabled";
-    else if (value) base += " is-selected";
-    else base += " is-active";
-    if (openDropdown === fieldType) base += " is-open";
+  const getFieldClassName = (
+    disabled: boolean,
+    value: string,
+    fieldType: QuickBookingDropdown,
+  ) => {
+    let base = 'booking-field';
+    if (disabled) base += ' is-disabled';
+    else if (value) base += ' is-selected';
+    else base += ' is-active';
+    if (openDropdown === fieldType) base += ' is-open';
     return base;
   };
 
-  const isFormComplete = selectedMovie && selectedCinema && selectedDate && selectedTime;
+  const isMovieDisabled = isMoviesLoading || hasMoviesError;
+  const isCinemaDisabled = !selectedMovieId || isCinemasLoading || hasCinemasError;
+  const isDateDisabled = !selectedCinemaId || isDatesLoading || hasDatesError;
+  const isShowtimeDisabled = !selectedDate || isShowtimesLoading || hasShowtimesError;
 
   return (
     <div className="booking-strip">
       <form onSubmit={handleSubmit} className="booking-card fade-up in-view">
         <div className="booking-fields">
-          {/* PHIM DROPDOWN */}
-          <div className={getFieldClassName(false, selectedMovie, 'movie')}>
+          <div className={getFieldClassName(isMovieDisabled, selectedMovieId, 'movie')}>
             <CineReactDropdown
-              label="Phim"
-              placeholder="Chọn phim"
-              disabled={false}
-              value={selectedMovie}
+              label="PHIM"
+              placeholder={isMoviesLoading ? 'Đang tải...' : hasMoviesError ? 'Không thể tải phim' : 'Chọn phim'}
+              disabled={isMovieDisabled}
+              value={selectedMovieId}
               options={movieOptions}
               isOpen={openDropdown === 'movie'}
-              onToggle={() => handleToggle('movie')}
+              emptyMessage="Không có phim"
+              onToggle={() => handleToggleDropdown('movie')}
+              onClose={handleCloseDropdown}
               onSelect={handleMovieSelect}
             />
           </div>
 
           <div className="booking-divider"></div>
 
-          {/* RẠP DROPDOWN */}
-          <div className={getFieldClassName(!selectedMovie, selectedCinema, 'cinema')}>
+          <div className={getFieldClassName(isCinemaDisabled, selectedCinemaId, 'cinema')}>
             <CineReactDropdown
-              label="Rạp"
-              placeholder="Chọn rạp"
-              disabled={!selectedMovie}
-              value={selectedCinema}
+              label="RẠP"
+              placeholder={isCinemasLoading ? 'Đang tải...' : hasCinemasError ? 'Không thể tải rạp' : 'Chọn rạp'}
+              disabled={isCinemaDisabled}
+              value={selectedCinemaId}
               options={cinemaOptions}
               isOpen={openDropdown === 'cinema'}
-              onToggle={() => handleToggle('cinema')}
+              emptyMessage="Không có rạp"
+              onToggle={() => handleToggleDropdown('cinema')}
+              onClose={handleCloseDropdown}
               onSelect={handleCinemaSelect}
             />
           </div>
 
           <div className="booking-divider"></div>
 
-          {/* NGÀY DROPDOWN */}
-          <div className={getFieldClassName(!selectedCinema, selectedDate, 'date')}>
+          <div className={getFieldClassName(isDateDisabled, selectedDate, 'date')}>
             <CineReactDropdown
-              label="Ngày"
-              placeholder="Chọn ngày"
-              disabled={!selectedCinema}
+              label="NGÀY"
+              placeholder={isDatesLoading ? 'Đang tải...' : hasDatesError ? 'Không thể tải ngày' : 'Chọn ngày'}
+              disabled={isDateDisabled}
               value={selectedDate}
               options={dateOptions}
               isOpen={openDropdown === 'date'}
-              onToggle={() => handleToggle('date')}
+              emptyMessage="Không có ngày"
+              onToggle={() => handleToggleDropdown('date')}
+              onClose={handleCloseDropdown}
               onSelect={handleDateSelect}
             />
           </div>
 
           <div className="booking-divider"></div>
 
-          {/* SUẤT CHIẾU DROPDOWN */}
-          <div className={getFieldClassName(!selectedDate, selectedTime, 'time')}>
+          <div className={getFieldClassName(isShowtimeDisabled, selectedShowtimeId, 'showtime')}>
             <CineReactDropdown
-              label="Suất chiếu"
-              placeholder="Chọn giờ"
-              disabled={!selectedDate}
-              value={selectedTime}
-              options={timeOptions}
-              isOpen={openDropdown === 'time'}
-              onToggle={() => handleToggle('time')}
-              onSelect={handleTimeSelect}
+              label="SUẤT CHIẾU"
+              placeholder={isShowtimesLoading ? 'Đang tải...' : hasShowtimesError ? 'Không thể tải suất' : 'Chọn giờ'}
+              disabled={isShowtimeDisabled}
+              value={selectedShowtimeId}
+              options={showtimeOptions}
+              isOpen={openDropdown === 'showtime'}
+              emptyMessage="Không có suất chiếu"
+              onToggle={() => handleToggleDropdown('showtime')}
+              onClose={handleCloseDropdown}
+              onSelect={handleShowtimeSelect}
             />
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          className="btn-primary btn-booking" 
-          disabled={!isFormComplete}
+        <button
+          type="submit"
+          className="btn-primary btn-booking"
+          disabled={!selectedShowtimeId}
         >
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
-            strokeLinecap="round" 
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />

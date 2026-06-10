@@ -1,0 +1,61 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/movies/detail/ghostbusters-frozen",
+    "params": {
+      "slug": "ghostbusters-frozen"
+    },
+    "description": "Mock response for Ghostbusters: Frozen Empire detail page"
+  },
+  "data": {
+    "id": "ghostbusters-frozen",
+    "slug": "ghostbusters-frozen",
+    "title": "Ghostbusters: Kỷ Nguyên Băng Giá",
+    "originalTitle": "Ghostbusters: Frozen Empire",
+    "overview": "Gia đình Spengler quay trở lại nơi mọi thứ bắt đầu - trạm cứu hỏa mang tính biểu tượng ở thành phố New York - để hợp tác với các cựu thành viên Biệt đội săn ma gốc, cứu thế giới khỏi Kỷ băng hà thứ hai.",
+    "tagline": "A chilly adventure in New York.",
+    "posterUrl": "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=500&q=80",
+    "backdropUrl": "https://images.unsplash.com/photo-1513794761617-07c574043f6e?w=1600&q=80",
+    "releaseDate": "2026-04-12",
+    "runtime": 115,
+    "status": "Released",
+    "rating": {
+      "average": 6.9,
+      "count": 154
+    },
+    "genres": [
+      { "id": 5, "name": "Hài hước" },
+      { "id": 2, "name": "Phiêu lưu" },
+      { "id": 4, "name": "Kỳ ảo" }
+    ],
+    "country": "Mỹ",
+    "producer": "Columbia Pictures",
+    "director": "Gil Kenan",
+    "cast": ["Paul Rudd", "Carrie Coon", "Finn Wolfhard"],
+    "trailerUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "recommendations": [
+      {
+        "id": "dune-part-two",
+        "title": "Dune: Cát Song - Phần Hai",
+        "poster": "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80",
+        "rating": 8.7,
+        "ageRating": "T16"
+      }
+    ],
+    "cinemas": [
+      {
+        "name": "Galaxy CineX - Hanoi Centre",
+        "formats": [
+          {
+            "name": "2D Lồng Tiếng",
+            "times": [
+              { "time": "12:00", "status": "available", "scheduleId": "601" },
+              { "time": "14:30", "status": "available", "scheduleId": "602" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

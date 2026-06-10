@@ -1,25 +1,27 @@
 'use client';
 
 import React from 'react';
-import { SeatItem } from '../data/seatMapData';
+import { Seat, SeatMap as SeatMapModel } from '../types/booking.type';
 import { SeatButton } from './SeatButton';
+import { SelectedSeat } from '../types';
 
 interface SeatMapProps {
-  seats: SeatItem[];
-  selectedSeats: SeatItem[];
-  onToggleSeat: (seat: SeatItem) => void;
+  seatMap: SeatMapModel;
+  selectedSeats: Seat[];
+  onToggleSeat: (seat: Seat) => void;
 }
 
-export const SeatMap: React.FC<SeatMapProps> = ({ seats, selectedSeats, onToggleSeat }) => {
-  // Group seats by row
-  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J'];
+export const SeatMap: React.FC<SeatMapProps> = ({ seatMap, selectedSeats, onToggleSeat }) => {
+  const selectedSeatIds = new Set(selectedSeats.map((seat) => seat.id));
+  const aisleSet = new Set(seatMap.layout.aislesAfterSeatNumbers);
 
-  const getRowSeats = (row: string) => {
-    return seats.filter((s) => s.row === row);
-  };
+  const getRowSeats = (row: string) =>
+    seatMap.seats
+      .filter((seat) => seat.row === row)
+      .sort((a, b) => a.number - b.number);
 
   return (
-    <div 
+    <div
       className="seat-map-section"
       style={{
         background: 'rgba(255, 255, 255, 0.85)',
@@ -35,8 +37,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({ seats, selectedSeats, onToggle
         overflow: 'hidden',
       }}
     >
-      {/* Screen area curve and indicator */}
-      <div 
+      <div
         className="screen-area"
         style={{
           width: '100%',
@@ -46,32 +47,22 @@ export const SeatMap: React.FC<SeatMapProps> = ({ seats, selectedSeats, onToggle
           position: 'relative',
         }}
       >
-        <span 
-          style={{ 
-            fontSize: '11px', 
-            textTransform: 'uppercase', 
-            letterSpacing: '0.25em', 
-            color: 'var(--text3)', 
+        <span
+          style={{
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.25em',
+            color: 'var(--text3)',
             fontWeight: 700,
             display: 'inline-block',
-            marginBottom: '10px'
+            marginBottom: '10px',
           }}
         >
-          MÀN HÌNH CHÍNH
+          {seatMap.layout.screenLabel}
         </span>
-        <div 
-          className="screen-curve"
-          style={{
-            height: '6px',
-            background: 'linear-gradient(to right, rgba(79, 60, 147, 0.05), #CFC9EB, rgba(79, 60, 147, 0.05))',
-            borderRadius: '50% / 100% 100% 0 0',
-            boxShadow: '0 4px 15px rgba(207, 201, 235, 0.4)',
-          }}
-        />
       </div>
 
-      {/* Seat Map scrolling wrap for smaller mobile viewports */}
-      <div 
+      <div
         className="seat-scroll-container"
         style={{
           width: '100%',
@@ -81,24 +72,25 @@ export const SeatMap: React.FC<SeatMapProps> = ({ seats, selectedSeats, onToggle
           padding: '10px 0 20px 0',
         }}
       >
-        <div 
-          style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '12px', 
-            margin: '0 auto', 
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            margin: '0 auto',
             minWidth: 'fit-content',
-            padding: '0 20px'
+            padding: '0 20px',
           }}
           className="seat-grid"
         >
-          {rows.map((row) => {
+          {seatMap.layout.rowOrder.map((row) => {
             const rowSeats = getRowSeats(row);
-            const isCouple = row === 'J';
+            if (rowSeats.length === 0) return null;
+            const isCouple = rowSeats.every((seat) => seat.type === 'couple');
 
             return (
-              <div 
-                key={row} 
+              <div
+                key={row}
                 className="seat-row"
                 style={{
                   display: 'flex',
@@ -107,8 +99,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({ seats, selectedSeats, onToggle
                   justifyContent: 'center',
                 }}
               >
-                {/* Left row labels */}
-                <span 
+                <span
                   className="seat-row-label"
                   style={{
                     fontSize: '13px',
@@ -122,29 +113,28 @@ export const SeatMap: React.FC<SeatMapProps> = ({ seats, selectedSeats, onToggle
                   {row}
                 </span>
 
-                {/* Seat buttons mapping */}
-                <div 
-                  style={{ 
-                    display: 'flex', 
+                <div
+                  style={{
+                    display: 'flex',
                     gap: isCouple ? '12px' : '8px',
-                    alignItems: 'center' 
+                    alignItems: 'center',
                   }}
                 >
-                  {rowSeats.map((seat) => {
-                    const isSelected = selectedSeats.some((s) => s.id === seat.id);
-                    return (
+                  {rowSeats.map((seat) => (
+                    <React.Fragment key={seat.id}>
                       <SeatButton
-                        key={seat.id}
                         seat={seat}
-                        isSelected={isSelected}
+                        isSelected={selectedSeatIds.has(seat.id)}
                         onToggle={onToggleSeat}
                       />
-                    );
-                  })}
+                      {aisleSet.has(seat.number) && (
+                        <span aria-hidden="true" style={{ width: '18px', flexShrink: 0 }} />
+                      )}
+                    </React.Fragment>
+                  ))}
                 </div>
 
-                {/* Right row labels */}
-                <span 
+                <span
                   className="seat-row-label"
                   style={{
                     fontSize: '13px',

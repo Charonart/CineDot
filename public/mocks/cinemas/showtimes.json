@@ -1,0 +1,50 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/cinemas/showtimes",
+    "query": {},
+    "description": "Mock response for showtimes by cinema"
+  },
+  "data": {
+    "date": "2024-06-15",
+    "cinemas": [
+      {
+        "cinemaId": "cn-001",
+        "cinemaName": "CineDot Q1 — Vincom Center",
+        "movies": [
+          {
+            "movieId": "m-001",
+            "title": "Dune: Part Two",
+            "posterUrl": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=200&h=300&fit=crop",
+            "formats": [
+              {
+                "format": "IMAX",
+                "showtimes": ["10:00", "13:30", "17:00", "20:30"]
+              },
+              {
+                "format": "2D",
+                "showtimes": ["09:00", "11:30", "14:00", "16:30", "19:00", "21:30"]
+              }
+            ]
+          },
+          {
+            "movieId": "m-002",
+            "title": "Godzilla x Kong",
+            "posterUrl": "https://images.unsplash.com/photo-1604975999044-188783d54fb3?w=200&h=300&fit=crop",
+            "formats": [
+              {
+                "format": "4DX",
+                "showtimes": ["11:00", "14:30", "18:00", "21:30"]
+              },
+              {
+                "format": "3D",
+                "showtimes": ["09:30", "12:00", "15:00", "17:30", "20:00"]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

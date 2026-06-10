@@ -1,5 +1,5 @@
 export interface Genre {
-  id: number;
+  id: number | string;
   name: string;
 }
 
@@ -13,16 +13,23 @@ export interface Trailer {
 }
 
 export interface Movie {
-  id: number;
+  id: number | string;
+  slug?: string;
   title: string;
+  originalTitle?: string;
   description: string;
   posterUrl: string;
-  backdropUrl: string;
-  releaseDate: string;
+  backdropUrl?: string | null;
+  releaseDate?: string | null;
   rating: number;
   voteCount: number;
   genres: Genre[];
-  runtime?: number;
+  runtime?: number | null;
+  formatTags?: string[];
+  status?: 'now-showing' | 'coming-soon';
+  ageRating?: string;
+  detailHref?: string;
+  bookingHref?: string;
 }
 
 export interface MovieList {
@@ -31,4 +38,22 @@ export interface MovieList {
   totalPages: number;
   totalItems: number;
   hasNext: boolean;
+}
+
+export interface HeroSlide {
+  id: number | string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  backdropUrl: string;
+  posterUrl: string;
+  runtime: number;
+  rating: number;
+  ageRating: string;
+  formatTags: string[];
+  trailerUrl: string;
+  status: string;
+  detailHref: string;
+  bookingHref: string;
 }
