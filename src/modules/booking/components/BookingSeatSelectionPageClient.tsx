@@ -10,6 +10,9 @@ import {
   SeatPriceBreakdown,
 } from '@/modules/booking/components';
 import { useSeatSelection } from '../hooks/useSeatSelection';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/modules/auth';
+import { appRoutes } from '@/shared/routes/appRoutes';
 
 interface BookingSeatSelectionPageClientProps {
   showtimeId: string;
@@ -58,6 +61,8 @@ const LoadingState = () => (
 );
 
 export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageClientProps> = ({ showtimeId }) => {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const {
     showtime,
     seatMap,
@@ -74,6 +79,15 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
     toggleSeat,
     handleCreateHold,
   } = useSeatSelection(showtimeId);
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      const currentPath = window.location.pathname;
+      router.push(appRoutes.login(currentPath));
+      return;
+    }
+    handleCreateHold();
+  };
 
   if (!showtimeId) {
     return (
@@ -171,7 +185,7 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
                 canCheckout={canCheckout}
                 isHoldingSeats={isHoldingSeats}
                 timeLeftSeconds={timeLeftSeconds}
-                onCheckout={handleCreateHold}
+                onCheckout={handleCheckout}
               />
             </div>
           </div>
@@ -183,7 +197,7 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
         totalAmount={totalAmount}
         canCheckout={canCheckout}
         isHoldingSeats={isHoldingSeats}
-        onCheckout={handleCreateHold}
+        onCheckout={handleCheckout}
       />
 
       <style dangerouslySetInnerHTML={{__html: `

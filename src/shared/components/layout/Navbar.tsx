@@ -8,9 +8,13 @@ import { ExpandableSearchBar } from '@shared/ui/ExpandableSearchBar';
 import { useNavbarMovies } from '@/modules/movie/hooks/useMovies';
 import { Movie } from '@/modules/movie/types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
+import { useAuth, UserMenu } from '@/modules/auth';
+import { usePathname } from 'next/navigation';
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, isAuthenticated, isAuthLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -354,7 +358,15 @@ export const Navbar: React.FC = () => {
               }
             }}
           />
-          <Link href="/coming-soon" className="nav-login">Đăng nhập</Link>
+          {isAuthLoading ? (
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
+          ) : isAuthenticated && user ? (
+            <UserMenu user={user} />
+          ) : (
+            <Link href={appRoutes.login(pathname || '')} className="nav-login">
+              Đăng nhập
+            </Link>
+          )}
           <Link href={`${appRoutes.movies}?category=now-showing`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
             Đặt vé
           </Link>

@@ -4,12 +4,14 @@ const envSchema = z.object({
   NEXT_PUBLIC_API_BASE_URL: z.string().url(),
   NEXT_PUBLIC_IMAGE_BASE_URL: z.string().url(),
   NEXT_PUBLIC_USE_MOCK: z.string().transform((val) => val === 'true'),
+  NEXT_PUBLIC_BACKEND_ORIGIN: z.string().url(),
 });
 
 const _env = envSchema.safeParse({
   NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
   NEXT_PUBLIC_IMAGE_BASE_URL: process.env.NEXT_PUBLIC_IMAGE_BASE_URL,
   NEXT_PUBLIC_USE_MOCK: process.env.NEXT_PUBLIC_USE_MOCK,
+  NEXT_PUBLIC_BACKEND_ORIGIN: process.env.NEXT_PUBLIC_BACKEND_ORIGIN,
 });
 
 if (!_env.success) {

@@ -8,7 +8,12 @@ import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
 export const axiosClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_BASE_URL,
   timeout: 10000,
+  withCredentials: true,
+  withXSRFToken: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
+    'Accept': 'application/json',
     'Content-Type': 'application/json',
   },
 });
