@@ -1,13 +1,9 @@
 import { logger } from '@lib/logger/logger';
 import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
-import { quickBookingApi } from '../api/quick-booking.api';
-import { quickBookingMapper } from '../mappers/quick-booking.mapper';
-import {
-  quickBookingCinemaListSchema,
-  quickBookingDateListSchema,
-  quickBookingMovieListSchema,
-  quickBookingShowtimeListSchema,
-} from '../schemas/quick-booking.schema';
+import { movieApi } from '@/modules/movie/api/movie.api';
+import { cinemasApi } from '@/modules/cinemas/api/cinemas.api';
+import { showtimeApi } from '@/modules/showtime/api/showtime.api';
+import { formatDateLabel, buildDateRange } from '@/modules/showtime/mappers/showtime.mapper';
 import {
   QuickBookingCinema,
   QuickBookingDate,
@@ -18,9 +14,13 @@ import {
 export const quickBookingService = {
   getMovies: async (signal?: AbortSignal): Promise<QuickBookingMovie[]> => {
     try {
-      const response = await quickBookingApi.getMovies(signal);
-      const validated = quickBookingMovieListSchema.parse(response.data);
-      return validated.map(quickBookingMapper.toMovieModel);
+      const response = await movieApi.getMovies({ status: 'now-showing' });
+      const results = response.data?.results || [];
+      return results.map((m: any) => ({
+        id: String(m.id),
+        title: m.title,
+        status: m.status || 'now-showing',
+      }));
     } catch (error) {
       if (isRequestCanceled(error)) {
         throw error;
@@ -34,11 +34,13 @@ export const quickBookingService = {
     if (!movieId) return [];
 
     try {
-      const response = await quickBookingApi.getCinemas(movieId, signal);
-      const validated = quickBookingCinemaListSchema.parse(response.data);
-      return validated
-        .map(quickBookingMapper.toCinemaModel)
-        .filter((cinema) => cinema.movieIds.includes(movieId));
+      const response = await cinemasApi.getCinemas();
+      const results = response.data?.results || [];
+      return results.map((c: any) => ({
+        id: String(c.id || c.slug),
+        name: c.name,
+        movieIds: [movieId], // mock to always associate with current movie
+      }));
     } catch (error) {
       if (isRequestCanceled(error)) {
         throw error;
@@ -56,11 +58,35 @@ export const quickBookingService = {
     if (!movieId || !cinemaId) return [];
 
     try {
-      const response = await quickBookingApi.getDates(movieId, cinemaId, signal);
-      const validated = quickBookingDateListSchema.parse(response.data);
-      return validated
-        .map(quickBookingMapper.toDateModel)
-        .filter((date) => date.movieId === movieId && date.cinemaId === cinemaId);
+      // Fetch showtimes for this movie and cinema to derive dates
+      const response = await showtimeApi.getShowtimes({ movieId, cinemaId, date: '' });
+      const results = response.data?.results || [];
+
+      const datesMap = new Map<string, string>();
+      results.forEach((st: any) => {
+        const dateStr = st.time.startTime.split('T')[0];
+        if (!datesMap.has(dateStr)) {
+          const labelObj = formatDateLabel(dateStr);
+          const label = `${labelObj.dayName} - ${labelObj.dayDate}`;
+          datesMap.set(dateStr, label);
+        }
+      });
+
+      if (datesMap.size === 0) {
+        const next7Days = buildDateRange(7);
+        next7Days.forEach((dateStr) => {
+          const labelObj = formatDateLabel(dateStr);
+          const label = `${labelObj.dayName} - ${labelObj.dayDate}`;
+          datesMap.set(dateStr, label);
+        });
+      }
+
+      return Array.from(datesMap.entries()).map(([dateStr, label]) => ({
+        id: dateStr,
+        label,
+        movieId,
+        cinemaId,
+      }));
     } catch (error) {
       if (isRequestCanceled(error)) {
         throw error;
@@ -79,15 +105,27 @@ export const quickBookingService = {
     if (!movieId || !cinemaId || !date) return [];
 
     try {
-      const response = await quickBookingApi.getShowtimes(movieId, cinemaId, date, signal);
-      const validated = quickBookingShowtimeListSchema.parse(response.data);
-      return validated
-        .map(quickBookingMapper.toShowtimeModel)
-        .filter((showtime) =>
-          showtime.movieId === movieId &&
-          showtime.cinemaId === cinemaId &&
-          showtime.date === date,
-        );
+      const response = await showtimeApi.getShowtimes({ movieId, cinemaId, date });
+      const results = response.data?.results || [];
+
+      return results.map((st: any) => {
+        const startTime = st.time.startTime;
+        const timeStr = startTime.split('T')[1]?.slice(0, 5) || '10:00';
+        const labelObj = formatDateLabel(date);
+        const dateLabel = `${labelObj.dayName} - ${labelObj.dayDate}`;
+
+        return {
+          id: String(st.showtimeId),
+          movieId,
+          cinemaId,
+          date,
+          dateLabel,
+          time: timeStr,
+          roomName: st.room.name,
+          screenType: st.room.screenType,
+          availableSeats: st.seatSummary.availableSeats,
+        };
+      });
     } catch (error) {
       if (isRequestCanceled(error)) {
         throw error;

@@ -2,11 +2,12 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { CinemaSchedule, ShowtimeItem } from '../data/movieDetailData';
+import { useShowtimes } from '@/modules/showtime/hooks/useShowtime';
+import { showtimeMapper } from '@/modules/showtime/mappers/showtime.mapper';
 import { ScrollTextSlideLeft, HighlightText } from '@/shared/components/visual';
 
 interface MovieScheduleProps {
-  cinemas: CinemaSchedule[];
+  movieId: string | number;
 }
 
 interface ScheduleDropdownProps {
@@ -116,7 +117,7 @@ const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({
   );
 };
 
-export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
+export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
   const router = useRouter();
   const params = useParams();
   const movieSlug = (params?.slug as string) || '';
@@ -124,6 +125,42 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedCinemaFilter, setSelectedCinemaFilter] = useState<string>('all');
+
+  const { data: showtimesData } = useShowtimes(movieId, { date: selectedDate });
+
+  const cinemas = useMemo(() => {
+    if (!showtimesData?.items) return [];
+
+    const groups = showtimeMapper.toCinemaGroups(showtimesData.items);
+    return groups.map((g) => ({
+      name: g.cinemaName,
+      formats: g.formatGroups.map((fg) => ({
+        name: fg.format,
+        times: fg.showtimes.map((st) => {
+          let status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out' = 'available';
+
+          // Simple past check
+          const startTime = new Date(st.startTime);
+          const now = new Date();
+          if (startTime < now) {
+            status = 'past';
+          } else if (st.status === 'sold_out' || st.availableSeats === 0) {
+            status = 'sold-out';
+          } else if (st.status === 'cancelled') {
+            status = 'locked';
+          } else if (st.occupancy >= 80) {
+            status = 'almost-full';
+          }
+
+          return {
+            time: st.formattedTime,
+            status,
+            scheduleId: String(st.showtimeId),
+          };
+        }),
+      })),
+    }));
+  }, [showtimesData]);
 
   const regionOptions = useMemo(() => [
     { value: 'all', label: 'Toàn quốc' },
@@ -190,7 +227,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   }, [cinemas, selectedRegion, selectedCinemaFilter]);
 
   // Helper to resolve button classes and attributes based on status
-  const getShowtimeBtnProps = (status: ShowtimeItem['status']) => {
+  const getShowtimeBtnProps = (status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out') => {
     switch (status) {
       case 'past':
         return { className: 'time-btn is-past', disabled: true, title: 'Đã qua giờ chiếu', label: 'Đã qua' };
