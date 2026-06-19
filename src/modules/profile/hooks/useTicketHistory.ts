@@ -11,12 +11,15 @@ interface UseTicketHistoryParams {
 /**
  * useTicketHistory — fetches the user's ticket purchase history.
  * Supports filtering by status (UPCOMING, COMPLETED, CANCELLED).
- * Uses query cancellation via AbortSignal.
+ *
+ * AbortSignal from TanStack Query is threaded all the way down to axiosClient
+ * so in-flight requests are cancelled when the query key changes (e.g. tab switch).
  */
 export const useTicketHistory = (params?: UseTicketHistoryParams) => {
   return useQuery({
     queryKey: profileKeys.tickets(params),
-    queryFn: ({ signal: _signal }) => profileService.getTicketHistory(params),
+    queryFn: ({ signal }) =>
+      profileService.getTicketHistory({ ...params, signal }),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

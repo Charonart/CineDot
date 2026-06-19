@@ -55,6 +55,9 @@ export interface UserProfile {
 
 /**
  * TicketHistory — clean domain model with formatted fields.
+ * NOTE: showtimeStart is kept as a raw ISO string.
+ * Date/time formatting MUST happen in Client Components only
+ * to avoid Next.js hydration mismatches (server vs client locale).
  */
 export interface TicketHistory {
   id: string;
@@ -64,11 +67,9 @@ export interface TicketHistory {
   cinemaName: string;
   roomName: string;
   seatLabels: string[];
-  showtimeStart: string; // ISO string preserved for Date ops
-  formattedDate: string; // e.g. "Thứ Năm, 25/06/2026"
-  formattedTime: string; // e.g. "19:30"
+  showtimeStart: string; // ISO 8601 — format in Client Component
   totalAmount: number;
-  formattedAmount: string; // e.g. "175.000 ₫"
+  formattedAmount: string; // VND — locale-independent: uses toLocaleString('vi-VN') safely as amount-only
   status: TicketStatus;
   qrCodeString: string;
 }

@@ -1,8 +1,9 @@
-import { profileApi, TicketHistoryQueryParams } from '../api/profile.api';
+import { profileApi } from '../api/profile.api';
 import { profileMapper } from '../mappers/profile.mapper';
 import { UserProfile, TicketHistory } from '../types/profile.type';
 import { userProfileSchema, ticketHistoryListSchema } from '../schemas/profile.schema';
 import { ProfileUpdateRequestDTO } from '../dto/profile.dto';
+import { TicketStatusDTO } from '../dto/ticket-history.dto';
 import { logger } from '@lib/logger/logger';
 
 export const profileService = {
@@ -39,10 +40,11 @@ export const profileService = {
   /**
    * Fetches the user's ticket history.
    * Validates the array response and maps each item to a TicketHistory model.
+   * @param params - Optional filter params including AbortSignal for cancellation.
    */
-  getTicketHistory: async (params?: TicketHistoryQueryParams): Promise<TicketHistory[]> => {
+  getTicketHistory: async (params?: { status?: TicketStatusDTO; page?: number; signal?: AbortSignal }): Promise<TicketHistory[]> => {
     try {
-      const response = await profileApi.getTicketHistory(params);
+      const response = await profileApi.getTicketHistory(params ?? {});
       const validatedData = ticketHistoryListSchema.parse(response.data);
       return profileMapper.toTicketHistoryList(validatedData);
     } catch (error) {

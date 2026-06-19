@@ -1,10 +1,33 @@
 'use client';
 
-/* eslint-disable @next/next/no-img-element */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TicketHistory } from '../types/profile.type';
 import { MapPin, Clock, Armchair, QrCode, ChevronDown } from 'lucide-react';
+
+// ─── Client-side date formatter ───────────────────────────────────────────────
+// MUST be in a Client Component — not in mapper/service — to avoid
+// SSR hydration mismatch (server locale vs client locale divergence).
+
+const formatTicketDate = (isoString: string): string => {
+  const date = new Date(isoString);
+  return date.toLocaleDateString('vi-VN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
+
+const formatTicketTime = (isoString: string): string => {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+};
 
 // ─── QR Code SVG (realistic visual mock) ─────────────────────────────────────
 const QRCodeMock: React.FC<{ value: string }> = ({ value }) => {
@@ -79,6 +102,14 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, index = 0 }) => 
   const [expanded, setExpanded] = useState(ticket.status === 'UPCOMING');
   const status = STATUS_CONFIG[ticket.status];
 
+  /**
+   * Date/time formatting happens client-side only via useMemo.
+   * This prevents SSR hydration mismatch caused by locale-sensitive
+   * toLocaleDateString() producing different output on server vs client.
+   */
+  const formattedDate = useMemo(() => formatTicketDate(ticket.showtimeStart), [ticket.showtimeStart]);
+  const formattedTime = useMemo(() => formatTicketTime(ticket.showtimeStart), [ticket.showtimeStart]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
@@ -98,23 +129,23 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, index = 0 }) => 
             ? '1px solid rgba(79,70,229,0.2)'
             : '1px solid rgba(0,0,0,0.06)',
           transition: 'box-shadow 0.3s ease, transform 0.3s ease',
-          cursor: 'default',
         }}
         className="ticket-card-root"
       >
         {/* ── Poster Header ─────────────────────────────────────────────── */}
         <div style={{ position: 'relative', height: 170, overflow: 'hidden' }}>
-          <img
+          {/* next/image with imageHelper-resolved URL — per AGENTS.md Rule 9 */}
+          <Image
             src={ticket.posterUrl}
             alt={ticket.movieTitle}
+            fill
+            sizes="(max-width: 768px) 100vw, 760px"
             style={{
-              width: '100%',
-              height: '100%',
               objectFit: 'cover',
               objectPosition: 'center top',
               filter: ticket.status === 'CANCELLED' ? 'grayscale(60%)' : 'none',
-              transition: 'filter 0.3s',
             }}
+            priority={index < 2}
           />
           {/* Gradient overlay */}
           <div style={{
@@ -170,7 +201,8 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, index = 0 }) => 
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Clock size={13} color="#6B7280" />
-              <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>{ticket.formattedDate}</span>
+              {/* formattedDate/formattedTime derived via useMemo — client-only, hydration-safe */}
+              <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>{formattedDate}</span>
               <span style={{
                 fontSize: 13,
                 fontWeight: 700,
@@ -179,7 +211,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, index = 0 }) => 
                 padding: '2px 8px',
                 borderRadius: 6,
               }}>
-                {ticket.formattedTime}
+                {formattedTime}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -206,7 +238,6 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, index = 0 }) => 
 
         {/* ── Perforated Tear-off Line ─────────────────────────────────── */}
         <div style={{ position: 'relative', margin: '0 20px', height: 20, display: 'flex', alignItems: 'center' }}>
-          {/* Left notch */}
           <div style={{
             position: 'absolute',
             left: -34,
@@ -217,11 +248,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, index = 0 }) => 
             border: '1px solid #E5E7EB',
             borderLeft: 'none',
           }} />
-          <div style={{
-            flex: 1,
-            borderTop: '2px dashed #E5E7EB',
-          }} />
-          {/* Right notch */}
+          <div style={{ flex: 1, borderTop: '2px dashed #E5E7EB' }} />
           <div style={{
             position: 'absolute',
             right: -34,
