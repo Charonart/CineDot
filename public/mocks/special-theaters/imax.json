@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/special-theaters/imax",
+    "params": { "type": "imax" },
+    "description": "Mock response for IMAX special theater"
+  },
+  "data": {
+    "type": "imax",
+    "name": "IMAX",
+    "tagline": "Trải Nghiệm Điện Ảnh Đỉnh Cao",
+    "description": "IMAX mang đến trải nghiệm điện ảnh vượt trội với màn hình khổng lồ cao tới 22m, âm thanh vòm 12 kênh crystal clear, và hình ảnh sắc nét gấp 10 lần so với màn hình thông thường.",
+    "heroImageUrl": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1920&h=1080&fit=crop",
+    "features": [
+      { "icon": "🖥️", "title": "Màn hình khổng lồ", "description": "Cao tới 22m, rộng tới 28m" },
+      { "icon": "🔊", "title": "Âm thanh 12 kênh", "description": "Crystal-clear clarity" },
+      { "icon": "📽️", "title": "Hình ảnh sắc nét x10", "description": "So với màn hình thông thường" },
+      { "icon": "💺", "title": "Ghế đặc biệt", "description": "Thiết kế tối ưu cho IMAX" }
+    ],
+    "technology": "IMAX® with Laser projection system",
+    "supportedCinemas": [
+      { "id": "cn-001", "name": "CineDot Quận 1 — Vincom Center", "address": "72 Lê Thánh Tôn, Q1, TP.HCM", "slug": "cinedot-q1-saigon" },
+      { "id": "cn-002", "name": "CineDot Quận 7 — SC VivoCity", "address": "1058 Nguyễn Văn Linh, Q7, TP.HCM", "slug": "cinedot-q7-sc-vivo" },
+      { "id": "cn-003", "name": "CineDot Hà Nội — Vincom Bà Triệu", "address": "191 Bà Triệu, Hai Bà Trưng, HN", "slug": "cinedot-ha-noi-vincom-ba-trieu" }
+    ],
+    "nowShowingMovies": [
+      { "id": "m-001", "slug": "dune-part-two", "title": "Dune: Part Two", "posterUrl": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=300&h=450&fit=crop", "rating": 8.5 },
+      { "id": "m-002", "slug": "godzilla-x-kong", "title": "Godzilla x Kong: The New Empire", "posterUrl": "https://images.unsplash.com/photo-1604975999044-188783d54fb3?w=300&h=450&fit=crop", "rating": 7.0 }
+    ]
+  }
+}

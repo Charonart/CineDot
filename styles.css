@@ -2153,11 +2153,11 @@ button {
 /* SECTION STRUCTURE IN MOVIE DETAIL */
 .section-detail-content {
   margin-top: 64px;
-  background: var(--bg2);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 36px;
-  box-shadow: var(--shadow-sm);
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 .detail-section-title {
@@ -2172,8 +2172,9 @@ button {
 
 .detail-article {
   font-size: 15px;
-  line-height: 1.75;
+  line-height: 1.8;
   color: var(--text2);
+  max-width: 100%;
 }
 
 .detail-article p {
@@ -2185,85 +2186,172 @@ button {
 }
 
 /* 5. SHOWTIME SCHEDULE SECTION */
-.schedule-controls {
+.schedule-toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 32px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.date-tabs-wrapper {
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-}
-
-.date-tabs-wrapper::-webkit-scrollbar {
-  display: none; /* Safari/Chrome */
-}
-
-.date-tabs {
-  display: flex;
+  justify-content: space-between;
   gap: 12px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  flex-wrap: nowrap;
 }
 
-.date-tab {
+.schedule-date-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 430px;
+  flex: 1 1 auto;
+}
+
+.schedule-nav-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex: 0 0 44px;
+}
+
+.schedule-nav-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.schedule-date-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE */
+  scroll-behavior: smooth;
+  flex: 1 1 auto;
+}
+
+.schedule-date-list::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+.schedule-date-item {
   background: transparent;
   border: 1px solid var(--border);
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   color: var(--text2);
-  font-weight: 600;
-  font-size: 14px;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   white-space: nowrap;
   transition: all var(--transition);
+  flex: 0 0 104px;
+  width: 104px;
+  height: 64px;
 }
 
-.date-tab:hover {
+.schedule-date-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.schedule-date-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.schedule-date-item:hover {
   background: var(--bg);
   border-color: var(--text);
   color: var(--text);
 }
 
-.date-tab.active {
+.schedule-date-item.active,
+.schedule-date-item.is-active {
   background: var(--text);
   color: var(--bg);
   border-color: var(--text);
   box-shadow: var(--shadow-sm);
 }
 
-.filter-dropdowns {
+.schedule-filters {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
-.filter-select {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  cursor: pointer;
-  outline: none;
-  transition: border 0.3s;
+.schedule-filter-city {
+  width: 170px;
 }
 
-.filter-select:focus {
-  border-color: var(--accent-strong);
+.schedule-filter-cinema {
+  width: 210px;
 }
 
 .cinema-schedule-box {
-  background: var(--bg);
+  background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   padding: 24px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 992px) {
+  .schedule-toolbar {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .schedule-date-nav {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+  
+  .schedule-filters {
+    width: 100%;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  
+  .schedule-filter-city,
+  .schedule-filter-cinema {
+    flex: 1 1 calc(50% - 6px);
+    width: 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  .schedule-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .schedule-filter-city,
+  .schedule-filter-cinema {
+    width: 100%;
+    flex: 1 1 auto;
+  }
 }
 
 .cinema-group-title {

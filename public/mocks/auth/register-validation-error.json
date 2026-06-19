@@ -1,0 +1,12 @@
+{
+  "success": false,
+  "req": {
+    "method": "POST",
+    "path": "/api/v1/auth/register"
+  },
+  "message": "Thông tin đăng ký không hợp lệ.",
+  "code": "VALIDATION_ERROR",
+  "errors": {
+    "email": ["Email đã tồn tại trên hệ thống."]
+  }
+}

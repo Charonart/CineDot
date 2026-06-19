@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "req": {
+    "method": "POST",
+    "path": "/api/v1/auth/register",
+    "body": {
+      "name": "Lương Hữu Luyến",
+      "email": "user@example.com",
+      "phone": "0987654321",
+      "password": "********",
+      "passwordConfirmation": "********"
+    },
+    "description": "Mock registration success response"
+  },
+  "data": {
+    "user": {
+      "id": "user_1",
+      "name": "Lương Hữu Luyến",
+      "email": "user@example.com",
+      "phone": "0987654321",
+      "avatarUrl": null,
+      "emailVerifiedAt": null,
+      "roles": ["customer"],
+      "permissions": []
+    }
+  },
+  "message": "Đăng ký tài khoản thành công"
+}

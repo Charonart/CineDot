@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "message": "One or more seats are no longer available",
+  "code": "SEAT_NOT_AVAILABLE",
+  "errors": {
+    "seatIds": ["seat_A2"]
+  }
+}

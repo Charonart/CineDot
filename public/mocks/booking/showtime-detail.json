@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "data": {
+    "id": "st_qb_1001",
+    "movie": {
+      "id": "movie_1",
+      "title": "Người Nhện: Phần 2",
+      "slug": "nguoi-nhen-phan-2",
+      "posterUrl": "/images/mock/spider-man.jpg",
+      "runtime": 120,
+      "ageRating": "T13"
+    },
+    "cinema": {
+      "id": "cinema_1",
+      "name": "CINE Landmark - Quận 1",
+      "address": "Quận 1, TP.HCM"
+    },
+    "room": {
+      "id": "room_1",
+      "name": "Room 1",
+      "screenType": "2D"
+    },
+    "showDate": "2026-06-04",
+    "showTime": "10:15",
+    "startsAt": "2026-06-04T10:15:00+07:00",
+    "endsAt": "2026-06-04T12:15:00+07:00",
+    "status": "open",
+    "salesStatus": "on-sale"
+  }
+}

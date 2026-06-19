@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useSearchMovies } from '@modules/movie/hooks/useMovies';
 import { useDebounce } from '@shared/hooks/useDebounce';
 import { MovieCard } from '@modules/movie/components/MovieCard';
@@ -8,11 +9,17 @@ import { MovieCardSkeleton } from '@modules/movie/components/MovieCardSkeleton';
 import { EmptyState } from '@shared/ui/EmptyState';
 import { ErrorState } from '@shared/ui/ErrorState';
 import { Search as SearchIcon } from 'lucide-react';
-import Link from 'next/link';
 
-export default function SearchPage() {
-  const [query, setQuery] = useState('');
+function SearchContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebounce(query, 500);
+
+  // Sync state if URL query changes (e.g. searching again from Navbar)
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   const { data, isLoading, isError, refetch } = useSearchMovies(debouncedQuery);
 
@@ -51,12 +58,32 @@ export default function SearchPage() {
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {data?.items.map((movie) => (
-            <Link key={movie.id} href={`/movies/${movie.id}`}>
+            <div key={movie.id}>
               <MovieCard movie={movie} />
-            </Link>
+            </div>
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 w-48 bg-zinc-200 rounded"></div>
+          <div className="h-12 w-full max-w-2xl bg-zinc-200 rounded-2xl"></div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-zinc-200 rounded-2xl"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }

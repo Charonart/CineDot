@@ -1,0 +1,125 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/quick-booking/showtimes",
+    "query": {
+      "movieId": "movie_1",
+      "cinemaId": "cinema_1",
+      "date": "2026-06-04"
+    },
+    "description": "Mock response listing showtimes available for quick booking selection"
+  },
+  "data": [
+    {
+      "id": "st_qb_1001",
+      "movieId": "movie_1",
+      "cinemaId": "cinema_1",
+      "date": "2026-06-04",
+      "dateLabel": "Hom nay - 04/06",
+      "time": "10:15",
+      "roomName": "Room 1",
+      "screenType": "2D",
+      "availableSeats": 45
+    },
+    {
+      "id": "st_qb_1002",
+      "movieId": "movie_1",
+      "cinemaId": "cinema_1",
+      "date": "2026-06-04",
+      "dateLabel": "Hom nay - 04/06",
+      "time": "19:30",
+      "roomName": "Room 3",
+      "screenType": "IMAX 2D",
+      "availableSeats": 28
+    },
+    {
+      "id": "st_qb_1003",
+      "movieId": "movie_1",
+      "cinemaId": "cinema_1",
+      "date": "2026-06-05",
+      "dateLabel": "Ngay mai - 05/06",
+      "time": "21:15",
+      "roomName": "Room 2",
+      "screenType": "2D",
+      "availableSeats": 52
+    },
+    {
+      "id": "st_qb_1101",
+      "movieId": "movie_1",
+      "cinemaId": "cinema_2",
+      "date": "2026-06-06",
+      "dateLabel": "Thu Bay - 06/06",
+      "time": "16:45",
+      "roomName": "Room 5",
+      "screenType": "4DX",
+      "availableSeats": 17
+    },
+    {
+      "id": "st_qb_2001",
+      "movieId": "movie_2",
+      "cinemaId": "cinema_1",
+      "date": "2026-06-04",
+      "dateLabel": "Hom nay - 04/06",
+      "time": "14:30",
+      "roomName": "Room 4",
+      "screenType": "3D",
+      "availableSeats": 36
+    },
+    {
+      "id": "st_qb_2301",
+      "movieId": "movie_2",
+      "cinemaId": "cinema_3",
+      "date": "2026-06-05",
+      "dateLabel": "Ngay mai - 05/06",
+      "time": "20:00",
+      "roomName": "Room 1",
+      "screenType": "IMAX 3D",
+      "availableSeats": 31
+    },
+    {
+      "id": "st_qb_3201",
+      "movieId": "movie_3",
+      "cinemaId": "cinema_2",
+      "date": "2026-06-06",
+      "dateLabel": "Thu Bay - 06/06",
+      "time": "18:30",
+      "roomName": "Room 2",
+      "screenType": "2D",
+      "availableSeats": 61
+    },
+    {
+      "id": "st_qb_3301",
+      "movieId": "movie_3",
+      "cinemaId": "cinema_3",
+      "date": "2026-06-07",
+      "dateLabel": "Chu Nhat - 07/06",
+      "time": "12:30",
+      "roomName": "Room 6",
+      "screenType": "2D",
+      "availableSeats": 0
+    },
+    {
+      "id": "st_qb_4401",
+      "movieId": "movie_4",
+      "cinemaId": "cinema_4",
+      "date": "2026-06-04",
+      "dateLabel": "Hom nay - 04/06",
+      "time": "22:00",
+      "roomName": "Room 1",
+      "screenType": "2D",
+      "availableSeats": 12
+    },
+    {
+      "id": "st_qb_5201",
+      "movieId": "movie_5",
+      "cinemaId": "cinema_2",
+      "date": "2026-06-05",
+      "dateLabel": "Ngay mai - 05/06",
+      "time": "17:00",
+      "roomName": "Room 7",
+      "screenType": "IMAX 2D",
+      "availableSeats": 24
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/movies/detail/godzilla-x-kong",
+    "params": {
+      "slug": "godzilla-x-kong"
+    },
+    "description": "Mock response for Godzilla x Kong detail page"
+  },
+  "data": {
+    "id": "godzilla-x-kong",
+    "slug": "godzilla-x-kong",
+    "title": "Godzilla x Kong: Đế Chế Mới",
+    "originalTitle": "Godzilla x Kong: The New Empire",
+    "overview": "Godzilla và Kong sẽ phải gạt bỏ những bất hòa để cùng nhau chống lại một mối đe dọa khổng lồ mới ẩn sâu trong lòng Trái Đất, đe dọa sự tồn vong của cả loài Titan lẫn nhân loại.",
+    "tagline": "Rise together or fall alone.",
+    "posterUrl": "https://images.unsplash.com/photo-1620421680010-0766ff230392?w=500&q=80",
+    "backdropUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1600&q=80",
+    "releaseDate": "2026-03-29",
+    "runtime": 115,
+    "status": "Released",
+    "rating": {
+      "average": 7.2,
+      "count": 289
+    },
+    "genres": [
+      { "id": 3, "name": "Hành động" },
+      { "id": 1, "name": "Viễn tưởng" },
+      { "id": 4, "name": "Kỳ ảo" }
+    ],
+    "country": "Mỹ",
+    "producer": "Legendary Pictures",
+    "director": "Adam Wingard",
+    "cast": ["Rebecca Hall", "Brian Tyree Henry", "Dan Stevens"],
+    "trailerUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "recommendations": [
+      {
+        "id": "dune-part-two",
+        "title": "Dune: Cát Song - Phần Hai",
+        "poster": "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80",
+        "rating": 8.7,
+        "ageRating": "T16"
+      },
+      {
+        "id": "inside-out-2",
+        "title": "Inside Out 2: Những Mảnh Ghép Cảm Xúc",
+        "poster": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80",
+        "rating": 8.5,
+        "ageRating": "P"
+      }
+    ],
+    "cinemas": [
+      {
+        "name": "Galaxy CineX - Hanoi Centre",
+        "formats": [
+          {
+            "name": "4DX 3D Phụ Đề",
+            "times": [
+              { "time": "11:00", "status": "available", "scheduleId": "501" },
+              { "time": "13:30", "status": "available", "scheduleId": "502" },
+              { "time": "16:00", "status": "almost-full", "scheduleId": "503" },
+              { "time": "18:30", "status": "available", "scheduleId": "504" },
+              { "time": "21:00", "status": "sold-out", "scheduleId": "505" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

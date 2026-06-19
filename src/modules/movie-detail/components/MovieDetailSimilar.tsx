@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { MovieList } from '@modules/movie/types/movie.type';
 import { MovieCard } from '@modules/movie/components/MovieCard';
 import { Film } from 'lucide-react';
@@ -24,14 +23,9 @@ export function MovieDetailSimilar({ similar }: MovieDetailSimilarProps) {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {similar.items.slice(0, 8).map((movie) => (
-          <Link
-            key={movie.id}
-            href={`/movies/${movie.id}`}
-            className="rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
-            aria-label={`View details for ${movie.title}`}
-          >
+          <div key={movie.id}>
             <MovieCard movie={movie} />
-          </Link>
+          </div>
         ))}
       </div>
     </section>

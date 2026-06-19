@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "req": {
+    "method": "POST",
+    "path": "/api/v1/auth/login",
+    "body": {
+      "email": "wrong@example.com",
+      "password": "********"
+    },
+    "description": "Mock invalid login response"
+  },
+  "message": "Email hoặc mật khẩu không đúng.",
+  "code": "INVALID_CREDENTIALS",
+  "errors": {
+    "email": ["Email hoặc mật khẩu không đúng."]
+  }
+}

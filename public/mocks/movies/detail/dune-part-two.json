@@ -1,0 +1,105 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/movies/detail/dune-part-two",
+    "params": {
+      "slug": "dune-part-two"
+    },
+    "description": "Mock response for Dune: Part Two detail view containing cinema schedules and recommendation cards"
+  },
+  "data": {
+    "id": "dune-part-two",
+    "slug": "dune-part-two",
+    "title": "Dune: Cát Song - Phần Hai",
+    "originalTitle": "Dune: Part Two",
+    "overview": "Dune: Cát Song - Phần Hai tiếp tục cuộc hành trình kỳ vĩ của Paul Atreides khi anh đồng hành cùng Chani và người Fremen trên sa mạc Arrakis, tìm kiếm sự trả thù chống lại những kẻ mưu hại gia tộc mình. Đối mặt với những lựa chọn giữa tình yêu của đời mình và số phận của vũ trụ, Paul cố gắng ngăn chặn một tương lai khủng khiếp mà chỉ anh mới có thể thấy trước.",
+    "tagline": "A long time ago in a galaxy far, far away...",
+    "posterUrl": "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=500&q=80",
+    "backdropUrl": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1600&q=80",
+    "releaseDate": "2026-03-15",
+    "runtime": 166,
+    "status": "Released",
+    "rating": {
+      "average": 8.7,
+      "count": 456
+    },
+    "genres": [
+      { "id": 1, "name": "Khoa học viễn tưởng" },
+      { "id": 2, "name": "Phiêu lưu" },
+      { "id": 6, "name": "Kịch tính" }
+    ],
+    "country": "Mỹ",
+    "producer": "Legendary Pictures / Warner Bros.",
+    "director": "Denis Villeneuve",
+    "cast": ["Timothée Chalamet", "Zendaya", "Rebecca Ferguson"],
+    "trailerUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "recommendations": [
+      {
+        "id": "lat-mat-7",
+        "title": "Lật Mặt 7: Một Điều Ước",
+        "poster": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&q=80",
+        "rating": 8.9,
+        "ageRating": "K"
+      },
+      {
+        "id": "inside-out-2",
+        "title": "Inside Out 2: Những Mảnh Ghép Cảm Xúc",
+        "poster": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80",
+        "rating": 8.5,
+        "ageRating": "P"
+      },
+      {
+        "id": "exhuma",
+        "title": "Exhuma: Quật Mộ Trùng Tang",
+        "poster": "https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?w=400&q=80",
+        "rating": 8.3,
+        "ageRating": "T16"
+      }
+    ],
+    "cinemas": [
+      {
+        "name": "Galaxy CineX - Hanoi Centre",
+        "formats": [
+          {
+            "name": "Onyx x Dolby Atmos 2D Lồng Tiếng",
+            "times": [
+              { "time": "10:00", "status": "past", "scheduleId": "301" },
+              { "time": "12:00", "status": "available", "scheduleId": "302" },
+              { "time": "14:00", "status": "almost-full", "scheduleId": "303" },
+              { "time": "16:00", "status": "available", "scheduleId": "304" },
+              { "time": "18:00", "status": "locked", "scheduleId": "305" },
+              { "time": "20:00", "status": "sold-out", "scheduleId": "306" }
+            ]
+          },
+          {
+            "name": "2D Lồng Tiếng",
+            "times": [
+              { "time": "10:30", "status": "past", "scheduleId": "307" },
+              { "time": "12:30", "status": "available", "scheduleId": "308" },
+              { "time": "14:30", "status": "available", "scheduleId": "309" },
+              { "time": "16:30", "status": "almost-full", "scheduleId": "310" },
+              { "time": "18:30", "status": "available", "scheduleId": "311" },
+              { "time": "20:30", "status": "sold-out", "scheduleId": "312" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "CINE Landmark - Q1",
+        "formats": [
+          {
+            "name": "IMAX 2D Phụ Đề",
+            "times": [
+              { "time": "09:00", "status": "past", "scheduleId": "401" },
+              { "time": "11:45", "status": "available", "scheduleId": "402" },
+              { "time": "14:30", "status": "available", "scheduleId": "403" },
+              { "time": "17:15", "status": "almost-full", "scheduleId": "404" },
+              { "time": "20:00", "status": "available", "scheduleId": "405" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
