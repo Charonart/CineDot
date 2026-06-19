@@ -59,6 +59,10 @@ export const mockRoutes: Record<string, string> = {
   '/api/v1/profile/me': '/mocks/profile/profile.json',
   '/profile/tickets': '/mocks/profile/ticket-history.json',
   '/api/v1/profile/tickets': '/mocks/profile/ticket-history.json',
+  '/booking/selector/movies': '/mocks/movie-now-showing.json',
+  '/api/v1/booking/selector/movies': '/mocks/movie-now-showing.json',
+  '/booking/selector/showtimes': '/mocks/showtimes-by-movie.json',
+  '/api/v1/booking/selector/showtimes': '/mocks/showtimes-by-movie.json',
 };
 
 export const getMockPath = (url: string): string | null => {

@@ -3,6 +3,7 @@
 import React from 'react';
 import {
   BookingPriceSummary,
+  BookingStepper,
   BookingSummaryHeader,
   MobileBookingBar,
   SeatLegend,
@@ -10,9 +11,11 @@ import {
   SeatPriceBreakdown,
 } from '@/modules/booking/components';
 import { useSeatSelection } from '../hooks/useSeatSelection';
+import { useBookingStore } from '../store/bookingStore';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/modules/auth';
 import { appRoutes } from '@/shared/routes/appRoutes';
+import { buildCancelBookingUrl, buildFoodsUrl } from '../utils/bookingNavigation';
 
 interface BookingSeatSelectionPageClientProps {
   showtimeId: string;
@@ -63,6 +66,15 @@ const LoadingState = () => (
 export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageClientProps> = ({ showtimeId }) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  
+  const resetBooking = useBookingStore((state) => state.resetBooking);
+  const initializeBooking = useBookingStore((state) => state.initializeBooking);
+  const initOrClearIfChanged = useBookingStore((state) => state.initOrClearIfChanged);
+  const setSeats = useBookingStore((state) => state.setSeats);
+  const startSeatHold = useBookingStore((state) => state.startSeatHold);
+  
+  const movieSlug = useBookingStore((state) => state.session.movie?.slug ?? null);
+
   const {
     showtime,
     seatMap,
@@ -80,13 +92,72 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
     handleCreateHold,
   } = useSeatSelection(showtimeId);
 
+  // Clear if showtimeId changed
+  React.useEffect(() => {
+    if (showtimeId) {
+      initOrClearIfChanged(showtimeId);
+    }
+  }, [showtimeId, initOrClearIfChanged]);
+
+  // Initialize booking session when showtime data loads
+  React.useEffect(() => {
+    if (showtime && showtimeId) {
+      initializeBooking({
+        movie: {
+          slug: showtime.movie.slug,
+          title: showtime.movie.title,
+          poster: showtime.movie.posterUrl,
+          format: showtime.room.screenType,
+          duration: showtime.movie.runtime.toString(),
+        },
+        cinema: {
+          id: showtime.cinema.id,
+          name: showtime.cinema.name,
+          hall: showtime.room.name,
+        },
+        showtime: {
+          date: showtime.showDate,
+          time: showtime.showTime,
+        },
+        showtimeId,
+      });
+    }
+  }, [showtime, showtimeId, initializeBooking]);
+
+  // Sync seats and navigate to foods step on successful seat hold
+  React.useEffect(() => {
+    if (hold && selectedSeats.length > 0) {
+      const mappedSeats = selectedSeats.map((s) => ({
+        id: s.id,
+        row: s.row,
+        number: s.number.toString(),
+        label: s.label,
+        type: s.type,
+        price: s.price,
+      }));
+      setSeats(mappedSeats);
+      startSeatHold();
+      router.replace(buildFoodsUrl());
+    }
+  }, [hold, selectedSeats, setSeats, startSeatHold, router]);
+
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      const currentPath = window.location.pathname;
+      const currentPath = window.location.pathname + window.location.search;
       router.push(appRoutes.login(currentPath));
       return;
     }
     handleCreateHold();
+  };
+
+  /**
+   * Cancel booking: destroy the Zustand session and navigate away.
+   * From the seats page, going "back" means full funnel exit.
+   * router.replace is used to prevent a history loop.
+   */
+  const handleCancelBooking = () => {
+    resetBooking();
+    router.replace(buildCancelBookingUrl(movieSlug));
   };
 
   if (!showtimeId) {
@@ -128,6 +199,10 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
       }}
     >
       <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+
+        {/* Progress Stepper — bypass mode: "Suất chiếu" step is permanently locked */}
+        <BookingStepper currentStep="seats" entryMode="bypass" />
+
         <BookingSummaryHeader showtime={showtime} />
 
         {!isOpenForSale && (
@@ -155,6 +230,41 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
 
         {!hasSeats && <AlertBanner message="Sơ đồ ghế hiện chưa có dữ liệu." />}
         {hasSeats && !hasAvailableSeats && <AlertBanner message="Suất chiếu này hiện không còn ghế khả dụng." />}
+
+        {/* Cancel booking — prominently placed but secondary (text-link style) */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <button
+            type="button"
+            onClick={handleCancelBooking}
+            aria-label="Hủy đặt vé và quay lại trang phim"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'transparent',
+              border: '1px solid #FFA4A4',
+              color: '#E53E3E',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              transition: 'background 0.18s ease, color 0.18s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#FFF2F2';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            Hủy đặt vé
+          </button>
+        </div>
 
         <SeatLegend />
 

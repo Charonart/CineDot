@@ -75,6 +75,7 @@ export type BookingSession = {
   movie: BookingMovieInfo | null;
   cinema: BookingCinemaInfo | null;
   showtime: BookingShowtimeInfo | null;
+  showtimeId: string | null;
   seats: SelectedSeat[];
   combos: ComboItem[];
   voucherCode?: string;

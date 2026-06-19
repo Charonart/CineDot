@@ -45,6 +45,7 @@ const createDefaultSession = (): BookingSession => ({
   movie: null,
   cinema: null,
   showtime: null,
+  showtimeId: null,
   seats: [],
   combos: [],
   voucherCode: undefined,
@@ -92,7 +93,10 @@ interface BookingActions {
     movie: BookingMovieInfo;
     cinema: BookingCinemaInfo;
     showtime: BookingShowtimeInfo;
+    showtimeId: string;
   }) => void;
+  clearBookingSession: () => void;
+  initOrClearIfChanged: (newShowtimeId: string) => void;
   setCurrentStep: (step: BookingStep) => void;
   setSeats: (seats: SelectedSeat[]) => void;
   addSeat: (seat: SelectedSeat) => void;
@@ -124,6 +128,25 @@ export const useBookingStore = create<BookingStore>()(
     (set) => ({
       session: createDefaultSession(),
 
+      clearBookingSession: () =>
+        set(() => ({
+          session: createDefaultSession(),
+        })),
+
+      initOrClearIfChanged: (newShowtimeId) =>
+        set((state) => {
+          if (state.session.showtimeId !== newShowtimeId) {
+            const cleared = createDefaultSession();
+            return {
+              session: {
+                ...cleared,
+                showtimeId: newShowtimeId,
+              },
+            };
+          }
+          return {};
+        }),
+
       initializeBooking: (payload) =>
         set((state) => {
           const current = state.session;
@@ -135,6 +158,7 @@ export const useBookingStore = create<BookingStore>()(
             !current.showtime ||
             current.showtime.date !== payload.showtime.date ||
             current.showtime.time !== payload.showtime.time ||
+            current.showtimeId !== payload.showtimeId ||
             current.status === 'expired';
 
           if (!hasChanged) {
@@ -147,6 +171,7 @@ export const useBookingStore = create<BookingStore>()(
               movie: payload.movie,
               cinema: payload.cinema,
               showtime: payload.showtime,
+              showtimeId: payload.showtimeId,
             },
           };
         }),

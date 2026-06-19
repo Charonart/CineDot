@@ -4,6 +4,8 @@ export const appRoutes = {
   movieDetail: (slug: string) => `/movies/detail/${slug}`,
   movieSchedule: (slug: string) => `/movies/detail/${slug}#schedule`,
   booking: (showtimeId: string) => `/booking/${showtimeId}`,
+  bookingRoot: '/booking',
+  bookingSeats: (showtimeId: string | number) => `/booking/seats?showtimeId=${showtimeId}`,
 
   // Star Shop
   starShop: '/star-shop',
