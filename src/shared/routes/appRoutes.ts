@@ -48,4 +48,9 @@ export const appRoutes = {
     return query ? `/reset-password?${query}` : '/reset-password';
   },
   verifyEmail: '/verify-email',
+
+  // Profile Module Routes
+  profile: '/profile',
+  profileTab: (tab: string) => `/profile?tab=${tab}`,
+  myTickets: '/profile?tab=tickets',
 };

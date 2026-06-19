@@ -53,6 +53,12 @@ export const mockRoutes: Record<string, string> = {
   // Resend Email Verification
   '/auth/email/verification-notification': '/mocks/auth/email-verification-sent.json',
   '/api/v1/auth/email/verification-notification': '/mocks/auth/email-verification-sent.json',
+
+  // ── Profile ────────────────────────────────────────────────────────────────
+  '/profile/me': '/mocks/profile/profile.json',
+  '/api/v1/profile/me': '/mocks/profile/profile.json',
+  '/profile/tickets': '/mocks/profile/ticket-history.json',
+  '/api/v1/profile/tickets': '/mocks/profile/ticket-history.json',
 };
 
 export const getMockPath = (url: string): string | null => {
