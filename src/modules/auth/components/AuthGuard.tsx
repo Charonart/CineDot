@@ -21,17 +21,17 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isAuthenticated, isAuthLoading, hasRole, hasPermission } = useAuth();
+  const { user, isAuthenticated, isAuthLoading: isLoading, isFetching, hasRole, hasPermission } = useAuth();
 
   const currentPath = searchParams && searchParams.toString()
     ? `${pathname}?${searchParams.toString()}`
     : pathname || '';
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.push(appRoutes.login(currentPath));
+    if (!isLoading && !isFetching && !user) {
+      router.replace(appRoutes.login(currentPath));
     }
-  }, [isAuthenticated, isAuthLoading, currentPath, router]);
+  }, [isLoading, isFetching, user, currentPath, router]);
 
   if (isAuthLoading) {
     return (

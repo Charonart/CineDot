@@ -19,4 +19,6 @@ export interface UserProfileDTO {
 export interface ProfileUpdateRequestDTO {
   name: string;
   phone?: string | null;
+  email?: string;
+  password?: string;
 }

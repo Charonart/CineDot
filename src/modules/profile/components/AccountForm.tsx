@@ -1,20 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { profileUpdateFormSchema, ProfileUpdateFormValues } from '../schemas/profile.schema';
-import { User, Phone, Mail, Save, CheckCircle, AlertCircle, Loader2, Camera } from 'lucide-react';
+import { User, Phone, Mail, Lock, Save, CheckCircle, AlertCircle, Loader2, Camera } from 'lucide-react';
 
 // ─── Simple form state (no react-hook-form dependency needed) ─────────────────
 interface FormState {
   name: string;
   phone: string;
+  email: string;
+  password?: string;
 }
 
 interface FormErrors {
   name?: string;
   phone?: string;
+  email?: string;
+  password?: string;
 }
 
 const validateForm = (values: FormState): FormErrors => {
@@ -99,8 +105,10 @@ const FormField: React.FC<FieldProps> = ({ id, label, value, onChange, placehold
 export const AccountForm: React.FC = () => {
   const { data: profile, isLoading } = useProfile();
   const updateMutation = useUpdateProfile();
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const [form, setForm] = useState<FormState>({ name: '', phone: '' });
+  const [form, setForm] = useState<FormState>({ name: '', phone: '', email: '', password: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -110,6 +118,8 @@ export const AccountForm: React.FC = () => {
       setForm({
         name: profile.name,
         phone: profile.phone ?? '',
+        email: profile.email,
+        password: '',
       });
     }
   }, [profile]);
@@ -125,11 +135,37 @@ export const AccountForm: React.FC = () => {
     }
     setErrors({});
 
+    const isEmailModified = form.email.trim() !== profile?.email;
+    const isPasswordModified = !!form.password;
+
     try {
-      await updateMutation.mutateAsync({
+      const payload: any = {
         name: form.name.trim(),
         phone: form.phone.trim() || null,
-      });
+      };
+
+      if (isEmailModified) {
+        payload.email = form.email.trim();
+      }
+
+      if (isPasswordModified) {
+        payload.password = form.password;
+      }
+
+      await updateMutation.mutateAsync(payload);
+
+      if (isEmailModified || isPasswordModified) {
+        // Force logout on the client
+        queryClient.clear();
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+        }
+        router.replace('/login');
+        alert("Thông tin bảo mật đã thay đổi. Vui lòng đăng nhập lại.");
+        return;
+      }
+
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3500);
     } catch {
@@ -137,7 +173,12 @@ export const AccountForm: React.FC = () => {
     }
   };
 
-  const isDirty = profile && (form.name !== profile.name || form.phone !== (profile.phone ?? ''));
+  const isDirty = profile && (
+    form.name !== profile.name ||
+    form.phone !== (profile.phone ?? '') ||
+    form.email !== profile.email ||
+    !!form.password
+  );
 
   return (
     <div style={{ padding: '36px 40px' }}>
@@ -216,10 +257,23 @@ export const AccountForm: React.FC = () => {
           />
           <FormField
             id="account-email"
-            label="Email (Không thể thay đổi)"
-            value={profile?.email ?? ''}
+            label="Email"
+            value={form.email}
+            onChange={v => { setForm(f => ({ ...f, email: v })); setErrors(e => ({ ...e, email: undefined })); }}
+            placeholder="Nhập địa chỉ email"
             icon={<Mail size={16} />}
-            readOnly
+            error={errors.email}
+            type="email"
+          />
+          <FormField
+            id="account-password"
+            label="Mật Khẩu Mới"
+            value={form.password || ''}
+            onChange={v => { setForm(f => ({ ...f, password: v })); setErrors(e => ({ ...e, password: undefined })); }}
+            placeholder="Nhập mật khẩu mới (nếu muốn thay đổi)"
+            icon={<Lock size={16} />}
+            error={errors.password}
+            type="password"
           />
           <FormField
             id="account-phone"

@@ -37,7 +37,8 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: (data: ProfileUpdateRequestDTO) => profileService.updateProfile(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: profileKeys.me() });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },
   });
 };

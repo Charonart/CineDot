@@ -12,11 +12,11 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: (payload: LoginRequestDTO) => authService.login(payload),
-    onSuccess: (session) => {
+    onSuccess: async (session) => {
       // 1. Set query data in cache
       queryClient.setQueryData(authKeys.me(), session);
       // 2. Invalidate to trigger updates across the app
-      void queryClient.invalidateQueries({ queryKey: authKeys.all });
+      await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       
       // 3. Safely redirect
       if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {

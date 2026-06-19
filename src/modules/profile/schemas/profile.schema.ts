@@ -40,10 +40,6 @@ export const ticketHistoryListSchema = z.array(ticketHistorySchema);
 
 // ─── Profile Update Form Schema (Strict Validation) ──────────────────────────
 
-/**
- * Zod schema for the AccountForm update request.
- * Email is excluded — it is read-only and never submitted.
- */
 export const profileUpdateFormSchema = z.object({
   name: z
     .string()
@@ -56,6 +52,17 @@ export const profileUpdateFormSchema = z.object({
       /^(0[3-9])\d{8}$/,
       'Số điện thoại không hợp lệ (VD: 0901234567)',
     )
+    .optional()
+    .or(z.literal('')),
+  email: z
+    .string()
+    .email('Email không hợp lệ')
+    .optional()
+    .or(z.literal('')),
+  password: z
+    .string()
+    .min(8, 'Mật khẩu phải từ 8 ký tự')
+    .max(64, 'Mật khẩu quá dài')
     .optional()
     .or(z.literal('')),
 });
