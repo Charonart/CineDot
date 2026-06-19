@@ -33,7 +33,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     }
   }, [isLoading, isFetching, user, currentPath, router]);
 
-  if (isAuthLoading) {
+  if (isLoading) {
     return (
       fallback || (
         <div className="auth-guard-loading">
