@@ -3,8 +3,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '../services/auth.service';
 import { LoginRequestDTO } from '../dto/auth.dto';
 import { authKeys } from './useCurrentUser';
+import { AuthSession } from '../types/auth.type';
 
-export const useLogin = () => {
+export const useLogin = (options?: { onSuccess?: (session: AuthSession) => void }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,7 +19,13 @@ export const useLogin = () => {
       // 2. Invalidate to trigger updates across the app
       void queryClient.invalidateQueries({ queryKey: authKeys.all });
       
-      // 3. Safely redirect
+      // 3. If custom onSuccess is provided, run it and skip default redirect
+      if (options?.onSuccess) {
+        options.onSuccess(session);
+        return;
+      }
+
+      // 4. Safely redirect
       if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
         router.push(redirectTo);
       } else {

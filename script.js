@@ -9,7 +9,7 @@
   /* ----------------------------------------------------------
      1. NAVBAR — scroll shadow + hamburger
   ---------------------------------------------------------- */
-
+  6
   const navbar = document.getElementById('navbar');
   const hamburger = document.getElementById('navHamburger');
   const mobileMenu = document.getElementById('navMobileMenu');
@@ -44,7 +44,7 @@
   const prevBtn = document.getElementById('sliderPrev');
   const nextBtn = document.getElementById('sliderNext');
   const sliderControls = document.getElementById('tabSliderControls');
-  
+
   const slidersConfig = {};
 
   const getSliderIdForTab = (tabId) => {
@@ -62,8 +62,8 @@
 
     const getVisibleCount = () => {
       const w = window.innerWidth;
-      if (w <= 480)  return 1;
-      if (w <= 700)  return 2;
+      if (w <= 480) return 1;
+      if (w <= 700) return 2;
       if (w <= 1100) return 3;
       return 4;
     };
@@ -130,7 +130,7 @@
     }, { passive: true });
 
     window.addEventListener('resize', updateSlider, { passive: true });
-    
+
     // Run initial update
     updateSlider();
 
@@ -193,17 +193,17 @@
 
     if (currentActivePanel) {
       currentActivePanel.classList.remove('show');
-      
+
       // Wait for the opacity fade transition to finish (150ms) before changing layout
       setTimeout(() => {
         currentActivePanel.classList.remove('active');
-        
+
         if (targetPanel) {
           targetPanel.classList.add('active');
           // Force layout reflow so standard transitions work
           targetPanel.offsetHeight;
           targetPanel.classList.add('show');
-          
+
           // Re-adjust active slider layout and toggle controls visibility
           const sliderId = getSliderIdForTab(tabId);
           if (sliderId && slidersConfig[sliderId]) {
@@ -313,10 +313,10 @@
 
   if (quickBookBtn) {
     quickBookBtn.addEventListener('click', () => {
-      const movie   = document.getElementById('bookMovie')?.value;
-      const cinema  = document.getElementById('bookCinema')?.value;
-      const date    = document.getElementById('bookDate')?.value;
-      const time    = document.getElementById('bookTime')?.value;
+      const movie = document.getElementById('bookMovie')?.value;
+      const cinema = document.getElementById('bookCinema')?.value;
+      const date = document.getElementById('bookDate')?.value;
+      const time = document.getElementById('bookTime')?.value;
 
       if (!movie || !cinema || !date || !time) {
         showToast('Vui lòng chọn đầy đủ thông tin để tiếp tục.', 'warning');

@@ -527,4 +527,14 @@ When the Home Hero is configured as an image-first carousel:
   - `/booking/seats` must only have one back button (the circular icon inside `BookingSummaryHeader`).
   - The circular back button in `BookingSummaryHeader` must be hooked up to use `router.replace(buildMovieDetailUrlFromSession(session) ?? "/movies")` instead of `window.history.back()`.
 
+## 38. Authentication in Booking Flow Rule
+1. Booking pages must never redirect users to a standalone login page.
+2. Authentication inside booking flow must use modal popup only.
+3. After successful login: Keep current route, keep current booking state, keep selected seats, close modal and continue flow.
+4. Booking context must survive authentication.
+5. Login must be checked at /booking/[showtimeId].
+6. Authentication must never reset booking session.
+7. User must always return to the exact booking state before authentication.
+
+
 

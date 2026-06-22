@@ -106,6 +106,7 @@ interface BookingActions {
   setPaymentMethod: (method: PaymentMethod) => void;
   markQuickComboHandled: () => void;
   startSeatHold: () => void;
+  clearSeatHold: () => void;
   expireSeatHold: () => void;
   markPendingPayment: () => void;
   markPaid: () => void;
@@ -113,16 +114,22 @@ interface BookingActions {
   cancelBooking: () => void;
   resetBooking: () => void;
   recalculateTotals: () => void;
+  setAuthModalOpen: (isOpen: boolean) => void;
+  setPendingCheckoutTrigger: (isPending: boolean) => void;
 }
 
 export type BookingStore = {
   session: BookingSession;
+  isAuthModalOpen: boolean;
+  pendingCheckoutTrigger: boolean;
 } & BookingActions;
 
 export const useBookingStore = create<BookingStore>()(
   persist(
     (set) => ({
       session: createDefaultSession(),
+      isAuthModalOpen: false,
+      pendingCheckoutTrigger: false,
 
       initializeBooking: (payload) =>
         set((state) => {
@@ -296,6 +303,16 @@ export const useBookingStore = create<BookingStore>()(
           },
         })),
 
+      clearSeatHold: () =>
+        set((state) => ({
+          session: {
+            ...state.session,
+            status: 'draft',
+            seatHoldStartedAt: undefined,
+            seatHoldExpiresAt: undefined,
+          },
+        })),
+
       markPendingPayment: () =>
         set((state) => ({
           session: {
@@ -331,11 +348,23 @@ export const useBookingStore = create<BookingStore>()(
       resetBooking: () =>
         set(() => ({
           session: createDefaultSession(),
+          isAuthModalOpen: false,
+          pendingCheckoutTrigger: false,
         })),
 
       recalculateTotals: () =>
         set((state) => ({
           session: recalculateSessionTotals(state.session),
+        })),
+
+      setAuthModalOpen: (isOpen) =>
+        set(() => ({
+          isAuthModalOpen: isOpen,
+        })),
+
+      setPendingCheckoutTrigger: (isPending) =>
+        set(() => ({
+          pendingCheckoutTrigger: isPending,
         })),
     }),
     {

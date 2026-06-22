@@ -692,7 +692,7 @@ button {
   bottom: -46px;
   left: 0;
   right: 0;
-  z-index: 20;
+  z-index: 40;
   padding: 0 32px;
 }
 
@@ -799,7 +799,7 @@ button {
   background: var(--bg);
   overflow: visible;
   position: relative;
-  padding-top: 96px;
+  padding-top: 156px;
 }
 
 .section-header-tabs {
@@ -4014,4 +4014,13 @@ select:disabled,
 @media (max-width: 480px) {
   .star-shop-tabs, .cc-tabs, .events-tabs { display: none; } /* Hidden on mobile, use nav links */
   .cinemas-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Hide scrollbar for date selector list */
+.schedule-date-list {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.schedule-date-list::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari/Webkit */
 }

@@ -2,10 +2,16 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { BookingShowtime } from '../types/booking.type';
 
 interface BookingSummaryHeaderProps {
-  showtime: BookingShowtime;
+  movieTitle?: string;
+  movieDuration?: string | number;
+  movieAgeRating?: string;
+  screenType?: string;
+  cinemaName?: string;
+  roomName?: string;
+  showtimeHour?: string;
+  showtimeDate?: string;
 }
 
 const formatShowDate = (dateStr: string) => {
@@ -25,7 +31,16 @@ const formatShowDate = (dateStr: string) => {
   }
 };
 
-export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({ showtime }) => {
+export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({
+  movieTitle = '',
+  movieDuration = '',
+  movieAgeRating = '',
+  screenType = '',
+  cinemaName = '',
+  roomName = '',
+  showtimeHour = '',
+  showtimeDate = '',
+}) => {
   const router = useRouter();
 
   return (
@@ -74,21 +89,23 @@ export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({ show
         </button>
 
         <div>
-          <span
-            className="badge"
-            style={{
-              background: '#CFC9EB',
-              color: '#131413',
-              fontWeight: 600,
-              fontSize: '11px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              marginBottom: '6px',
-              display: 'inline-block',
-            }}
-          >
-            {showtime.room.screenType}
-          </span>
+          {screenType && (
+            <span
+              className="badge"
+              style={{
+                background: '#CFC9EB',
+                color: '#131413',
+                fontWeight: 600,
+                fontSize: '11px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                marginBottom: '6px',
+                display: 'inline-block',
+              }}
+            >
+              {screenType}
+            </span>
+          )}
           <h1
             style={{
               fontSize: '22px',
@@ -100,10 +117,10 @@ export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({ show
               lineHeight: 1.2,
             }}
           >
-            {showtime.movie.title}
+            {movieTitle}
           </h1>
           <span style={{ fontSize: '13.5px', color: 'var(--text2)', fontWeight: 500 }}>
-            Thời lượng: {showtime.movie.runtime} phút · {showtime.movie.ageRating}
+            Thời lượng: {movieDuration} phút · {movieAgeRating}
           </span>
         </div>
       </div>
@@ -119,16 +136,16 @@ export const BookingSummaryHeader: React.FC<BookingSummaryHeaderProps> = ({ show
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text3)', fontWeight: 600 }}>Rạp chiếu</span>
-          <strong style={{ fontSize: '15px', color: '#131413', fontWeight: 600 }}>{showtime.cinema.name}</strong>
-          <span style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 500 }}>{showtime.room.name}</span>
+          <strong style={{ fontSize: '15px', color: '#131413', fontWeight: 600 }}>{cinemaName}</strong>
+          <span style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 500 }}>{roomName}</span>
         </div>
 
         <div style={{ width: '1px', height: '36px', background: 'var(--border)' }} className="meta-divider" />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text3)', fontWeight: 600 }}>Suất chiếu</span>
-          <strong style={{ fontSize: '15px', color: '#131413', fontWeight: 600 }}>{showtime.showTime}</strong>
-          <span style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 500 }}>{formatShowDate(showtime.showDate)}</span>
+          <strong style={{ fontSize: '15px', color: '#131413', fontWeight: 600 }}>{showtimeHour}</strong>
+          <span style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 500 }}>{formatShowDate(showtimeDate)}</span>
         </div>
       </div>
     </header>

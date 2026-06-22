@@ -10,7 +10,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start; /* Start content stably from top boundary */
-  overflow: visible;
+  overflow: visible !important;
   padding-top: 125px; /* Safe space below the fixed Navbar */
   padding-bottom: 0; /* No padding-bottom needed as booking panel is placed at bottom: 0 */
   background: var(--color-background);
@@ -68,10 +68,9 @@
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 32px;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 48px;
   height: 520px;
   /* Locked height content grid on desktop */
   transition:
@@ -367,10 +366,14 @@
   }
 
   .hero-showcase-content {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 32px;
     text-align: center;
     height: auto;
+    width: 100%;
   }
 
   .hero-showcase-info {
@@ -539,7 +542,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  overflow: visible;
+  overflow: visible !important;
   padding-top: 125px;
   padding-bottom: 0;
   position: relative;
