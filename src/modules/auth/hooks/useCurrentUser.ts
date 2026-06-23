@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { authService } from '../services/auth.service';
 import { AuthSession } from '../types/auth.type';
+import { QUERY_KEYS } from '@lib/constants/queryKeys';
 
 export const authKeys = {
-  all: ['currentUser'] as const,
-  me: () => ['currentUser'] as const,
+  all: QUERY_KEYS.currentUser,
+  me: () => QUERY_KEYS.currentUser,
 };
 
 export const useCurrentUser = () => {

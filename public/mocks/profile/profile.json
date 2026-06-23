@@ -2,9 +2,10 @@
   "success": true,
   "data": {
     "id": "usr_cinedot_001",
-    "name": "Nguyễn Minh Anh",
+    "full_name": "Nguyễn Minh Anh",
     "email": "minhanh@cinedot.vn",
     "phone": "0901234567",
+    "date_of_birth": "2004-01-01",
     "avatar": null,
     "membershipTier": "VIP",
     "totalPoints": 2850

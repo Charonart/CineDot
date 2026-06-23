@@ -36,17 +36,18 @@ export const profileMapper = {
    * Maps UserProfileDTO → UserProfile domain model.
    */
   toUserProfile: (dto: UserProfileDTO): UserProfile => {
-    const tier = dto.membershipTier as MembershipTier;
+    const tier = dto.membershipTier as MembershipTier || 'Standard';
     return {
       id: dto.id,
-      name: dto.name,
+      fullName: dto.full_name,
       email: dto.email,
       phone: dto.phone ?? null,
+      dateOfBirth: dto.date_of_birth ?? null,
       avatarUrl: resolveAvatarUrl(dto.avatar),
       membershipTier: tier,
-      membershipMeta: MEMBERSHIP_TIER_META[tier],
-      totalPoints: dto.totalPoints,
-      formattedPoints: formatPoints(dto.totalPoints),
+      membershipMeta: MEMBERSHIP_TIER_META[tier] || MEMBERSHIP_TIER_META['Standard'],
+      totalPoints: dto.totalPoints || 0,
+      formattedPoints: formatPoints(dto.totalPoints || 0),
     };
   },
 

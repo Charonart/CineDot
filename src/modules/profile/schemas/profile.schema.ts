@@ -12,12 +12,13 @@ export const ticketStatusSchema = z.enum(['UPCOMING', 'COMPLETED', 'CANCELLED'])
 
 export const userProfileSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  full_name: z.string(),
   email: z.string().email(),
   phone: z.string().nullable().optional(),
+  date_of_birth: z.string().nullable().optional(),
   avatar: z.string().nullable().optional(),
-  membershipTier: membershipTierSchema,
-  totalPoints: z.number().min(0).default(0),
+  membershipTier: membershipTierSchema.optional(),
+  totalPoints: z.number().min(0).default(0).optional(),
 });
 
 // ─── Ticket History DTO Schema ────────────────────────────────────────────────
@@ -41,7 +42,7 @@ export const ticketHistoryListSchema = z.array(ticketHistorySchema);
 // ─── Profile Update Form Schema (Strict Validation) ──────────────────────────
 
 export const profileUpdateFormSchema = z.object({
-  name: z
+  fullName: z
     .string()
     .min(2, 'Tên phải có ít nhất 2 ký tự')
     .max(100, 'Tên không được vượt quá 100 ký tự')
@@ -54,17 +55,7 @@ export const profileUpdateFormSchema = z.object({
     )
     .optional()
     .or(z.literal('')),
-  email: z
-    .string()
-    .email('Email không hợp lệ')
-    .optional()
-    .or(z.literal('')),
-  password: z
-    .string()
-    .min(8, 'Mật khẩu phải từ 8 ký tự')
-    .max(64, 'Mật khẩu quá dài')
-    .optional()
-    .or(z.literal('')),
+  dateOfBirth: z.string().optional().or(z.literal('')),
 });
 
 export type ProfileUpdateFormValues = z.infer<typeof profileUpdateFormSchema>;

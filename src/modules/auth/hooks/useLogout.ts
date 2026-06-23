@@ -7,19 +7,22 @@ export const useLogout = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: () => authService.logout(),
-    onSettled: () => {
-      // 1. Wipe all React Query caches
-      queryClient.clear();
+    mutationFn: async () => {
+      try {
+        await authService.logout();
+      } finally {
+        // 1. Wipe all React Query caches
+        queryClient.clear();
 
-      // 2. Clear any local/session storage related to auth
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
+        // 2. Clear any local/session storage related to auth
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+        }
+
+        // 3. Execute redirect using replace
+        router.replace('/login');
       }
-
-      // 3. Execute redirect
-      router.push('/login');
     },
   });
 };

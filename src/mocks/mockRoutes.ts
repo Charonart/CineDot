@@ -54,8 +54,7 @@ export const mockRoutes: Record<string, string> = {
   '/api/v1/cinemas/showtimes': '/mocks/cinemas/showtimes.json',
 
   // ── Profile ────────────────────────────────────────────────────────────────
-  '/profile/me': '/mocks/profile/profile.json',
-  '/api/v1/profile/me': '/mocks/profile/profile.json',
+  '/api/v1/users/profile': '/mocks/profile/profile.json',
   '/profile/tickets': '/mocks/profile/ticket-history.json',
   '/api/v1/profile/tickets': '/mocks/profile/ticket-history.json',
   '/booking/selector/movies': '/mocks/movie-now-showing.json',

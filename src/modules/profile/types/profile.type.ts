@@ -43,9 +43,10 @@ export const MEMBERSHIP_TIER_META: Record<MembershipTier, MembershipTierMeta> = 
  */
 export interface UserProfile {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   phone: string | null;
+  dateOfBirth: string | null;
   avatarUrl: string | null;
   membershipTier: MembershipTier;
   membershipMeta: MembershipTierMeta;
@@ -78,8 +79,9 @@ export interface TicketHistory {
  * Profile update form input shape (for AccountForm).
  */
 export interface ProfileUpdateForm {
-  name: string;
+  fullName: string;
   phone: string;
+  dateOfBirth: string;
 }
 
 /**

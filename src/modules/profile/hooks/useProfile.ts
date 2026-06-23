@@ -2,16 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileService } from '../services/profile.service';
 import { ProfileUpdateRequestDTO } from '../dto/profile.dto';
 import { TicketStatusDTO } from '../dto/ticket-history.dto';
+import { QUERY_KEYS } from '@lib/constants/queryKeys';
 
 /**
  * Query Key Factory for Profile Module.
  * All keys are centralized for consistent cache invalidation.
  */
 export const profileKeys = {
-  all: ['profile'] as const,
-  me: () => [...profileKeys.all, 'me'] as const,
+  all: QUERY_KEYS.profile,
+  me: () => [...QUERY_KEYS.profile, 'me'] as const,
   tickets: (params?: { status?: TicketStatusDTO; page?: number }) =>
-    [...profileKeys.all, 'tickets', params] as const,
+    [...QUERY_KEYS.profile, 'tickets', params] as const,
 };
 
 /**
@@ -28,7 +29,7 @@ export const useProfile = () => {
 };
 
 /**
- * useUpdateProfile — mutation for updating name/phone.
+ * useUpdateProfile — mutation for updating name/phone/dob.
  * On success, invalidates the profile cache to refetch fresh data.
  */
 export const useUpdateProfile = () => {
@@ -37,8 +38,8 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: (data: ProfileUpdateRequestDTO) => profileService.updateProfile(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.currentUser });
     },
   });
 };

@@ -10,17 +10,16 @@ import { User, Phone, Mail, Lock, Save, CheckCircle, AlertCircle, Loader2, Camer
 
 // ─── Simple form state (no react-hook-form dependency needed) ─────────────────
 interface FormState {
-  name: string;
+  fullName: string;
   phone: string;
   email: string;
-  password?: string;
+  dateOfBirth: string;
 }
 
 interface FormErrors {
-  name?: string;
+  fullName?: string;
   phone?: string;
-  email?: string;
-  password?: string;
+  dateOfBirth?: string;
 }
 
 const validateForm = (values: FormState): FormErrors => {
@@ -108,7 +107,7 @@ export const AccountForm: React.FC = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [form, setForm] = useState<FormState>({ name: '', phone: '', email: '', password: '' });
+  const [form, setForm] = useState<FormState>({ fullName: '', phone: '', email: '', dateOfBirth: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -116,10 +115,10 @@ export const AccountForm: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setForm({
-        name: profile.name,
+        fullName: profile.fullName,
         phone: profile.phone ?? '',
         email: profile.email,
-        password: '',
+        dateOfBirth: profile.dateOfBirth ?? '',
       });
     }
   }, [profile]);
@@ -135,36 +134,14 @@ export const AccountForm: React.FC = () => {
     }
     setErrors({});
 
-    const isEmailModified = form.email.trim() !== profile?.email;
-    const isPasswordModified = !!form.password;
-
     try {
       const payload: any = {
-        name: form.name.trim(),
+        full_name: form.fullName.trim(),
         phone: form.phone.trim() || null,
+        date_of_birth: form.dateOfBirth.trim() || null,
       };
 
-      if (isEmailModified) {
-        payload.email = form.email.trim();
-      }
-
-      if (isPasswordModified) {
-        payload.password = form.password;
-      }
-
       await updateMutation.mutateAsync(payload);
-
-      if (isEmailModified || isPasswordModified) {
-        // Force logout on the client
-        queryClient.clear();
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-        }
-        router.replace('/login');
-        alert("Thông tin bảo mật đã thay đổi. Vui lòng đăng nhập lại.");
-        return;
-      }
 
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3500);
@@ -174,10 +151,9 @@ export const AccountForm: React.FC = () => {
   };
 
   const isDirty = profile && (
-    form.name !== profile.name ||
+    form.fullName !== profile.fullName ||
     form.phone !== (profile.phone ?? '') ||
-    form.email !== profile.email ||
-    !!form.password
+    form.dateOfBirth !== (profile.dateOfBirth ?? '')
   );
 
   return (
@@ -210,7 +186,7 @@ export const AccountForm: React.FC = () => {
             color: '#FFFFFF',
             letterSpacing: '-0.02em',
           }}>
-            {isLoading ? '…' : profile?.name?.charAt(0)?.toUpperCase() ?? 'U'}
+            {isLoading ? '…' : profile?.fullName?.charAt(0)?.toUpperCase() ?? 'U'}
           </div>
           <button
             type="button"
@@ -235,7 +211,7 @@ export const AccountForm: React.FC = () => {
         </div>
         <div>
           <div style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A' }}>
-            {isLoading ? '…' : profile?.name}
+            {isLoading ? '…' : profile?.fullName}
           </div>
           <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
             {profile?.membershipMeta?.icon} {profile?.membershipTier} Member
@@ -249,30 +225,28 @@ export const AccountForm: React.FC = () => {
           <FormField
             id="account-name"
             label="Họ & Tên"
-            value={form.name}
-            onChange={v => { setForm(f => ({ ...f, name: v })); setErrors(e => ({ ...e, name: undefined })); }}
+            value={form.fullName}
+            onChange={v => { setForm(f => ({ ...f, fullName: v })); setErrors(e => ({ ...e, fullName: undefined })); }}
             placeholder="Nhập họ và tên"
             icon={<User size={16} />}
-            error={errors.name}
+            error={errors.fullName}
           />
           <FormField
             id="account-email"
             label="Email"
             value={form.email}
-            onChange={v => { setForm(f => ({ ...f, email: v })); setErrors(e => ({ ...e, email: undefined })); }}
+            readOnly={true}
             placeholder="Nhập địa chỉ email"
             icon={<Mail size={16} />}
-            error={errors.email}
             type="email"
           />
           <FormField
             id="account-password"
-            label="Mật Khẩu Mới"
-            value={form.password || ''}
-            onChange={v => { setForm(f => ({ ...f, password: v })); setErrors(e => ({ ...e, password: undefined })); }}
-            placeholder="Nhập mật khẩu mới (nếu muốn thay đổi)"
+            label="Mật Khẩu"
+            value="********"
+            readOnly={true}
+            placeholder="Không thể thay đổi tại đây"
             icon={<Lock size={16} />}
-            error={errors.password}
             type="password"
           />
           <FormField
@@ -284,6 +258,16 @@ export const AccountForm: React.FC = () => {
             icon={<Phone size={16} />}
             error={errors.phone}
             type="tel"
+          />
+          <FormField
+            id="account-dob"
+            label="Ngày Sinh"
+            value={form.dateOfBirth}
+            onChange={v => { setForm(f => ({ ...f, dateOfBirth: v })); setErrors(e => ({ ...e, dateOfBirth: undefined })); }}
+            placeholder="YYYY-MM-DD"
+            icon={<User size={16} />}
+            error={errors.dateOfBirth}
+            type="date"
           />
         </div>
 

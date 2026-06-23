@@ -12,18 +12,18 @@ export interface TicketHistoryQueryParams {
 
 export const profileApi = {
   /**
-   * GET /api/v1/profile/me
+   * GET /api/v1/users/profile
    * Returns the authenticated user's enriched profile (membership, points).
    */
   getProfile: (): Promise<ApiResponse<UserProfileDTO>> =>
-    axiosClient.get('/profile/me'),
+    axiosClient.get('/api/v1/users/profile'),
 
   /**
-   * PUT /api/v1/profile/me
-   * Updates name and/or phone. Email is immutable.
+   * PUT /api/v1/users/profile
+   * Updates name, phone and dob.
    */
   updateProfile: (data: ProfileUpdateRequestDTO): Promise<ApiResponse<UserProfileDTO>> =>
-    axiosClient.put('/profile/me', data),
+    axiosClient.put('/api/v1/users/profile', data),
 
   /**
    * GET /api/v1/profile/tickets
