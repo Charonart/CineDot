@@ -296,7 +296,6 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
                 isHoldingSeats={isHoldingSeats}
                 timeLeftSeconds={timeLeftSeconds}
                 onCheckout={handleCheckout}
-                onCheckout={handleCheckout}
               />
             </div>
           </div>
@@ -308,7 +307,6 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
         totalAmount={totalAmount}
         canCheckout={canCheckout}
         isHoldingSeats={isHoldingSeats}
-        onCheckout={handleCheckout}
         onCheckout={handleCheckout}
       />
 

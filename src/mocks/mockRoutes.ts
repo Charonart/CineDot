@@ -3,43 +3,6 @@ export const mockRoutes: Record<string, string> = {
   '/sanctum/csrf-cookie': '/mocks/auth/csrf-cookie.json',
 
   // Current User Session
-  '/auth/me': '/mocks/auth/me-guest.json',
-  '/api/v1/auth/me': '/mocks/auth/me-guest.json',
-
-  // Login
-  '/auth/login': '/mocks/auth/login-success.json',
-  '/api/v1/auth/login': '/mocks/auth/login-success.json',
-
-  // Register
-  '/auth/register': '/mocks/auth/register-success.json',
-  '/api/v1/auth/register': '/mocks/auth/register-success.json',
-
-  // Logout
-  '/auth/logout': '/mocks/auth/logout-success.json',
-  '/api/v1/auth/logout': '/mocks/auth/logout-success.json',
-
-  // Forgot Password
-  '/auth/forgot-password': '/mocks/auth/forgot-password-success.json',
-  '/api/v1/auth/forgot-password': '/mocks/auth/forgot-password-success.json',
-
-  // Reset Password
-  '/auth/reset-password': '/mocks/auth/reset-password-success.json',
-  '/api/v1/auth/reset-password': '/mocks/auth/reset-password-success.json',
-
-  // Resend Email Verification
-  '/auth/email/verification-notification': '/mocks/auth/email-verification-sent.json',
-  '/api/v1/auth/email/verification-notification': '/mocks/auth/email-verification-sent.json',
-
-  // Cinema pricing
-  '/cinemas/pricing': '/mocks/cinemas/pricing.json',
-  '/api/v1/cinemas/pricing': '/mocks/cinemas/pricing.json',
-  '/cinemas/showtimes': '/mocks/cinemas/showtimes.json',
-  '/api/v1/cinemas/showtimes': '/mocks/cinemas/showtimes.json',
-
-  // Laravel Sanctum CSRF Cookie
-  '/sanctum/csrf-cookie': '/mocks/auth/csrf-cookie.json',
-
-  // Current User Session
   // To test authenticated state, change '/mocks/auth/me-guest.json' to '/mocks/auth/me-authenticated.json' below:
   '/auth/me': '/mocks/auth/me-guest.json',
   '/api/v1/auth/me': '/mocks/auth/me-guest.json',
@@ -69,6 +32,12 @@ export const mockRoutes: Record<string, string> = {
   // Resend Email Verification
   '/auth/email/verification-notification': '/mocks/auth/email-verification-sent.json',
   '/api/v1/auth/email/verification-notification': '/mocks/auth/email-verification-sent.json',
+
+  // Cinema pricing
+  '/cinemas/pricing': '/mocks/cinemas/pricing.json',
+  '/api/v1/cinemas/pricing': '/mocks/cinemas/pricing.json',
+  '/cinemas/showtimes': '/mocks/cinemas/showtimes.json',
+  '/api/v1/cinemas/showtimes': '/mocks/cinemas/showtimes.json',
 
   // ── Profile ────────────────────────────────────────────────────────────────
   '/profile/me': '/mocks/profile/profile.json',
