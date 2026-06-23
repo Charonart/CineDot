@@ -3,7 +3,7 @@ import { z } from 'zod';
 // ─── Sub-schemas ──────────────────────────────────────────────────────────────
 
 const showtimeMovieRefSchema = z.object({
-  movieId: z.number(),
+  movieId: z.union([z.number(), z.string()]),
   title: z.string(),
 });
 

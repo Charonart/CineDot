@@ -16,7 +16,7 @@ export interface BookingSelectorCinemaDTO {
 
 export interface BookingSelectorShowtimeDTO {
   showtimeId: number;
-  movie: { movieId: number; title: string };
+  movie: { movieId: number | string; title: string };
   cinema: BookingSelectorCinemaDTO;
   room: { roomId: number; name: string; screenType: string };
   format: { language: string; subtitle: string | null; displayLabel: string };

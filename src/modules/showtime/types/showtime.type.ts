@@ -60,7 +60,7 @@ export interface ShowtimeSeatMap {
 
 export interface Showtime {
   showtimeId: number;
-  movieId: number;
+  movieId: number | string;
   movieTitle: string;
   cinemaId: number;
   cinemaName: string;
@@ -113,6 +113,6 @@ export interface ShowtimeCinemaGroup {
 
 export interface ShowtimeQueryParams {
   date: string;       // YYYY-MM-DD
-  movieId?: number;
+  movieId?: number | string;
   cinemaId?: number;
 }

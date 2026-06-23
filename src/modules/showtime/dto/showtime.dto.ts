@@ -6,7 +6,7 @@
 // ─── Showtime List ────────────────────────────────────────────────────────────
 
 export interface ShowtimeMovieRefDTO {
-  movieId: number;
+  movieId: number | string;
   title: string;
 }
 

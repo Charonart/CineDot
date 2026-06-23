@@ -22,7 +22,7 @@ export const bookingSelectorCinemaSchema = z.object({
 export const bookingSelectorShowtimeSchema = z.object({
   showtimeId: z.number(),
   movie: z.object({
-    movieId: z.number(),
+    movieId: z.union([z.number(), z.string()]),
     title: z.string(),
   }),
   cinema: bookingSelectorCinemaSchema,

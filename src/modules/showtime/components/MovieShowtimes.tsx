@@ -18,7 +18,7 @@ import { Showtime, ShowtimeCinemaGroup } from '../types/showtime.type';
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface MovieShowtimesProps {
-  movieId: number;
+  movieId: number | string;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
