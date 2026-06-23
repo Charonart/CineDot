@@ -10,9 +10,13 @@ import { Movie } from '@/modules/movie/types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
 import { useAuth, UserMenu } from '@/modules/auth';
 import { usePathname } from 'next/navigation';
+import { useAuth, UserMenu } from '@/modules/auth';
+import { usePathname } from 'next/navigation';
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, isAuthenticated, isAuthLoading } = useAuth();
   const pathname = usePathname();
   const { user, isAuthenticated, isAuthLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);

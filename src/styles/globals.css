@@ -144,9 +144,9 @@ button {
 }
 
 .container {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0 32px;
+  width: min(100%, 1240px);
+  margin-inline: auto;
+  padding-inline: 32px;
 }
 
 /* ============================================================
@@ -1881,18 +1881,19 @@ button {
    RESPONSIVE
    ============================================================ */
 
-@media (min-width: 1101px) {
+@media (min-width: 1025px) {
   .nav-mobile-menu {
     display: none !important;
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
   .nav-links {
     display: none;
   }
 
-  .nav-actions {
+  .nav-actions .btn-primary,
+  .nav-actions .nav-login {
     display: none;
   }
 
@@ -1909,7 +1910,7 @@ button {
   }
 
   .footer-top {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 32px;
   }
 
@@ -1918,7 +1919,7 @@ button {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
 
   .hero {
     height: auto;
@@ -1955,15 +1956,19 @@ button {
     padding: 16px;
     height: auto;
     border-radius: 20px;
+    gap: 16px;
   }
 
   .booking-fields {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
   }
 
   .booking-field {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
   }
 
   .booking-field select {
@@ -1971,7 +1976,7 @@ button {
   }
 
   .booking-field:last-child {
-    border-bottom: none;
+    border: 1px solid var(--border);
   }
 
   .booking-divider {
@@ -1998,17 +2003,24 @@ button {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767px) {
   .container {
-    padding: 0 20px;
+    padding: 0 16px;
   }
 
   .navbar {
-    padding: 12px 20px;
+    padding: 8px 16px;
+    height: 60px;
   }
 
   .nav-inner {
-    padding: 8px 8px 8px 18px;
+    padding: 0;
+  }
+
+  .nav-mobile-menu {
+    max-width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
   .section {
@@ -2046,6 +2058,10 @@ button {
     gap: 14px;
   }
 
+  .booking-fields {
+    grid-template-columns: 1fr;
+  }
+
   .trailer-stats {
     flex-direction: column;
   }
@@ -2056,7 +2072,7 @@ button {
   }
 
   .footer-top {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .footer-brand {
@@ -2892,7 +2908,7 @@ button {
    RESPONSIVE ADJUSTMENTS FOR DETAIL PAGE
    ============================================================ */
 
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .detail-main-layout {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -2913,7 +2929,7 @@ button {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .detail-hero {
     height: 340px;
     /* Tablet banner height within 300px - 360px */
@@ -2992,7 +3008,7 @@ button {
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 480px) {
   .detail-hero {
     height: 260px;
     /* Mobile banner height within 240px - 300px */
@@ -3191,7 +3207,7 @@ select:disabled,
 }
 
 /* Mobile Adjustments */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .movie-overlay {
     opacity: 1;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
@@ -4002,7 +4018,7 @@ select:disabled,
   .special-theater-desc-grid { grid-template-columns: 1fr; gap: 2rem; }
   .cinemas-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .star-shop-grid, .cc-grid, .events-grid, .cinemas-grid { grid-template-columns: 1fr; }
   .cc-featured-card, .event-featured-card { aspect-ratio: 4/3; }
   .special-theater-features { grid-template-columns: 1fr; }

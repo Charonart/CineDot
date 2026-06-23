@@ -4,16 +4,16 @@ import { ShowtimeListDTO, ShowtimeSeatListDTO, ShowtimeQueryParamsDTO } from '..
 
 export const showtimeApi = {
   /**
-   * GET /api/movies/:movieId/showtimes?date=YYYY-MM-DD
-   * Lấy danh sách suất chiếu của một bộ phim theo ngày.
+   * GET /api/v1/showtimes?movieId=...&cinemaId=...&date=...
+   * Lấy danh sách suất chiếu của một bộ phim theo rạp và ngày.
    */
-  getShowtimes: (movieId: number, params: ShowtimeQueryParamsDTO): Promise<ApiResponse<ShowtimeListDTO>> =>
-    axiosClient.get(`/movies/${movieId}/showtimes`, { params }),
+  getShowtimes: (params: ShowtimeQueryParamsDTO): Promise<ApiResponse<ShowtimeListDTO>> =>
+    axiosClient.get('/showtimes', { params }),
 
   /**
-   * GET /api/showtimes/:showtimeId/seats
+   * GET /api/v1/showtimes/:showtimeId/seats
    * Lấy sơ đồ ghế của một suất chiếu.
    */
-  getSeats: (showtimeId: number): Promise<ApiResponse<ShowtimeSeatListDTO>> =>
+  getSeats: (showtimeId: number | string): Promise<ApiResponse<ShowtimeSeatListDTO>> =>
     axiosClient.get(`/showtimes/${showtimeId}/seats`),
 };
