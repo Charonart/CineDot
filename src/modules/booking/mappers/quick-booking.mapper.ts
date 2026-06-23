@@ -1,24 +1,17 @@
 import {
   QuickBookingCinemaDTO,
   QuickBookingDateDTO,
-  QuickBookingMovieDTO,
   QuickBookingShowtimeDTO,
 } from '../dto/quick-booking.dto';
+import { Movie } from '@/modules/movie/types/movie.type';
 import {
   QuickBookingCinema,
   QuickBookingDate,
-  QuickBookingMovie,
   QuickBookingShowtime,
   SelectOption,
 } from '../types/quick-booking.type';
 
 export const quickBookingMapper = {
-  toMovieModel: (dto: QuickBookingMovieDTO): QuickBookingMovie => ({
-    id: dto.id,
-    title: dto.title,
-    status: dto.status,
-  }),
-
   toCinemaModel: (dto: QuickBookingCinemaDTO): QuickBookingCinema => ({
     id: dto.id,
     name: dto.name,
@@ -44,8 +37,8 @@ export const quickBookingMapper = {
     availableSeats: dto.availableSeats,
   }),
 
-  toMovieOptions: (movies: QuickBookingMovie[]): SelectOption[] =>
-    movies.map((movie) => ({ value: movie.id, label: movie.title })),
+  toMovieOptions: (movies: Movie[]): SelectOption[] =>
+    movies.map((movie) => ({ value: String(movie.id), label: movie.title })),
 
   toCinemaOptions: (cinemas: QuickBookingCinema[]): SelectOption[] =>
     cinemas.map((cinema) => ({ value: cinema.id, label: cinema.name })),

@@ -1,6 +1,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useMoviesList } from '@/modules/movie/hooks/useMovies';
 import { quickBookingMapper } from '../mappers/quick-booking.mapper';
 import { quickBookingService } from '../services/quick-booking.service';
 import { QuickBookingDropdown } from '../types/quick-booking.type';
@@ -10,7 +11,6 @@ const GC_TIME = 30 * 60 * 1000;
 
 export const quickBookingKeys = {
   all: ['quick-booking'] as const,
-  movies: () => [...quickBookingKeys.all, 'movies'] as const,
   cinemas: (movieId: string) => [...quickBookingKeys.all, 'cinemas', { movieId }] as const,
   dates: (movieId: string, cinemaId: string) =>
     [...quickBookingKeys.all, 'dates', { movieId, cinemaId }] as const,
@@ -26,12 +26,8 @@ export const useQuickBooking = () => {
   const [selectedShowtimeId, setSelectedShowtimeId] = useState('');
   const [openDropdown, setOpenDropdown] = useState<QuickBookingDropdown | null>(null);
 
-  const moviesQuery = useQuery({
-    queryKey: quickBookingKeys.movies(),
-    queryFn: ({ signal }) => quickBookingService.getMovies(signal),
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
-  });
+  const { data: moviesListData, isLoading: isMoviesLoading, isError: hasMoviesError } = useMoviesList({ status: 'now-showing' });
+  const movies = moviesListData?.items || [];
 
   const cinemasQuery = useQuery({
     queryKey: quickBookingKeys.cinemas(selectedMovieId),
@@ -60,9 +56,9 @@ export const useQuickBooking = () => {
 
   const movieOptions = useMemo(
     () => quickBookingMapper.toMovieOptions(
-      (moviesQuery.data ?? []).filter((movie) => movie.status === 'now-showing'),
+      movies.filter((movie) => movie.status === 'now-showing'),
     ),
-    [moviesQuery.data],
+    [movies],
   );
 
   const cinemaOptions = useMemo(
@@ -130,11 +126,11 @@ export const useQuickBooking = () => {
     cinemaOptions,
     dateOptions,
     showtimeOptions,
-    isMoviesLoading: moviesQuery.isLoading,
+    isMoviesLoading,
     isCinemasLoading: cinemasQuery.isLoading,
     isDatesLoading: datesQuery.isLoading,
     isShowtimesLoading: showtimesQuery.isLoading,
-    hasMoviesError: moviesQuery.isError,
+    hasMoviesError,
     hasCinemasError: cinemasQuery.isError,
     hasDatesError: datesQuery.isError,
     hasShowtimesError: showtimesQuery.isError,

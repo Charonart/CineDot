@@ -3,10 +3,11 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  useBookingSelectorMovies,
   useBookingSelectorShowtimes,
 } from '@/modules/booking/hooks/useBookingSelector';
-import { BookingSelectorMovie, BookingSelectorCinema, BookingSelectorShowtime } from '@/modules/booking/types/bookingSelector.type';
+import { BookingSelectorCinema, BookingSelectorShowtime } from '@/modules/booking/types/bookingSelector.type';
+import { useMoviesList } from '@/modules/movie/hooks/useMovies';
+import { Movie } from '@/modules/movie/types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
 import Image from 'next/image';
 
@@ -35,11 +36,12 @@ export default function BookingPage() {
   const router = useRouter();
   
   const [activeStep, setActiveStep] = useState<number>(1);
-  const [selectedMovie, setSelectedMovie] = useState<BookingSelectorMovie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [selectedCinema, setSelectedCinema] = useState<BookingSelectorCinema | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('2026-05-18');
 
-  const { data: movies, isLoading: loadingMovies } = useBookingSelectorMovies();
+  const { data: moviesListData, isLoading: loadingMovies } = useMoviesList({ status: 'now-showing' });
+  const movies = moviesListData?.items || [];
   
   const { data: showtimes, isLoading: loadingShowtimes } = useBookingSelectorShowtimes(
     selectedMovie?.slug || '',
@@ -74,7 +76,7 @@ export default function BookingPage() {
     return Object.values(groups);
   }, [filteredShowtimes]);
 
-  const handleSelectMovie = (movie: BookingSelectorMovie) => {
+  const handleSelectMovie = (movie: Movie) => {
     setSelectedMovie(movie);
     setActiveStep(2);
   };
@@ -265,7 +267,7 @@ export default function BookingPage() {
                             {movie.title}
                           </h4>
                           <span style={{ fontSize: '12px', color: '#8F8CA3' }}>
-                            {movie.genres.map(g => g.name).join(', ')}
+                            {movie.genres?.map(g => g.name).join(', ') || ''}
                           </span>
                         </div>
                       </div>

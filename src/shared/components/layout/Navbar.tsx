@@ -367,7 +367,7 @@ export const Navbar: React.FC = () => {
               Đăng nhập
             </Link>
           )}
-          <Link href={`${appRoutes.movies}?category=now-showing`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+          <Link href={`${appRoutes.bookingRoot}`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
             Đặt vé
           </Link>
         </div>

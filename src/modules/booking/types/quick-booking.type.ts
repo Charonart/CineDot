@@ -1,17 +1,9 @@
-export type QuickBookingMovieStatus = 'now-showing' | 'coming-soon';
 export type QuickBookingDropdown = 'movie' | 'cinema' | 'date' | 'showtime';
 
 export interface SelectOption {
   value: string;
   label: string;
 }
-
-export interface QuickBookingMovie {
-  id: string;
-  title: string;
-  status: QuickBookingMovieStatus;
-}
-
 export interface QuickBookingCinema {
   id: string;
   name: string;

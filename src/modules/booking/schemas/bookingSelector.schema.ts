@@ -1,18 +1,5 @@
 import { z } from 'zod';
 
-export const bookingSelectorMovieSchema = z.object({
-  id: z.string(),
-  slug: z.string(),
-  title: z.string(),
-  posterUrl: z.string(),
-  genres: z.array(z.object({
-    id: z.number(),
-    name: z.string(),
-  })),
-  formatTags: z.array(z.string()),
-  ageRating: z.string(),
-});
-
 export const bookingSelectorCinemaSchema = z.object({
   cinemaId: z.number(),
   name: z.string(),

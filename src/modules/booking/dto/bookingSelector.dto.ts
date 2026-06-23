@@ -1,13 +1,3 @@
-export interface BookingSelectorMovieDTO {
-  id: string;
-  slug: string;
-  title: string;
-  posterUrl: string;
-  genres: { id: number; name: string }[];
-  formatTags: string[];
-  ageRating: string;
-}
-
 export interface BookingSelectorCinemaDTO {
   cinemaId: number;
   name: string;

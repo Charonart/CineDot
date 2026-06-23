@@ -1,19 +1,7 @@
-import { BookingSelectorMovieDTO, BookingSelectorShowtimeDTO } from '../dto/bookingSelector.dto';
-import { BookingSelectorMovie, BookingSelectorShowtime } from '../types/bookingSelector.type';
+import { BookingSelectorShowtimeDTO } from '../dto/bookingSelector.dto';
+import { BookingSelectorShowtime } from '../types/bookingSelector.type';
 
 export const bookingSelectorMapper = {
-  toMovie(dto: BookingSelectorMovieDTO): BookingSelectorMovie {
-    return {
-      id: dto.id,
-      slug: dto.slug,
-      title: dto.title,
-      posterUrl: dto.posterUrl,
-      genres: dto.genres.map(g => ({ id: g.id, name: g.name })),
-      formatTags: [...dto.formatTags],
-      ageRating: dto.ageRating,
-    };
-  },
-
   toShowtime(dto: BookingSelectorShowtimeDTO): BookingSelectorShowtime {
     return {
       showtimeId: dto.showtimeId,
