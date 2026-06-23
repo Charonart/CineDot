@@ -10,6 +10,7 @@ interface PageProps {
 
 /**
  * SSR Strategy: Generate Dynamic Metadata for SEO
+ * Canonical URL: /movies/[slug] (no /detail/ segment)
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -18,10 +19,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: `${movie.title} | CineDot`,
       description: movie.description || `Thông tin chi tiết phim ${movie.title} trên CineDot`,
+      alternates: {
+        canonical: `/movies/${slug}`,
+      },
       openGraph: {
         title: movie.title,
         description: movie.description,
         images: [movie.backdropUrl],
+        url: `/movies/${slug}`,
       },
     };
   } catch {
@@ -31,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 async function MovieDetailPageContent({ params }: PageProps) {
   const { slug } = await params;
-  
+
   let movie;
   try {
     movie = await movieDetailService.getMovieDetailBySlug(slug);
@@ -44,14 +49,14 @@ async function MovieDetailPageContent({ params }: PageProps) {
 
 export default function MovieDetailPage({ params }: PageProps) {
   return (
-    <Suspense 
+    <Suspense
       fallback={
-        <div 
-          className="movie-detail-page" 
-          style={{ 
-            minHeight: '100vh', 
-            display: 'flex', 
-            alignItems: 'center', 
+        <div
+          className="movie-detail-page"
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
             background: 'var(--color-background)',
             color: 'var(--color-text-primary)'

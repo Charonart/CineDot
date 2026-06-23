@@ -263,13 +263,13 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
 
       <div className="schedule-toolbar">
         {/* Date Selector Wrapper */}
-        <div className="schedule-date-nav">
+        <div className="schedule-date-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
           <button 
             type="button" 
-            className="schedule-nav-btn" 
+            className="date-nav" 
             aria-label="Ngày trước"
             onClick={() => {
-              const el = document.querySelector('.schedule-date-list');
+              const el = document.querySelector('.date-slider');
               el?.scrollBy({ left: -240, behavior: 'smooth' });
             }}
           >
@@ -278,28 +278,28 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
             </svg>
           </button>
 
-          <div className="schedule-date-list">
+          <div className="date-slider">
             {dateTabs.map(({ dayLabel, formattedDate, dateStr }) => (
               <button
                 key={dateStr}
                 type="button"
-                className={`schedule-date-item ${selectedDate === dateStr ? 'is-active active' : ''}`}
+                className={`date-tab ${selectedDate === dateStr ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedDate(dateStr);
                 }}
               >
-                <span className="schedule-date-label">{dayLabel}</span>
-                <span className="schedule-date-value">{formattedDate}</span>
+                <span>{dayLabel}</span>
+                <strong>{formattedDate}</strong>
               </button>
             ))}
           </div>
 
           <button 
             type="button" 
-            className="schedule-nav-btn" 
+            className="date-nav" 
             aria-label="Ngày sau"
             onClick={() => {
-              const el = document.querySelector('.schedule-date-list');
+              const el = document.querySelector('.date-slider');
               el?.scrollBy({ left: 240, behavior: 'smooth' });
             }}
           >

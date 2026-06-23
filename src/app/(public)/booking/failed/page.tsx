@@ -18,7 +18,7 @@ function FailedPageContent() {
     : 'Có lỗi xảy ra trong quá trình xử lý giao dịch. Vui lòng thử lại sau.';
 
   // Determine back to movie details URL
-  const movieDetailsUrl = movieSlug ? `/movies/detail/${movieSlug}` : '/movies';
+  const movieDetailsUrl = movieSlug ? `/movies/${movieSlug}` : '/movies';
 
   return (
     <div

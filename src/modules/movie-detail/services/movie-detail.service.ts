@@ -1,4 +1,4 @@
-import { movieDetailApi } from '../api/movie-detail.api';
+import { movieApi } from '@modules/movie/api/movie.api';
 import { movieDetailMapper } from '../mappers/movie-detail.mapper';
 import { MovieDetail, Credits, Video } from '../types/movie-detail.type';
 import { movieDetailSchema, creditsSchema, videoListSchema } from '../schemas/movie-detail.schema';
@@ -8,9 +8,13 @@ import { MovieList } from '@modules/movie/types/movie.type';
 import { logger } from '@lib/logger/logger';
 
 export const movieDetailService = {
+  /**
+   * Lấy chi tiết phim bằng slug hoặc numeric id.
+   * Sử dụng movieApi.getMovieDetail — unified endpoint GET /movies/:idOrSlug.
+   */
   getMovieDetail: async (slug: string | number): Promise<MovieDetail> => {
     try {
-      const response = await movieDetailApi.getDetail(slug);
+      const response = await movieApi.getMovieDetail(slug);
       const validated = movieDetailSchema.parse(response.data);
       return movieDetailMapper.toMovieDetail(validated);
     } catch (error) {
@@ -19,13 +23,16 @@ export const movieDetailService = {
     }
   },
 
+  /**
+   * Alias: cho phép gọi bằng slug (canonical SEO pattern).
+   */
   getMovieDetailBySlug: async (slug: string): Promise<MovieDetail> => {
     return movieDetailService.getMovieDetail(slug);
   },
 
   getCredits: async (id: number): Promise<Credits> => {
     try {
-      const response = await movieDetailApi.getCredits(id);
+      const response = await movieApi.getCredits(id);
       const validated = creditsSchema.parse(response.data);
       return movieDetailMapper.toCredits(validated);
     } catch (error) {
@@ -36,7 +43,7 @@ export const movieDetailService = {
 
   getVideos: async (id: number): Promise<Video[]> => {
     try {
-      const response = await movieDetailApi.getVideos(id);
+      const response = await movieApi.getVideos(id);
       const validated = videoListSchema.parse(response.data);
       return validated.results.map(movieDetailMapper.toVideo);
     } catch (error) {
@@ -47,7 +54,7 @@ export const movieDetailService = {
 
   getSimilar: async (id: number, page = 1): Promise<MovieList> => {
     try {
-      const response = await movieDetailApi.getSimilar(id, page);
+      const response = await movieApi.getSimilar(id, page);
       const validated = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validated);
     } catch (error) {

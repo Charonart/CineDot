@@ -1,6 +1,6 @@
 import { axiosClient } from '@lib/axios/axiosClient';
 import { ApiResponse } from '@shared/types/api.type';
-import { ShowtimeListDTO, ShowtimeSeatListDTO, ShowtimeQueryParamsDTO } from '../dto/showtime.dto';
+import { ShowtimeListDTO, ShowtimeQueryParamsDTO } from '../dto/showtime.dto';
 
 export const showtimeApi = {
   /**
@@ -10,10 +10,6 @@ export const showtimeApi = {
   getShowtimes: (params: ShowtimeQueryParamsDTO): Promise<ApiResponse<ShowtimeListDTO>> =>
     axiosClient.get('/showtimes', { params }),
 
-  /**
-   * GET /api/v1/showtimes/:showtimeId/seats
-   * Lấy sơ đồ ghế của một suất chiếu.
-   */
-  getSeats: (showtimeId: number | string): Promise<ApiResponse<ShowtimeSeatListDTO>> =>
-    axiosClient.get(`/showtimes/${showtimeId}/seats`),
+  // NOTE: getSeats (GET /showtimes/:id/seats) đã được xóa — trùng lặp với bookingApi.getSeatMap.
+  // Để lấy sơ đồ ghế, dùng bookingApi.getSeatMap từ @modules/booking/api/booking.api.
 };

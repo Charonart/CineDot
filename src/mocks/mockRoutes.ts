@@ -1,3 +1,17 @@
+/**
+ * mockRoutes.ts — Path → Mock JSON file mapping
+ *
+ * ⚠️  MOCK METHOD OVERRIDE NOTE:
+ * axiosClient (src/lib/axios/axiosClient.ts) interceptor overrides ALL HTTP methods
+ * to GET when NEXT_PUBLIC_USE_MOCK=true. This means PUT, POST, PATCH, DELETE requests
+ * are all redirected to the corresponding JSON file as GET requests.
+ *
+ * Example: `PUT /profile/me` is served by `/mocks/profile/profile.json` — no separate
+ * route is needed for mutating methods, as the path key is sufficient.
+ *
+ * Mock files should reflect the expected SUCCESS response shape.
+ * To simulate errors, temporarily point to an error-fixture JSON file.
+ */
 export const mockRoutes: Record<string, string> = {
   // Laravel Sanctum CSRF Cookie
   '/sanctum/csrf-cookie': '/mocks/auth/csrf-cookie.json',

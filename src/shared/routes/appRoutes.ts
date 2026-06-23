@@ -1,8 +1,8 @@
 export const appRoutes = {
   home: '/',
   movies: '/movies',
-  movieDetail: (slug: string) => `/movies/detail/${slug}`,
-  movieSchedule: (slug: string) => `/movies/detail/${slug}#schedule`,
+  movieDetail: (slug: string) => `/movies/${slug}`,
+  movieSchedule: (slug: string) => `/movies/${slug}`,
   booking: (showtimeId: string) => `/booking/${showtimeId}`,
   bookingRoot: '/booking',
   bookingSeats: (showtimeId: string | number) => `/booking/seats?showtimeId=${showtimeId}`,

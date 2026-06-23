@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { 
-  MovieDetailHeroStatic, 
-  MovieDetailInfo, 
-  MovieOverview, 
-  MovieSchedule, 
-  MovieRecommendations 
+import {
+  MovieDetailHeroStatic,
+  MovieDetailInfo,
+  MovieOverview,
+  MovieSchedule,
+  MovieRecommendations
 } from '@modules/movie-detail/components';
 import { TrailerModal } from '@/shared/components/visual';
 import { MovieDetail } from '@modules/movie-detail/types/movie-detail.type';
@@ -21,35 +21,40 @@ export default function MovieDetailPageClient({ movie }: MovieDetailPageClientPr
   const searchParams = useSearchParams();
   const focus = searchParams.get('focus');
 
-  React.useEffect(() => {
+  /**
+   * Query-param scroll: dùng cho ?focus=schedule
+   * (booking cancellation flow → quay lại trang phim và scroll tới lịch chiếu).
+   */
+  useEffect(() => {
     if (focus === 'schedule') {
       const timer = setTimeout(() => {
         const scheduleEl = document.getElementById('schedule');
         if (scheduleEl) {
-          scheduleEl.scrollIntoView({ behavior: 'smooth' });
+          scheduleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 100);
       return () => clearTimeout(timer);
     }
   }, [focus]);
+
   return (
     <main className="movie-detail-page">
       {/* SECTION 2 — TRAILER / HERO VIDEO SECTION */}
-      <MovieDetailHeroStatic 
-        backdrop={movie.backdropUrl} 
-        title={movie.title} 
-        onPlayTrailer={() => setIsTrailerOpen(true)} 
+      <MovieDetailHeroStatic
+        backdrop={movie.backdropUrl}
+        title={movie.title}
+        onPlayTrailer={() => setIsTrailerOpen(true)}
       />
 
       {/* MAIN WRAPPER FOR 2-COLUMN LAYOUT */}
       <div className="detail-container">
         <div className="detail-main-layout">
-          
+
           {/* LEFT COLUMN (68%) */}
           <div className="detail-main-content">
-            
+
             {/* SECTION 3A — MOVIE POSTER + METADATA BLOCK */}
-            <MovieDetailInfo 
+            <MovieDetailInfo
               poster={movie.posterUrl}
               title={movie.title}
               originalTitle={movie.originalTitle}

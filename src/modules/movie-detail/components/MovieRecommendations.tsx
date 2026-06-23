@@ -21,7 +21,7 @@ export const MovieRecommendations: React.FC<MovieRecommendationsProps> = ({ reco
                 <span className="sidebar-badge-rating">★ {movie.rating}</span>
                 <span className="sidebar-badge-age">{movie.ageRating}</span>
                 <div className="sidebar-card-overlay">
-                  <Link href={`/movies/detail/${movie.id}`} className="sidebar-overlay-btn">
+                  <Link href={`/movies/${movie.id}`} className="sidebar-overlay-btn">
                     <svg 
                       className="ticket-icon" 
                       width="16" 
@@ -44,7 +44,7 @@ export const MovieRecommendations: React.FC<MovieRecommendationsProps> = ({ reco
                 <h3 
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    window.location.href = `/movies/detail/${movie.id}`;
+                    window.location.href = `/movies/${movie.id}`;
                   }}
                 >
                   {movie.title}

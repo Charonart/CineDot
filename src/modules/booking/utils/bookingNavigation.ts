@@ -24,7 +24,7 @@ export function buildSeatsUrlFromShowtimeId(showtimeId: string | number): string
 
 export function buildMovieDetailUrlFromSession(session: Partial<BookingSession>): string | null {
   if (!session.movie?.slug) return null;
-  return `/movies/detail/${session.movie.slug}?focus=schedule`;
+  return `/movies/${session.movie.slug}?focus=schedule`;
 }
 
 export function buildFoodsUrl(): string {
@@ -53,7 +53,7 @@ export function buildBookingRootUrl(): string {
  */
 export function buildCancelBookingUrl(movieSlug?: string | null): string {
   if (movieSlug) {
-    return `/movies/detail/${movieSlug}`;
+    return `/movies/${movieSlug}`;
   }
   return '/movies';
 }
