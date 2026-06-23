@@ -242,14 +242,8 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
     }
   };
 
-  const handleShowtimeClick = (cinemaName: string, time: string) => {
-    const bookingParams = new URLSearchParams({
-      movie: movieSlug,
-      cinema: cinemaName,
-      date: selectedDate,
-      time: time,
-    });
-    router.push(`/booking/seats?${bookingParams.toString()}`);
+  const handleShowtimeClick = (scheduleId: string) => {
+    router.push(`/booking/${scheduleId}`);
   };
 
   return (
@@ -359,7 +353,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
                             className={className}
                             disabled={disabled}
                             title={title}
-                            onClick={() => handleShowtimeClick(cinema.name, item.time)}
+                            onClick={() => handleShowtimeClick(item.scheduleId)}
                           >
                             <span>{item.time}</span>
                             {label && <small>{label}</small>}

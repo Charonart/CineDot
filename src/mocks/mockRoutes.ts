@@ -118,16 +118,18 @@ export const getMockPath = (url: string): string | null => {
   }
 
   // GET /showtimes/:showtimeId/seats
-  if (/^(\/api\/v1)?\/showtimes\/([^/]+)\/seats$/.test(path)) {
+  if (/\/showtimes\/([^/]+)\/seats/.test(path)) {
     return '/mocks/booking/seat-map.json';
   }
 
   // GET /showtimes/:showtimeId
-  if (/^(\/api\/v1)?\/showtimes\/([^/]+)$/.test(path)) {
-    const showtimeId = detailMatch ? '' : path.split('/').pop();
+  const showtimeDetailMatch = path.match(/\/showtimes\/([^/]+)/);
+  if (showtimeDetailMatch) {
+    const showtimeId = showtimeDetailMatch[1];
     if (showtimeId === 'st_qb_closed') {
       return '/mocks/booking/showtime-detail-closed.json';
     }
+    // Prevent matching standard routes like /showtimes as dynamic IDs
     const reserved = ['trending', 'popular', 'search', 'navbar'];
     if (showtimeId && !reserved.includes(showtimeId)) {
       return '/mocks/booking/showtime-detail.json';
