@@ -21,7 +21,7 @@ export const useLogout = () => {
         }
 
         // 3. Execute redirect using replace
-        router.replace('/login');
+        router.replace('/');
       }
     },
   });

@@ -74,106 +74,44 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
   const paymentMethodLabel =
     PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label || paymentMethod || '';
 
-  // ─── LUỒNG THANH TOÁN CHÍNH (Tương thích Mock & Laravel BE) ────────────────
+ // ─── LUỒNG THANH TOÁN CHÍNH ────────────────
   const handleConfirmPayment = async () => {
-    // BƯỚC 1: Ngăn double-click
+    // Bước 1: Validate session.bookingId và các điều kiện cơ bản
     if (isSubmitting) return;
-    setIsSubmitting(true);
-    setErrorMsg(null);
-
-    // Kiểm tra session hold còn hạn không
-    if (isExpired) {
-      setErrorMsg('Phiên giữ ghế đã hết hạn. Vui lòng chọn lại ghế ngồi.');
-      setIsSubmitting(false);
+    
+    if (!session.bookingId) {
+      setErrorMsg('Dữ liệu đơn hàng không tồn tại. Vui lòng thử lại từ đầu.');
       return;
     }
-
-    // Validate dữ liệu cơ bản
-    if (!showtimeId || seats.length === 0) {
-      setErrorMsg('Dữ liệu đặt vé không hợp lệ. Vui lòng thử lại từ đầu.');
-      setIsSubmitting(false);
-      return;
-    }
-
     if (!paymentMethod) {
       setErrorMsg('Vui lòng chọn phương thức thanh toán.');
-      setIsSubmitting(false);
       return;
     }
-
-    let booking_id = 105; // Fallback booking_id mặc định để test UI/Mock
-
+    setIsSubmitting(true);
+    setErrorMsg(null);
     try {
-      // 1. GỌI API BƯỚC 1: POST /api/v1/bookings/hold-seats
-      try {
-        const holdPayload = {
-          schedule_id: Number(showtimeId),
-          schedule_seat_ids: seats.map((s) => Number(s.id)),
-          combos: combos.map((c) => ({
-            combo_id: Number(c.id),
-            quantity: c.quantity,
-          })),
-        };
-        const holdRes = await bookingApi.holdSeatsAndCreateOrder(holdPayload);
-        // Trích xuất booking_id an toàn từ data lồng nhau
-        const rawHoldData = (holdRes.data as any).data || holdRes.data;
-        booking_id = rawHoldData.booking_id || booking_id;
-        markPendingPayment();
-      } catch (holdErr) {
-        console.warn('[Payment Flow] holdSeats API failed, using fallback mock booking_id:', holdErr);
-        // Ở môi trường mock/dev, ta bỏ qua lỗi mạng và gán booking_id tạm thời để chạy tiếp
-        markPendingPayment();
-      }
-
-      // 2. GỌI API BƯỚC 2: POST /api/v1/bookings/{id}/apply-voucher (Nếu có voucher)
-      if (voucherCode && voucherCode.trim() !== '') {
-        try {
-          await bookingApi.applyVoucher(booking_id, { voucher_code: voucherCode.trim() });
-        } catch (voucherErr) {
-          console.warn('[Payment Flow] applyVoucher API failed, skipping:', voucherErr);
-        }
-      }
-
-      // 3. GỌI API BƯỚC 3: POST /api/v1/payments
-      try {
-        const payRes = await bookingApi.processPayment({
-          booking_id,
-          payment_method: paymentMethod,
-        });
-
-        // Nếu BE trả về link redirect thực tế (VNPAY/MOMO...)
-        const rawPayData = (payRes.data as any).data || payRes.data;
-        if (rawPayData.payment_url) {
-          markPaid();
-          window.location.href = rawPayData.payment_url;
-          return;
-        }
-      } catch (payErr) {
-        console.warn('[Payment Flow] processPayment API failed/CORS, bypassing for Mock UI test:', payErr);
-        // Tự động bỏ qua lỗi Network/CORS của API payment để giả lập thanh toán thành công
-      }
-
-      // BƯỚC 4: XỬ LÝ THÀNH CÔNG (DỌN DẸP STATE & ĐỒNG BỘ VÉ)
+      // Bước 2: Gọi API processPayment
+      await bookingApi.processPayment({
+        booking_id: session.bookingId,
+        payment_method: paymentMethod,
+      });
       markPaid();
-
-      // Invalidate cache lịch sử vé để tự động cập nhật danh sách vé mới
+      // Bước 3: Invalidate cache lịch sử vé
       queryClient.invalidateQueries({ queryKey: ['ticket-history'] });
-
-      // Dọn dẹp giỏ hàng trong Zustand Store để tránh rò rỉ bộ nhớ
-      resetBooking();
-
-      // Đẩy người dùng về trang lịch sử vé
-      router.replace('/profile?tab=ticket-history');
-
-    } catch (err: unknown) {
+      // Bước 4: Chuyển trang về trang chủ TRƯỚC
+      router.replace('/');
+      // Bước 5: Gọi resetBooking trong setTimeout để state dọn dẹp sau khi route đã đổi, 
+      // tránh làm showtimeId bị null quá sớm gây lỗi văng về trang /movies
+      setTimeout(() => {
+        resetBooking();
+      }, 500);
+    } catch (err: any) {
+      // Bước 6: Xử lý lỗi
       markFailed();
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Đã xảy ra lỗi trong quá trình xử lý thanh toán.';
+      const message = err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi trong quá trình xử lý thanh toán.';
       setErrorMsg(message);
     } finally {
-      // Set submitting = false trong block finally để nút bấm khôi phục trạng thái
+      // Cuối cùng tắt trạng thái isSubmitting
       setIsSubmitting(false);
     }
   };

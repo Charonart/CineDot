@@ -52,7 +52,8 @@ export const bookingApi = {
    * Khởi tạo giao dịch thanh toán.
    * Trả về payment_url (redirect) hoặc xác nhận thành công ngay.
    */
-  processPayment: (payload: ProcessPaymentRequestDTO): Promise<ApiResponse<ProcessPaymentResponseDTO>> =>
-    axiosClient.post('/payments', payload),
+    processPayment: (payload: ProcessPaymentRequestDTO): Promise<ApiResponse<ProcessPaymentResponseDTO>> => {
+    return axiosClient.post('/payments', payload).then((res: any) => res.data ?? res);
+  },
 };
 

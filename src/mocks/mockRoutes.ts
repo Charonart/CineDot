@@ -133,9 +133,24 @@ export const getMockPath = (url: string): string | null => {
     }
   }
 
-  // POST /seat-holds
+  // POST /seat-holds (legacy)
   if (/^(\/api\/v1)?\/seat-holds$/.test(path)) {
     return '/mocks/booking/seat-hold-success.json';
+  }
+
+  // POST /bookings/hold-seats
+  if (/^(\/api\/v1)?\/bookings\/hold-seats$/.test(path)) {
+    return '/mocks/booking/seat-hold-success.json';
+  }
+
+  // POST /bookings/:id/apply-voucher
+  if (/^(\/api\/v1)?\/bookings\/\d+\/apply-voucher$/.test(path)) {
+    return '/mocks/booking/apply-voucher-success.json';
+  }
+
+  // POST /payments
+  if (/^(\/api\/v1)?\/payments$/.test(path)) {
+    return '/mocks/booking/payment-success.json';
   }
 
   // Legacy fallback for showtimes if needed
