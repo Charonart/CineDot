@@ -83,8 +83,67 @@ export interface SeatHoldRequestDTO {
 
 export interface SeatHoldDTO {
   holdId: string;
+  /** booking_id của đơn hàng pending — BE trả về cùng với hold-seats response */
+  booking_id: number;
   showtimeId: string;
   seatIds: string[];
   expiresAt: string;
   serverTime: string;
+}
+
+// ─── BƯỚC 1: POST /api/v1/bookings/hold-seats ───────────────────────────────
+
+export interface ComboPayloadDTO {
+  combo_id: number;
+  quantity: number;
+}
+
+/** Payload gửi lên POST /api/v1/bookings/hold-seats */
+export interface HoldSeatsRequestDTO {
+  /** schedule_id tương ứng với showtimeId trong store */
+  schedule_id: number;
+  /** Danh sách schedule_seat_id đã chọn */
+  schedule_seat_ids: number[];
+  /** Danh sách combo bắp nước kèm số lượng */
+  combos: ComboPayloadDTO[];
+}
+
+/** Response trả về từ POST /api/v1/bookings/hold-seats */
+export interface HoldSeatsResponseDTO {
+  booking_id: number;
+  expires_at?: string;
+  message?: string;
+}
+
+// ─── BƯỚC 2: POST /api/v1/bookings/{id}/apply-voucher ────────────────────────
+
+/** Payload gửi lên POST /api/v1/bookings/{id}/apply-voucher */
+export interface ApplyVoucherRequestDTO {
+  voucher_code: string;
+}
+
+/** Response trả về từ POST /api/v1/bookings/{id}/apply-voucher */
+export interface ApplyVoucherResponseDTO {
+  success: boolean;
+  discount_amount?: number;
+  message?: string;
+}
+
+// ─── BƯỚC 3: POST /api/v1/payments ────────────────────────────────────────────
+
+/** Payload gửi lên POST /api/v1/payments */
+export interface ProcessPaymentRequestDTO {
+  booking_id: number;
+  /** Phương thức thanh toán: 'momo' | 'zalopay' | 'onepay' | 'qr' | ... */
+  payment_method: string;
+}
+
+/** Response trả về từ POST /api/v1/payments */
+export interface ProcessPaymentResponseDTO {
+  success: boolean;
+  /** Link redirect đến cổng thanh toán (nếu có) */
+  payment_url?: string;
+  /** Xác nhận thanh toán thành công ngay (mock/cash) */
+  transaction_id?: string;
+  message?: string;
 }

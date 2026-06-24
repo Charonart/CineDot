@@ -21,8 +21,9 @@ export default function BookingPaymentPage() {
   const router = useRouter();
   const [hasHydrated, setHasHydrated] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isSuccessMessageOpen, setIsSuccessMessageOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  // isSubmitting được quản lý bên trong TicketConfirmModal — không cần ở đây
+  const [isSubmitting] = useState(false);
 
   const session = useBookingStore((state) => state.session);
   const {
@@ -34,10 +35,10 @@ export default function BookingPaymentPage() {
     seatHoldExpiresAt,
     status,
     paymentMethod,
+    bookingId, // booking_id từ hold-seats response
   } = session;
 
   const setCurrentStep = useBookingStore((state) => state.setCurrentStep);
-  const markPendingPayment = useBookingStore((state) => state.markPendingPayment);
   const resetBooking = useBookingStore((state) => state.resetBooking);
 
   // Set hydration complete flag
@@ -106,11 +107,6 @@ export default function BookingPaymentPage() {
     setIsConfirmOpen(true);
   };
 
-  const handleConfirmPayment = () => {
-    markPendingPayment();
-    setIsConfirmOpen(false);
-    setIsSuccessMessageOpen(true);
-  };
 
   const handleCancelBooking = () => {
     resetBooking();
@@ -254,9 +250,12 @@ export default function BookingPaymentPage() {
           {/* Sticky checkout order summary sidebar */}
           <div style={{ width: '100%', maxWidth: '360px' }} className="price-summary-desktop-wrap">
             <BookingOrderSummary
-              continueLabel="Thanh toán"
+              continueLabel={
+                // Hiển thị trạng thái loading khi đang xử lý thanh toán
+                isSubmitting ? 'Đang xử lý...' : 'Thanh toán'
+              }
               onContinue={handleCheckoutClick}
-              disabled={isExpired}
+              disabled={isExpired || isSubmitting}
             />
           </div>
         </div>
@@ -276,110 +275,13 @@ export default function BookingPaymentPage() {
         }
       `}} />
 
-      {/* Ticket Confirmation details preview modal overlay */}
+      {/* Ticket Confirmation details preview modal — modal tự xử lý toàn bộ payment flow */}
       <TicketConfirmModal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
-        onConfirm={handleConfirmPayment}
       />
 
-      {/* SUCCESS/PENDING GATEWAY NOTIFICATION OVERLAY */}
-      {isSuccessMessageOpen && (
-        <div
-          className="modal-overlay open"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            background: 'rgba(19, 20, 19, 0.6)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-          }}
-          onClick={() => setIsSuccessMessageOpen(false)}
-        >
-          <div
-            className="modal-container"
-            style={{
-              background: '#ffffff',
-              borderRadius: '24px',
-              padding: '36px 32px',
-              maxWidth: '460px',
-              width: '100%',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
-              textAlign: 'center',
-              border: '1px solid var(--border)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: '#E6FFFA',
-                color: '#319795',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 20px auto',
-              }}
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
 
-            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#131413', margin: '0 0 12px 0' }}>
-              Xác Nhận Đơn Hàng Thành Công
-            </h3>
-
-            <div style={{ fontSize: '14.5px', color: 'var(--text2)', lineHeight: 1.5, margin: '0 0 24px 0' }}>
-              <div
-                style={{
-                  background: '#F0EEF9',
-                  border: '1px solid #CFC9EB',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  color: '#4f3c93',
-                  fontWeight: 600,
-                  fontSize: '14.5px',
-                  textAlign: 'left',
-                }}
-              >
-                Cổng thanh toán mock sẽ được triển khai ở Micro-task Booking 7.
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsSuccessMessageOpen(false)}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '12px',
-                background: '#131413',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '14.5px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'opacity 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '0.9';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

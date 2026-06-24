@@ -72,6 +72,8 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
   const initOrClearIfChanged = useBookingStore((state) => state.initOrClearIfChanged);
   const setSeats = useBookingStore((state) => state.setSeats);
   const startSeatHold = useBookingStore((state) => state.startSeatHold);
+  // Lưu booking_id từ hold-seats response — cần thiết để gọi POST /payments sau
+  const setBookingId = useBookingStore((state) => state.setBookingId);
   
   const movieSlug = useBookingStore((state) => state.session.movie?.slug ?? null);
 
@@ -124,7 +126,7 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
     }
   }, [showtime, showtimeId, initializeBooking]);
 
-  // Sync seats and navigate to foods step on successful seat hold
+  // Sync seats và navigate to foods step on successful seat hold
   React.useEffect(() => {
     if (hold && selectedSeats.length > 0) {
       const mappedSeats = selectedSeats.map((s) => ({
@@ -137,9 +139,11 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
       }));
       setSeats(mappedSeats);
       startSeatHold();
+      // Lưu booking_id từ BE vào session — dùng cho POST /payments ở payment page
+      setBookingId(hold.bookingId);
       router.replace(buildFoodsUrl());
     }
-  }, [hold, selectedSeats, setSeats, startSeatHold, router]);
+  }, [hold, selectedSeats, setSeats, startSeatHold, setBookingId, router]);
 
   const handleCheckout = () => {
     if (!isAuthenticated) {

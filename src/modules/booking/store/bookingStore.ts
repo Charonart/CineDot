@@ -111,6 +111,8 @@ interface BookingActions {
   markQuickComboHandled: () => void;
   startSeatHold: () => void;
   expireSeatHold: () => void;
+  /** Lưu booking_id sau khi hold-seats API trả về — dùng cho POST /payments */
+  setBookingId: (id: number) => void;
   markPendingPayment: () => void;
   markPaid: () => void;
   markFailed: () => void;
@@ -319,6 +321,12 @@ export const useBookingStore = create<BookingStore>()(
             ...state.session,
             status: 'expired',
           },
+        })),
+
+      // Lưu booking_id BE trả về từ hold-seats response vào session
+      setBookingId: (id) =>
+        set((state) => ({
+          session: { ...state.session, bookingId: id },
         })),
 
       markPendingPayment: () =>

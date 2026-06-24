@@ -86,6 +86,8 @@ export interface SeatHoldRequest {
 
 export interface SeatHold {
   holdId: string;
+  /** booking_id của đơn pending — dùng cho POST /payments */
+  bookingId: number;
   showtimeId: string;
   seatIds: string[];
   expiresAt: string;
