@@ -126,9 +126,12 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
     }
   }, [showtime, showtimeId, initializeBooking]);
 
+  const [showSuccess, setShowSuccess] = React.useState(false);
+
   // Sync seats và navigate to foods step on successful seat hold
   React.useEffect(() => {
     if (hold && selectedSeats.length > 0) {
+      setShowSuccess(true);
       const mappedSeats = selectedSeats.map((s) => ({
         id: s.id,
         row: s.row,
@@ -141,7 +144,12 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
       startSeatHold();
       // Lưu booking_id từ BE vào session — dùng cho POST /payments ở payment page
       setBookingId(hold.bookingId);
-      router.replace(buildFoodsUrl());
+      
+      const timer = setTimeout(() => {
+        router.replace(buildFoodsUrl());
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     }
   }, [hold, selectedSeats, setSeats, startSeatHold, setBookingId, router]);
 
@@ -214,6 +222,30 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
         )}
 
         {errorMessage && <AlertBanner message={errorMessage} />}
+
+        {showSuccess && (
+          <div
+            style={{
+              background: '#E8F5E9',
+              border: '1px solid #81C784',
+              color: '#2E7D32',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              fontSize: '14.5px',
+              fontWeight: 600,
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Giữ ghế thành công! Đang chuyển sang bước tiếp theo...
+          </div>
+        )}
 
         {hold && (
           <div

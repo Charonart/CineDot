@@ -5,6 +5,8 @@ import { LoginRequestDTO } from '../dto/auth.dto';
 import { authKeys } from './useCurrentUser';
 import { QUERY_KEYS } from '@lib/constants/queryKeys';
 
+import { useAuthStore } from '../store/authStore';
+
 export const useLogin = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -14,6 +16,9 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (payload: LoginRequestDTO) => authService.login(payload),
     onSuccess: async (session) => {
+      // 0. Lưu JWT token vào store
+      useAuthStore.getState().setToken(session.token);
+
       // 1. Set query data in cache
       queryClient.setQueryData(authKeys.me(), session);
       // 2. Invalidate to trigger updates across the app

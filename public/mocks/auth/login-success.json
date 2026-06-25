@@ -11,6 +11,7 @@
     "description": "Mock login success response for cookie/session auth"
   },
   "data": {
+    "token": "mock-jwt-token-12345",
     "user": {
       "id": "user_1",
       "name": "Lương Hữu Luyến",

@@ -19,6 +19,7 @@ export const authMapper = {
   toAuthSession: (dto: AuthSessionDTO): AuthSession => {
     return {
       user: authMapper.toAuthUser(dto.user),
+      token: dto.token || '',
     };
   },
 };

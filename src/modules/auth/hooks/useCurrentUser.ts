@@ -8,12 +8,17 @@ export const authKeys = {
   me: () => QUERY_KEYS.currentUser,
 };
 
+import { useAuthStore } from '../store/authStore';
+
 export const useCurrentUser = () => {
+  const token = useAuthStore((state) => state.token);
+
   return useQuery<AuthSession, Error>({
     queryKey: authKeys.me(),
     queryFn: ({ signal }) => authService.getCurrentUser(signal),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000,  // 30 minutes
+    enabled: !!token, // Chỉ fetch khi đã có token
     retry: (failureCount, error: unknown) => {
       if (error && typeof error === 'object' && 'code' in error) {
         const code = (error as { code?: string }).code;

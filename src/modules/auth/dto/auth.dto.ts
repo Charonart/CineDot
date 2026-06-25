@@ -13,6 +13,7 @@ export interface AuthUserDTO {
 
 export interface AuthSessionDTO {
   user: AuthUserDTO;
+  token?: string;
 }
 
 export interface LoginRequestDTO {
