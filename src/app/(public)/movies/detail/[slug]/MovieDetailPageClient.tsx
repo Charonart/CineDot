@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   MovieDetailHeroStatic, 
@@ -9,15 +9,15 @@ import {
   MovieSchedule, 
   MovieRecommendations 
 } from '@modules/movie-detail/components';
-import { TrailerModal } from '@/shared/components/visual';
 import { MovieDetail } from '@modules/movie-detail/types/movie-detail.type';
+import { useTrailerStore } from '@/shared/store/trailerStore';
 
 interface MovieDetailPageClientProps {
   movie: MovieDetail;
 }
 
 export default function MovieDetailPageClient({ movie }: MovieDetailPageClientProps) {
-  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const openTrailer = useTrailerStore((state) => state.openTrailer);
   const searchParams = useSearchParams();
   const focus = searchParams.get('focus');
 
@@ -38,7 +38,7 @@ export default function MovieDetailPageClient({ movie }: MovieDetailPageClientPr
       <MovieDetailHeroStatic 
         backdrop={movie.backdropUrl} 
         title={movie.title} 
-        onPlayTrailer={() => setIsTrailerOpen(true)} 
+        onPlayTrailer={() => openTrailer(movie.trailerUrl, movie.posterUrl, movie.title)} 
       />
 
       {/* MAIN WRAPPER FOR 2-COLUMN LAYOUT */}
@@ -62,7 +62,7 @@ export default function MovieDetailPageClient({ movie }: MovieDetailPageClientPr
               genres={movie.genres.map((g) => g.name)}
               director={movie.director}
               cast={movie.cast}
-              onPlayTrailer={() => setIsTrailerOpen(true)}
+              onPlayTrailer={() => openTrailer(movie.trailerUrl, movie.posterUrl, movie.title)}
             />
 
             {/* SECTION 4 — MOVIE CONTENT SECTION */}
@@ -80,15 +80,6 @@ export default function MovieDetailPageClient({ movie }: MovieDetailPageClientPr
 
         </div>
       </div>
-
-      {/* CINEMATIC TRAILER MODAL */}
-      <TrailerModal
-        isOpen={isTrailerOpen}
-        onClose={() => setIsTrailerOpen(false)}
-        videoSrc={movie.trailerUrl}
-        poster={movie.posterUrl}
-        title={movie.title}
-      />
     </main>
   );
 }

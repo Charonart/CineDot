@@ -216,7 +216,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   };
 
   return (
-    <section className="section-detail-content fade-up in-view" id="schedule">
+    <section className="fade-up in-view" id="schedule" style={{ marginTop: '48px', width: '100%' }}>
       <ScrollTextSlideLeft as="h2" className="detail-section-title">
         Lịch{' '}
         <HighlightText variant="underline" color="primary">
@@ -224,7 +224,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </HighlightText>
       </ScrollTextSlideLeft>
 
-      <div className="schedule-toolbar flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 mb-7 border-b border-[var(--color-border)] pb-5">
+      <div className="schedule-toolbar flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7 border-b border-[var(--color-border)] pb-5 w-full">
         {/* Date Selector Wrapper */}
         <div className="schedule-date-nav flex items-center gap-2.5 min-w-0 xl:min-w-[430px] flex-1">
           <button 
@@ -277,7 +277,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </div>
 
         {/* Dropdown Filters */}
-        <div className="schedule-filters flex items-center gap-2.5 flex-shrink-0 mt-4 xl:mt-0">
+        <div className="schedule-filters flex items-center gap-3 md:ml-auto flex-shrink-0">
           <ScheduleDropdown
             label="Khu vực"
             value={selectedRegion}
@@ -285,7 +285,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             onChange={(val) => {
               setSelectedRegion(val);
             }}
-            className="schedule-filter-city w-[140px] md:w-[170px]"
+            className="schedule-filter-city w-[140px]"
           />
           
           <ScheduleDropdown
@@ -295,7 +295,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             onChange={(val) => {
               setSelectedCinemaFilter(val);
             }}
-            className="schedule-filter-cinema w-[180px] md:w-[210px]"
+            className="schedule-filter-cinema w-[180px]"
           />
         </div>
       </div>
@@ -308,14 +308,14 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
       ) : (
         filteredCinemas.map((cinema) => {
           return (
-            <div key={cinema.name} className="cinema-schedule-box" style={{ marginBottom: '24px' }}>
+            <div key={cinema.name} className="cinema-schedule-box p-6 sm:p-8" style={{ marginBottom: '24px' }}>
               <h3 className="cinema-group-title">{cinema.name}</h3>
 
               <div className="showtime-rows">
                 {cinema.formats.map((format) => (
-                  <div key={format.name} className="showtime-row">
-                    <h4 className="format-title">{format.name}</h4>
-                    <div className="time-grid">
+                  <div key={format.name} className="flex flex-col sm:flex-row items-start justify-start gap-4 sm:gap-6 md:gap-8 py-5 first:pt-0 last:pb-0 border-b border-gray-100 last:border-none w-full">
+                    <h4 className="w-full sm:w-[180px] md:w-[220px] flex-shrink-0 text-sm font-semibold text-gray-600 pt-2.5">{format.name}</h4>
+                    <div className="flex flex-wrap gap-3 flex-1 w-full">
                       {format.times.map((item) => {
                         const { className, disabled, title, label } = getShowtimeBtnProps(item.status);
 

@@ -536,5 +536,10 @@ When the Home Hero is configured as an image-first carousel:
 6. Authentication must never reset booking session.
 7. User must always return to the exact booking state before authentication.
 
+## 39. Absolute/Fixed Navbar Spacing & Specificity Rules
+- **Page Layout Wrapper**: For pages with a fixed/absolute top Navbar (e.g., Star Shop, Cinema Corner), if the content overlaps or is hidden by the Navbar, do not rely solely on Tailwind arbitrary class values (like `pt-[120px]`) which can suffer from compilation or specificity overrides in some viewports.
+- **Enforcement**: Apply a safe inline style on the page root wrapper `div` (e.g., `style={{ paddingTop: '110px' }}` or similar offset matching the floating navbar height of 88px) to guarantee rendering parity and ensure a spacious margin between the bottom of the Navbar and the page content on all viewports.
+
+
 
 

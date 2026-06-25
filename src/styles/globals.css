@@ -3554,6 +3554,47 @@ select:disabled,
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Redesigned Cinematic Star Shop UI Styles */
+@keyframes float-badge-1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1.5deg); }
+}
+
+@keyframes float-badge-2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(-1deg); }
+}
+
+@keyframes float-badge-3 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
+}
+
+.animate-float-1 {
+  animation: float-badge-1 8s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: float-badge-2 10s ease-in-out infinite;
+}
+
+.animate-float-3 {
+  animation: float-badge-3 9s ease-in-out infinite;
+}
+
+.star-shop-hero-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(124, 111, 232, 0.15) 0%, transparent 60%);
+}
+
+.star-shop-glow-ambient {
+  box-shadow: 0 0 50px rgba(124, 111, 232, 0.12);
+}
+
+.star-shop-glow-orange {
+  box-shadow: 0 0 40px rgba(255, 122, 26, 0.1);
+}
+
 .star-shop-card--skeleton .star-shop-card-image-wrap,
 .star-shop-card--skeleton .star-shop-card-body { min-height: 240px; }
 

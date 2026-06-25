@@ -4,7 +4,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExpandableSearchBar } from '@shared/ui/ExpandableSearchBar';
+import dynamic from 'next/dynamic';
+
+const DynamicExpandableSearchBar = dynamic(
+  () => import('@shared/ui/ExpandableSearchBar').then((mod) => mod.ExpandableSearchBar),
+  { ssr: false, loading: () => <div style={{ width: 44, height: 38 }} /> }
+);
 import { useNavbarMovies } from '@/modules/movie/hooks/useMovies';
 import { Movie } from '@/modules/movie/types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
@@ -348,7 +353,7 @@ export const Navbar: React.FC = () => {
 
         {/* Actions Button Panel */}
         <div className="nav-actions">
-          <ExpandableSearchBar
+          <DynamicExpandableSearchBar
             placeholder="Tìm phim..."
             expandedWidth="min(260px, 28vw)"
             onSubmit={(value) => {

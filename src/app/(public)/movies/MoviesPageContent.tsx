@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MoviesPageHeader, CategoryType } from '@modules/movie/components/MoviesPageHeader';
 import { MoviesListingCard } from '@modules/movie/components/MoviesListingCard';
-import { CINE_MOVIES_DB, MovieListingItem } from '@modules/movie/data/moviesListingData';
-import { TrailerModal } from '@/shared/components/visual';
+import { CINE_MOVIES_DB } from '@modules/movie/data/moviesListingData';
+import { useTrailerStore } from '@/shared/store/trailerStore';
 
 export default function MoviesPageContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<CategoryType>('now-showing');
-  const [activeTrailerMovie, setActiveTrailerMovie] = useState<MovieListingItem | null>(null);
+  const openTrailer = useTrailerStore((state) => state.openTrailer);
 
   // Sync active tab with search parameter on initial load
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function MoviesPageContent() {
                   <MoviesListingCard 
                     key={movie.id} 
                     movie={movie} 
-                    onPlayTrailer={(selectedMovie) => setActiveTrailerMovie(selectedMovie)} 
+                    onPlayTrailer={(selectedMovie) => openTrailer(selectedMovie.trailerSrc || '', selectedMovie.poster || '', selectedMovie.title || '')} 
                   />
                 ))}
               </div>
@@ -82,15 +82,6 @@ export default function MoviesPageContent() {
 
         </div>
       </section>
-
-      {/* CINEMATIC TRAILER MODAL */}
-      <TrailerModal
-        isOpen={!!activeTrailerMovie}
-        onClose={() => setActiveTrailerMovie(null)}
-        videoSrc={activeTrailerMovie?.trailerSrc}
-        poster={activeTrailerMovie?.poster}
-        title={activeTrailerMovie?.title || ''}
-      />
 
     </main>
   );

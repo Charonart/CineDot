@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { TrailerModal } from '@/shared/components/visual';
+import { useTrailerStore } from '@/shared/store/trailerStore';
 import { appRoutes } from '@/shared/routes/appRoutes';
 
 interface Genre {
@@ -34,7 +34,7 @@ interface MovieCardProps {
 }
 
 export const MovieCard: React.FC<MovieCardProps> = (props) => {
-  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const openTrailer = useTrailerStore((state) => state.openTrailer);
 
   const movie: Movie = props.movie || {
     id: props.id || '',
@@ -96,7 +96,11 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setIsTrailerOpen(true);
+                openTrailer(
+                  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+                  posterUrl,
+                  title
+                );
               }}
             >
               <svg
@@ -132,14 +136,6 @@ export const MovieCard: React.FC<MovieCardProps> = (props) => {
           </div>
         </div>
       </div>
-
-      <TrailerModal
-        isOpen={isTrailerOpen}
-        onClose={() => setIsTrailerOpen(false)}
-        videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
-        poster={posterUrl}
-        title={title}
-      />
     </>
   );
 };

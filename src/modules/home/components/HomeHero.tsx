@@ -4,8 +4,12 @@
 import React, { useState, useEffect } from 'react';
 import { QuickBookingPanel } from './QuickBookingPanel';
 import { useHeroSlides } from '@/modules/movie/hooks/useMovies';
-import { TrailerModal } from '@/shared/components/visual';
+import dynamic from 'next/dynamic';
 
+const DynamicTrailerModal = dynamic(
+  () => import('@/shared/components/visual').then((mod) => mod.TrailerModal),
+  { ssr: false }
+);
 export const HomeHero: React.FC = () => {
   const { data: slides = [], isLoading, isError } = useHeroSlides();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -171,8 +175,8 @@ export const HomeHero: React.FC = () => {
       <QuickBookingPanel />
 
       {/* Trailer Modal */}
-      {activeSlide && (
-        <TrailerModal
+      {activeSlide && isTrailerOpen && (
+        <DynamicTrailerModal
           isOpen={isTrailerOpen}
           onClose={() => setIsTrailerOpen(false)}
           videoSrc={activeSlide.trailerUrl}

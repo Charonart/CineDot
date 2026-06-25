@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   VideoPlayer,
-  TrailerModal,
   HighlightText,
   ScrollTextSlideLeft
 } from '@/shared/components/visual';
 import { appRoutes } from '@/shared/routes/appRoutes';
+import dynamic from 'next/dynamic';
+
+const DynamicTrailerModal = dynamic(
+  () => import('@/shared/components/visual').then((mod) => mod.TrailerModal),
+  { ssr: false }
+);
 
 export const HomeTrailerSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,13 +97,15 @@ export const HomeTrailerSection: React.FC = () => {
       </section>
 
       {/* CINEMATIC TRAILER MODAL */}
-      <TrailerModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        videoSrc="https://www.youtube.com/embed/ZXAcQeaTq0Q"
-        poster="https://images.unsplash.com/photo-1534809027769-b00d750a6bac?w=1200&q=80"
-        title="Featured Trailer"
-      />
+      {isModalOpen && (
+        <DynamicTrailerModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          videoSrc="https://www.youtube.com/embed/ZXAcQeaTq0Q"
+          poster="https://images.unsplash.com/photo-1534809027769-b00d750a6bac?w=1200&q=80"
+          title="Featured Trailer"
+        />
+      )}
     </>
   );
 };
