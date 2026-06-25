@@ -18,8 +18,8 @@ export const mockRoutes: Record<string, string> = {
 
   // Current User Session
   // To test authenticated state, change '/mocks/auth/me-guest.json' to '/mocks/auth/me-authenticated.json' below:
-  '/auth/me': '/mocks/auth/me-guest.json',
-  '/api/v1/auth/me': '/mocks/auth/me-guest.json',
+  '/auth/me': '/mocks/auth/me-authenticated.json',
+  '/api/v1/auth/me': '/mocks/auth/me-authenticated.json',
 
   // Login
   // To test validation/credentials errors, change '/mocks/auth/login-success.json' to '/mocks/auth/login-invalid.json' below:
