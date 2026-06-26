@@ -1,6 +1,12 @@
 import { axiosClient } from '@lib/axios/axiosClient';
 import { ApiResponse } from '@shared/types/api.type';
-import { MovieListResponseDTO, MovieDTO } from '../dto/movie.dto';
+import {
+  MovieListResponseDTO,
+  MovieDTO,
+  ReviewListResponseDTO,
+  AddReviewRequestDTO,
+  AddReviewResponseDTO,
+} from '../dto/movie.dto';
 import {
   MovieDetailDTO,
   CreditsDTO,
@@ -62,4 +68,25 @@ export const movieApi = {
    */
   getSimilar: (id: number, page = 1): Promise<ApiResponse<MovieListResponseDTO>> =>
     axiosClient.get(`/movies/${id}/similar`, { params: { page } }),
+
+  /**
+   * GET /api/v1/movies/:id/reviews?per_page=10&page=1
+   * Lấy danh sách bình luận / đánh giá của một bộ phim.
+   */
+  getReviews: (
+    id: number,
+    params?: { page?: number; per_page?: number },
+    signal?: AbortSignal,
+  ): Promise<ApiResponse<ReviewListResponseDTO>> =>
+    axiosClient.get(`/movies/${id}/reviews`, { params, signal }),
+
+  /**
+   * POST /api/v1/movies/:id/reviews   (yêu cầu Bearer token)
+   * Thêm một bình luận / đánh giá mới cho bộ phim.
+   */
+  addReview: (
+    id: number,
+    payload: AddReviewRequestDTO,
+  ): Promise<AddReviewResponseDTO> =>
+    axiosClient.post(`/movies/${id}/reviews`, payload),
 };

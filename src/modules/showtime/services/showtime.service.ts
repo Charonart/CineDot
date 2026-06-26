@@ -13,9 +13,9 @@ export const showtimeService = {
   getShowtimes: async (movieId: number | string, params: ShowtimeQueryParams): Promise<ShowtimeList> => {
     try {
       const response = await showtimeApi.getShowtimes({
-        movieId,
         date: params.date,
-        cinemaId: params.cinemaId,
+        movie_id: movieId ? Number(movieId) : undefined,
+        cinema_id: params.cinemaId ? Number(params.cinemaId) : undefined,
       });
       const validated = showtimeListSchema.parse(response.data);
       return showtimeMapper.toShowtimeList(validated.results, params.date);

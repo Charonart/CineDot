@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "data": {
+    "seats": [
+      { "id": "seat_A1", "row": "A", "number": 1, "label": "A1", "type": "standard", "status": "available" },
+      { "id": "seat_A2", "row": "A", "number": 2, "label": "A2", "type": "standard", "status": "available" },
+      { "id": "seat_A3", "row": "A", "number": 3, "label": "A3", "type": "standard", "status": "available" },
+      { "id": "seat_A4", "row": "A", "number": 4, "label": "A4", "type": "standard", "status": "available" },
+      { "id": "seat_A5", "row": "A", "number": 5, "label": "A5", "type": "standard", "status": "available" },
+      { "id": "seat_B1", "row": "B", "number": 1, "label": "B1", "type": "standard", "status": "available" },
+      { "id": "seat_B2", "row": "B", "number": 2, "label": "B2", "type": "standard", "status": "available" },
+      { "id": "seat_B3", "row": "B", "number": 3, "label": "B3", "type": "vip",      "status": "available" },
+      { "id": "seat_B4", "row": "B", "number": 4, "label": "B4", "type": "vip",      "status": "available" },
+      { "id": "seat_B5", "row": "B", "number": 5, "label": "B5", "type": "standard", "status": "available" },
+      { "id": "seat_C1", "row": "C", "number": 1, "label": "C1", "type": "couple",   "status": "available" },
+      { "id": "seat_C2", "row": "C", "number": 2, "label": "C2", "type": "couple",   "status": "available" }
+    ],
+    "roomId": 1,
+    "roomName": "Cinema 1",
+    "roomType": "2D"
+  }
+}

@@ -8,6 +8,7 @@ import {
   HoldSeatsResponseDTO,
   ProcessPaymentRequestDTO,
   ProcessPaymentResponseDTO,
+  RemoveVoucherResponseDTO,
   SeatHoldDTO,
   SeatHoldRequestDTO,
   SeatMapDTO,
@@ -46,6 +47,13 @@ export const bookingApi = {
     payload: ApplyVoucherRequestDTO,
   ): Promise<ApiResponse<ApplyVoucherResponseDTO>> =>
     axiosClient.post(`/bookings/${bookingId}/apply-voucher`, payload),
+
+  // ─── BƯỚC 2.5: POST /api/v1/bookings/{id}/remove-voucher ────────────────────
+  /**
+   * Hủy áp dụng voucher khỏi đơn hàng.
+   */
+  removeVoucher: (bookingId: number): Promise<ApiResponse<RemoveVoucherResponseDTO>> =>
+    axiosClient.post(`/bookings/${bookingId}/remove-voucher`),
 
   // ─── BƯỚC 3: POST /api/v1/payments ───────────────────────────────────────────
   /**

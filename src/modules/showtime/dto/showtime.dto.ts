@@ -136,8 +136,12 @@ export interface ShowtimeSeatListDTO {
 
 // ─── Query Params ─────────────────────────────────────────────────────────────
 
+/**
+ * Query params cho GET /api/v1/showtimes
+ * Khớp 100% với Postman spec (snake_case).
+ */
 export interface ShowtimeQueryParamsDTO {
-  date: string;       // YYYY-MM-DD, required
-  movieId?: number | string;
-  cinemaId?: number | string;
+  date: string;         // YYYY-MM-DD, required
+  movie_id?: number;    // ID bộ phim (optional)
+  cinema_id?: number;   // ID rạp chiếu (optional)
 }

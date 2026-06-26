@@ -129,6 +129,12 @@ export interface ApplyVoucherResponseDTO {
   message?: string;
 }
 
+/** Response trả về từ POST /api/v1/bookings/{id}/remove-voucher */
+export interface RemoveVoucherResponseDTO {
+  success: boolean;
+  message?: string;
+}
+
 // ─── BƯỚC 3: POST /api/v1/payments ────────────────────────────────────────────
 
 /** Payload gửi lên POST /api/v1/payments */

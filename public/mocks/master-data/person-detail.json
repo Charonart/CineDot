@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Timothy Chalamet",
+    "originalName": "Timothée Hal Chalamet",
+    "biography": "Timothée Hal Chalamet là một diễn viên người Mỹ gốc Pháp. Anh được biết đến rộng rãi qua vai diễn Paul Atreides trong bộ phim khoa học viễn tưởng 'Dune' (2021) và 'Dune: Part Two' (2024), đây là vai diễn đã đưa anh trở thành một trong những nam diễn viên hàng đầu Hollywood.",
+    "birthday": "1995-12-27",
+    "deathday": null,
+    "placeOfBirth": "New York City, New York, USA",
+    "profileUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
+    "knownForDepartment": "Acting",
+    "popularity": 98.4,
+    "tmdbId": 1190668
+  }
+}

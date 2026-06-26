@@ -26,10 +26,10 @@ export const profileApi = {
     axiosClient.put('/api/v1/users/profile', data),
 
   /**
-   * GET /api/v1/profile/tickets
-   * Returns the authenticated user's ticket history, optionally filtered by status.
+   * GET /api/v1/users/bookings
+   * Returns the authenticated user's booking history, optionally filtered by status.
    * Accepts an AbortSignal for query cancellation (e.g. TanStack Query tab switch).
    */
   getTicketHistory: ({ signal, ...params }: TicketHistoryQueryParams = {}): Promise<ApiResponse<TicketHistoryDTO[]>> =>
-    axiosClient.get('/profile/tickets', { params, signal }),
+    axiosClient.get('/api/v1/users/bookings', { params, signal }),
 };

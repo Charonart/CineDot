@@ -39,7 +39,7 @@ export const quickBookingService = {
 
     try {
       // Fetch showtimes for this movie and cinema to derive dates
-      const response = await showtimeApi.getShowtimes({ movieId, cinemaId, date: '' });
+      const response = await showtimeApi.getShowtimes({ movie_id: Number(movieId) || undefined, cinema_id: Number(cinemaId) || undefined, date: '' });
       const results = response.data?.results || [];
 
       const datesMap = new Map<string, string>();
@@ -85,7 +85,7 @@ export const quickBookingService = {
     if (!movieId || !cinemaId || !date) return [];
 
     try {
-      const response = await showtimeApi.getShowtimes({ movieId, cinemaId, date });
+      const response = await showtimeApi.getShowtimes({ movie_id: Number(movieId) || undefined, cinema_id: Number(cinemaId) || undefined, date });
       const results = response.data?.results || [];
 
       return results.map((st: any) => {

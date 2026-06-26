@@ -33,8 +33,8 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeTab, onTab
   const tierAccent = profile?.membershipMeta?.accentColor ?? '#9CA3AF';
   const tierRing = TIER_RING_GRADIENT[profile?.membershipTier ?? 'Standard'];
 
-  const initials = profile?.name
-    ? profile.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  const initials = profile?.fullName
+    ? profile.fullName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
     : '?';
 
   return (
@@ -83,7 +83,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeTab, onTab
 
         {/* Name */}
         <div style={{ fontSize: 17, fontWeight: 800, color: '#1A1A1A', marginBottom: 6, letterSpacing: '-0.01em' }}>
-          {isLoading ? '—' : profile?.name}
+          {isLoading ? '—' : profile?.fullName}
         </div>
         <div style={{ fontSize: 12.5, color: '#9CA3AF', marginBottom: 14 }}>
           {isLoading ? '' : profile?.email}
