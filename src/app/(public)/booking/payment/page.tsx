@@ -14,16 +14,14 @@ import {
 import {
   buildBookingFailedUrl,
   buildSeatsUrlFromSession,
-  buildCancelBookingUrl,
 } from '@/modules/booking';
 
 export default function BookingPaymentPage() {
   const router = useRouter();
   const [hasHydrated, setHasHydrated] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSuccessMessageOpen, setIsSuccessMessageOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  // isSubmitting được quản lý bên trong TicketConfirmModal — không cần ở đây
-  const [isSubmitting] = useState(false);
 
   const session = useBookingStore((state) => state.session);
   const {
@@ -35,11 +33,10 @@ export default function BookingPaymentPage() {
     seatHoldExpiresAt,
     status,
     paymentMethod,
-    bookingId, // booking_id từ hold-seats response
   } = session;
 
   const setCurrentStep = useBookingStore((state) => state.setCurrentStep);
-  const resetBooking = useBookingStore((state) => state.resetBooking);
+  const markPendingPayment = useBookingStore((state) => state.markPendingPayment);
 
   // Set hydration complete flag
   useEffect(() => {
@@ -107,10 +104,10 @@ export default function BookingPaymentPage() {
     setIsConfirmOpen(true);
   };
 
-
-  const handleCancelBooking = () => {
-    resetBooking();
-    router.replace(buildCancelBookingUrl(movie?.slug ?? null));
+  const handleConfirmPayment = () => {
+    markPendingPayment();
+    setIsConfirmOpen(false);
+    setIsSuccessMessageOpen(true);
   };
 
   // Render a clean fallback skeleton spinner before client hydration is complete
@@ -158,62 +155,33 @@ export default function BookingPaymentPage() {
         >
           {/* Main Selection Column */}
           <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Action Bar: Back and Cancel buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={() => router.replace('/booking/foods')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#4f3c93',
-                  fontSize: '14.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '4px 0',
-                  transition: 'color 0.2s ease',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#382b6b'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = '#4f3c93'; }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="19" y1="12" x2="5" y2="12" />
-                  <polyline points="12 19 5 12 12 5" />
-                </svg>
-                Quay lại chọn bắp nước
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCancelBooking}
-                aria-label="Hủy đặt vé và quay lại trang phim"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'transparent',
-                  border: '1px solid #FFA4A4',
-                  color: '#E53E3E',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '6px 14px',
-                  borderRadius: '8px',
-                  transition: 'background 0.18s ease',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF2F2'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                Hủy đặt vé
-              </button>
-            </div>
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={() => router.replace('/booking/foods')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'transparent',
+                border: 'none',
+                color: '#4f3c93',
+                fontSize: '14.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                padding: '4px 0',
+                marginRight: 'auto',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#382b6b'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#4f3c93'; }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              Quay lại chọn bắp nước
+            </button>
 
             {/* Voucher apply panel */}
             <VoucherPanel />
@@ -250,12 +218,9 @@ export default function BookingPaymentPage() {
           {/* Sticky checkout order summary sidebar */}
           <div style={{ width: '100%', maxWidth: '360px' }} className="price-summary-desktop-wrap">
             <BookingOrderSummary
-              continueLabel={
-                // Hiển thị trạng thái loading khi đang xử lý thanh toán
-                isSubmitting ? 'Đang xử lý...' : 'Thanh toán'
-              }
+              continueLabel="Thanh toán"
               onContinue={handleCheckoutClick}
-              disabled={isExpired || isSubmitting}
+              disabled={isExpired}
             />
           </div>
         </div>
@@ -275,13 +240,110 @@ export default function BookingPaymentPage() {
         }
       `}} />
 
-      {/* Ticket Confirmation details preview modal — modal tự xử lý toàn bộ payment flow */}
+      {/* Ticket Confirmation details preview modal overlay */}
       <TicketConfirmModal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmPayment}
       />
 
+      {/* SUCCESS/PENDING GATEWAY NOTIFICATION OVERLAY */}
+      {isSuccessMessageOpen && (
+        <div
+          className="modal-overlay open"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(19, 20, 19, 0.6)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+          onClick={() => setIsSuccessMessageOpen(false)}
+        >
+          <div
+            className="modal-container"
+            style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              padding: '36px 32px',
+              maxWidth: '460px',
+              width: '100%',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+              textAlign: 'center',
+              border: '1px solid var(--border)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: '#E6FFFA',
+                color: '#319795',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px auto',
+              }}
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
 
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#131413', margin: '0 0 12px 0' }}>
+              Xác Nhận Đơn Hàng Thành Công
+            </h3>
+
+            <div style={{ fontSize: '14.5px', color: 'var(--text2)', lineHeight: 1.5, margin: '0 0 24px 0' }}>
+              <div
+                style={{
+                  background: '#F0EEF9',
+                  border: '1px solid #CFC9EB',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: '#4f3c93',
+                  fontWeight: 600,
+                  fontSize: '14.5px',
+                  textAlign: 'left',
+                }}
+              >
+                Cổng thanh toán mock sẽ được triển khai ở Micro-task Booking 7.
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsSuccessMessageOpen(false)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                background: '#131413',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '14.5px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.9';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

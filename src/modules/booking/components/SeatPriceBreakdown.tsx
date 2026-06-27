@@ -1,24 +1,30 @@
 'use client';
 
 import React from 'react';
-import { Seat, SeatPricing, SeatType } from '../types/booking.type';
+import { SelectedSeat } from '../types';
 
 interface SeatPriceBreakdownProps {
-  pricing: SeatPricing[];
-  selectedSeats: Seat[];
+  selectedSeats: SelectedSeat[];
 }
 
-const getSeatTypeVisual = (seatType: SeatType): React.CSSProperties => {
-  if (seatType === 'vip') return { width: '20px', height: '20px', border: '1px solid #CFC9EB', borderRadius: '4px', background: '#F0EEF9' };
-  if (seatType === 'couple') return { width: '36px', height: '20px', border: '1px solid #FFA4A4', borderRadius: '6px', background: '#FFF2F2' };
-  return { width: '20px', height: '20px', border: '1px solid #d9d9d9', borderRadius: '4px', background: '#ffffff' };
-};
+export const SeatPriceBreakdown: React.FC<SeatPriceBreakdownProps> = ({ selectedSeats }) => {
+  // Base prices (fallback if no seats selected to inspect)
+  const STANDARD_PRICE = 120000;
+  const VIP_PRICE = 150000;
+  const COUPLE_PRICE = 300000;
 
-export const SeatPriceBreakdown: React.FC<SeatPriceBreakdownProps> = ({ pricing, selectedSeats }) => {
-  const grandTotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+  // Calculate seat counts and totals based on selected seats array
+  const standardCount = selectedSeats.filter((s) => s.type === 'standard').length;
+  const vipCount = selectedSeats.filter((s) => s.type === 'vip').length;
+  const coupleCount = selectedSeats.filter((s) => s.type === 'couple').length;
+
+  const standardTotal = standardCount * STANDARD_PRICE;
+  const vipTotal = vipCount * VIP_PRICE;
+  const coupleTotal = coupleCount * COUPLE_PRICE;
+  const grandTotal = standardTotal + vipTotal + coupleTotal;
 
   return (
-    <div
+    <div 
       className="seat-price-breakdown-card"
       style={{
         background: '#ffffff',
@@ -33,20 +39,21 @@ export const SeatPriceBreakdown: React.FC<SeatPriceBreakdownProps> = ({ pricing,
         gap: '20px',
       }}
     >
-      <h3
-        style={{
-          fontSize: '14px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          color: 'var(--text3)',
-          margin: 0,
-          fontWeight: 700,
+      <h3 
+        style={{ 
+          fontSize: '14px', 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.05em', 
+          color: 'var(--text3)', 
+          margin: 0, 
+          fontWeight: 700 
         }}
       >
         Giá vé theo loại ghế
       </h3>
 
-      <div
+      {/* Grid containing breakdowns and total */}
+      <div 
         className="seat-price-breakdown-grid"
         style={{
           display: 'grid',
@@ -55,6 +62,7 @@ export const SeatPriceBreakdown: React.FC<SeatPriceBreakdownProps> = ({ pricing,
           alignItems: 'center',
         }}
       >
+        {/* Shorthand styles media injection for mobile responsiveness */}
         <style dangerouslySetInnerHTML={{__html: `
           @media (max-width: 768px) {
             .seat-price-breakdown-grid {
@@ -70,44 +78,113 @@ export const SeatPriceBreakdown: React.FC<SeatPriceBreakdownProps> = ({ pricing,
           }
         `}} />
 
-        {pricing.map((priceItem) => {
-          const seatsByType = selectedSeats.filter((seat) => seat.type === priceItem.seatType);
-          const typeTotal = seatsByType.reduce((sum, seat) => sum + seat.price, 0);
+        {/* Standard Seat Info Column */}
+        <div 
+          className="seat-price-item"
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+          }}
+        >
+          {/* Legend shape */}
+          <div 
+            className="seat-price-icon"
+            style={{ 
+              width: '20px', 
+              height: '20px', 
+              border: '1px solid #d9d9d9', 
+              borderRadius: '4px', 
+              background: '#ffffff',
+              marginTop: '2px',
+              flexShrink: 0
+            }} 
+          />
+          <div>
+            <span className="seat-price-label" style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 600, display: 'block' }}>Ghế thường</span>
+            <span className="seat-price-value" style={{ fontSize: '14px', color: '#131413', fontWeight: 700 }}>
+              {standardCount > 0 ? `${standardCount} x ` : '0 x '} {STANDARD_PRICE.toLocaleString('vi-VN')} đ
+            </span>
+            {standardCount > 0 && (
+              <span style={{ fontSize: '12.5px', color: 'var(--text3)', display: 'block', marginTop: '2px' }}>
+                Tổng: {standardTotal.toLocaleString('vi-VN')} đ
+              </span>
+            )}
+          </div>
+        </div>
 
-          return (
-            <div
-              key={priceItem.seatType}
-              className="seat-price-item"
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px',
-              }}
-            >
-              <div
-                className="seat-price-icon"
-                style={{
-                  ...getSeatTypeVisual(priceItem.seatType),
-                  marginTop: '2px',
-                  flexShrink: 0,
-                }}
-              />
-              <div>
-                <span className="seat-price-label" style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 600, display: 'block' }}>{priceItem.label}</span>
-                <span className="seat-price-value" style={{ fontSize: '14px', color: '#131413', fontWeight: 700 }}>
-                  {seatsByType.length} x {priceItem.price.toLocaleString('vi-VN')} đ
-                </span>
-                {seatsByType.length > 0 && (
-                  <span style={{ fontSize: '12.5px', color: 'var(--text3)', display: 'block', marginTop: '2px' }}>
-                    Tổng: {typeTotal.toLocaleString('vi-VN')} đ
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {/* VIP Seat Info Column */}
+        <div 
+          className="seat-price-item"
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+          }}
+        >
+          {/* Legend shape */}
+          <div 
+            className="seat-price-icon"
+            style={{ 
+              width: '20px', 
+              height: '20px', 
+              border: '1px solid #CFC9EB', 
+              borderRadius: '4px', 
+              background: '#F0EEF9',
+              marginTop: '2px',
+              flexShrink: 0
+            }} 
+          />
+          <div>
+            <span className="seat-price-label" style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 600, display: 'block' }}>Ghế VIP</span>
+            <span className="seat-price-value" style={{ fontSize: '14px', color: '#131413', fontWeight: 700 }}>
+              {vipCount > 0 ? `${vipCount} x ` : '0 x '} {VIP_PRICE.toLocaleString('vi-VN')} đ
+            </span>
+            {vipCount > 0 && (
+              <span style={{ fontSize: '12.5px', color: 'var(--text3)', display: 'block', marginTop: '2px' }}>
+                Tổng: {vipTotal.toLocaleString('vi-VN')} đ
+              </span>
+            )}
+          </div>
+        </div>
 
-        <div
+        {/* Couple Seat Info Column */}
+        <div 
+          className="seat-price-item"
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+          }}
+        >
+          {/* Legend shape */}
+          <div 
+            className="seat-price-icon"
+            style={{ 
+              width: '36px', 
+              height: '20px', 
+              border: '1px solid #FFA4A4', 
+              borderRadius: '6px', 
+              background: '#FFF2F2',
+              marginTop: '2px',
+              flexShrink: 0
+            }} 
+          />
+          <div>
+            <span className="seat-price-label" style={{ fontSize: '13px', color: 'var(--text2)', fontWeight: 600, display: 'block' }}>Ghế đôi</span>
+            <span className="seat-price-value" style={{ fontSize: '14px', color: '#131413', fontWeight: 700 }}>
+              {coupleCount > 0 ? `${coupleCount} x ` : '0 x '} {COUPLE_PRICE.toLocaleString('vi-VN')} đ
+            </span>
+            {coupleCount > 0 && (
+              <span style={{ fontSize: '12.5px', color: 'var(--text3)', display: 'block', marginTop: '2px' }}>
+                Tổng: {coupleTotal.toLocaleString('vi-VN')} đ
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Grand Total Info Column */}
+        <div 
           className="seat-price-total"
           style={{
             borderLeft: '1px solid var(--border)',

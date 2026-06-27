@@ -13,4 +13,5 @@ export { BookingOrderSummary } from './BookingOrderSummary';
 export { VoucherPanel } from './VoucherPanel';
 export { PaymentMethodSelector } from './PaymentMethodSelector';
 export { TicketConfirmModal } from './TicketConfirmModal';
-export { BookingSeatSelectionPageClient } from './BookingSeatSelectionPageClient';
+
+

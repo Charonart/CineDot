@@ -25,12 +25,9 @@ export {
 
 export {
   buildSeatsUrlFromSession,
-  buildSeatsUrlFromShowtimeId,
   buildMovieDetailUrlFromSession,
   buildFoodsUrl,
   buildPaymentUrl,
   buildBookingFailedUrl,
-  buildBookingRootUrl,
-  buildCancelBookingUrl,
 } from './utils/bookingNavigation';
 

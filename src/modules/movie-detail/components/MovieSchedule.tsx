@@ -2,12 +2,11 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useShowtimes } from '@/modules/showtime/hooks/useShowtime';
-import { showtimeMapper } from '@/modules/showtime/mappers/showtime.mapper';
+import { CinemaSchedule, ShowtimeItem } from '../data/movieDetailData';
 import { ScrollTextSlideLeft, HighlightText } from '@/shared/components/visual';
 
 interface MovieScheduleProps {
-  movieId: string | number;
+  cinemas: CinemaSchedule[];
 }
 
 interface ScheduleDropdownProps {
@@ -117,7 +116,7 @@ const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({
   );
 };
 
-export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
+export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   const router = useRouter();
   const params = useParams();
   const movieSlug = (params?.slug as string) || '';
@@ -125,42 +124,6 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedCinemaFilter, setSelectedCinemaFilter] = useState<string>('all');
-
-  const { data: showtimesData } = useShowtimes(movieId, { date: selectedDate });
-
-  const cinemas = useMemo(() => {
-    if (!showtimesData?.items) return [];
-
-    const groups = showtimeMapper.toCinemaGroups(showtimesData.items);
-    return groups.map((g) => ({
-      name: g.cinemaName,
-      formats: g.formatGroups.map((fg) => ({
-        name: fg.format,
-        times: fg.showtimes.map((st) => {
-          let status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out' = 'available';
-
-          // Simple past check
-          const startTime = new Date(st.startTime);
-          const now = new Date();
-          if (startTime < now) {
-            status = 'past';
-          } else if (st.status === 'sold_out' || st.availableSeats === 0) {
-            status = 'sold-out';
-          } else if (st.status === 'cancelled') {
-            status = 'locked';
-          } else if (st.occupancy >= 80) {
-            status = 'almost-full';
-          }
-
-          return {
-            time: st.formattedTime,
-            status,
-            scheduleId: String(st.showtimeId),
-          };
-        }),
-      })),
-    }));
-  }, [showtimesData]);
 
   const regionOptions = useMemo(() => [
     { value: 'all', label: 'Toàn quốc' },
@@ -227,7 +190,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
   }, [cinemas, selectedRegion, selectedCinemaFilter]);
 
   // Helper to resolve button classes and attributes based on status
-  const getShowtimeBtnProps = (status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out') => {
+  const getShowtimeBtnProps = (status: ShowtimeItem['status']) => {
     switch (status) {
       case 'past':
         return { className: 'time-btn is-past', disabled: true, title: 'Đã qua giờ chiếu', label: 'Đã qua' };
@@ -242,8 +205,14 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
     }
   };
 
-  const handleShowtimeClick = (scheduleId: string) => {
-    router.push(`/booking/${scheduleId}`);
+  const handleShowtimeClick = (cinemaName: string, time: string) => {
+    const bookingParams = new URLSearchParams({
+      movie: movieSlug,
+      cinema: cinemaName,
+      date: selectedDate,
+      time: time,
+    });
+    router.push(`/booking/seats?${bookingParams.toString()}`);
   };
 
   return (
@@ -257,13 +226,13 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
 
       <div className="schedule-toolbar">
         {/* Date Selector Wrapper */}
-        <div className="schedule-date-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+        <div className="schedule-date-nav">
           <button 
             type="button" 
-            className="date-nav" 
+            className="schedule-nav-btn" 
             aria-label="Ngày trước"
             onClick={() => {
-              const el = document.querySelector('.date-slider');
+              const el = document.querySelector('.schedule-date-list');
               el?.scrollBy({ left: -240, behavior: 'smooth' });
             }}
           >
@@ -272,28 +241,28 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
             </svg>
           </button>
 
-          <div className="date-slider">
+          <div className="schedule-date-list">
             {dateTabs.map(({ dayLabel, formattedDate, dateStr }) => (
               <button
                 key={dateStr}
                 type="button"
-                className={`date-tab ${selectedDate === dateStr ? 'active' : ''}`}
+                className={`schedule-date-item ${selectedDate === dateStr ? 'is-active active' : ''}`}
                 onClick={() => {
                   setSelectedDate(dateStr);
                 }}
               >
-                <span>{dayLabel}</span>
-                <strong>{formattedDate}</strong>
+                <span className="schedule-date-label">{dayLabel}</span>
+                <span className="schedule-date-value">{formattedDate}</span>
               </button>
             ))}
           </div>
 
           <button 
             type="button" 
-            className="date-nav" 
+            className="schedule-nav-btn" 
             aria-label="Ngày sau"
             onClick={() => {
-              const el = document.querySelector('.date-slider');
+              const el = document.querySelector('.schedule-date-list');
               el?.scrollBy({ left: 240, behavior: 'smooth' });
             }}
           >
@@ -353,7 +322,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
                             className={className}
                             disabled={disabled}
                             title={title}
-                            onClick={() => handleShowtimeClick(item.scheduleId)}
+                            onClick={() => handleShowtimeClick(cinema.name, item.time)}
                           >
                             <span>{item.time}</span>
                             {label && <small>{label}</small>}
