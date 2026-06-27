@@ -1,13 +1,14 @@
 import { movieApi } from '../api/movie.api';
 import { movieMapper, heroSlideMapper } from '../mappers/movie.mapper';
 import { Movie, MovieList, HeroSlide } from '../types/movie.type';
-import { movieListResponseSchema, movieSchema, heroSlideListSchema } from '../schemas/movie.schema';
+import { movieListResponseSchema, movieSchema } from '../schemas/movie.schema';
 import { logger } from '@lib/logger/logger';
+import { z } from 'zod';
 
 export const movieService = {
   getTrendingMovies: async (page = 1): Promise<MovieList> => {
     try {
-      const response = await movieApi.getTrending(page);
+      const response = await movieApi.getMovies({ category: 'now-showing', page });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -18,7 +19,7 @@ export const movieService = {
 
   getPopularMovies: async (page = 1): Promise<MovieList> => {
     try {
-      const response = await movieApi.getPopular(page);
+      const response = await movieApi.getMovies({ category: 'coming-soon', page });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -27,7 +28,7 @@ export const movieService = {
     }
   },
 
-  getMovieDetail: async (id: number): Promise<Movie> => {
+  getMovieDetail: async (id: number | string): Promise<Movie> => {
     try {
       const response = await movieApi.getDetail(id);
       const validatedData = movieSchema.parse(response.data);
@@ -40,7 +41,7 @@ export const movieService = {
 
   searchMovies: async (query: string, page = 1): Promise<MovieList> => {
     try {
-      const response = await movieApi.searchMovies(query, page);
+      const response = await movieApi.getMovies({ search: query, page });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -49,7 +50,14 @@ export const movieService = {
     }
   },
 
-  getMovies: async (params: { category?: string; limit?: number; page?: number }): Promise<MovieList> => {
+  getMovies: async (params: {
+    category?: string;
+    status?: string;
+    featured?: boolean | string;
+    limit?: number;
+    page?: number;
+    search?: string;
+  }): Promise<MovieList> => {
     try {
       const response = await movieApi.getMovies(params);
       const validatedData = movieListResponseSchema.parse(response.data);
@@ -62,7 +70,7 @@ export const movieService = {
 
   getNavbarMovies: async (): Promise<MovieList> => {
     try {
-      const response = await movieApi.getNavbarMovies();
+      const response = await movieApi.getMovies({ status: 'now-showing,coming-soon', limit: 8 });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -73,8 +81,10 @@ export const movieService = {
 
   getHeroSlides: async (): Promise<HeroSlide[]> => {
     try {
-      const response = await movieApi.getHeroSlides();
-      const validatedData = heroSlideListSchema.parse(response.data);
+      const response = await movieApi.getMovies({ category: 'now-showing', featured: true, limit: 5 });
+      // response.data is MovieListResponseDTO under the new contract, so we parse results
+      const results = response.data?.results || [];
+      const validatedData = z.array(movieSchema).parse(results);
       return heroSlideMapper.toHeroSlideListModel(validatedData);
     } catch (error) {
       logger.error('[MovieService] getHeroSlides failed:', error);

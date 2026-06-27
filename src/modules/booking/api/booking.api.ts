@@ -6,11 +6,11 @@ const encodePathSegment = (value: string) => encodeURIComponent(value);
 
 export const bookingApi = {
   getShowtimeDetail: (showtimeId: string, signal?: AbortSignal): Promise<ApiResponse<BookingShowtimeDTO>> =>
-    axiosClient.get(`/booking/showtimes/${encodePathSegment(showtimeId)}`, { signal }),
+    axiosClient.get(`/showtimes/${encodePathSegment(showtimeId)}`, { signal }),
 
   getSeatMap: (showtimeId: string, signal?: AbortSignal): Promise<ApiResponse<SeatMapDTO>> =>
-    axiosClient.get(`/booking/showtimes/${encodePathSegment(showtimeId)}/seats`, { signal }),
+    axiosClient.get(`/showtimes/${encodePathSegment(showtimeId)}/seats`, { signal }),
 
   createSeatHold: (payload: SeatHoldRequestDTO): Promise<ApiResponse<SeatHoldDTO>> =>
-    axiosClient.post('/booking/seat-holds', payload),
+    axiosClient.post('/seat-holds', payload),
 };

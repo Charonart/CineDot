@@ -201,7 +201,7 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
       />
 
       <style dangerouslySetInnerHTML={{__html: `
-        @media (max-width: 991px) {
+        @media (max-width: 1024px) {
           .price-summary-desktop-wrap {
             display: none !important;
           }

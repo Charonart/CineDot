@@ -62,7 +62,7 @@
   margin-bottom: 40px;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 768px) {
   .movies-toolbar {
     flex-direction: row;
     align-items: center;
@@ -229,20 +229,29 @@
 }
 
 /* 5. RESPONSIVE GRID COVERAGES */
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
   .movies-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 32px 20px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .movies-header {
     padding: 32px 0 16px;
   }
   .movies-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 24px 16px;
+  }
+  .movies-toolbar .tabs-nav {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .movies-toolbar .tabs-nav::-webkit-scrollbar {
+    display: none;
   }
 }
 

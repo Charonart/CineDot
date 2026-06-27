@@ -138,6 +138,6 @@ export interface ShowtimeSeatListDTO {
 
 export interface ShowtimeQueryParamsDTO {
   date: string;       // YYYY-MM-DD, required
-  movieId?: number;
-  cinemaId?: number;
+  movieId?: number | string;
+  cinemaId?: number | string;
 }

@@ -70,7 +70,7 @@ export default function MovieDetailPageClient({ movie }: MovieDetailPageClientPr
 
             {/* SECTION 5 — SHOWTIME SCHEDULE SECTION */}
             <div id="schedule">
-              <MovieSchedule cinemas={movie.cinemas} />
+              <MovieSchedule movieId={movie.id} />
             </div>
 
           </div>

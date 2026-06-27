@@ -9,9 +9,13 @@ export const showtimeService = {
    * Lấy danh sách suất chiếu của một bộ phim theo ngày.
    * Validate response bằng Zod trước khi map sang domain model.
    */
-  getShowtimes: async (movieId: number, params: ShowtimeQueryParams): Promise<ShowtimeList> => {
+  getShowtimes: async (movieId: number | string, params: ShowtimeQueryParams): Promise<ShowtimeList> => {
     try {
-      const response = await showtimeApi.getShowtimes(movieId, params);
+      const response = await showtimeApi.getShowtimes({
+        movieId,
+        date: params.date,
+        cinemaId: params.cinemaId,
+      });
       const validated = showtimeListSchema.parse(response.data);
       return showtimeMapper.toShowtimeList(validated.results, params.date);
     } catch (error) {
@@ -23,7 +27,7 @@ export const showtimeService = {
   /**
    * Lấy sơ đồ ghế của một suất chiếu.
    */
-  getSeats: async (showtimeId: number): Promise<ShowtimeSeatMap> => {
+  getSeats: async (showtimeId: number | string): Promise<ShowtimeSeatMap> => {
     try {
       const response = await showtimeApi.getSeats(showtimeId);
       const validated = showtimeSeatListSchema.parse(response.data);

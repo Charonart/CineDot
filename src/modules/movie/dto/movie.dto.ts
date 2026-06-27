@@ -19,6 +19,10 @@ export interface MovieDTO {
   formatTags?: string[];
   status?: 'now-showing' | 'coming-soon';
   ageRating?: string;
+  subtitle?: string;
+  trailerUrl?: string;
+  featured?: boolean;
+  categories?: string[];
 }
 
 export interface MovieListResponseDTO {

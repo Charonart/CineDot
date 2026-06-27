@@ -1,4 +1,4 @@
-import { MovieDTO, MovieListResponseDTO, HeroSlideDTO } from '../dto/movie.dto';
+import { MovieDTO, MovieListResponseDTO } from '../dto/movie.dto';
 import { Movie, MovieList, HeroSlide } from '../types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
 
@@ -40,27 +40,27 @@ export const movieMapper = {
 };
 
 export const heroSlideMapper = {
-  toHeroSlideModel: (dto: HeroSlideDTO): HeroSlide => {
+  toHeroSlideModel: (dto: MovieDTO): HeroSlide => {
     const slug = dto.slug || String(dto.id);
     return {
       id: dto.id,
       slug: slug,
       title: dto.title,
       subtitle: dto.subtitle,
-      description: dto.description,
-      backdropUrl: dto.backdropUrl,
+      description: dto.overview || '',
+      backdropUrl: dto.backdropUrl || '',
       posterUrl: dto.posterUrl,
-      runtime: dto.runtime,
-      rating: dto.rating,
+      runtime: dto.runtime || 120,
+      rating: dto.rating || 0,
       ageRating: dto.ageRating || 'P',
       formatTags: dto.formatTags || [],
-      trailerUrl: dto.trailerUrl,
-      status: dto.status,
+      trailerUrl: dto.trailerUrl || '',
+      status: dto.status || 'now-showing',
       detailHref: appRoutes.movieDetail(slug),
       bookingHref: appRoutes.movieSchedule(slug),
     };
   },
 
-  toHeroSlideListModel: (dtos: HeroSlideDTO[]): HeroSlide[] =>
+  toHeroSlideListModel: (dtos: MovieDTO[]): HeroSlide[] =>
     (dtos || []).map(heroSlideMapper.toHeroSlideModel),
 };

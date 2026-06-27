@@ -21,6 +21,10 @@ export const movieSchema = z.object({
   formatTags: z.array(z.string()).optional(),
   status: z.enum(['now-showing', 'coming-soon']).optional(),
   ageRating: z.string().optional(),
+  subtitle: z.string().optional(),
+  trailerUrl: z.string().optional(),
+  featured: z.boolean().optional(),
+  categories: z.array(z.string()).optional(),
 });
 
 export const movieListResponseSchema = z.object({

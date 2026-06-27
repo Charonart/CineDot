@@ -7,10 +7,10 @@ import { ShowtimeQueryParams } from '../types/showtime.type';
 export const showtimeKeys = {
   all:      ['showtimes'] as const,
   lists:    () => [...showtimeKeys.all, 'list'] as const,
-  list:     (movieId: number, params: ShowtimeQueryParams) =>
+  list:     (movieId: number | string, params: ShowtimeQueryParams) =>
               [...showtimeKeys.lists(), movieId, params] as const,
   seatMaps: () => [...showtimeKeys.all, 'seats'] as const,
-  seatMap:  (showtimeId: number) => [...showtimeKeys.seatMaps(), showtimeId] as const,
+  seatMap:  (showtimeId: number | string) => [...showtimeKeys.seatMaps(), showtimeId] as const,
 };
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -22,15 +22,16 @@ const GC_TIME    = 30 * 60 * 1000;  // 30 phút
 
 /**
  * Lấy danh sách suất chiếu theo ngày.
- * enabled: chỉ fetch khi có date hợp lệ (YYYY-MM-DD) và movieId > 0.
+ * enabled: chỉ fetch khi có date hợp lệ (YYYY-MM-DD) và movieId hợp lệ.
  */
-export const useShowtimes = (movieId: number, params: ShowtimeQueryParams) => {
+export const useShowtimes = (movieId: number | string, params: ShowtimeQueryParams) => {
   const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(params.date);
+  const hasMovieId = typeof movieId === 'string' ? !!movieId.trim() : movieId > 0;
 
   return useQuery({
     queryKey:  showtimeKeys.list(movieId, params),
     queryFn:   () => showtimeService.getShowtimes(movieId, params),
-    enabled:   isValidDate && movieId > 0,
+    enabled:   isValidDate && hasMovieId,
     staleTime: STALE_TIME,
     gcTime:    GC_TIME,
   });
@@ -40,11 +41,13 @@ export const useShowtimes = (movieId: number, params: ShowtimeQueryParams) => {
  * Lấy sơ đồ ghế của một suất chiếu.
  * staleTime ngắn — ghế thay đổi liên tục.
  */
-export const useShowtimeSeats = (showtimeId: number | null) => {
+export const useShowtimeSeats = (showtimeId: number | string | null) => {
+  const hasShowtimeId = showtimeId !== null && (typeof showtimeId === 'string' ? !!showtimeId.trim() : showtimeId > 0);
+
   return useQuery({
-    queryKey:  showtimeKeys.seatMap(showtimeId ?? 0),
+    queryKey:  showtimeKeys.seatMap(showtimeId ?? ''),
     queryFn:   () => showtimeService.getSeats(showtimeId!),
-    enabled:   showtimeId !== null && showtimeId > 0,
+    enabled:   hasShowtimeId,
     staleTime: 60 * 1000,  // 1 phút
     gcTime:    GC_TIME,
   });
