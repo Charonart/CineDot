@@ -9,10 +9,9 @@ import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
 export const axiosClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_BASE_URL,
   timeout: 10000,
-  withCredentials: true,
-  withXSRFToken: true,
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
+  // withCredentials is intentionally omitted: the backend sends
+  // Access-Control-Allow-Origin: * which browsers reject for credentialed
+  // requests. Auth is handled via the Authorization: Bearer header below.
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -52,7 +51,7 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => Promise.reject(error),
@@ -107,8 +106,8 @@ const handleMockFilter = (url: string, params: any, responseData: any) => {
     const searchVal = params.search || params.query;
     if (searchVal) {
       const q = String(searchVal).toLowerCase();
-      results = results.filter((m: any) => 
-        m.title.toLowerCase().includes(q) || 
+      results = results.filter((m: any) =>
+        m.title.toLowerCase().includes(q) ||
         (m.originalTitle && m.originalTitle.toLowerCase().includes(q)) ||
         (m.overview && m.overview.toLowerCase().includes(q))
       );
