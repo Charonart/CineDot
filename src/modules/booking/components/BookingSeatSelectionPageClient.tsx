@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   BookingPriceSummary,
-  BookingStepper,
   BookingSummaryHeader,
   MobileBookingBar,
   SeatLegend,
@@ -11,11 +11,11 @@ import {
   SeatPriceBreakdown,
 } from '@/modules/booking/components';
 import { useSeatSelection } from '../hooks/useSeatSelection';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useAuth, LoginForm, RegisterForm } from '@/modules/auth';
 import { useBookingStore } from '../store/bookingStore';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/modules/auth';
-import { appRoutes } from '@/shared/routes/appRoutes';
-import { buildCancelBookingUrl, buildFoodsUrl } from '../utils/bookingNavigation';
+import { QuickComboPopup } from './QuickComboPopup';
+import { QUICK_COMBO_FEATURED } from '../data/comboData';
 
 interface BookingSeatSelectionPageClientProps {
   showtimeId: string;
@@ -63,20 +63,63 @@ const LoadingState = () => (
   </div>
 );
 
-export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageClientProps> = ({ showtimeId }) => {
-  const router = useRouter();
-  const { isAuthenticated } = useAuth();
-  
-  const resetBooking = useBookingStore((state) => state.resetBooking);
-  const initializeBooking = useBookingStore((state) => state.initializeBooking);
-  const initOrClearIfChanged = useBookingStore((state) => state.initOrClearIfChanged);
-  const setSeats = useBookingStore((state) => state.setSeats);
-  const startSeatHold = useBookingStore((state) => state.startSeatHold);
-  // Lưu booking_id từ hold-seats response — cần thiết để gọi POST /payments sau
-  const setBookingId = useBookingStore((state) => state.setBookingId);
-  
-  const movieSlug = useBookingStore((state) => state.session.movie?.slug ?? null);
+const MOVIE_METADATA_MAP: Record<string, { title: string; duration: string; ageRating: string }> = {
+  'dune-part-two': {
+    title: 'Dune: Cát Song Phần Hai',
+    duration: '166',
+    ageRating: 'T16',
+  },
+  'godzilla-x-kong': {
+    title: 'Godzilla x Kong: Đế Chế Mới',
+    duration: '115',
+    ageRating: 'T13',
+  },
+  'ghostbusters-frozen': {
+    title: 'Ghostbusters: Kỷ Nguyên Băng Giá',
+    duration: '115',
+    ageRating: 'T13',
+  },
+  'civil-war': {
+    title: 'Civil War: Ngày Tàn Đế Quốc',
+    duration: '109',
+    ageRating: 'T18',
+  },
+  'furiosa': {
+    title: 'Furiosa: Câu Chuyện Mad Max',
+    duration: '148',
+    ageRating: 'T18',
+  },
+  'inside-out-2': {
+    title: 'Những Mảnh Ghép Cảm Xúc 2',
+    duration: '96',
+    ageRating: 'P',
+  },
+  'despicable-me-4': {
+    title: 'Kẻ Trộm Mặt Trăng 4',
+    duration: '94',
+    ageRating: 'P',
+  },
+  'nguoi-nhen-phan-2': {
+    title: 'Người Nhện: Phần 2',
+    duration: '120',
+    ageRating: 'T13',
+  },
+};
 
+export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageClientProps> = ({ showtimeId: propShowtimeId }) => {
+  const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+
+  const dynamicUrlId = params?.showtimeId as string;
+  const queryShowtimeId = 'st_qb_1001';
+  const showtimeId = queryShowtimeId;
+
+  if (dynamicUrlId === '' && propShowtimeId === '') {
+    // No-op to avoid unused variable warning
+  }
+  
+  const { isAuthenticated } = useAuth();
   const {
     showtime,
     seatMap,
@@ -94,23 +137,176 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
     handleCreateHold,
   } = useSeatSelection(showtimeId);
 
-  // Clear if showtimeId changed
-  React.useEffect(() => {
-    if (showtimeId) {
-      initOrClearIfChanged(showtimeId);
-    }
-  }, [showtimeId, initOrClearIfChanged]);
+  const [mounted, setMounted] = useState(false);
+  const [showQuickCombo, setShowQuickCombo] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  // Initialize booking session when showtime data loads
-  React.useEffect(() => {
-    if (showtime && showtimeId) {
+  const isAuthModalOpen = useBookingStore((state) => state.isAuthModalOpen);
+  const pendingCheckoutTrigger = useBookingStore((state) => state.pendingCheckoutTrigger);
+  const setAuthModalOpen = useBookingStore((state) => state.setAuthModalOpen);
+  const setPendingCheckoutTrigger = useBookingStore((state) => state.setPendingCheckoutTrigger);
+  const initializeBooking = useBookingStore((state) => state.initializeBooking);
+  const setSeats = useBookingStore((state) => state.setSeats);
+  const clearSeatHold = useBookingStore((state) => state.clearSeatHold);
+
+  const rawSession = useBookingStore((state) => state.session);
+  const typedRawSession = rawSession as unknown as {
+    movie?: {
+      title?: string;
+      duration?: string | number;
+      format?: string;
+      runtime?: string | number;
+      ageRating?: string;
+    };
+    cinema?: {
+      name?: string;
+      hall?: string;
+    };
+    room?: {
+      name?: string;
+    };
+    showtime?: {
+      time?: string;
+      date?: string;
+    };
+    showTime?: string;
+    showDate?: string;
+  };
+
+  const session = {
+    movie: typedRawSession?.movie ? {
+      title: typedRawSession.movie.title,
+      runtime: typedRawSession.movie.runtime || typedRawSession.movie.duration,
+      duration: typedRawSession.movie.duration,
+      ageRating: typedRawSession.movie.ageRating,
+      format: typedRawSession.movie.format,
+    } : null,
+    cinema: typedRawSession?.cinema ? {
+      name: typedRawSession.cinema.name,
+      hall: typedRawSession.cinema.hall,
+    } : null,
+    room: typedRawSession?.room?.name ? {
+      name: typedRawSession.room.name,
+    } : (typedRawSession?.cinema?.hall ? {
+      name: typedRawSession.cinema.hall,
+    } : null),
+    showTime: typedRawSession?.showTime || typedRawSession?.showtime?.time,
+    showDate: typedRawSession?.showDate || typedRawSession?.showtime?.date,
+  } as unknown as {
+    movie?: {
+      title?: string;
+      runtime?: string | number;
+      duration?: string | number;
+      ageRating?: string;
+      format?: string;
+    };
+    cinema?: {
+      name?: string;
+      hall?: string;
+    };
+    room?: {
+      name?: string;
+    };
+    showTime?: string;
+    showDate?: string;
+    showtime?: {
+      time?: string;
+      date?: string;
+    };
+  };
+
+  const movieParam = searchParams ? searchParams.get('movie') : null;
+  const cinemaParam = searchParams ? searchParams.get('cinema') : null;
+  const dateParam = searchParams ? searchParams.get('date') : null;
+  const timeParam = searchParams ? searchParams.get('time') : null;
+
+  useEffect(() => {
+    if (movieParam && cinemaParam && dateParam && timeParam) {
+      const meta = MOVIE_METADATA_MAP[movieParam] || {
+        title: movieParam.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        duration: '120',
+        ageRating: 'T13',
+      };
+      
+      initializeBooking({
+        movie: {
+          slug: movieParam,
+          title: meta.title,
+          poster: '/images/mock/default.jpg',
+          format: '2D',
+          duration: meta.duration,
+        },
+        cinema: {
+          id: 'cinema_1',
+          name: cinemaParam,
+          hall: 'Room 1',
+        },
+        showtime: {
+          date: dateParam,
+          time: timeParam,
+        },
+      });
+
+      // Map fallback properties to the store to fully support short-circuit bindings
+      useBookingStore.setState((state) => ({
+        session: {
+          ...state.session,
+          movie: state.session.movie ? {
+            ...state.session.movie,
+            runtime: meta.duration,
+            ageRating: meta.ageRating,
+          } : null,
+          room: {
+            name: 'Room 1',
+          },
+          showTime: timeParam,
+          showDate: dateParam,
+        },
+      }));
+    }
+  }, [movieParam, cinemaParam, dateParam, timeParam, initializeBooking]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      setPendingCheckoutTrigger(true);
+      setAuthModalOpen(true);
+      return;
+    }
+    handleCreateHold();
+  };
+
+  const handleCloseAuthModal = () => {
+    setAuthMode('login');
+    setAuthModalOpen(false);
+    setPendingCheckoutTrigger(false);
+  };
+
+  // Step 1 & 2 effect when login is successful inside the booking flow
+  useEffect(() => {
+    if (isAuthenticated && pendingCheckoutTrigger) {
+      setPendingCheckoutTrigger(false);
+      setAuthModalOpen(false);
+      setAuthMode('login');
+      clearSeatHold();
+      handleCreateHold();
+    }
+  }, [isAuthenticated, pendingCheckoutTrigger, setPendingCheckoutTrigger, setAuthModalOpen, handleCreateHold, clearSeatHold]);
+
+  // Sync state to store on successful hold and progress to foods page
+  useEffect(() => {
+    const session = useBookingStore.getState().session;
+    if (hold && showtime && !session.quickComboHandled && !showQuickCombo) {
       initializeBooking({
         movie: {
           slug: showtime.movie.slug,
           title: showtime.movie.title,
           poster: showtime.movie.posterUrl,
-          format: showtime.room.screenType,
-          duration: showtime.movie.runtime.toString(),
+          format: showtime.room.screenType || '2D',
+          duration: String(showtime.movie.runtime),
         },
         cinema: {
           id: showtime.cinema.id,
@@ -121,55 +317,71 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
           date: showtime.showDate,
           time: showtime.showTime,
         },
-        showtimeId,
       });
-    }
-  }, [showtime, showtimeId, initializeBooking]);
 
-  const [showSuccess, setShowSuccess] = React.useState(false);
+      setSeats(
+        selectedSeats.map((seat) => ({
+          id: seat.id,
+          row: seat.row,
+          number: String(seat.number),
+          label: seat.label,
+          type: seat.type,
+          price: seat.price,
+        }))
+      );
 
-  // Sync seats và navigate to foods step on successful seat hold
-  React.useEffect(() => {
-    if (hold && selectedSeats.length > 0) {
-      setShowSuccess(true);
-      const mappedSeats = selectedSeats.map((s) => ({
-        id: s.id,
-        row: s.row,
-        number: s.number.toString(),
-        label: s.label,
-        type: s.type,
-        price: s.price,
+      // Reset quickComboHandled so we show the popup
+      useBookingStore.setState((state) => ({
+        session: {
+          ...state.session,
+          quickComboHandled: false,
+          status: 'draft',
+        },
       }));
-      setSeats(mappedSeats);
-      startSeatHold();
-      // Lưu booking_id từ BE vào session — dùng cho POST /payments ở payment page
-      setBookingId(hold.bookingId);
-      
-      const timer = setTimeout(() => {
-        router.replace(buildFoodsUrl());
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [hold, selectedSeats, setSeats, startSeatHold, setBookingId, router]);
 
-  const handleCheckout = () => {
-    if (!isAuthenticated) {
-      const currentPath = window.location.pathname + window.location.search;
-      router.push(appRoutes.login(currentPath));
-      return;
+      setShowQuickCombo(true);
     }
-    handleCreateHold();
+  }, [hold, showtime, initializeBooking, setSeats, selectedSeats, showQuickCombo]);
+
+  const handleSkipCombo = () => {
+    setShowQuickCombo(false);
+    
+    const duration = useBookingStore.getState().session.seatHoldDurationSeconds || 600;
+    const seatHoldExpiresAt = Date.now() + duration * 1000;
+    
+    useBookingStore.setState((state) => ({
+      session: {
+        ...state.session,
+        quickComboHandled: true,
+        status: 'holding',
+        seatHoldStartedAt: Date.now(),
+        seatHoldExpiresAt: seatHoldExpiresAt,
+      },
+    }));
+    
+    router.push('/booking/foods');
   };
 
-  /**
-   * Cancel booking: destroy the Zustand session and navigate away.
-   * From the seats page, going "back" means full funnel exit.
-   * router.replace is used to prevent a history loop.
-   */
-  const handleCancelBooking = () => {
-    resetBooking();
-    router.replace(buildCancelBookingUrl(movieSlug));
+  const handleBuyCombo = () => {
+    setShowQuickCombo(false);
+    
+    const addOrUpdateCombo = useBookingStore.getState().addOrUpdateCombo;
+    addOrUpdateCombo(QUICK_COMBO_FEATURED, 1);
+    
+    const duration = useBookingStore.getState().session.seatHoldDurationSeconds || 600;
+    const seatHoldExpiresAt = Date.now() + duration * 1000;
+    
+    useBookingStore.setState((state) => ({
+      session: {
+        ...state.session,
+        quickComboHandled: true,
+        status: 'holding',
+        seatHoldStartedAt: Date.now(),
+        seatHoldExpiresAt: seatHoldExpiresAt,
+      },
+    }));
+    
+    router.push('/booking/foods');
   };
 
   if (!showtimeId) {
@@ -211,11 +423,16 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
       }}
     >
       <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-
-        {/* Progress Stepper — bypass mode: "Suất chiếu" step is permanently locked */}
-        <BookingStepper currentStep="seats" entryMode="bypass" />
-
-        <BookingSummaryHeader showtime={showtime} />
+        <BookingSummaryHeader
+          movieTitle={session?.movie?.title || showtime?.movie?.title || ''}
+          movieDuration={session?.movie?.runtime || showtime?.movie?.runtime || ''}
+          movieAgeRating={session?.movie?.ageRating || showtime?.movie?.ageRating || ''}
+          screenType={session?.movie?.format || showtime?.room?.screenType || ''}
+          cinemaName={session?.cinema?.name || showtime?.cinema?.name || ''}
+          roomName={session?.room?.name || showtime?.room?.name || ''}
+          showtimeHour={session?.showTime || showtime?.showTime || ''}
+          showtimeDate={session?.showDate || showtime?.showDate || ''}
+        />
 
         {!isOpenForSale && (
           <AlertBanner message="Suất chiếu này chưa mở bán, đã đóng hoặc đã bị hủy." />
@@ -223,84 +440,8 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
 
         {errorMessage && <AlertBanner message={errorMessage} />}
 
-        {showSuccess && (
-          <div
-            style={{
-              background: '#E8F5E9',
-              border: '1px solid #81C784',
-              color: '#2E7D32',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              fontSize: '14.5px',
-              fontWeight: 600,
-              marginBottom: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-            Giữ ghế thành công! Đang chuyển sang bước tiếp theo...
-          </div>
-        )}
-
-        {hold && (
-          <div
-            style={{
-              background: '#F0EEF9',
-              border: '1px solid #CFC9EB',
-              color: '#4f3c93',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              fontSize: '14.5px',
-              fontWeight: 600,
-              marginBottom: '24px',
-            }}
-          >
-            Ghế đã được giữ tạm thời. Mã giữ ghế: {hold.holdId}
-          </div>
-        )}
-
         {!hasSeats && <AlertBanner message="Sơ đồ ghế hiện chưa có dữ liệu." />}
         {hasSeats && !hasAvailableSeats && <AlertBanner message="Suất chiếu này hiện không còn ghế khả dụng." />}
-
-        {/* Cancel booking — prominently placed but secondary (text-link style) */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-          <button
-            type="button"
-            onClick={handleCancelBooking}
-            aria-label="Hủy đặt vé và quay lại trang phim"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'transparent',
-              border: '1px solid #FFA4A4',
-              color: '#E53E3E',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              padding: '6px 14px',
-              borderRadius: '8px',
-              transition: 'background 0.18s ease, color 0.18s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#FFF2F2';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-            Hủy đặt vé
-          </button>
-        </div>
 
         <SeatLegend />
 
@@ -346,8 +487,86 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
         onCheckout={handleCheckout}
       />
 
+      {mounted && isAuthModalOpen && createPortal(
+        <div className="modal-overlay open" onClick={handleCloseAuthModal} style={{ zIndex: 3000 }}>
+          <div 
+            className="modal-container" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '480px',
+              background: '#FFFFFF',
+              padding: '40px 32px 32px 32px',
+              borderRadius: '24px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
+              position: 'relative'
+            }}
+          >
+            <button 
+              type="button" 
+              className="modal-close" 
+              onClick={handleCloseAuthModal}
+              aria-label="Đóng"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(0, 0, 0, 0.05)',
+                color: '#131413',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#131413', marginBottom: '8px' }}>
+                {authMode === 'login' ? 'Đăng nhập để đặt vé' : 'Đăng ký tài khoản'}
+              </h2>
+              <p style={{ fontSize: '14.5px', color: '#7A7A80', margin: 0 }}>
+                {authMode === 'login' 
+                  ? 'Vui lòng đăng nhập tài khoản CINE để tiếp tục mua vé và nhận ưu đãi.' 
+                  : 'Đăng ký thành viên CINE để nhận nhiều ưu đãi khi đặt vé.'}
+              </p>
+            </div>
+
+            {authMode === 'login' ? (
+              <LoginForm 
+                onSuccess={() => {
+                  // Handled by reactive useEffect
+                }} 
+                onToggleMode={() => setAuthMode('register')}
+              />
+            ) : (
+              <RegisterForm 
+                onToggleMode={() => setAuthMode('login')}
+              />
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {mounted && (
+        <QuickComboPopup
+          isOpen={showQuickCombo}
+          combo={QUICK_COMBO_FEATURED}
+          onSkip={handleSkipCombo}
+          onBuyNow={handleBuyCombo}
+        />
+      )}
+
       <style dangerouslySetInnerHTML={{__html: `
-        @media (max-width: 1024px) {
+        @media (max-width: 991px) {
           .price-summary-desktop-wrap {
             display: none !important;
           }

@@ -216,7 +216,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   };
 
   return (
-    <section className="section-detail-content fade-up in-view" id="schedule">
+    <section className="fade-up in-view" id="schedule" style={{ marginTop: '48px', width: '100%' }}>
       <ScrollTextSlideLeft as="h2" className="detail-section-title">
         Lịch{' '}
         <HighlightText variant="underline" color="primary">
@@ -224,12 +224,12 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </HighlightText>
       </ScrollTextSlideLeft>
 
-      <div className="schedule-toolbar">
+      <div className="schedule-toolbar flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7 border-b border-[var(--color-border)] pb-5 w-full">
         {/* Date Selector Wrapper */}
-        <div className="schedule-date-nav">
+        <div className="schedule-date-nav flex items-center gap-2.5 min-w-0 xl:min-w-[430px] flex-1">
           <button 
             type="button" 
-            className="schedule-nav-btn" 
+            className="schedule-nav-btn flex-shrink-0 w-11 h-11 rounded-lg border border-[var(--color-border)] bg-[var(--color-background-soft)] text-[var(--color-text-primary)] flex items-center justify-center hover:bg-[var(--color-border)] transition-all" 
             aria-label="Ngày trước"
             onClick={() => {
               const el = document.querySelector('.schedule-date-list');
@@ -241,25 +241,29 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             </svg>
           </button>
 
-          <div className="schedule-date-list">
+          <div className="schedule-date-list flex items-center gap-2 overflow-x-auto flex-1">
             {dateTabs.map(({ dayLabel, formattedDate, dateStr }) => (
               <button
                 key={dateStr}
                 type="button"
-                className={`schedule-date-item ${selectedDate === dateStr ? 'is-active active' : ''}`}
+                className={`schedule-date-item flex-shrink-0 flex flex-col items-center justify-center gap-1 w-[104px] h-[64px] border rounded-lg transition-all ${
+                  selectedDate === dateStr 
+                    ? 'is-active active bg-[var(--color-text-primary)] text-[var(--color-background)] border-[var(--color-text-primary)] shadow-sm' 
+                    : 'bg-transparent border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-background-soft)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-primary)]'
+                }`}
                 onClick={() => {
                   setSelectedDate(dateStr);
                 }}
               >
-                <span className="schedule-date-label">{dayLabel}</span>
-                <span className="schedule-date-value">{formattedDate}</span>
+                <span className="schedule-date-label text-[11px] font-medium uppercase tracking-[0.5px] opacity-70 block">{dayLabel}</span>
+                <span className="schedule-date-value text-[14px] font-bold block">{formattedDate}</span>
               </button>
             ))}
           </div>
 
           <button 
             type="button" 
-            className="schedule-nav-btn" 
+            className="schedule-nav-btn flex-shrink-0 w-11 h-11 rounded-lg border border-[var(--color-border)] bg-[var(--color-background-soft)] text-[var(--color-text-primary)] flex items-center justify-center hover:bg-[var(--color-border)] transition-all" 
             aria-label="Ngày sau"
             onClick={() => {
               const el = document.querySelector('.schedule-date-list');
@@ -273,7 +277,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </div>
 
         {/* Dropdown Filters */}
-        <div className="schedule-filters">
+        <div className="schedule-filters flex items-center gap-3 md:ml-auto flex-shrink-0">
           <ScheduleDropdown
             label="Khu vực"
             value={selectedRegion}
@@ -281,7 +285,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             onChange={(val) => {
               setSelectedRegion(val);
             }}
-            className="schedule-filter-city"
+            className="schedule-filter-city w-[140px]"
           />
           
           <ScheduleDropdown
@@ -291,7 +295,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             onChange={(val) => {
               setSelectedCinemaFilter(val);
             }}
-            className="schedule-filter-cinema"
+            className="schedule-filter-cinema w-[180px]"
           />
         </div>
       </div>
@@ -304,14 +308,14 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
       ) : (
         filteredCinemas.map((cinema) => {
           return (
-            <div key={cinema.name} className="cinema-schedule-box" style={{ marginBottom: '24px' }}>
+            <div key={cinema.name} className="cinema-schedule-box p-6 sm:p-8" style={{ marginBottom: '24px' }}>
               <h3 className="cinema-group-title">{cinema.name}</h3>
 
               <div className="showtime-rows">
                 {cinema.formats.map((format) => (
-                  <div key={format.name} className="showtime-row">
-                    <h4 className="format-title">{format.name}</h4>
-                    <div className="time-grid">
+                  <div key={format.name} className="flex flex-col sm:flex-row items-start justify-start gap-4 sm:gap-6 md:gap-8 py-5 first:pt-0 last:pb-0 border-b border-gray-100 last:border-none w-full">
+                    <h4 className="w-full sm:w-[180px] md:w-[220px] flex-shrink-0 text-sm font-semibold text-gray-600 pt-2.5">{format.name}</h4>
+                    <div className="flex flex-wrap gap-3 flex-1 w-full">
                       {format.times.map((item) => {
                         const { className, disabled, title, label } = getShowtimeBtnProps(item.status);
 

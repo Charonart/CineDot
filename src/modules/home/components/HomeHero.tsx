@@ -3,23 +3,32 @@
 
 import React, { useState, useEffect } from 'react';
 import { QuickBookingPanel } from './QuickBookingPanel';
-import { HERO_BANNERS } from '../data/heroMovies';
+import { useHeroSlides } from '@/modules/movie/hooks/useMovies';
+import dynamic from 'next/dynamic';
 
+const DynamicTrailerModal = dynamic(
+  () => import('@/shared/components/visual').then((mod) => mod.TrailerModal),
+  { ssr: false }
+);
 export const HomeHero: React.FC = () => {
+  const { data: slides = [], isLoading, isError } = useHeroSlides();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [resetCounter, setResetCounter] = useState(0);
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
-  const length = HERO_BANNERS.length;
-  const leftIndex = (activeIndex - 1 + length) % length;
-  const rightIndex = (activeIndex + 1) % length;
+  const length = slides.length;
+  const leftIndex = length > 0 ? (activeIndex - 1 + length) % length : 0;
+  const rightIndex = length > 0 ? (activeIndex + 1) % length : 0;
 
   const handleNext = () => {
+    if (length === 0) return;
     setActiveIndex((prev) => (prev + 1) % length);
     setResetCounter((prev) => prev + 1);
   };
 
   const handlePrev = () => {
+    if (length === 0) return;
     setActiveIndex((prev) => (prev - 1 + length) % length);
     setResetCounter((prev) => prev + 1);
   };
@@ -32,7 +41,7 @@ export const HomeHero: React.FC = () => {
 
   // Autoplay Effect
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || length <= 1) return;
 
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % length);
@@ -41,26 +50,46 @@ export const HomeHero: React.FC = () => {
     return () => clearInterval(interval);
   }, [isHovered, resetCounter, length]);
 
+  if (isLoading) {
+    return (
+      <section className="hero hero-circular-showcase hero-image-carousel-section" id="hero" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Đang tải phim nổi bật...</p>
+      </section>
+    );
+  }
+
+  if (isError || slides.length === 0) {
+    return (
+      <section className="hero hero-circular-showcase hero-image-carousel-section" id="hero" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'var(--color-error)' }}>Không thể tải danh sách phim nổi bật.</p>
+        <QuickBookingPanel />
+      </section>
+    );
+  }
+
+  const activeSlide = slides[activeIndex];
+
   return (
-    <section className="hero hero-circular-showcase hero-image-carousel-section" id="hero">
+    <section className="hero hero-circular-showcase hero-image-carousel-section" id="hero" style={{ overflow: 'visible' }}>
       {/* Background Slideshow (Fades backdrop images dynamically) */}
       <div className="hero-showcase-bg-container">
-        {HERO_BANNERS.map((banner, idx) => (
+        {slides.map((slide, idx) => (
           <div
-            key={banner.id}
+            key={slide.id}
             className={`hero-showcase-bg-slide ${idx === activeIndex ? 'is-active' : ''}`}
           >
             <img
-              src={banner.image}
-              alt={`${banner.alt} backdrop`}
+              src={slide.backdropUrl}
+              alt={`${slide.title} backdrop`}
             />
           </div>
         ))}
         <div className="hero-showcase-overlay"></div>
       </div>
 
-      {/* Main Showcase Content (Centered Carousel) */}
+      {/* Main Showcase Content (Centered Grid) */}
       <div className="hero-showcase-content">
+        {/* Right Column: Carousel */}
         <div
           className="hero-banner-carousel-container"
           onMouseEnter={() => setIsHovered(true)}
@@ -89,7 +118,7 @@ export const HomeHero: React.FC = () => {
 
           {/* Carousel Wrapper */}
           <div className="hero-banner-carousel">
-            {HERO_BANNERS.map((banner, idx) => {
+            {slides.map((slide, idx) => {
               let positionClass = 'is-hidden';
               if (idx === activeIndex) {
                 positionClass = 'is-active';
@@ -101,13 +130,13 @@ export const HomeHero: React.FC = () => {
 
               return (
                 <div
-                  key={banner.id}
+                  key={slide.id}
                   className={`hero-banner-card ${positionClass}`}
                   onClick={() => handleSelectCard(idx)}
                 >
                   <img
-                    src={banner.image}
-                    alt={banner.alt}
+                    src={slide.backdropUrl}
+                    alt={slide.title}
                     onError={(e) => {
                       const target = e.currentTarget as HTMLImageElement;
                       target.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1600&q=80';
@@ -138,11 +167,23 @@ export const HomeHero: React.FC = () => {
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
+
         </div>
       </div>
 
       {/* QUICK BOOKING PANEL (Positioned absolute outside the showcase grid and gallery transformations) */}
       <QuickBookingPanel />
+
+      {/* Trailer Modal */}
+      {activeSlide && isTrailerOpen && (
+        <DynamicTrailerModal
+          isOpen={isTrailerOpen}
+          onClose={() => setIsTrailerOpen(false)}
+          videoSrc={activeSlide.trailerUrl}
+          poster={activeSlide.backdropUrl}
+          title={activeSlide.title}
+        />
+      )}
     </section>
   );
 };

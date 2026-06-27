@@ -333,4 +333,19 @@ When the Home Hero is configured as an image-first carousel:
   - `/booking/seats` must only have one back button (the circular icon inside `BookingSummaryHeader`).
   - The circular back button in `BookingSummaryHeader` must be hooked up to use `router.replace(buildMovieDetailUrlFromSession(session) ?? "/movies")` instead of `window.history.back()`.
 
+## 38. Authentication in Booking Flow Rule
+1. Booking pages must never redirect users to a standalone login page.
+2. Authentication inside booking flow must use modal popup only.
+3. After successful login: Keep current route, keep current booking state, keep selected seats, close modal and continue flow.
+4. Booking context must survive authentication.
+5. Login must be checked at /booking/[showtimeId].
+6. Authentication must never reset booking session.
+7. User must always return to the exact booking state before authentication.
+
+## 39. Absolute/Fixed Navbar Spacing & Specificity Rules
+- **Page Layout Wrapper**: For pages with a fixed/absolute top Navbar (e.g., Star Shop, Cinema Corner), if the content overlaps or is hidden by the Navbar, do not rely solely on Tailwind arbitrary class values (like `pt-[120px]`) which can suffer from compilation or specificity overrides in some viewports.
+- **Enforcement**: Apply a safe inline style on the page root wrapper `div` (e.g., `style={{ paddingTop: '110px' }}` or similar offset matching the floating navbar height of 88px) to guarantee rendering parity and ensure a spacious margin between the bottom of the Navbar and the page content on all viewports.
+
+
+
 

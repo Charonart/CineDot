@@ -3,11 +3,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '../services/auth.service';
 import { LoginRequestDTO } from '../dto/auth.dto';
 import { authKeys } from './useCurrentUser';
-import { QUERY_KEYS } from '@lib/constants/queryKeys';
+import { AuthSession } from '../types/auth.type';
 
-import { useAuthStore } from '../store/authStore';
-
-export const useLogin = () => {
+export const useLogin = (options?: { onSuccess?: (session: AuthSession) => void }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -15,23 +13,23 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: (payload: LoginRequestDTO) => authService.login(payload),
-    onSuccess: async (session) => {
-      // 0. Lưu JWT token vào store
-      useAuthStore.getState().setToken(session.token);
-
+    onSuccess: (session) => {
       // 1. Set query data in cache
       queryClient.setQueryData(authKeys.me(), session);
       // 2. Invalidate to trigger updates across the app
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.currentUser });
+      void queryClient.invalidateQueries({ queryKey: authKeys.all });
       
-      // 3. Refetch currentUser to avoid AuthGuard race condition
-      await queryClient.refetchQueries({ queryKey: QUERY_KEYS.currentUser });
-      
-      // 4. Safely redirect using replace
+      // 3. If custom onSuccess is provided, run it and skip default redirect
+      if (options?.onSuccess) {
+        options.onSuccess(session);
+        return;
+      }
+
+      // 4. Safely redirect
       if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
-        router.replace(redirectTo);
+        router.push(redirectTo);
       } else {
-        router.replace('/');
+        router.push('/');
       }
     },
   });

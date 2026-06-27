@@ -10,7 +10,7 @@ export const MovieOverview: React.FC<MovieOverviewProps> = ({ overview }) => {
   const paragraphs = overview.split('\n').filter(p => p.trim() !== '');
 
   return (
-    <section className="section-detail-content fade-up in-view">
+    <section className="fade-up in-view" style={{ marginTop: '48px', width: '100%' }}>
       <ScrollTextSlideLeft as="h2" className="detail-section-title">
         Nội dung{' '}
         <HighlightText variant="underline" color="primary">

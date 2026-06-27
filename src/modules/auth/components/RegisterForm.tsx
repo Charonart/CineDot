@@ -5,7 +5,7 @@ import { registerSchema } from '../schemas/auth.schema';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { appRoutes } from '@/shared/routes/appRoutes';
 
-export const RegisterForm: React.FC = () => {
+export const RegisterForm: React.FC<{ onToggleMode?: () => void }> = ({ onToggleMode }) => {
   const registerMutation = useRegister();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -198,9 +198,31 @@ export const RegisterForm: React.FC = () => {
 
       <div className="auth-footer-link">
         Đã có tài khoản?{' '}
-        <Link href={appRoutes.login()}>
-          Đăng nhập ngay
-        </Link>
+        {onToggleMode ? (
+          <button
+            type="button"
+            onClick={onToggleMode}
+            className="auth-link-btn"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#4F46E5',
+              padding: 0,
+              font: 'inherit',
+              cursor: 'pointer',
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+          >
+            Đăng nhập ngay
+          </button>
+        ) : (
+          <Link href={appRoutes.login()}>
+            Đăng nhập ngay
+          </Link>
+        )}
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
