@@ -13,6 +13,7 @@ export interface AuthUser {
 
 export interface AuthSession {
   user: AuthUser;
+  token: string;
 }
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';

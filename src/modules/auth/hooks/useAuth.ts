@@ -2,7 +2,7 @@ import { useCurrentUser } from './useCurrentUser';
 import { UserRole } from '../types/auth.type';
 
 export const useAuth = () => {
-  const { data: session, isLoading, isError } = useCurrentUser();
+  const { data: session, isLoading, isError, isFetching } = useCurrentUser();
 
   const user = session?.user || null;
   const isAuthenticated = !!user;
@@ -29,5 +29,6 @@ export const useAuth = () => {
     hasRole,
     hasPermission,
     isError,
+    isFetching,
   };
 };

@@ -1,0 +1,45 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Combo 1 — Bắp Lớn + Nước Ngọt",
+      "description": "1 bắp rang bơ cỡ lớn + 1 ly nước ngọt 22oz. Lựa chọn hoàn hảo cho một người.",
+      "price": 79000,
+      "imageUrl": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&q=80",
+      "isAvailable": true
+    },
+    {
+      "id": 2,
+      "name": "Combo 2 — Bắp Lớn + 2 Nước Ngọt",
+      "description": "1 bắp rang bơ cỡ lớn + 2 ly nước ngọt 22oz. Dành cho cặp đôi lý tưởng.",
+      "price": 109000,
+      "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80",
+      "isAvailable": true
+    },
+    {
+      "id": 3,
+      "name": "Combo 3 — 2 Bắp + 2 Nước Ngọt",
+      "description": "2 bắp rang bơ cỡ vừa + 2 ly nước ngọt 22oz. Tiết kiệm hơn khi mua theo cặp.",
+      "price": 149000,
+      "imageUrl": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80",
+      "isAvailable": true
+    },
+    {
+      "id": 4,
+      "name": "Combo Gia Đình — 4 Bắp + 4 Nước",
+      "description": "4 bắp rang bơ + 4 ly nước ngọt. Giải pháp cho gia đình hoặc nhóm bạn.",
+      "price": 269000,
+      "imageUrl": "https://images.unsplash.com/photo-1608068811966-7e6c3e73b71c?w=400&q=80",
+      "isAvailable": true
+    },
+    {
+      "id": 5,
+      "name": "Combo Nachos + Nước",
+      "description": "1 hộp Nachos phô mai + 1 ly nước ngọt 22oz. Thay đổi khẩu vị thú vị.",
+      "price": 89000,
+      "imageUrl": "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?w=400&q=80",
+      "isAvailable": true
+    }
+  ]
+}

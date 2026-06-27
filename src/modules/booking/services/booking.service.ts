@@ -25,7 +25,8 @@ export const bookingService = {
     try {
       assertShowtimeId(showtimeId);
       const response = await bookingApi.getShowtimeDetail(showtimeId, signal);
-      const validated = bookingShowtimeSchema.parse(response.data);
+      const rawData = (response.data as any).data || response.data;
+      const validated = bookingShowtimeSchema.parse(rawData);
       return bookingMapper.toShowtime(validated);
     } catch (error) {
       if (isRequestCanceled(error)) {
@@ -41,7 +42,8 @@ export const bookingService = {
     try {
       assertShowtimeId(showtimeId);
       const response = await bookingApi.getSeatMap(showtimeId, signal);
-      const validated = seatMapSchema.parse(response.data);
+      const rawData = (response.data as any).data || response.data;
+      const validated = seatMapSchema.parse(rawData);
       return bookingMapper.toSeatMap(validated);
     } catch (error) {
       if (isRequestCanceled(error)) {
@@ -58,7 +60,8 @@ export const bookingService = {
       assertShowtimeId(payload.showtimeId);
       if (payload.seatIds.length === 0) throw new Error('SEAT_NOT_AVAILABLE');
       const response = await bookingApi.createSeatHold(payload);
-      const validated = seatHoldSchema.parse(response.data);
+      const rawData = (response.data as any).data || response.data;
+      const validated = seatHoldSchema.parse(rawData);
       return bookingMapper.toSeatHold(validated);
     } catch (error) {
       if (isRequestCanceled(error)) {

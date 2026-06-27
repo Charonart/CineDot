@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "data": [
+    { "id": 1,  "name": "TP. Hồ Chí Minh", "code": "HCM",  "region": "Nam" },
+    { "id": 2,  "name": "Hà Nội",           "code": "HAN",  "region": "Bắc" },
+    { "id": 3,  "name": "Đà Nẵng",          "code": "DAN",  "region": "Trung" },
+    { "id": 4,  "name": "Bình Dương",        "code": "BDU",  "region": "Nam" },
+    { "id": 5,  "name": "Đồng Nai",          "code": "DNA",  "region": "Nam" },
+    { "id": 6,  "name": "Cần Thơ",           "code": "CTH",  "region": "Nam" },
+    { "id": 7,  "name": "Hải Phòng",         "code": "HPH",  "region": "Bắc" },
+    { "id": 8,  "name": "Khánh Hòa",         "code": "KHA",  "region": "Trung" },
+    { "id": 9,  "name": "Lâm Đồng",          "code": "LDO",  "region": "Trung" },
+    { "id": 10, "name": "Long An",            "code": "LAN",  "region": "Nam" }
+  ]
+}

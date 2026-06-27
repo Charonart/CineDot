@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import Cookies from 'js-cookie';
 import { env } from '../env/env';
 import { logger } from '../logger/logger';
 import { getMockPath } from '@mocks/mockRoutes';
@@ -47,8 +48,10 @@ axiosClient.interceptors.request.use(
     }
 
     // 2. Auth Injection
-    // const token = localStorage.getItem('token');
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    const token = Cookies.get('cine_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     
     return config;
   },

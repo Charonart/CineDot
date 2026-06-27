@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "data": {
+    "discount_amount": 50000,
+    "final_total": 150000
+  }
+}

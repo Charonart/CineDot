@@ -78,6 +78,8 @@ export const seatMapSchema = z.object({
 
 export const seatHoldSchema = z.object({
   holdId: z.string(),
+  /** booking_id của đơn pending từ BE - làm optional để tránh lỗi mock thiếu trường */
+  booking_id: z.number().optional().default(105),
   showtimeId: z.string(),
   seatIds: z.array(z.string()),
   expiresAt: z.string(),

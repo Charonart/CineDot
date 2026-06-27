@@ -4030,4 +4030,244 @@ select:disabled,
 @media (max-width: 480px) {
   .star-shop-tabs, .cc-tabs, .events-tabs { display: none; } /* Hidden on mobile, use nav links */
   .cinemas-stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
+}
+
+/* ============================================================
+   MOVIE ACTION COMPONENTS — Watchlist & Rating
+   ============================================================ */
+
+/* ── Shared icon helper ── */
+.btn-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-icon--filled {
+  fill: currentColor;
+}
+
+.btn-icon--spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Watchlist Button ── */
+.btn-watchlist {
+  /* Inherits .btn-ghost — adds bookmark-specific overrides */
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.35);
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.btn-watchlist:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+/* Active state: already in watchlist */
+.btn-watchlist--active {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.55);
+  color: #F59E0B;
+}
+
+.btn-watchlist--active:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: rgba(245, 158, 11, 0.8);
+}
+
+.btn-watchlist:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Rating Widget container ── */
+.rating-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Stars row ── */
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Individual star button ── */
+.rating-star {
+  background: transparent;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: transform 0.1s;
+  outline-offset: 2px;
+}
+
+.rating-star svg {
+  width: 22px;
+  height: 22px;
+  color: var(--border, rgba(255,255,255,0.2));
+  fill: transparent;
+  transition: color 0.1s, fill 0.1s, transform 0.1s;
+}
+
+.rating-star--filled svg {
+  color: #F59E0B;
+  fill: #F59E0B;
+}
+
+.rating-star--hovered svg {
+  color: #F59E0B;
+  fill: rgba(245, 158, 11, 0.5);
+  transform: scale(1.15);
+}
+
+.rating-star:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rating-star:focus-visible {
+  outline: 2px solid #F59E0B;
+  border-radius: 4px;
+}
+
+/* ── Remove rating button ── */
+.rating-remove-btn {
+  margin-left: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--muted, #888);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.rating-remove-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.rating-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ── Spinner inline ── */
+.rating-spinner {
+  display: inline-block;
+  margin-left: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(245, 158, 11, 0.25);
+  border-top-color: #F59E0B;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Hint text ── */
+.rating-hint {
+  font-size: 13px;
+  margin: 0;
+  min-height: 1.2em;
+}
+
+.rating-hint--preview {
+  color: #F59E0B;
+  font-weight: 600;
+}
+
+.rating-hint--selected {
+  color: #F59E0B;
+}
+
+.rating-hint--selected strong {
+  font-weight: 700;
+}
+
+.rating-hint--idle {
+  color: var(--muted, #888);
+}
+
+/* ── Community stats row ── */
+.rating-community {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text2, #aaa);
+}
+
+.rating-community__icon {
+  width: 14px;
+  height: 14px;
+  color: #F59E0B;
+  fill: #F59E0B;
+}
+
+.rating-community__score {
+  font-weight: 700;
+  color: #F59E0B;
+}
+
+.rating-community__divider {
+  color: var(--muted, #888);
+}
+
+.rating-community__count {
+  color: var(--muted, #888);
+}
+
+/* ── Rating section in MovieDetailInfo ── */
+.movie-detail-rating-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border, rgba(255,255,255,0.1));
+}
+
+.movie-detail-rating-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted, #888);
+  margin: 0 0 10px 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .rating-stars {
+    gap: 2px;
+  }
+
+  .rating-star svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-watchlist {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+}
+

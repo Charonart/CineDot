@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CineDot - Movie Management System
 
-## Getting Started
+**CineDot** is a production-level movie management and booking system. This repository contains the Frontend portion of the application.
 
-First, run the development server:
+## 🌟 Project Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend/Backend Separation**: The frontend (Next.js) is completely decoupled from the backend (Laravel).
+- **TMDB Integration**: The backend acts as a proxy/adapter to TMDB. The frontend never calls TMDB APIs directly.
+- **Mock-First Architecture**: Features are developed using a robust mock API system before connecting to the real backend.
+
+## 🚀 Tech Stack
+
+- **Framework**: Next.js 15+ (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS, Headless UI, Lucide Icons
+- **State Management**:
+  - **Server State**: Tanstack Query (Data caching, refetching)
+  - **Client State**: Zustand (UI themes, sidebars, modals)
+- **Data Validation**: Zod
+- **HTTP Client**: Axios (with centralized error normalization)
+
+## 🏗️ Folder Architecture
+
+The project strictly follows a **Modular Feature-First** architecture:
+
+```text
+src/
+ ├── app/        # Next.js Routing, Layouts, Server Components
+ ├── modules/    # Feature domains (e.g., auth, movies, search)
+ │   ├── api/        # Axios API calls
+ │   ├── dto/        # Data Transfer Objects from Backend
+ │   ├── schemas/    # Zod validation schemas
+ │   ├── types/      # Clean Domain Models for UI
+ │   ├── mappers/    # Transform DTOs to Domain Models
+ │   ├── services/   # Business logic & Safe parsing
+ │   ├── hooks/      # Tanstack Query integrations
+ │   └── components/ # UI components specific to the module
+ ├── shared/     # Reusable UI components, utilities, visual elements
+ ├── lib/        # 3rd party configurations (Axios, Env, QueryClient)
+ ├── configs/    # Static app configurations
+ ├── mocks/      # Mock data for offline development
+ └── store/      # Global client state (Zustand)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⚙️ Development Workflow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Every new feature **MUST** follow this strict workflow:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **DTO Definition**: Define the raw data structure from the backend API.
+2. **Zod Schema**: Create a validation schema for the DTO.
+3. **Domain Types**: Define the clean, UI-friendly data types.
+4. **Mapper**: Write a function to transform the validated DTO into the Domain Type.
+5. **API Client**: Add the HTTP request method.
+6. **Service**: Combine API call, validation (`safeParse`), and mapping.
+7. **Query Hook**: Create a custom Tanstack Query hook.
+8. **Mock Data**: Create JSON files in `public/mocks` and register them.
+9. **UI Implementation**: Build the UI components and connect them to the hook.
 
-## Learn More
+*Never use raw API data directly in UI components.*
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository & Install dependencies**
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Environment Variables**
+   Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Ensure `NEXT_PUBLIC_USE_MOCK=true` is set if you want to develop without a running backend.
 
-## Deploy on Vercel
+3. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📚 Documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For more in-depth technical documentation:
+- [Backend Handover & API Contract](docs/BACKEND-HANDOVER.md): API contract expectations for backend engineers.
+- [Architecture Decision Records (ADRs)](docs/architecture/decisions): Historical architecture choices.
+- `AGENTS.md`: Full coding rules and architectural constraints.

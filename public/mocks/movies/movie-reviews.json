@@ -1,0 +1,56 @@
+{
+  "success": true,
+  "data": {
+    "page": 1,
+    "perPage": 10,
+    "totalPages": 1,
+    "totalResults": 5,
+    "results": [
+      {
+        "id": 101,
+        "userId": 42,
+        "username": "movie_fan_vn",
+        "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&q=80",
+        "rating": 9,
+        "comment": "Phim cực hay, hình ảnh đẹp mê hồn! Nội dung sâu sắc và cảm xúc. Không thể bỏ lỡ!",
+        "createdAt": "2026-06-20T14:30:00+07:00"
+      },
+      {
+        "id": 102,
+        "userId": 55,
+        "username": "cinedot_vip",
+        "avatar": null,
+        "rating": 8,
+        "comment": "Diễn xuất của dàn diễn viên rất tốt, đặc biệt là vai chính. Xứng đáng xem 2 lần.",
+        "createdAt": "2026-06-18T19:15:00+07:00"
+      },
+      {
+        "id": 103,
+        "userId": 71,
+        "username": "film_critic_saigon",
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+        "rating": 7,
+        "comment": "Phim ổn, nhưng phần giữa hơi dài. Đoạn kết bù đắp lại rất tốt.",
+        "createdAt": "2026-06-15T11:00:00+07:00"
+      },
+      {
+        "id": 104,
+        "userId": 88,
+        "username": "nguyenthuan2k",
+        "avatar": null,
+        "rating": 10,
+        "comment": "Tuyệt phẩm của năm! Âm thanh và hình ảnh IMAX làm cho trải nghiệm thêm phần ấn tượng.",
+        "createdAt": "2026-06-10T20:45:00+07:00"
+      },
+      {
+        "id": 105,
+        "userId": 33,
+        "username": "tran_minh_duc",
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
+        "rating": 6,
+        "comment": "Cũng được, nhưng mình nghĩ phần trước hay hơn. Vẫn đáng xem.",
+        "createdAt": "2026-06-05T16:20:00+07:00"
+      }
+    ]
+  }
+}

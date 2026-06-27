@@ -111,7 +111,7 @@ export const HomeHero: React.FC = () => {
               {activeSlide.description}
             </p>
             <div className="hero-showcase-actions">
-              <a href={activeSlide.bookingHref || `/movies/detail/${activeSlide.slug}`} className="btn-primary btn-large" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+              <a href={activeSlide.bookingHref || `/movies/${activeSlide.slug}`} className="btn-primary btn-large" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                 Đặt vé
               </a>
               {activeSlide.trailerUrl && (

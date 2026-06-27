@@ -69,6 +69,7 @@ export const bookingMapper = {
 
   toSeatHold: (dto: SeatHoldDTO): SeatHold => ({
     holdId: dto.holdId,
+    bookingId: dto.booking_id, // Map BE snake_case -> FE camelCase
     showtimeId: dto.showtimeId,
     seatIds: dto.seatIds,
     expiresAt: dto.expiresAt,

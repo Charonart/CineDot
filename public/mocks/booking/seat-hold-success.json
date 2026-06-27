@@ -2,6 +2,7 @@
   "success": true,
   "data": {
     "holdId": "hold_abc123",
+    "booking_id": 105,
     "showtimeId": "st_qb_1001",
     "seatIds": ["seat_A1", "seat_A2"],
     "expiresAt": "2026-06-04T10:00:00+07:00",

@@ -19,6 +19,11 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, isLoading, isError } = useNavbarMovies();
 
@@ -358,16 +363,16 @@ export const Navbar: React.FC = () => {
               }
             }}
           />
-          {isAuthLoading ? (
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
-          ) : isAuthenticated && user ? (
+          {isMounted && isAuthLoading ? (
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center'}} />
+          ) : isMounted && isAuthenticated && user ? (
             <UserMenu user={user} />
           ) : (
             <Link href={appRoutes.login(pathname || '')} className="nav-login">
               Đăng nhập
             </Link>
           )}
-          <Link href={`${appRoutes.movies}?category=now-showing`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+          <Link href={`${appRoutes.bookingRoot}`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
             Đặt vé
           </Link>
         </div>

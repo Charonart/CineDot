@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "data": {
+    "vnp_Amount": "10000000",
+    "vnp_BankCode": "NCB",
+    "vnp_BankTranNo": "VNP14201564",
+    "vnp_CardType": "ATM",
+    "vnp_OrderInfo": "Thanh+toan+don+hang+CD123456",
+    "vnp_PayDate": "20260626202530",
+    "vnp_ResponseCode": "00",
+    "vnp_TmnCode": "CINEDOT01",
+    "vnp_TransactionNo": "14201564",
+    "vnp_TransactionStatus": "00",
+    "vnp_TxnRef": "CD123456",
+    "vnp_SecureHash": "verified",
+    "booking_id": 105,
+    "status": "paid",
+    "message": "Giao dịch thành công"
+  }
+}

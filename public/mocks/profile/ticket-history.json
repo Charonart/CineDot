@@ -1,0 +1,83 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "tkt_001",
+      "bookingId": "BK-20260625-8A3F",
+      "movieTitle": "Avengers: Doomsday",
+      "posterPath": "https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjOgEE2t2.jpg",
+      "cinemaName": "CineDot Vincom Đồng Khởi",
+      "roomName": "Phòng IMAX 01",
+      "seatLabels": ["G7", "G8"],
+      "showtimeStart": "2026-06-25T19:30:00+07:00",
+      "totalAmount": 250000,
+      "status": "UPCOMING",
+      "qrCodeString": "CINEDOT-BK-20260625-8A3F-G7G8"
+    },
+    {
+      "id": "tkt_002",
+      "bookingId": "BK-20260628-9C1E",
+      "movieTitle": "Mission: Impossible – The Final Reckoning",
+      "posterPath": "https://image.tmdb.org/t/p/w500/z53D72EAOxGRqdr7KXXWp9dJiDe.jpg",
+      "cinemaName": "CineDot Aeon Mall Tân Phú",
+      "roomName": "Phòng 4DX 02",
+      "seatLabels": ["C5", "C6", "C7"],
+      "showtimeStart": "2026-06-28T14:00:00+07:00",
+      "totalAmount": 375000,
+      "status": "UPCOMING",
+      "qrCodeString": "CINEDOT-BK-20260628-9C1E-C5C6C7"
+    },
+    {
+      "id": "tkt_003",
+      "bookingId": "BK-20260610-2D7B",
+      "movieTitle": "Lilo & Stitch",
+      "posterPath": "https://image.tmdb.org/t/p/w500/5FmkJP0a8YeAhUHGJlPKy1oSENB.jpg",
+      "cinemaName": "CineDot Vincom Đồng Khởi",
+      "roomName": "Phòng Premium 03",
+      "seatLabels": ["D4", "D5"],
+      "showtimeStart": "2026-06-10T20:00:00+07:00",
+      "totalAmount": 220000,
+      "status": "COMPLETED",
+      "qrCodeString": "CINEDOT-BK-20260610-2D7B-D4D5"
+    },
+    {
+      "id": "tkt_004",
+      "bookingId": "BK-20260602-5F9A",
+      "movieTitle": "Doraemon: Nobita và Vùng Đất Lý Tưởng Trên Bầu Trời",
+      "posterPath": "https://image.tmdb.org/t/p/w500/2Pgs4NMJLQbIWmJWABgGxj3ZFML.jpg",
+      "cinemaName": "CineDot Crescent Mall",
+      "roomName": "Phòng Kids 01",
+      "seatLabels": ["B8", "B9", "B10"],
+      "showtimeStart": "2026-06-02T10:30:00+07:00",
+      "totalAmount": 195000,
+      "status": "COMPLETED",
+      "qrCodeString": "CINEDOT-BK-20260602-5F9A-B8B9B10"
+    },
+    {
+      "id": "tkt_005",
+      "bookingId": "BK-20260520-1A4C",
+      "movieTitle": "Karate Kid: Legends",
+      "posterPath": "https://image.tmdb.org/t/p/w500/fzTenNM5LWuJOqxE0UoMFCnMqUE.jpg",
+      "cinemaName": "CineDot Aeon Mall Bình Dương",
+      "roomName": "Phòng Dolby Atmos 04",
+      "seatLabels": ["F12", "F13"],
+      "showtimeStart": "2026-05-20T21:15:00+07:00",
+      "totalAmount": 230000,
+      "status": "COMPLETED",
+      "qrCodeString": "CINEDOT-BK-20260520-1A4C-F12F13"
+    },
+    {
+      "id": "tkt_006",
+      "bookingId": "BK-20260515-7E2D",
+      "movieTitle": "How to Train Your Dragon",
+      "posterPath": "https://image.tmdb.org/t/p/w500/q8HE3s4KNXk7P1NfSmj6RjOQ0E4.jpg",
+      "cinemaName": "CineDot Vincom Đồng Khởi",
+      "roomName": "Phòng IMAX 01",
+      "seatLabels": ["A1", "A2"],
+      "showtimeStart": "2026-05-15T18:00:00+07:00",
+      "totalAmount": 200000,
+      "status": "CANCELLED",
+      "qrCodeString": "CINEDOT-BK-20260515-7E2D-A1A2"
+    }
+  ]
+}

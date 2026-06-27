@@ -1,35 +1,15 @@
 import { logger } from '@lib/logger/logger';
 import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
-import { movieApi } from '@/modules/movie/api/movie.api';
 import { cinemasApi } from '@/modules/cinemas/api/cinemas.api';
 import { showtimeApi } from '@/modules/showtime/api/showtime.api';
 import { formatDateLabel, buildDateRange } from '@/modules/showtime/mappers/showtime.mapper';
 import {
   QuickBookingCinema,
   QuickBookingDate,
-  QuickBookingMovie,
   QuickBookingShowtime,
 } from '../types/quick-booking.type';
 
 export const quickBookingService = {
-  getMovies: async (signal?: AbortSignal): Promise<QuickBookingMovie[]> => {
-    try {
-      const response = await movieApi.getMovies({ status: 'now-showing' });
-      const results = response.data?.results || [];
-      return results.map((m: any) => ({
-        id: String(m.id),
-        title: m.title,
-        status: m.status || 'now-showing',
-      }));
-    } catch (error) {
-      if (isRequestCanceled(error)) {
-        throw error;
-      }
-      logger.error('[QuickBookingService] getMovies failed:', error);
-      throw new Error('FAILED_TO_LOAD_QUICK_BOOKING_MOVIES');
-    }
-  },
-
   getCinemas: async (movieId: string, signal?: AbortSignal): Promise<QuickBookingCinema[]> => {
     if (!movieId) return [];
 
@@ -59,7 +39,7 @@ export const quickBookingService = {
 
     try {
       // Fetch showtimes for this movie and cinema to derive dates
-      const response = await showtimeApi.getShowtimes({ movieId, cinemaId, date: '' });
+      const response = await showtimeApi.getShowtimes({ movie_id: Number(movieId) || undefined, cinema_id: Number(cinemaId) || undefined, date: '' });
       const results = response.data?.results || [];
 
       const datesMap = new Map<string, string>();
@@ -105,7 +85,7 @@ export const quickBookingService = {
     if (!movieId || !cinemaId || !date) return [];
 
     try {
-      const response = await showtimeApi.getShowtimes({ movieId, cinemaId, date });
+      const response = await showtimeApi.getShowtimes({ movie_id: Number(movieId) || undefined, cinema_id: Number(cinemaId) || undefined, date });
       const results = response.data?.results || [];
 
       return results.map((st: any) => {

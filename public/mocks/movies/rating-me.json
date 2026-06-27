@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "success": true,
+  "data": {
+    "movieId": 1,
+    "userScore": 0,
+    "averageScore": 7.4,
+    "voteCount": 12483,
+    "updatedAt": "2026-06-27T08:00:00.000Z"
+  },
+  "message": "Bạn chưa đánh giá bộ phim này."
+}

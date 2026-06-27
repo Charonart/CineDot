@@ -1,0 +1,10 @@
+{
+  "status": "success",
+  "success": true,
+  "data": {
+    "movieId": 1,
+    "isInWatchlist": true,
+    "updatedAt": "2026-06-27T08:00:00.000Z"
+  },
+  "message": "Đã thêm phim vào danh sách yêu thích."
+}

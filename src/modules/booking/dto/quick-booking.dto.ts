@@ -1,11 +1,3 @@
-export type QuickBookingMovieStatusDTO = 'now-showing' | 'coming-soon';
-
-export interface QuickBookingMovieDTO {
-  id: string;
-  title: string;
-  status: QuickBookingMovieStatusDTO;
-}
-
 export interface QuickBookingCinemaDTO {
   id: string;
   name: string;

@@ -75,6 +75,7 @@ export type BookingSession = {
   movie: BookingMovieInfo | null;
   cinema: BookingCinemaInfo | null;
   showtime: BookingShowtimeInfo | null;
+  showtimeId: string | null;
   seats: SelectedSeat[];
   combos: ComboItem[];
   voucherCode?: string;
@@ -88,6 +89,8 @@ export type BookingSession = {
   comboTotal: number;
   finalTotal: number;
   status: BookingStatus;
+  /** booking_id trả về từ BE sau khi hold-seats thành công — dùng để gửi POST /payments */
+  bookingId?: number;
 };
 
 export type VoucherType = 'percent' | 'fixed';

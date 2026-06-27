@@ -1,0 +1,10 @@
+{
+  "status": "success",
+  "success": true,
+  "data": {
+    "movieId": 1,
+    "isInWatchlist": false,
+    "updatedAt": "2026-06-27T08:00:00.000Z"
+  },
+  "message": "Phim chưa được thêm vào danh sách yêu thích."
+}

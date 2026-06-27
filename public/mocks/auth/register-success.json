@@ -13,6 +13,7 @@
     "description": "Mock registration success response"
   },
   "data": {
+    "token": "mock-jwt-token-67890",
     "user": {
       "id": "user_1",
       "name": "Lương Hữu Luyến",

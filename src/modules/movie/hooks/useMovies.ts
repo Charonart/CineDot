@@ -47,7 +47,7 @@ export const useSearchMovies = (query: string, page = 1) => {
   });
 };
 
-export const useMoviesList = (params: { category?: string; limit?: number; page?: number }) => {
+export const useMoviesList = (params: { category?: string; status?: string; limit?: number; page?: number }) => {
   return useQuery({
     queryKey: movieKeys.listParams(params),
     queryFn: () => movieService.getMovies(params),

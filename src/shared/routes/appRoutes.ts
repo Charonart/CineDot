@@ -1,9 +1,11 @@
 export const appRoutes = {
   home: '/',
   movies: '/movies',
-  movieDetail: (slug: string) => `/movies/detail/${slug}`,
-  movieSchedule: (slug: string) => `/movies/detail/${slug}#schedule`,
+  movieDetail: (slug: string) => `/movies/${slug}`,
+  movieSchedule: (slug: string) => `/movies/${slug}`,
   booking: (showtimeId: string) => `/booking/${showtimeId}`,
+  bookingRoot: '/booking',
+  bookingSeats: (showtimeId: string | number) => `/booking/seats?showtimeId=${showtimeId}`,
 
   // Star Shop
   starShop: '/star-shop',
@@ -48,4 +50,9 @@ export const appRoutes = {
     return query ? `/reset-password?${query}` : '/reset-password';
   },
   verifyEmail: '/verify-email',
+
+  // Profile Module Routes
+  profile: '/profile',
+  profileTab: (tab: string) => `/profile?tab=${tab}`,
+  myTickets: '/profile?tab=tickets',
 };

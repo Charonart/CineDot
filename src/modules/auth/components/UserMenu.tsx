@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
   import { useLogout } from '../hooks/useLogout';
   import { AuthUser } from '../types/auth.type';
   import { LogOut, Ticket, User, ChevronDown } from 'lucide-react';
+  import { appRoutes } from '@/shared/routes/appRoutes';
 
   interface UserMenuProps {
     user: AuthUser;
@@ -69,12 +70,12 @@ import React, { useState, useEffect, useRef } from 'react';
             
             <div className="user-dropdown-divider"></div>
 
-            <Link href="/profile" className="user-dropdown-item" onClick={() => setIsOpen(false)}>
+            <Link href={appRoutes.profile} className="user-dropdown-item" onClick={() => setIsOpen(false)}>
               <User size={16} />
               <span>Tài khoản của tôi</span>
             </Link>
 
-            <Link href="/tickets" className="user-dropdown-item" onClick={() => setIsOpen(false)}>
+            <Link href={appRoutes.myTickets} className="user-dropdown-item" onClick={() => setIsOpen(false)}>
               <Ticket size={16} />
               <span>Vé của tôi</span>
             </Link>

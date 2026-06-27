@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "success": true,
+  "data": {
+    "movieId": 1,
+    "userScore": 0,
+    "averageScore": 7.3,
+    "voteCount": 12482,
+    "updatedAt": "2026-06-27T08:12:00.000Z"
+  },
+  "message": "Đã xóa đánh giá của bạn."
+}

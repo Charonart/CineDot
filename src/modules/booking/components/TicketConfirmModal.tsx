@@ -1,38 +1,57 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useBookingStore } from '../store/bookingStore';
+import { useSeatHoldTimer } from '../hooks/useSeatHoldTimer';
+import { bookingApi } from '../api/booking.api';
 import { PAYMENT_METHODS } from '../data/paymentMethods';
 
 interface TicketConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
 }
 
 export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
   isOpen,
   onClose,
-  onConfirm,
 }) => {
-  const session = useBookingStore((state) => state.session);
-  const [isChecked, setIsChecked] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-  // Close modal on escape key press
+  // ─── Store selectors ────────────────────────────────────────────────────────
+  const session = useBookingStore((state) => state.session);
+  const resetBooking = useBookingStore((state) => state.resetBooking);
+  const markPendingPayment = useBookingStore((state) => state.markPendingPayment);
+  const markPaid = useBookingStore((state) => state.markPaid);
+  const markFailed = useBookingStore((state) => state.markFailed);
+
+  // ─── Local UI state ─────────────────────────────────────────────────────────
+  const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // ─── Timer ──────────────────────────────────────────────────────────────────
+  const { isExpired } = useSeatHoldTimer();
+
+  // Đóng modal khi nhấn Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && !isSubmitting) {
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, isSubmitting, onClose]);
 
-  // Reset checked state when opening/closing
+  // Reset local state mỗi lần mở lại modal
   useEffect(() => {
     if (isOpen) {
       setIsChecked(false);
+      setErrorMsg(null);
+      setIsSubmitting(false);
     }
   }, [isOpen]);
 
@@ -42,16 +61,63 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
     movie,
     cinema,
     showtime,
+    showtimeId,
     seats,
     combos,
     discountAmount,
     finalTotal,
     paymentMethod,
+    voucherCode,
   } = session;
 
   const seatLabels = seats.map((s) => s.label).join(', ');
   const paymentMethodLabel =
     PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label || paymentMethod || '';
+
+ // ─── LUỒNG THANH TOÁN CHÍNH ────────────────
+  const handleConfirmPayment = async () => {
+    // Bước 1: Validate session.bookingId và các điều kiện cơ bản
+    if (isSubmitting) return;
+    
+    if (!session.bookingId) {
+      setErrorMsg('Dữ liệu đơn hàng không tồn tại. Vui lòng thử lại từ đầu.');
+      return;
+    }
+    if (!paymentMethod) {
+      setErrorMsg('Vui lòng chọn phương thức thanh toán.');
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    try {
+      // Bước 2: Gọi API processPayment
+      await bookingApi.processPayment({
+        booking_id: session.bookingId,
+        payment_method: paymentMethod,
+      });
+      markPaid();
+      // Bước 3: Invalidate cache lịch sử vé
+      queryClient.invalidateQueries({ queryKey: ['ticket-history'] });
+      // Bước 4: Chuyển trang về trang chủ TRƯỚC
+      router.replace('/');
+      // Bước 5: Gọi resetBooking trong setTimeout để state dọn dẹp sau khi route đã đổi, 
+      // tránh làm showtimeId bị null quá sớm gây lỗi văng về trang /movies
+      setTimeout(() => {
+        resetBooking();
+      }, 500);
+    } catch (err: any) {
+      // Bước 6: Xử lý lỗi
+      markFailed();
+      const message = err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi trong quá trình xử lý thanh toán.';
+      setErrorMsg(message);
+    } finally {
+      // Cuối cùng tắt trạng thái isSubmitting
+      setIsSubmitting(false);
+    }
+  };
+
+  // ─── RENDER ─────────────────────────────────────────────────────────────────
+  const canSubmit = isChecked && !isSubmitting && !isExpired;
 
   return (
     <div
@@ -67,7 +133,7 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
         justifyContent: 'center',
         padding: '20px',
       }}
-      onClick={onClose}
+      onClick={() => !isSubmitting && onClose()}
     >
       <div
         className="modal-container"
@@ -91,14 +157,15 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
           </h3>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => !isSubmitting && onClose()}
+            disabled={isSubmitting}
             style={{
               background: 'transparent',
               border: 'none',
               fontSize: '24px',
               fontWeight: 500,
               color: 'var(--text3)',
-              cursor: 'pointer',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
               lineHeight: 1,
               padding: '4px',
             }}
@@ -106,6 +173,24 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
             &times;
           </button>
         </div>
+
+        {/* Cảnh báo hết hạn */}
+        {isExpired && (
+          <div
+            style={{
+              background: '#FFF5F5',
+              border: '1px solid #FED7D7',
+              borderRadius: '10px',
+              padding: '12px 14px',
+              marginBottom: '16px',
+              fontSize: '13.5px',
+              color: '#C53030',
+              fontWeight: 600,
+            }}
+          >
+            ⏰ Phiên giữ ghế đã hết hạn. Vui lòng quay lại chọn ghế mới.
+          </div>
+        )}
 
         {/* Info Grid */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
@@ -179,31 +264,52 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
           </div>
         </div>
 
+        {/* Error Banner */}
+        {errorMsg && (
+          <div
+            style={{
+              background: '#FFF5F5',
+              border: '1px solid #FEB2B2',
+              borderRadius: '10px',
+              padding: '12px 14px',
+              marginBottom: '16px',
+              fontSize: '13.5px',
+              color: '#C53030',
+              fontWeight: 500,
+            }}
+          >
+            ❌ {errorMsg}
+          </div>
+        )}
+
         {/* Checkbox agreement */}
         <label
           style={{
             display: 'flex',
             alignItems: 'flex-start',
             gap: '10px',
-            cursor: 'pointer',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
             padding: '12px 14px',
             background: 'var(--bg)',
             borderRadius: '12px',
             border: '1px solid var(--border)',
             marginBottom: '24px',
             userSelect: 'none',
+            opacity: isSubmitting ? 0.6 : 1,
           }}
         >
           <input
             type="checkbox"
+            id="confirm-booking-agreement"
             checked={isChecked}
-            onChange={(e) => setIsChecked(e.target.checked)}
+            onChange={(e) => !isSubmitting && setIsChecked(e.target.checked)}
+            disabled={isSubmitting}
             style={{
               marginTop: '3px',
               width: '16px',
               height: '16px',
               accentColor: '#4f3c93',
-              cursor: 'pointer',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
             }}
           />
           <span style={{ fontSize: '13px', color: 'var(--text2)', lineHeight: 1.4 }}>
@@ -215,7 +321,8 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => !isSubmitting && onClose()}
+            disabled={isSubmitting}
             style={{
               flex: 1,
               padding: '14px',
@@ -225,11 +332,12 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
               color: 'var(--text2)',
               fontWeight: 700,
               fontSize: '14.5px',
-              cursor: 'pointer',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
               transition: 'background 0.2s ease',
+              opacity: isSubmitting ? 0.5 : 1,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--bg2)';
+              if (!isSubmitting) e.currentTarget.style.background = 'var(--bg2)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
@@ -237,34 +345,65 @@ export const TicketConfirmModal: React.FC<TicketConfirmModalProps> = ({
           >
             Quay lại
           </button>
+
           <button
             type="button"
-            disabled={!isChecked}
-            onClick={onConfirm}
+            id="confirm-payment-btn"
+            disabled={!canSubmit}
+            onClick={handleConfirmPayment}
             style={{
               flex: 2,
               padding: '14px',
               borderRadius: '12px',
-              background: isChecked ? '#4f3c93' : 'var(--bg2)',
-              color: isChecked ? '#ffffff' : 'var(--text3)',
+              background: canSubmit ? '#4f3c93' : 'var(--bg2)',
+              color: canSubmit ? '#ffffff' : 'var(--text3)',
               fontWeight: 700,
               fontSize: '14.5px',
               border: 'none',
-              cursor: isChecked ? 'pointer' : 'not-allowed',
+              cursor: canSubmit ? 'pointer' : 'not-allowed',
               transition: 'opacity 0.2s ease',
-              boxShadow: isChecked ? '0 4px 15px rgba(79, 60, 147, 0.2)' : 'none',
+              boxShadow: canSubmit ? '0 4px 15px rgba(79, 60, 147, 0.2)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
             }}
             onMouseEnter={(e) => {
-              if (isChecked) e.currentTarget.style.opacity = '0.9';
+              if (canSubmit) e.currentTarget.style.opacity = '0.9';
             }}
             onMouseLeave={(e) => {
-              if (isChecked) e.currentTarget.style.opacity = '1';
+              if (canSubmit) e.currentTarget.style.opacity = '1';
             }}
           >
-            Xác nhận thanh toán
+            {isSubmitting ? (
+              <>
+                {/* Spinner inline */}
+                <span
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderTopColor: '#fff',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: 'spin 0.7s linear infinite',
+                  }}
+                />
+                Đang xử lý...
+              </>
+            ) : (
+              'Xác nhận thanh toán'
+            )}
           </button>
         </div>
       </div>
+
+      {/* Keyframe cho spinner */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

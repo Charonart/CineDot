@@ -1,4 +1,5 @@
 import { showtimeApi } from '../api/showtime.api';
+import { bookingApi } from '@modules/booking/api/booking.api';
 import { showtimeMapper } from '../mappers/showtime.mapper';
 import { showtimeListSchema, showtimeSeatListSchema } from '../schemas/showtime.schema';
 import { ShowtimeList, ShowtimeSeatMap, ShowtimeQueryParams } from '../types/showtime.type';
@@ -12,9 +13,9 @@ export const showtimeService = {
   getShowtimes: async (movieId: number | string, params: ShowtimeQueryParams): Promise<ShowtimeList> => {
     try {
       const response = await showtimeApi.getShowtimes({
-        movieId,
         date: params.date,
-        cinemaId: params.cinemaId,
+        movie_id: movieId ? Number(movieId) : undefined,
+        cinema_id: params.cinemaId ? Number(params.cinemaId) : undefined,
       });
       const validated = showtimeListSchema.parse(response.data);
       return showtimeMapper.toShowtimeList(validated.results, params.date);
@@ -26,10 +27,11 @@ export const showtimeService = {
 
   /**
    * Lấy sơ đồ ghế của một suất chiếu.
+   * Delegates to bookingApi.getSeatMap — single source of truth cho endpoint GET /showtimes/:id/seats.
    */
   getSeats: async (showtimeId: number | string): Promise<ShowtimeSeatMap> => {
     try {
-      const response = await showtimeApi.getSeats(showtimeId);
+      const response = await bookingApi.getSeatMap(String(showtimeId));
       const validated = showtimeSeatListSchema.parse(response.data);
       return showtimeMapper.toSeatMap(validated);
     } catch (error) {
