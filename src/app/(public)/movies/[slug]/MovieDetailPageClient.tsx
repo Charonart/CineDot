@@ -55,6 +55,7 @@ export default function MovieDetailPageClient({ movie }: MovieDetailPageClientPr
 
             {/* SECTION 3A — MOVIE POSTER + METADATA BLOCK */}
             <MovieDetailInfo
+              movieId={movie.id}
               poster={movie.posterUrl}
               title={movie.title}
               originalTitle={movie.originalTitle}

@@ -50,7 +50,7 @@ export const movieApi = {
    * Diễn viên và đoàn phim.
    * Gộp từ movieDetailApi.getCredits.
    */
-  getCredits: (id: number): Promise<ApiResponse<CreditsDTO>> =>
+  getCredits: (id: number | string): Promise<ApiResponse<CreditsDTO>> =>
     axiosClient.get(`/movies/${id}/credits`),
 
   /**
@@ -58,7 +58,7 @@ export const movieApi = {
    * Trailer, Teaser, Clip.
    * Gộp từ movieDetailApi.getVideos.
    */
-  getVideos: (id: number): Promise<ApiResponse<VideoListDTO>> =>
+  getVideos: (id: number | string): Promise<ApiResponse<VideoListDTO>> =>
     axiosClient.get(`/movies/${id}/videos`),
 
   /**
@@ -66,7 +66,7 @@ export const movieApi = {
    * Phim tương tự.
    * Gộp từ movieDetailApi.getSimilar.
    */
-  getSimilar: (id: number, page = 1): Promise<ApiResponse<MovieListResponseDTO>> =>
+  getSimilar: (id: number | string, page = 1): Promise<ApiResponse<MovieListResponseDTO>> =>
     axiosClient.get(`/movies/${id}/similar`, { params: { page } }),
 
   /**

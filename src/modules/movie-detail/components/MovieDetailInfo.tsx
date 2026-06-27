@@ -1,7 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
+'use client';
+
 import React from 'react';
+import { WatchlistButton } from '@modules/movie/components/WatchlistButton';
+import { RatingStars } from '@modules/movie/components/RatingStars';
 
 interface MovieDetailInfoProps {
+  /** ID số của phim — dùng cho WatchlistButton & RatingStars */
+  movieId: number | string;
   poster: string;
   title: string;
   originalTitle?: string;
@@ -18,6 +24,7 @@ interface MovieDetailInfoProps {
 }
 
 export const MovieDetailInfo: React.FC<MovieDetailInfoProps> = ({
+  movieId,
   poster,
   title,
   originalTitle,
@@ -120,7 +127,20 @@ export const MovieDetailInfo: React.FC<MovieDetailInfoProps> = ({
               </svg>
               Xem trailer
             </button>
+
+            {/* Watchlist — chỉ render khi có movieId */}
+            {!!movieId && (
+              <WatchlistButton movieId={movieId} showLabel />
+            )}
           </div>
+
+          {/* Rating section */}
+          {!!movieId && (
+            <div className="movie-detail-rating-section">
+              <p className="movie-detail-rating-label">Đánh giá của bạn</p>
+              <RatingStars movieId={movieId} showStats />
+            </div>
+          )}
         </div>
       </div>
     </section>

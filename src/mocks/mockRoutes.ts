@@ -77,6 +77,10 @@ export const mockRoutes: Record<string, string> = {
   '/api/v1/provinces': '/mocks/master-data/provinces.json',
   '/api/v1/combos': '/mocks/master-data/combos.json',
 
+  // ── Watchlist & Ratings Mocks ───────────────────────────────────────────────
+  '/movies/watchlist': '/mocks/movies/watchlist-add.json',
+  '/api/v1/movies/watchlist': '/mocks/movies/watchlist-add.json',
+
   // ── VNPay Return Callback ───────────────────────────────────────────────────
   '/api/v1/payments/vnpay/return': '/mocks/booking/vnpay-return.json',
 };
@@ -109,6 +113,22 @@ export const getMockPath = (url: string): string | null => {
   // GET /api/v1/movies/:id/reviews
   if (/^(\/api\/v1)?\/movies\/[^/]+\/reviews$/.test(path)) {
     return '/mocks/movies/movie-reviews.json';
+  }
+
+  // Watchlist & Rating Actions
+  // GET /movies/:id/watchlist
+  if (/^(\/api\/v1)?\/movies\/[^/]+\/watchlist$/.test(path)) {
+    return '/mocks/movies/watchlist-status.json';
+  }
+  // GET /movies/:id/ratings/me
+  if (/^(\/api\/v1)?\/movies\/[^/]+\/ratings\/me$/.test(path)) {
+    return '/mocks/movies/rating-me.json';
+  }
+  // POST or DELETE /movies/:id/ratings
+  if (/^(\/api\/v1)?\/movies\/[^/]+\/ratings$/.test(path)) {
+    // Note: Since all mutating methods are overridden to GET for mock file requests:
+    // We map to specific mock depending on endpoint.
+    return '/mocks/movies/rating-submit.json';
   }
 
   // GET /movies/detail/:slug or /movies/:slug (excluding reserved keywords)

@@ -30,7 +30,7 @@ export const movieDetailService = {
     return movieDetailService.getMovieDetail(slug);
   },
 
-  getCredits: async (id: number): Promise<Credits> => {
+  getCredits: async (id: number | string): Promise<Credits> => {
     try {
       const response = await movieApi.getCredits(id);
       const validated = creditsSchema.parse(response.data);
@@ -41,7 +41,7 @@ export const movieDetailService = {
     }
   },
 
-  getVideos: async (id: number): Promise<Video[]> => {
+  getVideos: async (id: number | string): Promise<Video[]> => {
     try {
       const response = await movieApi.getVideos(id);
       const validated = videoListSchema.parse(response.data);
@@ -52,7 +52,7 @@ export const movieDetailService = {
     }
   },
 
-  getSimilar: async (id: number, page = 1): Promise<MovieList> => {
+  getSimilar: async (id: number | string, page = 1): Promise<MovieList> => {
     try {
       const response = await movieApi.getSimilar(id, page);
       const validated = movieListResponseSchema.parse(response.data);

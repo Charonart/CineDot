@@ -6,16 +6,16 @@ import { movieDetailService } from '../services/movie-detail.service';
  */
 export const movieDetailKeys = {
   all: ['movie-detail'] as const,
-  detail: (id: number) => [...movieDetailKeys.all, id] as const,
-  credits: (id: number) => [...movieDetailKeys.all, id, 'credits'] as const,
-  videos: (id: number) => [...movieDetailKeys.all, id, 'videos'] as const,
-  similar: (id: number, page: number) => [...movieDetailKeys.all, id, 'similar', { page }] as const,
+  detail: (id: number | string) => [...movieDetailKeys.all, id] as const,
+  credits: (id: number | string) => [...movieDetailKeys.all, id, 'credits'] as const,
+  videos: (id: number | string) => [...movieDetailKeys.all, id, 'videos'] as const,
+  similar: (id: number | string, page: number) => [...movieDetailKeys.all, id, 'similar', { page }] as const,
 };
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;   // 5 phút
 const DEFAULT_GC_TIME   = 30 * 60 * 1000;   // 30 phút
 
-export const useMovieDetail = (id: number) => {
+export const useMovieDetail = (id: number | string) => {
   return useQuery({
     queryKey: movieDetailKeys.detail(id),
     queryFn: () => movieDetailService.getMovieDetail(id),
@@ -25,7 +25,7 @@ export const useMovieDetail = (id: number) => {
   });
 };
 
-export const useMovieCredits = (id: number) => {
+export const useMovieCredits = (id: number | string) => {
   return useQuery({
     queryKey: movieDetailKeys.credits(id),
     queryFn: () => movieDetailService.getCredits(id),
@@ -35,7 +35,7 @@ export const useMovieCredits = (id: number) => {
   });
 };
 
-export const useMovieVideos = (id: number) => {
+export const useMovieVideos = (id: number | string) => {
   return useQuery({
     queryKey: movieDetailKeys.videos(id),
     queryFn: () => movieDetailService.getVideos(id),
@@ -45,7 +45,7 @@ export const useMovieVideos = (id: number) => {
   });
 };
 
-export const useMovieSimilar = (id: number, page = 1) => {
+export const useMovieSimilar = (id: number | string, page = 1) => {
   return useQuery({
     queryKey: movieDetailKeys.similar(id, page),
     queryFn: () => movieDetailService.getSimilar(id, page),
