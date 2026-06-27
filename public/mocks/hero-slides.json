@@ -1,0 +1,55 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/home/hero-slides",
+    "description": "Mock response for home hero movie slider"
+  },
+  "data": [
+    {
+      "id": "dune-part-two",
+      "slug": "dune-part-two",
+      "title": "Dune: Cát Song - Phần Hai",
+      "subtitle": "Đặt vé nhanh. Xem phim hay.",
+      "description": "Paul Atreides sát cánh cùng Chani và người Fremen trên sa mạc Arrakis trong cuộc hành trình trả thù những kẻ tàn sát gia tộc.",
+      "backdropUrl": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1600&q=80",
+      "posterUrl": "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80",
+      "runtime": 166,
+      "rating": 8.7,
+      "ageRating": "T16",
+      "formatTags": ["IMAX", "2D"],
+      "trailerUrl": "https://www.youtube.com/watch?v=U2Qp5pL3YwY",
+      "status": "now-showing"
+    },
+    {
+      "id": "godzilla-x-kong",
+      "slug": "godzilla-x-kong",
+      "title": "Godzilla x Kong: Đế Chế Mới",
+      "subtitle": "Liên minh khổng lồ trỗi dậy",
+      "description": "Godzilla và Kong phải cùng nhau chống lại một mối đe dọa khổng lồ mới ẩn sâu dưới lòng đất, đe dọa sự tồn vong của nhân loại.",
+      "backdropUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1600&q=80",
+      "posterUrl": "https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80",
+      "runtime": 115,
+      "rating": 7.2,
+      "ageRating": "T13",
+      "formatTags": ["4DX", "3D"],
+      "trailerUrl": "https://www.youtube.com/watch?v=lV1OOlGwExM",
+      "status": "now-showing"
+    },
+    {
+      "id": "ghostbusters-frozen",
+      "slug": "ghostbusters-frozen",
+      "title": "Biệt Đội Săn Ma: Kỷ Nguyên Băng Giá",
+      "subtitle": "Cơn ác mộng băng giá trỗi dậy",
+      "description": "Gia đình Spengler hợp tác với Biệt đội săn ma đời đầu bảo vệ thành phố New York khỏi thế lực đóng băng độc ác muốn hủy diệt nhân loại.",
+      "backdropUrl": "https://images.unsplash.com/photo-1513794761617-07c574043f6e?w=1600&q=80",
+      "posterUrl": "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=400&q=80",
+      "runtime": 115,
+      "rating": 6.9,
+      "ageRating": "T13",
+      "formatTags": ["2D"],
+      "trailerUrl": "https://www.youtube.com/watch?v=6P3FzCILH6s",
+      "status": "now-showing"
+    }
+  ]
+}

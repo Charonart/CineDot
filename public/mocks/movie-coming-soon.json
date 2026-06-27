@@ -1,0 +1,94 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/movies",
+    "query": {
+      "category": "coming-soon"
+    },
+    "description": "Mock response for coming-soon movies list"
+  },
+  "data": {
+    "page": 1,
+    "results": [
+      {
+        "id": "deadpool-wolverine",
+        "slug": "deadpool-wolverine",
+        "title": "Deadpool & Wolverine",
+        "originalTitle": "Deadpool & Wolverine",
+        "overview": "Chuyến phiêu lưu điên rồ đưa Deadpool gia nhập MCU và hợp lực cùng Wolverine hoành tráng.",
+        "posterUrl": "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=1600&q=80",
+        "releaseDate": "2026-07-26",
+        "rating": 8.8,
+        "voteCount": 1205,
+        "genres": [
+          { "id": 3, "name": "Action" },
+          { "id": 5, "name": "Comedy" }
+        ],
+        "formatTags": ["IMAX", "2D"],
+        "status": "coming-soon",
+        "ageRating": "T18"
+      },
+      {
+        "id": "alien-romulus",
+        "slug": "alien-romulus",
+        "title": "Alien: Romulus",
+        "originalTitle": "Alien: Romulus",
+        "overview": "Một nhóm thám hiểm không gian trẻ tuổi chạm trán với nỗi kinh hoàng tột cùng trong một trạm nghiên cứu bỏ hoang.",
+        "posterUrl": "https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=80",
+        "releaseDate": "2026-08-16",
+        "rating": 8.0,
+        "voteCount": 340,
+        "genres": [
+          { "id": 7, "name": "Horror" },
+          { "id": 1, "name": "Sci-Fi" }
+        ],
+        "formatTags": ["2D"],
+        "status": "coming-soon",
+        "ageRating": "T18"
+      },
+      {
+        "id": "joker-two",
+        "slug": "joker-two",
+        "title": "Joker: Folie à Deux",
+        "originalTitle": "Joker: Điên Có Đôi",
+        "overview": "Phần hai khai thác sâu hơn tâm lý phức tạp của Arthur Fleck khi anh gặp gỡ và yêu Harley Quinn tại Arkham.",
+        "posterUrl": "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80",
+        "releaseDate": "2026-10-04",
+        "rating": 8.2,
+        "voteCount": 540,
+        "genres": [
+          { "id": 6, "name": "Drama" },
+          { "id": 8, "name": "Musical" }
+        ],
+        "formatTags": ["Dolby Vision"],
+        "status": "coming-soon",
+        "ageRating": "T18"
+      },
+      {
+        "id": "gladiator-two",
+        "slug": "gladiator-two",
+        "title": "Gladiator II",
+        "originalTitle": "Võ Sĩ Giác Đấu II",
+        "overview": "Lucius quay trở lại Rome và đối mặt với võ đài giác đấu sinh tử để khôi phục lại vinh quang của đế chế.",
+        "posterUrl": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=1600&q=80",
+        "releaseDate": "2026-11-20",
+        "rating": 7.9,
+        "voteCount": 98,
+        "genres": [
+          { "id": 3, "name": "Action" },
+          { "id": 9, "name": "History" }
+        ],
+        "formatTags": ["IMAX", "2D"],
+        "status": "coming-soon",
+        "ageRating": "T18"
+      }
+    ],
+    "totalPages": 1,
+    "totalResults": 4
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/movies",
+    "query": {
+      "category": "imax"
+    },
+    "description": "Mock response for IMAX category movies list"
+  },
+  "data": {
+    "page": 1,
+    "results": [
+      {
+        "id": "dune-part-two",
+        "slug": "dune-part-two",
+        "title": "Dune: Part Two",
+        "originalTitle": "Dune: Cát Song - Phần Hai",
+        "overview": "Paul Atreides sát cánh cùng Chani và người Fremen trên sa mạc Arrakis trong cuộc hành trình trả thù gia tộc.",
+        "posterUrl": "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1600&q=80",
+        "releaseDate": "2026-03-15",
+        "rating": 8.7,
+        "voteCount": 456,
+        "genres": [
+          { "id": 1, "name": "Sci-Fi" },
+          { "id": 2, "name": "Adventure" }
+        ],
+        "formatTags": ["IMAX", "2D"],
+        "status": "now-showing",
+        "ageRating": "T16"
+      },
+      {
+        "id": "furiosa",
+        "slug": "furiosa",
+        "title": "Furiosa: A Mad Max Saga",
+        "originalTitle": "Furiosa: Câu Chuyện Mad Max",
+        "overview": "Tiền truyện kể về thời trẻ phi thường của chiến binh Furiosa trong thế giới hậu tận thế hoang tàn.",
+        "posterUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1473163928189-364b2c4e1135?w=1600&q=80",
+        "releaseDate": "2026-05-24",
+        "rating": 7.8,
+        "voteCount": 182,
+        "genres": [
+          { "id": 3, "name": "Action" },
+          { "id": 1, "name": "Sci-Fi" }
+        ],
+        "formatTags": ["IMAX", "2D"],
+        "status": "now-showing",
+        "ageRating": "T18"
+      },
+      {
+        "id": "deadpool-wolverine",
+        "slug": "deadpool-wolverine",
+        "title": "Deadpool & Wolverine",
+        "originalTitle": "Deadpool & Wolverine",
+        "overview": "Deadpool và Wolverine hợp lực giải cứu đa vũ trụ trong kiệt tác hành động hài hước IMAX.",
+        "posterUrl": "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=1600&q=80",
+        "releaseDate": "2026-07-26",
+        "rating": 8.8,
+        "voteCount": 1205,
+        "genres": [
+          { "id": 3, "name": "Action" },
+          { "id": 5, "name": "Comedy" }
+        ],
+        "formatTags": ["IMAX", "2D"],
+        "status": "coming-soon",
+        "ageRating": "T18"
+      },
+      {
+        "id": "godzilla-x-kong",
+        "slug": "godzilla-x-kong",
+        "title": "Godzilla x Kong",
+        "originalTitle": "Godzilla x Kong: Đế Chế Mới",
+        "overview": "Godzilla và Kong liên minh khổng lồ bảo vệ tinh cầu khỏi hiểm họa ẩn dật.",
+        "posterUrl": "https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400&q=80",
+        "backdropUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1600&q=80",
+        "releaseDate": "2026-03-29",
+        "rating": 7.2,
+        "voteCount": 289,
+        "genres": [
+          { "id": 3, "name": "Action" },
+          { "id": 4, "name": "Fantasy" }
+        ],
+        "formatTags": ["IMAX", "4DX"],
+        "status": "now-showing",
+        "ageRating": "T13"
+      }
+    ],
+    "totalPages": 1,
+    "totalResults": 4
+  }
+}
