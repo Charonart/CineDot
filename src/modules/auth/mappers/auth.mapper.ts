@@ -10,9 +10,8 @@ export const authMapper = {
       phone: dto.phone ?? null,
       avatarUrl: dto.avatarUrl ?? null,
       emailVerifiedAt: dto.emailVerifiedAt ?? null,
-      // Default to ['customer'] if roles list is empty/missing, as movie tickets buyers are customers
-      roles: dto.roles && dto.roles.length > 0 ? dto.roles : ['customer'],
-      permissions: dto.permissions ?? [],
+      roles: dto.roles,
+      permissions: dto.permissions,
     };
   },
 

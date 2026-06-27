@@ -20,7 +20,7 @@
       "avatarUrl": null,
       "emailVerifiedAt": "2026-06-10T14:50:00Z",
       "roles": ["customer"],
-      "permissions": []
+      "permissions": ["view_bookings", "create_review"]
     }
   },
   "message": "Đăng nhập thành công"

@@ -17,12 +17,18 @@ export const mockRoutes: Record<string, string> = {
   '/sanctum/csrf-cookie': '/mocks/auth/csrf-cookie.json',
 
   // Current User Session
-  // To test authenticated state, change '/mocks/auth/me-guest.json' to '/mocks/auth/me-authenticated.json' below:
+  // Switch role by changing mock file:
+  //   Customer : '/mocks/auth/me-authenticated.json'  (roles: ["customer"])
+  //   Admin    : '/mocks/auth/me-admin.json'           (roles: ["admin"])
+  //   Guest    : '/mocks/auth/me-guest.json'           (unauthenticated)
   '/auth/me': '/mocks/auth/me-authenticated.json',
   '/api/v1/auth/me': '/mocks/auth/me-authenticated.json',
 
   // Login
-  // To test validation/credentials errors, change '/mocks/auth/login-success.json' to '/mocks/auth/login-invalid.json' below:
+  // Switch login role by changing mock file:
+  //   Customer : '/mocks/auth/login-success.json'
+  //   Admin    : '/mocks/auth/login-success-admin.json'
+  //   Error    : '/mocks/auth/login-invalid.json'
   '/auth/login': '/mocks/auth/login-success.json',
   '/api/v1/auth/login': '/mocks/auth/login-success.json',
 

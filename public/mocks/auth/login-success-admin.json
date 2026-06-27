@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "data": {
+    "token": "mock-jwt-token-admin-99999",
+    "user": {
+      "id": "user_admin_1",
+      "name": "Admin CineDot",
+      "email": "admin@cinedot.com",
+      "phone": "0987654321",
+      "avatarUrl": null,
+      "emailVerifiedAt": "2026-06-10T14:50:00Z",
+      "roles": ["admin"],
+      "permissions": ["manage_movies", "manage_cinemas", "manage_users", "manage_bookings", "view_reports"]
+    }
+  },
+  "message": "Đăng nhập thành công"
+}

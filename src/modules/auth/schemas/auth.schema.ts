@@ -7,8 +7,8 @@ export const authUserSchema = z.object({
   phone: z.string().nullable().optional(),
   avatarUrl: z.string().nullable().optional(),
   emailVerifiedAt: z.string().nullable().optional(),
-  roles: z.array(z.enum(['customer', 'staff', 'admin'])),
-  permissions: z.array(z.string()),
+  roles: z.array(z.enum(['customer', 'staff', 'admin'])).optional().default(['customer']),
+  permissions: z.array(z.string()).optional().default([]),
 });
 
 export const authSessionSchema = z.object({
