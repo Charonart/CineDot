@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product } from '../types/star-shop.type';
+import { Product, CATEGORY_LABELS } from '../types/star-shop.type';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -11,28 +11,28 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="group h-full flex flex-col bg-surface rounded-md border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden hover:border-[#7C6FE8]/30 hover:shadow-[var(--shadow-md)] transition-shadow duration-300">
+    <div className="star-shop-card group h-full flex flex-col">
       {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-background-soft shrink-0">
+      <div className="star-shop-card-image-wrap aspect-square relative overflow-hidden bg-background-soft shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={product.imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          className="star-shop-card-image w-full h-full object-cover"
           loading="lazy"
         />
 
         {/* Badges */}
         {product.badge && (
-          <div className="absolute top-2 left-2 z-10">
-            <span className="px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase bg-gradient-to-r from-orange-500 to-red-500 rounded-sm shadow-sm">
+          <div className="absolute top-3 left-3 z-10">
+            <span className="px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase bg-linear-to-r from-orange-500 to-red-500 rounded-sm shadow-sm">
               {product.badge}
             </span>
           </div>
         )}
 
         {product.discountPercent && (
-          <div className="absolute top-2 right-2 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <span className="px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase bg-error/90 backdrop-blur-sm rounded-sm shadow-sm">
               -{product.discountPercent}%
             </span>
@@ -41,17 +41,31 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Content Body */}
-      <div className="flex flex-col flex-1 justify-between p-4 min-h-[135px]">
-        <h3 className="font-normal text-[15px] text-text-primary line-clamp-2 leading-snug group-hover:text-[#7C6FE8] transition-colors duration-300">
-          {product.name}
-        </h3>
+      <div className="star-shop-card-body flex flex-col flex-1 justify-between">
+        <div className="flex flex-col gap-1">
+          <span className="star-shop-card-category">{CATEGORY_LABELS[product.category]}</span>
 
-        <div className="flex items-end gap-2">
-          <span className="text-[20px] font-bold text-[#7C6FE8] leading-none truncate">
+          <h3
+            className="star-shop-card-name line-clamp-2 group-hover:text-[#7C6FE8] transition-colors duration-300"
+            style={{
+              height: '40px',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {product.name}
+          </h3>
+        </div>
+
+        {/* Price & Original Price */}
+        <div className="flex items-baseline gap-2 mt-auto mb-3">
+          <span className="star-shop-card-price text-[18px] font-bold text-[#7C6FE8]">
             {formatPrice(product.price)}
           </span>
           {product.originalPrice && (
-            <span className="text-xs text-text-muted line-through leading-none mb-[3px]">
+            <span className="star-shop-card-original-price text-xs line-through">
               {formatPrice(product.originalPrice)}
             </span>
           )}
@@ -63,8 +77,8 @@ export function ProductCard({ product }: ProductCardProps) {
             type="button"
             disabled={!product.isInStock}
             className={`w-full h-[38px] rounded-[4px] text-[13px] font-medium transition-colors duration-300 ${product.isInStock
-              ? 'bg-[#7C6FE8] text-white hover:opacity-90 shadow-sm'
-              : 'bg-surface border border-[var(--color-border)] text-text-muted cursor-not-allowed'
+              ? 'bg-[#7C6FE8] text-white hover:opacity-90 shadow-sm cursor-pointer'
+              : 'bg-surface border border-border text-text-muted cursor-not-allowed'
               }`}
             aria-label={`Mua ngay ${product.name}`}
           >
@@ -75,8 +89,8 @@ export function ProductCard({ product }: ProductCardProps) {
             type="button"
             disabled={!product.isInStock}
             className={`w-full h-[38px] flex justify-center items-center gap-1.5 rounded-[4px] text-[13px] font-medium border-[1.5px] border-solid transition-colors duration-300 ${product.isInStock
-              ? 'border-[#7C6FE8] text-[#7C6FE8] bg-surface hover:bg-[#7C6FE8]/10'
-              : 'border-[var(--color-border)] text-text-muted bg-background-soft cursor-not-allowed'
+              ? 'border-[#7C6FE8] text-[#7C6FE8] bg-surface hover:bg-[#7C6FE8]/10 cursor-pointer'
+              : 'border-border text-text-muted bg-background-soft cursor-not-allowed'
               }`}
             aria-label={`Thêm ${product.name} vào giỏ hàng`}
           >

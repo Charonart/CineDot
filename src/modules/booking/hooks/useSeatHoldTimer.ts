@@ -69,7 +69,8 @@ export function useSeatHoldTimer(options?: {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [isMounted, seatHoldExpiresAt, status, expireSeatHold, options]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted, seatHoldExpiresAt, status, expireSeatHold]);
 
   // Default server side / non-mounted / inactive timer response
   if (!isMounted || !seatHoldExpiresAt) {

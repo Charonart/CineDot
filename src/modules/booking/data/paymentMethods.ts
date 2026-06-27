@@ -4,9 +4,16 @@ export type PaymentMethodItem = {
   id: PaymentMethod;
   label: string;
   description: string;
+  logoUrl?: string;
 };
 
 export const PAYMENT_METHODS: PaymentMethodItem[] = [
+  {
+    id: 'zalopay',
+    label: 'ZaloPay',
+    description: 'Thanh toán qua ví ZaloPay',
+    logoUrl: 'https://static.wikia.nocookie.net/logos/images/3/30/ZaloPay_logo.png/revision/latest?cb=20211231001517&path-prefix=vi',
+  },
   {
     id: 'onepay',
     label: 'OnePay',
@@ -16,11 +23,6 @@ export const PAYMENT_METHODS: PaymentMethodItem[] = [
     id: 'momo',
     label: 'Ví MoMo',
     description: 'Thanh toán nhanh qua ví điện tử MoMo',
-  },
-  {
-    id: 'zalopay',
-    label: 'ZaloPay',
-    description: 'Thanh toán qua ví ZaloPay',
   },
   {
     id: 'shopeepay',

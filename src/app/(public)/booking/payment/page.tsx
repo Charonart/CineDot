@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBookingStore } from '@/modules/booking/store/bookingStore';
 import { useSeatHoldTimer } from '@/modules/booking/hooks/useSeatHoldTimer';
+import { useCreateZaloPayOrder } from '@/modules/booking/hooks/useZaloPay';
 import {
   BookingStepper,
   BookingOrderSummary,
@@ -95,6 +96,9 @@ export default function BookingPaymentPage() {
     },
   });
 
+  const { mutateAsync: createZaloPayOrder } = useCreateZaloPayOrder();
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
   const handleCheckoutClick = () => {
     setErrorMsg('');
     if (!paymentMethod) {
@@ -104,10 +108,37 @@ export default function BookingPaymentPage() {
     setIsConfirmOpen(true);
   };
 
-  const handleConfirmPayment = () => {
-    markPendingPayment();
-    setIsConfirmOpen(false);
-    setIsSuccessMessageOpen(true);
+  const handleConfirmPayment = async () => {
+    if (paymentMethod === 'zalopay') {
+      try {
+        setIsProcessingPayment(true);
+        // Calculate mock total amount or get from store. For sandbox demo, we use 50000.
+        const orderData = {
+          amount: 50000, 
+          description: `Thanh toán vé xem phim ${movie?.title || ''}`,
+          app_user: 'CineDotUser',
+        };
+        const response = await createZaloPayOrder(orderData);
+        
+        if (response.success && response.order_url) {
+          markPendingPayment();
+          window.location.href = response.order_url;
+        } else {
+          setErrorMsg('Lỗi tạo đơn hàng ZaloPay: ' + (response.message || 'Unknown error'));
+          setIsConfirmOpen(false);
+          setIsProcessingPayment(false);
+        }
+      } catch (error: any) {
+        setErrorMsg('Đã có lỗi xảy ra khi kết nối ZaloPay.');
+        setIsConfirmOpen(false);
+        setIsProcessingPayment(false);
+      }
+    } else {
+      // Mock for other methods
+      markPendingPayment();
+      setIsConfirmOpen(false);
+      setIsSuccessMessageOpen(true);
+    }
   };
 
   // Render a clean fallback skeleton spinner before client hydration is complete
