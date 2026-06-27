@@ -19,12 +19,18 @@ interface StarShopPageProps {
 
 function ProductSkeleton() {
   return (
-    <div className="star-shop-card star-shop-card--skeleton flex flex-col">
-      <div className="skeleton-image aspect-[4/5] animate-pulse" />
-      <div className="star-shop-card-body p-4 flex flex-col gap-3">
-        <div className="skeleton-line skeleton-line--short" />
-        <div className="skeleton-line" />
-        <div className="skeleton-line skeleton-line--medium" />
+    <div className="flex flex-col h-full bg-surface rounded-md border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden">
+      <div className="aspect-square bg-background-soft animate-pulse shrink-0" />
+      <div className="flex flex-col flex-1 p-4">
+        <div className="flex flex-col gap-2 mb-3">
+          <div className="h-4 w-5/6 bg-background-soft rounded animate-pulse" />
+          <div className="h-4 w-2/3 bg-background-soft rounded animate-pulse" />
+          <div className="h-6 w-1/3 bg-background-soft rounded animate-pulse mt-2" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-auto">
+          <div className="h-9 w-full bg-background-soft rounded-[4px] animate-pulse" />
+          <div className="h-9 w-full bg-background-soft rounded-[4px] animate-pulse" />
+        </div>
       </div>
     </div>
   );
@@ -33,10 +39,8 @@ function ProductSkeleton() {
 export function StarShopPage({ initialCategory }: StarShopPageProps) {
   // Sync category state with category route param
   const [activeCategory, setActiveCategory] = useState<ProductCategory | undefined>(initialCategory);
-  
-  // Client-side text search & sorting states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+
+  // Note: Search and sorting functionality has been removed for a cleaner UI
 
   // Trigger state update on route change
   useEffect(() => {
@@ -49,10 +53,10 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
   const refInnerChild = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
-    const activeBtn = 
+    const activeBtn =
       activeCategory === 'movie-verse' ? refMovieVerse.current :
-      activeCategory === 'fan-wibu' ? refFanWibu.current :
-      activeCategory === 'inner-child' ? refInnerChild.current : null;
+        activeCategory === 'fan-wibu' ? refFanWibu.current :
+          activeCategory === 'inner-child' ? refInnerChild.current : null;
 
     if (activeBtn) {
       setIndicatorStyle({
@@ -69,10 +73,10 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
 
   useEffect(() => {
     const handleResize = () => {
-      const activeBtn = 
+      const activeBtn =
         activeCategory === 'movie-verse' ? refMovieVerse.current :
-        activeCategory === 'fan-wibu' ? refFanWibu.current :
-        activeCategory === 'inner-child' ? refInnerChild.current : null;
+          activeCategory === 'fan-wibu' ? refFanWibu.current :
+            activeCategory === 'inner-child' ? refInnerChild.current : null;
 
       if (activeBtn) {
         setIndicatorStyle({
@@ -93,34 +97,8 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
   const { data, isLoading, isError } = useProducts(activeCategory);
 
   const rawProducts = data?.items || [];
-  
-  // 1. Client-side text query search
-  let processedProducts = rawProducts;
-  if (searchQuery.trim() !== '') {
-    const q = searchQuery.toLowerCase();
-    processedProducts = processedProducts.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q))
-    );
-  }
 
-  // 2. Client-side sorting
-  processedProducts = [...processedProducts].sort((a, b) => {
-    if (sortBy === 'price-asc') {
-      return a.price - b.price;
-    } else if (sortBy === 'price-desc') {
-      return b.price - a.price;
-    } else if (sortBy === 'name-asc') {
-      return a.name.localeCompare(b.name);
-    } else if (sortBy === 'name-desc') {
-      return b.name.localeCompare(a.name);
-    } else {
-      // Default: newest (reverse ID sequence)
-      return b.id.localeCompare(a.id);
-    }
-  });
+
 
   return (
     <div className="star-shop-page min-h-screen bg-background text-text-primary transition-colors duration-300">
@@ -132,21 +110,21 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
         <div className="container mx-auto px-6 text-center">
           <div className="tabs-nav-container" style={{ display: 'inline-flex' }}>
             <div className="tabs-nav" id="starShopTabs" style={{ position: 'relative' }}>
-              <Link 
+              <Link
                 ref={refMovieVerse}
                 href={appRoutes.starShopCategory('movie-verse')}
                 className={`tab-btn ${activeCategory === 'movie-verse' ? 'active' : ''}`}
               >
                 Movie-Verse
               </Link>
-              <Link 
+              <Link
                 ref={refFanWibu}
                 href={appRoutes.starShopCategory('fan-wibu')}
                 className={`tab-btn ${activeCategory === 'fan-wibu' ? 'active' : ''}`}
               >
                 Fan Wibu
               </Link>
-              <Link 
+              <Link
                 ref={refInnerChild}
                 href={appRoutes.starShopCategory('inner-child')}
                 className={`tab-btn ${activeCategory === 'inner-child' ? 'active' : ''}`}
@@ -171,7 +149,7 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
       {/* 6. Main Listing section */}
       <section className="star-shop-products" id="shop">
         <div className="container mx-auto px-6">
-          
+
           {/* Section Heading */}
           <div className="mb-6">
             <h2 className="text-xl font-bold uppercase tracking-wider text-text-primary mb-1">
@@ -182,35 +160,7 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
             </p>
           </div>
 
-          {/* Filtering & Sorting Toolbar */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between p-4 bg-background-soft border border-border rounded-2xl mb-8 shadow-sm">
-            {/* Search Box */}
-            <div className="relative w-full sm:max-w-xs">
-              <span className="absolute inset-y-0 left-3 flex items-center text-text-muted text-xs">🔍</span>
-              <input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-surface border border-border text-xs text-text-primary focus:outline-none focus:border-accent-deep transition-all duration-300"
-              />
-            </div>
 
-            {/* Sorting Select */}
-            <div className="w-full sm:w-auto">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface border border-border text-xs font-bold text-text-secondary cursor-pointer hover:border-text-primary focus:outline-none transition-colors"
-              >
-                <option value="newest">Mới nhất</option>
-                <option value="price-asc">Giá: Thấp đến Cao</option>
-                <option value="price-desc">Giá: Cao đến Thấp</option>
-                <option value="name-asc">Tên: A - Z</option>
-                <option value="name-desc">Tên: Z - A</option>
-              </select>
-            </div>
-          </div>
 
           {/* Load Error */}
           {isError && (
@@ -222,19 +172,19 @@ export function StarShopPage({ initialCategory }: StarShopPageProps) {
 
           {/* Grid View */}
           {isLoading ? (
-            <div className="star-shop-grid">
+            <div className="star-shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>
-          ) : processedProducts.length === 0 ? (
+          ) : rawProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-text-muted border border-dashed border-border rounded-2xl gap-3">
               <span className="text-3xl">🛍️</span>
               <p className="font-medium text-xs">Không tìm thấy sản phẩm phù hợp.</p>
             </div>
           ) : (
-            <div className="star-shop-grid">
-              {processedProducts.map((product) => (
+            <div className="star-shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {rawProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
