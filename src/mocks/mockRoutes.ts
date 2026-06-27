@@ -59,6 +59,8 @@ export const mockRoutes: Record<string, string> = {
   '/api/v1/profile/tickets': '/mocks/profile/ticket-history.json',
   '/booking/selector/showtimes': '/mocks/showtimes-by-movie.json',
   '/api/v1/booking/selector/showtimes': '/mocks/showtimes-by-movie.json',
+  '/admin/movies': '/mocks/admin/movies.json',
+  '/api/v1/admin/movies': '/mocks/admin/movies.json',
 };
 
 export const getMockPath = (url: string): string | null => {
@@ -67,6 +69,12 @@ export const getMockPath = (url: string): string | null => {
   const queryParams = new URLSearchParams(queryStr);
 
   if (mockRoutes[path]) return mockRoutes[path];
+
+  // ─── Admin Movies Detail ──────────────────────────────────────────────────
+  const adminMovieDetailMatch = path.match(/^(\/api\/v1)?\/admin\/movies\/([^/]+)$/);
+  if (adminMovieDetailMatch) {
+    return '/mocks/admin/movie-detail.json';
+  }
 
   // ─── Movies ────────────────────────────────────────────────────────────────
   // All movie listing requests route to the consolidated movies.json database
