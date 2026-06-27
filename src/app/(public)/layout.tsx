@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navbar, Footer } from "@shared/components/layout";
+import "@/styles/template.css";
 
 export default function PublicLayout({
   children,

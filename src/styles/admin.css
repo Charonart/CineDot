@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-admin-bg: #F8F9FA;
+  --color-admin-surface: #FFFFFF;
+  --color-admin-border: #E9ECEF;
+  --color-admin-text-primary: #1A1A1A;
+  --color-admin-text-secondary: #6C757D;
+  
+  --color-admin-brand: #B8AFFF;
+  --color-admin-brand-hover: #9E91F5;
+  --color-admin-brand-light: #EBE8FF;
+  
+  --color-admin-accent: #FF7A1A;
+  --color-admin-accent-hover: #E5680E;
+  --color-admin-accent-light: #FFE8D6;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-admin-bg);
+    color: var(--color-admin-text-primary);
+  }
+}

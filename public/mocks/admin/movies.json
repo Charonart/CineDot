@@ -1,0 +1,79 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "id": 1,
+      "title": "Dune: Hành Tinh Cát - Phần Hai",
+      "original_title": "Dune: Part Two",
+      "status": "now_showing",
+      "release_date": "2024-03-01",
+      "rating": 8.8,
+      "runtime": 166,
+      "age_rating": "T16",
+      "poster_url": "https://image.tmdb.org/t/p/w500/1pdf3ZzTaicuMR5f6TGB52R5G6r.jpg",
+      "backdrop_url": "https://image.tmdb.org/t/p/original/8YFLd4zncljUz4H4hVI5P4W44f3.jpg",
+      "trailer_url": "https://www.youtube.com/watch?v=U2Qp5pL38oY",
+      "overview": "Dune: Part Two sẽ khám phá hành trình tiếp theo của Paul Atreides khi anh hợp nhất với Chani và người Fremen trong khi tìm kiếm sự trả thù chống lại những kẻ âm mưu đã phá hủy gia đình anh.",
+      "genres": [
+        { "id": 878, "name": "Khoa học Viễn tưởng" },
+        { "id": 12, "name": "Phiêu lưu" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Godzilla x Kong: Đế Chế Mới",
+      "original_title": "Godzilla x Kong: The New Empire",
+      "status": "now_showing",
+      "release_date": "2024-03-29",
+      "rating": 7.5,
+      "runtime": 115,
+      "age_rating": "T13",
+      "poster_url": "https://image.tmdb.org/t/p/w500/bQ2ywkG1Jjigo2FoDGf73Z97o3r.jpg",
+      "backdrop_url": "https://image.tmdb.org/t/p/original/j3nn41mg462t5Cc3ndn24Ar56pe.jpg",
+      "trailer_url": "https://www.youtube.com/watch?v=lV1OOlGwExM",
+      "overview": "Hai thực thể cổ đại khổng lồ Godzilla và Kong sẽ phải đối đầu với một mối đe dọa lớn ẩn sâu bên trong hành tinh của chúng ta, thử thách sự sinh tồn của cả hai và của chính loài người.",
+      "genres": [
+        { "id": 28, "name": "Hành động" },
+        { "id": 878, "name": "Khoa học Viễn tưởng" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Biệt Đội Săn Ma: Kỷ Nguyên Băng Giá",
+      "original_title": "Ghostbusters: Frozen Empire",
+      "status": "coming_soon",
+      "release_date": "2026-07-15",
+      "rating": 6.8,
+      "runtime": 115,
+      "age_rating": "T13",
+      "poster_url": "https://image.tmdb.org/t/p/w500/en39Q5U1n1WM85i52185nbe6o51.jpg",
+      "backdrop_url": "https://image.tmdb.org/t/p/original/4woS64V4PPd5f57j5597oFwcl3S.jpg",
+      "trailer_url": "https://www.youtube.com/watch?v=6hLz8Tq2L5c",
+      "overview": "Gia đình Spengler quay trở lại trạm cứu hỏa thành phố New York lịch sử để hợp tác với các Ghostbusters ban đầu, những người đã phát triển một phòng thí nghiệm nghiên cứu tối mật.",
+      "genres": [
+        { "id": 14, "name": "Kỳ ảo" },
+        { "id": 35, "name": "Hài hước" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Oppenheimer",
+      "original_title": "Oppenheimer",
+      "status": "stopped",
+      "release_date": "2023-07-21",
+      "rating": 8.9,
+      "runtime": 180,
+      "age_rating": "T18",
+      "poster_url": "https://image.tmdb.org/t/p/w500/8Gxv83nb2Es4lhOVrGjW4vOhZeb.jpg",
+      "backdrop_url": "https://image.tmdb.org/t/p/original/fm6a0zo2oV6W6lhOWrGjW4vOhZeb.jpg",
+      "trailer_url": "https://www.youtube.com/watch?v=uYPbbksJxIg",
+      "overview": "Câu chuyện về nhà vật lý lý thuyết J. Robert Oppenheimer, người đứng đầu phòng thí nghiệm Los Alamos trong Dự án Manhattan thời Thế chiến II và vai trò của ông trong việc phát triển bom nguyên tử.",
+      "genres": [
+        { "id": 18, "name": "Chính kịch" },
+        { "id": 36, "name": "Lịch sử" }
+      ]
+    }
+  ],
+  "total_pages": 1,
+  "total_results": 4
+}

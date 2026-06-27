@@ -1,0 +1,18 @@
+{
+  "id": 1,
+  "title": "Dune: Hành Tinh Cát - Phần Hai",
+  "original_title": "Dune: Part Two",
+  "status": "now_showing",
+  "release_date": "2024-03-01",
+  "rating": 8.8,
+  "runtime": 166,
+  "age_rating": "T16",
+  "poster_url": "https://image.tmdb.org/t/p/w500/1pdf3ZzTaicuMR5f6TGB52R5G6r.jpg",
+  "backdrop_url": "https://image.tmdb.org/t/p/original/8YFLd4zncljUz4H4hVI5P4W44f3.jpg",
+  "trailer_url": "https://www.youtube.com/watch?v=U2Qp5pL38oY",
+  "overview": "Dune: Part Two sẽ khám phá hành trình tiếp theo của Paul Atreides khi anh hợp nhất với Chani và người Fremen trong khi tìm kiếm sự trả thù chống lại những kẻ âm mưu đã phá hủy gia đình anh.",
+  "genres": [
+    { "id": 878, "name": "Khoa học Viễn tưởng" },
+    { "id": 12, "name": "Phiêu lưu" }
+  ]
+}

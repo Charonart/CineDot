@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import "@/styles/template.css";
 
 export default function AuthLayout({
   children,
