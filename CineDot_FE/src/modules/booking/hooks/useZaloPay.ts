@@ -3,7 +3,7 @@ import { paymentService, CreateZaloPayOrderRequest, CheckZaloPayStatusRequest } 
 
 // Key factory for ZaloPay
 export const zaloPayKeys = {
-  all: ['zaloPay'] as const,
+  all: ['zalopay'] as const,
   status: (appTransId: string) => [...zaloPayKeys.all, 'status', appTransId] as const,
 };
 

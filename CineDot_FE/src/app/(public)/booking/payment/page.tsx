@@ -42,6 +42,15 @@ export default function BookingPaymentPage() {
   // Set hydration complete flag
   useEffect(() => {
     setHasHydrated(true);
+
+    // BFCache fix: if user navigates back from ZaloPay Gateway, force reload to restore UI
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
   // Update current step to payment
@@ -112,11 +121,45 @@ export default function BookingPaymentPage() {
     if (paymentMethod === 'zalopay') {
       try {
         setIsProcessingPayment(true);
-        // Calculate mock total amount or get from store. For sandbox demo, we use 50000.
+        // Calculate real total amount from store
+        const amountToPay = session.finalTotal > 0 ? session.finalTotal : 50000;
+        // Construct detailed items list for ZaloPay
+        const ticketItem = {
+          itemid: 'ticket',
+          itemname: `Vé xem phim ${movie?.title || ''}`,
+          itemprice: session.ticketTotal,
+          itemquantity: 1
+        };
+        const comboItems = session.combos.map(c => ({
+          itemid: c.id,
+          itemname: c.name,
+          itemprice: c.price,
+          itemquantity: c.quantity
+        }));
+        const itemPayload = [ticketItem, ...comboItems];
+
+        // Create a highly detailed description for ZaloPay UI
+        const seatLabels = seats.map(s => s.label).join(', ');
+        const comboString = session.combos.map(c => `${c.name} x${c.quantity}`).join(', ');
+        let detailedDescription = `Phim: ${movie?.title || ''} (${seatLabels})`;
+        if (comboString) {
+          detailedDescription += ` + ${comboString}`;
+        }
+        if (detailedDescription.length > 250) {
+          detailedDescription = detailedDescription.substring(0, 247) + '...';
+        }
+
         const orderData = {
-          amount: 50000, 
-          description: `Thanh toán vé xem phim ${movie?.title || ''}`,
+          amount: amountToPay, 
+          description: detailedDescription,
           app_user: 'CineDotUser',
+          items: itemPayload,
+          embed_data: JSON.stringify({
+            booking_id: `MOCK_BK_${Date.now()}`,
+            movie_id: movie?.slug || 'unknown_movie',
+            movie_title: movie?.title,
+            seats: seatLabels
+          })
         };
         const response = await createZaloPayOrder(orderData);
         

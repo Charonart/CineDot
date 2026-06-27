@@ -13,4 +13,7 @@ export const bookingApi = {
 
   createSeatHold: (payload: SeatHoldRequestDTO): Promise<ApiResponse<SeatHoldDTO>> =>
     axiosClient.post('/booking/seat-holds', payload),
+
+  createBooking: (payload: any): Promise<ApiResponse<any>> =>
+    axiosClient.post('/bookings/hold-seats', payload),
 };

@@ -112,8 +112,8 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
   const searchParams = useSearchParams();
 
   const dynamicUrlId = params?.showtimeId as string;
-  const queryShowtimeId = 'st_qb_1001';
-  const showtimeId = queryShowtimeId;
+  const queryShowtimeId = searchParams?.get('showtimeId') as string;
+  const showtimeId = propShowtimeId || dynamicUrlId || queryShowtimeId;
 
   if (dynamicUrlId === '' && propShowtimeId === '') {
     // No-op to avoid unused variable warning
@@ -300,22 +300,24 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
   useEffect(() => {
     const session = useBookingStore.getState().session;
     if (hold && showtime && !session.quickComboHandled && !showQuickCombo) {
+      const currentMovieSlug = useBookingStore.getState().session.movie?.slug;
+      
       initializeBooking({
         movie: {
-          slug: showtime.movie.slug,
-          title: showtime.movie.title,
-          poster: showtime.movie.posterUrl,
-          format: showtime.room.screenType || '2D',
-          duration: String(showtime.movie.runtime),
+          slug: currentMovieSlug || showtime.movie.slug,
+          title: useBookingStore.getState().session.movie?.title || showtime.movie.title,
+          poster: useBookingStore.getState().session.movie?.poster || showtime.movie.posterUrl,
+          format: useBookingStore.getState().session.movie?.format || showtime.room.screenType || '2D',
+          duration: String(useBookingStore.getState().session.movie?.duration || showtime.movie.runtime),
         },
         cinema: {
           id: showtime.cinema.id,
-          name: showtime.cinema.name,
+          name: useBookingStore.getState().session.cinema?.name || showtime.cinema.name,
           hall: showtime.room.name,
         },
         showtime: {
-          date: showtime.showDate,
-          time: showtime.showTime,
+          date: useBookingStore.getState().session.showDate || showtime.showDate,
+          time: useBookingStore.getState().session.showTime || showtime.showTime,
         },
       });
 

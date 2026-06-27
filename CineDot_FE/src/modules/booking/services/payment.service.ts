@@ -4,6 +4,8 @@ export type CreateZaloPayOrderRequest = {
   amount: number;
   description?: string;
   app_user?: string;
+  embed_data?: string;
+  items?: any[];
 };
 
 export type CreateZaloPayOrderResponse = {
