@@ -8,7 +8,7 @@ import { z } from 'zod';
 export const movieService = {
   getTrendingMovies: async (page = 1): Promise<MovieList> => {
     try {
-      const response = await movieApi.getMovies({ category: 'now-showing', page });
+      const response = await movieApi.getMovies({ category: 'now_showing', page });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -19,7 +19,7 @@ export const movieService = {
 
   getPopularMovies: async (page = 1): Promise<MovieList> => {
     try {
-      const response = await movieApi.getMovies({ category: 'coming-soon', page });
+      const response = await movieApi.getMovies({ category: 'coming_soon', page });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -68,9 +68,10 @@ export const movieService = {
     }
   },
 
+  // lấy dữ liệu hiển thị ở header
   getNavbarMovies: async (): Promise<MovieList> => {
     try {
-      const response = await movieApi.getMovies({ status: 'now-showing,coming-soon', limit: 8 });
+      const response = await movieApi.getMovies({ status: 'now_showing,coming_soon', limit: 8 });
       const validatedData = movieListResponseSchema.parse(response.data);
       return movieMapper.toMovieListModel(validatedData);
     } catch (error) {
@@ -79,9 +80,10 @@ export const movieService = {
     }
   },
 
+  // lấy dữ liệu hiển thị trên carousel trang chủ
   getHeroSlides: async (): Promise<HeroSlide[]> => {
     try {
-      const response = await movieApi.getMovies({ category: 'now-showing', featured: true, limit: 5 });
+      const response = await movieApi.getMovies({ category: 'now_showing', featured: true, limit: 4 });
       // response.data is MovieListResponseDTO under the new contract, so we parse results
       const results = response.data?.results || [];
       const validatedData = z.array(movieSchema).parse(results);
