@@ -33,8 +33,8 @@ export function useSeatHoldTimer(options?: {
       return;
     }
 
-    // Only run the timer if the status is active holding
-    if (status !== 'holding') {
+    // Only run the timer if the status is active holding, pending, or failed
+    if (status !== 'holding' && status !== 'pending-payment' && status !== 'failed') {
       setTimeLeftMs(0);
       return;
     }
@@ -44,7 +44,7 @@ export function useSeatHoldTimer(options?: {
       const difference = seatHoldExpiresAt - now;
       if (difference <= 0) {
         setTimeLeftMs(0);
-        if (status === 'holding') {
+        if (status === 'holding' || status === 'pending-payment' || status === 'failed') {
           expireSeatHold();
           if (options?.onExpired) {
             options.onExpired();
@@ -69,7 +69,8 @@ export function useSeatHoldTimer(options?: {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [isMounted, seatHoldExpiresAt, status, expireSeatHold, options]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted, seatHoldExpiresAt, status, expireSeatHold]);
 
   // Default server side / non-mounted / inactive timer response
   if (!isMounted || !seatHoldExpiresAt) {
@@ -93,7 +94,7 @@ export function useSeatHoldTimer(options?: {
   const formattedTime = `${minutesStr}:${secondsStr}`;
 
   return {
-    isActive: status === 'holding' && seatHoldExpiresAt > Date.now(),
+    isActive: ['holding', 'pending-payment', 'failed'].includes(status) && seatHoldExpiresAt > Date.now(),
     isExpired,
     timeLeftMs,
     minutes: minutesStr,

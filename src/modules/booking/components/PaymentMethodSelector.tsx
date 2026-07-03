@@ -77,10 +77,19 @@ export const PaymentMethodSelector: React.FC = () => {
                 }}
               />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#131413' }}>
-                  {method.label}
-                </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {method.logoUrl && (
+                    <img 
+                      src={method.logoUrl} 
+                      alt={`${method.label} logo`} 
+                      style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
+                    />
+                  )}
+                  <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#131413' }}>
+                    {method.label}
+                  </span>
+                </div>
                 <span style={{ fontSize: '12px', color: 'var(--text2)', lineHeight: 1.3 }}>
                   {method.description}
                 </span>
