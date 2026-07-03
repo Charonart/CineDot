@@ -14,6 +14,7 @@ export interface Product {
   description: string;
   stock: number;
   tags: string[];
+  images?: string[];
   discountPercent: number | null;
   isInStock: boolean;
 }

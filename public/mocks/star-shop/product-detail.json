@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/star-shop/products/{id}",
+    "query": {},
+    "description": "Mock response for single star shop product"
+  },
+  "data": {
+    "id": "ss-001",
+    "slug": "dune-part-two-steelbook",
+    "name": "Dune Part Two - Steelbook 4K UHD",
+    "category": "movie-verse",
+    "price": 899000,
+    "originalPrice": 1200000,
+    "imageUrl": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=500&fit=crop",
+    "badge": "HOT",
+    "description": "Bộ sưu tập Steelbook 4K UHD phiên bản giới hạn của bom tấn Dune Part Two. Sản phẩm chính hãng độc quyền tại CineDot.",
+    "stock": 50,
+    "tags": ["steelbook", "4k", "limited"],
+    "images": [
+      "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1585647347384-2593bc35786b?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop"
+    ]
+  }
+}
