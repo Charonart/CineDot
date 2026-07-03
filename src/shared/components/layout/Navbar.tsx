@@ -416,7 +416,7 @@ export const Navbar: React.FC = () => {
             </Link>
           )}
 
-          {isAuthLoading ? (
+          {!isMounted || isAuthLoading ? (
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
           ) : isAuthenticated && user ? (
             <UserMenu user={user} />

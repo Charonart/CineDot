@@ -2,11 +2,12 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { CinemaSchedule, ShowtimeItem } from '../data/movieDetailData';
+import { useShowtimes } from '@/modules/showtime/hooks/useShowtime';
+import { showtimeMapper } from '@/modules/showtime/mappers/showtime.mapper';
 import { ScrollTextSlideLeft, HighlightText } from '@/shared/components/visual';
 
 interface MovieScheduleProps {
-  cinemas: CinemaSchedule[];
+  movieId: string | number;
 }
 
 interface ScheduleDropdownProps {
@@ -116,7 +117,7 @@ const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({
   );
 };
 
-export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
+export const MovieSchedule: React.FC<MovieScheduleProps> = ({ movieId }) => {
   const router = useRouter();
   const params = useParams();
   const movieSlug = (params?.slug as string) || '';
@@ -124,6 +125,42 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedCinemaFilter, setSelectedCinemaFilter] = useState<string>('all');
+
+  const { data: showtimesData } = useShowtimes(movieId, { date: selectedDate });
+
+  const cinemas = useMemo(() => {
+    if (!showtimesData?.items) return [];
+
+    const groups = showtimeMapper.toCinemaGroups(showtimesData.items);
+    return groups.map((g) => ({
+      name: g.cinemaName,
+      formats: g.formatGroups.map((fg) => ({
+        name: fg.format,
+        times: fg.showtimes.map((st) => {
+          let status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out' = 'available';
+
+          // Simple past check
+          const startTime = new Date(st.startTime);
+          const now = new Date();
+          if (startTime < now) {
+            status = 'past';
+          } else if (st.status === 'sold_out' || st.availableSeats === 0) {
+            status = 'sold-out';
+          } else if (st.status === 'cancelled') {
+            status = 'locked';
+          } else if (st.occupancy >= 80) {
+            status = 'almost-full';
+          }
+
+          return {
+            time: st.formattedTime,
+            status,
+            scheduleId: String(st.showtimeId),
+          };
+        }),
+      })),
+    }));
+  }, [showtimesData]);
 
   const regionOptions = useMemo(() => [
     { value: 'all', label: 'Toàn quốc' },
@@ -190,7 +227,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
   }, [cinemas, selectedRegion, selectedCinemaFilter]);
 
   // Helper to resolve button classes and attributes based on status
-  const getShowtimeBtnProps = (status: ShowtimeItem['status']) => {
+  const getShowtimeBtnProps = (status: 'past' | 'available' | 'almost-full' | 'locked' | 'sold-out') => {
     switch (status) {
       case 'past':
         return { className: 'time-btn is-past', disabled: true, title: 'Đã qua giờ chiếu', label: 'Đã qua' };
@@ -205,18 +242,12 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
     }
   };
 
-  const handleShowtimeClick = (cinemaName: string, time: string) => {
-    const bookingParams = new URLSearchParams({
-      movie: movieSlug,
-      cinema: cinemaName,
-      date: selectedDate,
-      time: time,
-    });
-    router.push(`/booking/seats?${bookingParams.toString()}`);
+  const handleShowtimeClick = (scheduleId: string) => {
+    router.push(`/booking/${scheduleId}`);
   };
 
   return (
-    <section className="fade-up in-view" id="schedule" style={{ marginTop: '48px', width: '100%' }}>
+    <section className="section-detail-content fade-up in-view" id="schedule">
       <ScrollTextSlideLeft as="h2" className="detail-section-title">
         Lịch{' '}
         <HighlightText variant="underline" color="primary">
@@ -224,15 +255,15 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </HighlightText>
       </ScrollTextSlideLeft>
 
-      <div className="schedule-toolbar flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7 border-b border-[var(--color-border)] pb-5 w-full">
+      <div className="schedule-toolbar">
         {/* Date Selector Wrapper */}
-        <div className="schedule-date-nav flex items-center gap-2.5 min-w-0 xl:min-w-[430px] flex-1">
+        <div className="schedule-date-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
           <button 
             type="button" 
-            className="schedule-nav-btn flex-shrink-0 w-11 h-11 rounded-lg border border-[var(--color-border)] bg-[var(--color-background-soft)] text-[var(--color-text-primary)] flex items-center justify-center hover:bg-[var(--color-border)] transition-all" 
+            className="date-nav" 
             aria-label="Ngày trước"
             onClick={() => {
-              const el = document.querySelector('.schedule-date-list');
+              const el = document.querySelector('.date-slider');
               el?.scrollBy({ left: -240, behavior: 'smooth' });
             }}
           >
@@ -241,32 +272,28 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             </svg>
           </button>
 
-          <div className="schedule-date-list flex items-center gap-2 overflow-x-auto flex-1">
+          <div className="date-slider">
             {dateTabs.map(({ dayLabel, formattedDate, dateStr }) => (
               <button
                 key={dateStr}
                 type="button"
-                className={`schedule-date-item flex-shrink-0 flex flex-col items-center justify-center gap-1 w-[104px] h-[64px] border rounded-lg transition-all ${
-                  selectedDate === dateStr 
-                    ? 'is-active active bg-[var(--color-text-primary)] text-[var(--color-background)] border-[var(--color-text-primary)] shadow-sm' 
-                    : 'bg-transparent border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-background-soft)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-primary)]'
-                }`}
+                className={`date-tab ${selectedDate === dateStr ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedDate(dateStr);
                 }}
               >
-                <span className="schedule-date-label text-[11px] font-medium uppercase tracking-[0.5px] opacity-70 block">{dayLabel}</span>
-                <span className="schedule-date-value text-[14px] font-bold block">{formattedDate}</span>
+                <span>{dayLabel}</span>
+                <strong>{formattedDate}</strong>
               </button>
             ))}
           </div>
 
           <button 
             type="button" 
-            className="schedule-nav-btn flex-shrink-0 w-11 h-11 rounded-lg border border-[var(--color-border)] bg-[var(--color-background-soft)] text-[var(--color-text-primary)] flex items-center justify-center hover:bg-[var(--color-border)] transition-all" 
+            className="date-nav" 
             aria-label="Ngày sau"
             onClick={() => {
-              const el = document.querySelector('.schedule-date-list');
+              const el = document.querySelector('.date-slider');
               el?.scrollBy({ left: 240, behavior: 'smooth' });
             }}
           >
@@ -277,7 +304,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
         </div>
 
         {/* Dropdown Filters */}
-        <div className="schedule-filters flex items-center gap-3 md:ml-auto flex-shrink-0">
+        <div className="schedule-filters">
           <ScheduleDropdown
             label="Khu vực"
             value={selectedRegion}
@@ -285,7 +312,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             onChange={(val) => {
               setSelectedRegion(val);
             }}
-            className="schedule-filter-city w-[140px]"
+            className="schedule-filter-city"
           />
           
           <ScheduleDropdown
@@ -295,7 +322,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
             onChange={(val) => {
               setSelectedCinemaFilter(val);
             }}
-            className="schedule-filter-cinema w-[180px]"
+            className="schedule-filter-cinema"
           />
         </div>
       </div>
@@ -308,14 +335,14 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
       ) : (
         filteredCinemas.map((cinema) => {
           return (
-            <div key={cinema.name} className="cinema-schedule-box p-6 sm:p-8" style={{ marginBottom: '24px' }}>
+            <div key={cinema.name} className="cinema-schedule-box" style={{ marginBottom: '24px' }}>
               <h3 className="cinema-group-title">{cinema.name}</h3>
 
               <div className="showtime-rows">
                 {cinema.formats.map((format) => (
-                  <div key={format.name} className="flex flex-col sm:flex-row items-start justify-start gap-4 sm:gap-6 md:gap-8 py-5 first:pt-0 last:pb-0 border-b border-gray-100 last:border-none w-full">
-                    <h4 className="w-full sm:w-[180px] md:w-[220px] flex-shrink-0 text-sm font-semibold text-gray-600 pt-2.5">{format.name}</h4>
-                    <div className="flex flex-wrap gap-3 flex-1 w-full">
+                  <div key={format.name} className="showtime-row">
+                    <h4 className="format-title">{format.name}</h4>
+                    <div className="time-grid">
                       {format.times.map((item) => {
                         const { className, disabled, title, label } = getShowtimeBtnProps(item.status);
 
@@ -326,7 +353,7 @@ export const MovieSchedule: React.FC<MovieScheduleProps> = ({ cinemas }) => {
                             className={className}
                             disabled={disabled}
                             title={title}
-                            onClick={() => handleShowtimeClick(cinema.name, item.time)}
+                            onClick={() => handleShowtimeClick(item.scheduleId)}
                           >
                             <span>{item.time}</span>
                             {label && <small>{label}</small>}

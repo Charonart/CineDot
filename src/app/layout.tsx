@@ -18,7 +18,6 @@ export const metadata: Metadata = {
 };
 
 import { QueryProvider } from "@shared/providers/QueryProvider";
-import { GlobalTrailerModal } from "@/shared/components/visual/GlobalTrailerModal";
 
 export default function RootLayout({
   children,
@@ -32,10 +31,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col font-sans">
-        <QueryProvider>
-          {children}
-          <GlobalTrailerModal />
-        </QueryProvider>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

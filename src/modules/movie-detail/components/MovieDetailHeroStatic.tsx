@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from 'react';
+
 interface MovieDetailHeroStaticProps {
   backdrop: string;
   title: string;
