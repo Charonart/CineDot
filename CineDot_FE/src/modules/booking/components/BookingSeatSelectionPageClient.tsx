@@ -316,8 +316,8 @@ export const BookingSeatSelectionPageClient: React.FC<BookingSeatSelectionPageCl
           hall: showtime.room.name,
         },
         showtime: {
-          date: useBookingStore.getState().session.showDate || showtime.showDate,
-          time: useBookingStore.getState().session.showTime || showtime.showTime,
+          date: useBookingStore.getState().session.showtime?.date || showtime.showDate,
+          time: useBookingStore.getState().session.showtime?.time || showtime.showTime,
         },
       });
 

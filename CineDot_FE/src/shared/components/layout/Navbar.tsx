@@ -15,6 +15,7 @@ import { Movie } from '@/modules/movie/types/movie.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
 import { useAuth, UserMenu } from '@/modules/auth';
 import { usePathname } from 'next/navigation';
+import { useCartStore } from '@/modules/star-shop/store/useCartStore';
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
@@ -24,6 +25,9 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  const totalItems = useCartStore((state) => state.totalItems);
 
   const { data, isLoading, isError } = useNavbarMovies();
 
@@ -35,8 +39,9 @@ export const Navbar: React.FC = () => {
   const nowShowingMovies = movies.filter(m => m.status === 'now-showing').slice(0, 4);
   const comingSoonMovies = movies.filter(m => m.status === 'coming-soon').slice(0, 4);
 
-  // 1. Scroll Shadow listener
+  // 1. Scroll Shadow listener & Hydration
   useEffect(() => {
+    setIsMounted(true);
     const handleScroll = () => {
       if (window.scrollY > 40) {
         setIsScrolled(true);
@@ -363,6 +368,54 @@ export const Navbar: React.FC = () => {
               }
             }}
           />
+          
+          {/* Cart Icon */}
+          {isMounted && totalItems > 0 && (
+            <Link 
+              href="/cart" 
+              className="nav-cart-icon" 
+              style={{
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '44px',
+                height: '44px',
+                color: 'var(--text)',
+                textDecoration: 'none'
+              }}
+              title="Giỏ hàng"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              <span 
+                className="cart-badge"
+                style={{
+                  position: 'absolute',
+                  top: '2px',
+                  right: '0',
+                  background: '#ff6b00',
+                  color: 'white',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  height: '18px',
+                  minWidth: '18px',
+                  borderRadius: '9px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 4px',
+                  border: '2px solid var(--background)'
+                }}
+              >
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            </Link>
+          )}
+
           {isAuthLoading ? (
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
           ) : isAuthenticated && user ? (

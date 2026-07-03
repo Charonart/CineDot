@@ -147,6 +147,10 @@ export const getMockPath = (url: string): string | null => {
     if (category === 'inner-child') return '/mocks/star-shop/products-inner-child.json';
     return '/mocks/star-shop/products.json';
   }
+  
+  if (/^(\/api\/v1)?\/star-shop\/products\/([^/]+)$/.test(path)) {
+    return '/mocks/star-shop/product-detail.json';
+  }
 
   // ── Cinema Corner ──────────────────────────────────────────────────────────
   if (/^(\/api\/v1)?\/cinema-corner\/articles\/[^/]+$/.test(path)) {

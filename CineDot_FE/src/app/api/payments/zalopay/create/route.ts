@@ -17,8 +17,8 @@ export async function POST(request: Request) {
     // Parse client embed_data if provided, then merge with redirecturl
     const parsedClientEmbed = client_embed_data ? JSON.parse(client_embed_data) : {};
     const embed_data = {
-      ...parsedClientEmbed,
-      redirecturl: 'http://localhost:3000/booking/payment/zalopay-return'
+      redirecturl: 'http://localhost:3000/booking/payment/zalopay-return',
+      ...parsedClientEmbed
     };
     
     const items = client_items || [];

@@ -35,7 +35,8 @@ axiosClient.interceptors.request.use(
           origin = `http://localhost:${port}`;
         }
         config.baseURL = origin;
-        config.url = mockPath;
+        const cacheBuster = `_t=${Date.now()}`;
+        config.url = mockPath.includes('?') ? `${mockPath}&${cacheBuster}` : `${mockPath}?${cacheBuster}`;
         config.method = 'GET';
         logger.info(`🚀 [Mock Mode] Redirecting to ${mockPath}`);
       }

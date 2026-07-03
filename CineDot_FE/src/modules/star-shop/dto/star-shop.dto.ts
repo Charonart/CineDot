@@ -7,7 +7,8 @@ export interface ProductDTO {
   category: 'movie-verse' | 'fan-wibu' | 'inner-child';
   price: number;
   originalPrice: number | null;
-  imageUrl: string;
+  imageUrl: string; // Primary image for list view
+  images?: string[]; // Multiple images for detail view
   badge: string | null;
   description: string;
   stock: number;
