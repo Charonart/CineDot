@@ -1,162 +1,190 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useProducts } from '../hooks/useStarShop';
-import { ProductCategory, CATEGORY_LABELS, Product } from '../types/star-shop.type';
+import { ProductCategory } from '../types/star-shop.type';
 import { appRoutes } from '@/shared/routes/appRoutes';
+import { HeroSection } from './HeroSection';
+import { FeaturedProductsGallery } from './FeaturedProductsGallery';
+import { CampaignBanner } from './CampaignBanner';
+import { PremiumShowcase } from './PremiumShowcase';
+import { ProductCard } from './ProductCard';
 
 interface StarShopPageProps {
   initialCategory?: ProductCategory;
 }
 
-const CATEGORIES: { value: ProductCategory | undefined; label: string }[] = [
-  { value: undefined, label: 'Tất Cả' },
-  { value: 'movie-verse', label: 'Movie-verse' },
-  { value: 'fan-wibu', label: 'Fan Wibu' },
-  { value: 'inner-child', label: 'Inner Child' },
-];
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-}
-
-function ProductCard({ product }: { product: Product }) {
-  return (
-    <div className="star-shop-card">
-      <div className="star-shop-card-image-wrap">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={product.imageUrl} alt={product.name} className="star-shop-card-image" loading="lazy" />
-        {product.badge && (
-          <span className={`star-shop-badge star-shop-badge--${product.badge.toLowerCase()}`}>
-            {product.badge}
-          </span>
-        )}
-        {product.discountPercent && (
-          <span className="star-shop-discount-badge">-{product.discountPercent}%</span>
-        )}
-      </div>
-      <div className="star-shop-card-body">
-        <div className="star-shop-card-category">
-          {CATEGORY_LABELS[product.category]}
-        </div>
-        <h3 className="star-shop-card-name">{product.name}</h3>
-        <p className="star-shop-card-desc">{product.description}</p>
-        <div className="star-shop-card-footer">
-          <div className="star-shop-card-price-wrap">
-            <span className="star-shop-card-price">{formatPrice(product.price)}</span>
-            {product.originalPrice && (
-              <span className="star-shop-card-original-price">{formatPrice(product.originalPrice)}</span>
-            )}
-          </div>
-          <div className="star-shop-card-actions">
-            <button
-              type="button"
-              className="btn-star-shop-add"
-              disabled={!product.isInStock}
-              aria-label={`Thêm ${product.name} vào giỏ hàng`}
-            >
-              {product.isInStock ? 'Thêm giỏ' : 'Hết hàng'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function ProductSkeleton() {
   return (
-    <div className="star-shop-card star-shop-card--skeleton">
-      <div className="skeleton-image" />
-      <div className="star-shop-card-body">
-        <div className="skeleton-line skeleton-line--short" />
-        <div className="skeleton-line" />
-        <div className="skeleton-line skeleton-line--medium" />
+    <div className="flex flex-col h-full bg-surface rounded-md border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden">
+      <div className="aspect-square bg-background-soft animate-pulse shrink-0" />
+      <div className="flex flex-col flex-1 p-4">
+        <div className="flex flex-col gap-2 mb-3">
+          <div className="h-4 w-5/6 bg-background-soft rounded animate-pulse" />
+          <div className="h-4 w-2/3 bg-background-soft rounded animate-pulse" />
+          <div className="h-6 w-1/3 bg-background-soft rounded animate-pulse mt-2" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-auto">
+          <div className="h-9 w-full bg-background-soft rounded-[4px] animate-pulse" />
+          <div className="h-9 w-full bg-background-soft rounded-[4px] animate-pulse" />
+        </div>
       </div>
     </div>
   );
 }
 
 export function StarShopPage({ initialCategory }: StarShopPageProps) {
+  // Sync category state with category route param
   const [activeCategory, setActiveCategory] = useState<ProductCategory | undefined>(initialCategory);
+
+  // Note: Search and sorting functionality has been removed for a cleaner UI
+
+  // Trigger state update on route change
+  useEffect(() => {
+    setActiveCategory(initialCategory);
+  }, [initialCategory]);
+
+  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
+  const refMovieVerse = useRef<HTMLAnchorElement>(null);
+  const refFanWibu = useRef<HTMLAnchorElement>(null);
+  const refInnerChild = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    const activeBtn =
+      activeCategory === 'movie-verse' ? refMovieVerse.current :
+        activeCategory === 'fan-wibu' ? refFanWibu.current :
+          activeCategory === 'inner-child' ? refInnerChild.current : null;
+
+    if (activeBtn) {
+      setIndicatorStyle({
+        left: `${activeBtn.offsetLeft}px`,
+        width: `${activeBtn.offsetWidth}px`,
+        opacity: 1
+      });
+    } else {
+      setIndicatorStyle({
+        opacity: 0
+      });
+    }
+  }, [activeCategory]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeBtn =
+        activeCategory === 'movie-verse' ? refMovieVerse.current :
+          activeCategory === 'fan-wibu' ? refFanWibu.current :
+            activeCategory === 'inner-child' ? refInnerChild.current : null;
+
+      if (activeBtn) {
+        setIndicatorStyle({
+          left: `${activeBtn.offsetLeft}px`,
+          width: `${activeBtn.offsetWidth}px`,
+          opacity: 1
+        });
+      } else {
+        setIndicatorStyle({
+          opacity: 0
+        });
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [activeCategory]);
+
   const { data, isLoading, isError } = useProducts(activeCategory);
 
-  const products = data?.items || [];
+  const rawProducts = data?.items || [];
+
+
 
   return (
-    <div className="star-shop-page">
-      {/* Hero */}
-      <section className="star-shop-hero">
-        <div className="star-shop-hero-bg" aria-hidden="true" />
-        <div className="container star-shop-hero-content">
-          <div className="star-shop-hero-badge">🌟 Merchandise & Gifts</div>
-          <h1 className="star-shop-hero-title">Star Shop</h1>
-          <p className="star-shop-hero-subtitle">
-            Bộ sưu tập quà tặng điện ảnh cao cấp — từ mô hình, poster đến merchandise anime chính hãng
-          </p>
-        </div>
-      </section>
+    <div className="star-shop-page min-h-screen bg-background text-text-primary transition-colors duration-300">
+      {/* 1. Dynamic Hero Banner matching site identity */}
+      <HeroSection initialCategory={activeCategory} />
 
-      {/* Category Tabs */}
-      <section className="star-shop-categories">
-        <div className="container">
-          <div className="star-shop-tabs" role="tablist" aria-label="Danh mục sản phẩm">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.value ?? 'all'}
-                type="button"
-                role="tab"
-                aria-selected={activeCategory === cat.value}
-                className={`star-shop-tab ${activeCategory === cat.value ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.value)}
+      {/* 2. Category Navigation Tabs */}
+      <section className="star-shop-tabs-section bg-background pt-8 pb-4" style={{ marginTop: '2.5rem' }}>
+        <div className="container mx-auto px-6 text-center">
+          <div className="tabs-nav-container" style={{ display: 'inline-flex' }}>
+            <div className="tabs-nav" id="starShopTabs" style={{ position: 'relative' }}>
+              <Link
+                ref={refMovieVerse}
+                href={appRoutes.starShopCategory('movie-verse')}
+                className={`tab-btn ${activeCategory === 'movie-verse' ? 'active' : ''}`}
               >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-          {/* Category nav links for sub-routes */}
-          <div className="star-shop-category-nav">
-            <Link href={appRoutes.starShop} className={`star-shop-cat-link ${!initialCategory ? 'active' : ''}`}>
-              Tất Cả
-            </Link>
-            <Link href={appRoutes.starShopCategory('movie-verse')} className={`star-shop-cat-link ${initialCategory === 'movie-verse' ? 'active' : ''}`}>
-              Movie-verse
-            </Link>
-            <Link href={appRoutes.starShopCategory('fan-wibu')} className={`star-shop-cat-link ${initialCategory === 'fan-wibu' ? 'active' : ''}`}>
-              Fan Wibu
-            </Link>
-            <Link href={appRoutes.starShopCategory('inner-child')} className={`star-shop-cat-link ${initialCategory === 'inner-child' ? 'active' : ''}`}>
-              Inner Child
-            </Link>
+                Movie-Verse
+              </Link>
+              <Link
+                ref={refFanWibu}
+                href={appRoutes.starShopCategory('fan-wibu')}
+                className={`tab-btn ${activeCategory === 'fan-wibu' ? 'active' : ''}`}
+              >
+                Fan Wibu
+              </Link>
+              <Link
+                ref={refInnerChild}
+                href={appRoutes.starShopCategory('inner-child')}
+                className={`tab-btn ${activeCategory === 'inner-child' ? 'active' : ''}`}
+              >
+                Inner Child
+              </Link>
+              <span className="tab-glow-indicator" id="starShopTabIndicator" style={indicatorStyle}></span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Product Grid */}
-      <section className="star-shop-products">
-        <div className="container">
+      {/* 3. Featured Products Gallery */}
+      <FeaturedProductsGallery products={rawProducts} />
+
+      {/* 4. Limited urgencies Campaign Banner */}
+      <CampaignBanner />
+
+      {/* 5. Dynamic Premium Showcase for Editorial Highlights */}
+      {rawProducts.length > 0 && <PremiumShowcase products={rawProducts} />}
+
+      {/* 6. Main Listing section */}
+      <section className="star-shop-products" id="shop">
+        <div className="container mx-auto px-6">
+
+          {/* Section Heading */}
+          <div className="mb-6">
+            <h2 className="text-xl font-bold uppercase tracking-wider text-text-primary mb-1">
+              Danh Mục Sản Phẩm
+            </h2>
+            <p className="text-xs text-text-muted">
+              Xem toàn bộ quà tặng chất lượng cao có trong hệ thống CineDot.
+            </p>
+          </div>
+
+
+
+          {/* Load Error */}
           {isError && (
-            <div className="star-shop-error-state">
-              <span className="state-icon">⚠️</span>
-              <p>Không thể tải sản phẩm. Vui lòng thử lại sau.</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center text-error border border-error/20 bg-error/5 rounded-2xl gap-2">
+              <span className="text-2xl">⚠️</span>
+              <p className="font-semibold text-sm">Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.</p>
             </div>
           )}
 
+          {/* Grid View */}
           {isLoading ? (
-            <div className="star-shop-grid">
+            <div className="star-shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>
-          ) : products.length === 0 ? (
-            <div className="star-shop-empty-state">
-              <span className="state-icon">🛍️</span>
-              <p>Chưa có sản phẩm trong danh mục này.</p>
+          ) : rawProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center text-text-muted border border-dashed border-border rounded-2xl gap-3">
+              <span className="text-3xl">🛍️</span>
+              <p className="font-medium text-xs">Không tìm thấy sản phẩm phù hợp.</p>
             </div>
           ) : (
-            <div className="star-shop-grid">
-              {products.map((product) => (
+            <div className="star-shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {rawProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

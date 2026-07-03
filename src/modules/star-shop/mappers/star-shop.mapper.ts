@@ -20,6 +20,7 @@ export const productMapper = {
       description: dto.description,
       stock: dto.stock,
       tags: dto.tags,
+      images: dto.images,
       discountPercent,
       isInStock: dto.stock > 0,
     };

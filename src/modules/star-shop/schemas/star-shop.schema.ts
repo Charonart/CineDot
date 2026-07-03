@@ -12,6 +12,7 @@ export const productSchema = z.object({
   description: z.string(),
   stock: z.number(),
   tags: z.array(z.string()),
+  images: z.array(z.string()).optional(),
 });
 
 export const productListResponseSchema = z.object({

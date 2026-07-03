@@ -1,17 +1,37 @@
 'use client';
 
 import React from 'react';
-import { useBookingStore } from '../store/bookingStore';
-import { PAYMENT_METHODS } from '../data/paymentMethods';
+import { useCartStore } from '../store/useCartStore';
 
-export const PaymentMethodSelector: React.FC = () => {
-  const session = useBookingStore((state) => state.session);
-  const setPaymentMethod = useBookingStore((state) => state.setPaymentMethod);
-  const selectedMethod = session.paymentMethod;
+// Dummy data for payment methods
+const PAYMENT_METHODS = [
+  {
+    id: 'zalopay',
+    label: 'Ví ZaloPay',
+    description: 'Thanh toán qua ví điện tử ZaloPay',
+  },
+  {
+    id: 'momo',
+    label: 'Ví MoMo',
+    description: 'Thanh toán qua ví điện tử MoMo',
+  },
+  {
+    id: 'atm',
+    label: 'Thẻ ATM nội địa',
+    description: 'Thanh toán qua thẻ ATM nội địa',
+  },
+  {
+    id: 'visa',
+    label: 'Thẻ quốc tế (Visa, Master, JCB)',
+    description: 'Thanh toán qua thẻ quốc tế',
+  },
+];
+
+export const StarShopPaymentMethod: React.FC = () => {
+  const { paymentMethod, setPaymentMethod } = useCartStore();
 
   return (
     <div
-      className="payment-method-selector"
       style={{
         background: '#ffffff',
         border: '1px solid var(--border)',
@@ -35,7 +55,7 @@ export const PaymentMethodSelector: React.FC = () => {
         }}
       >
         {PAYMENT_METHODS.map((method) => {
-          const isSelected = selectedMethod === method.id;
+          const isSelected = paymentMethod === method.id;
 
           return (
             <div
@@ -79,13 +99,6 @@ export const PaymentMethodSelector: React.FC = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {method.logoUrl && (
-                    <img 
-                      src={method.logoUrl} 
-                      alt={`${method.label} logo`} 
-                      style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
-                    />
-                  )}
                   <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#131413' }}>
                     {method.label}
                   </span>
