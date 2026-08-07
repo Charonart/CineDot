@@ -1,38 +1,75 @@
-import { useQuery } from '@tanstack/react-query';
-import { cinemasService } from '../services/cinemas.service';
+'use client';
 
-export const cinemasKeys = {
-  all: ['cinemas'] as const,
-  lists: () => [...cinemasKeys.all, 'list'] as const,
-  listParams: (params: Record<string, unknown>) => [...cinemasKeys.lists(), params] as const,
-  detail: (slug: string) => [...cinemasKeys.all, 'detail', slug] as const,
-  pricing: () => [...cinemasKeys.all, 'pricing'] as const,
-};
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { CinemaItem, PricingFormatTab, CinemaPricingFormat } from '../types/cinemas.types';
+import { fetchCinemasByCity, fetchPricingFormat } from '../services/cinemas.service';
 
-export const useCinemas = (params?: { city?: string }) => {
-  return useQuery({
-    queryKey: cinemasKeys.listParams(params ?? {}),
-    queryFn: () => cinemasService.getCinemas(params),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
-};
+export function useCinemas() {
+  const searchParams = useSearchParams();
+  const urlCity = searchParams ? searchParams.get('city') : null;
 
-export const useCinema = (slug: string) => {
-  return useQuery({
-    queryKey: cinemasKeys.detail(slug),
-    queryFn: () => cinemasService.getCinema(slug),
-    enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
-};
+  const [selectedCity, setSelectedCity] = useState<string>(urlCity || 'TP.Hồ Chí Minh');
+  const [cinemas, setCinemas] = useState<CinemaItem[]>([]);
+  const [selectedCinema, setSelectedCinema] = useState<CinemaItem | null>(null);
+  const [pricingTab, setPricingTab] = useState<PricingFormatTab>('2d');
+  const [pricingFormat, setPricingFormat] = useState<CinemaPricingFormat | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export const usePricing = () => {
-  return useQuery({
-    queryKey: cinemasKeys.pricing(),
-    queryFn: () => cinemasService.getPricing(),
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-  });
-};
+  // Sync selectedCity when URL parameter changes
+  useEffect(() => {
+    if (urlCity) {
+      setSelectedCity(urlCity);
+    }
+  }, [urlCity]);
+
+  // Load cinemas when city changes
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCinemas() {
+      setLoading(true);
+      try {
+        const data = await fetchCinemasByCity(selectedCity);
+        if (isMounted) {
+          setCinemas(data);
+          if (data.length > 0) {
+            setSelectedCinema(data[0]);
+          } else {
+            setSelectedCinema(null);
+          }
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadCinemas();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCity]);
+
+  // Load pricing when pricingTab changes
+  useEffect(() => {
+    let isMounted = true;
+    async function loadPricing() {
+      const data = await fetchPricingFormat(pricingTab);
+      if (isMounted) setPricingFormat(data);
+    }
+    loadPricing();
+    return () => {
+      isMounted = false;
+    };
+  }, [pricingTab]);
+
+  return {
+    selectedCity,
+    setSelectedCity,
+    cinemas,
+    selectedCinema,
+    setSelectedCinema,
+    pricingTab,
+    setPricingTab,
+    pricingFormat,
+    loading,
+  };
+}

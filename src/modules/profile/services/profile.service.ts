@@ -1,55 +1,32 @@
-import { profileApi } from '../api/profile.api';
-import { profileMapper } from '../mappers/profile.mapper';
-import { UserProfile, TicketHistory } from '../types/profile.type';
-import { userProfileSchema, ticketHistoryListSchema } from '../schemas/profile.schema';
-import { ProfileUpdateRequestDTO } from '../dto/profile.dto';
-import { TicketStatusDTO } from '../dto/ticket-history.dto';
-import { logger } from '@lib/logger/logger';
+import {
+  UserProfile,
+  UserTicketItem,
+  TransactionItem,
+  RewardVoucherItem,
+} from '../types/profile.types';
+import {
+  MOCK_USER_PROFILE,
+  MOCK_USER_TICKETS,
+  MOCK_TRANSACTIONS,
+  MOCK_REWARD_VOUCHERS,
+} from '../mocks/mockProfileData';
 
-export const profileService = {
-  /**
-   * Fetches the authenticated user's enriched profile.
-   * Validates the response with Zod before mapping to domain model.
-   */
-  getProfile: async (): Promise<UserProfile> => {
-    try {
-      const response = await profileApi.getProfile();
-      const validatedData = userProfileSchema.parse(response.data);
-      return profileMapper.toUserProfile(validatedData);
-    } catch (error) {
-      logger.error('[ProfileService] getProfile failed:', error);
-      throw new Error('FAILED_TO_LOAD_PROFILE');
-    }
-  },
+export async function fetchUserProfile(): Promise<UserProfile> {
+  await new Promise((res) => setTimeout(res, 150));
+  return MOCK_USER_PROFILE;
+}
 
-  /**
-   * Updates the user profile (name, phone).
-   * Returns the updated domain model.
-   */
-  updateProfile: async (data: ProfileUpdateRequestDTO): Promise<UserProfile> => {
-    try {
-      const response = await profileApi.updateProfile(data);
-      const validatedData = userProfileSchema.parse(response.data);
-      return profileMapper.toUserProfile(validatedData);
-    } catch (error) {
-      logger.error('[ProfileService] updateProfile failed:', error);
-      throw new Error('FAILED_TO_UPDATE_PROFILE');
-    }
-  },
+export async function fetchUserTickets(tab: 'UPCOMING' | 'PAST'): Promise<UserTicketItem[]> {
+  await new Promise((res) => setTimeout(res, 200));
+  return MOCK_USER_TICKETS.filter((t) => t.status === tab);
+}
 
-  /**
-   * Fetches the user's ticket history.
-   * Validates the array response and maps each item to a TicketHistory model.
-   * @param params - Optional filter params including AbortSignal for cancellation.
-   */
-  getTicketHistory: async (params?: { status?: TicketStatusDTO; page?: number; signal?: AbortSignal }): Promise<TicketHistory[]> => {
-    try {
-      const response = await profileApi.getTicketHistory(params ?? {});
-      const validatedData = ticketHistoryListSchema.parse(response.data);
-      return profileMapper.toTicketHistoryList(validatedData);
-    } catch (error) {
-      logger.error('[ProfileService] getTicketHistory failed:', error);
-      throw new Error('FAILED_TO_LOAD_TICKET_HISTORY');
-    }
-  },
-};
+export async function fetchTransactions(): Promise<TransactionItem[]> {
+  await new Promise((res) => setTimeout(res, 200));
+  return MOCK_TRANSACTIONS;
+}
+
+export async function fetchRewardVouchers(): Promise<RewardVoucherItem[]> {
+  await new Promise((res) => setTimeout(res, 200));
+  return MOCK_REWARD_VOUCHERS;
+}

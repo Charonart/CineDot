@@ -1,28 +1,21 @@
-'use client';
+import React from 'react';
+import { MoviesListingClientPage } from '@/modules/movies-listing/components/MoviesListingClientPage';
+import { MovieListingTab } from '@/modules/movies-listing/types/movies-listing.types';
 
-import React, { Suspense } from 'react';
-import MoviesPageContent from './MoviesPageContent';
+interface MoviesPageProps {
+  searchParams: Promise<{
+    tab?: string;
+  }>;
+}
 
-export default function MoviesPage() {
-  return (
-    <Suspense 
-      fallback={
-        <div 
-          className="movies-page" 
-          style={{ 
-            minHeight: '100vh', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            background: 'var(--color-background)',
-            color: 'var(--color-text-primary)'
-          }}
-        >
-          <p style={{ fontSize: '16px', fontWeight: 500 }}>Đang tải danh sách phim...</p>
-        </div>
-      }
-    >
-      <MoviesPageContent />
-    </Suspense>
-  );
+export const metadata = {
+  title: 'Danh Sách Phim Đang Chiếu & Sắp Chiếu - CineDot Rạp Phim IMAX',
+  description: 'Khám phá danh sách phim bom tấn mới nhất đang chiếu và sắp chiếu tại hệ thống rạp CineDot. Đặt vé trực tuyến nhanh chóng.',
+};
+
+export default async function MoviesPage({ searchParams }: MoviesPageProps) {
+  const { tab } = await searchParams;
+  const initialTab: MovieListingTab = tab === 'coming-soon' ? 'coming-soon' : 'now-showing';
+
+  return <MoviesListingClientPage initialTab={initialTab} />;
 }

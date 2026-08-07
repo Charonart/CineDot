@@ -1,0 +1,223 @@
+import { MovieDetail, CinemaShowtimeGroup } from '../types/movie-detail.types';
+import { MovieCardItem } from '@/modules/home/types/home.types';
+
+export const MOCK_MOVIE_DETAIL_SPIDERMAN: MovieDetail = {
+  id: 'm-1',
+  slug: 'spiderman-new-beginning',
+  title: 'Người Nhện: Khởi Đầu Mới',
+  originalTitle: 'Spider-Man: A New Beginning',
+  posterUrl: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
+  backdropUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1600&auto=format&fit=crop&q=80',
+  bannerUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1600&auto=format&fit=crop&q=80',
+  trailerUrl: 'https://www.youtube.com/watch?v=cqGjhVJWtEg',
+  formatBadge: '2D Phụ Đề',
+  ageRating: 'T13',
+  genre: ['Hành động', 'Phiêu lưu', 'Giả tưởng'],
+  duration: '148 phút',
+  releaseDate: '31/07/2026',
+  country: 'Mỹ',
+  director: 'Jon Watts',
+  cast: ['Tom Holland', 'Zendaya', 'Jacob Batalon'],
+  synopsis:
+    'Theo sau các sự kiện chấn động toàn cầu, Peter Parker phải học cách cân bằng lại cuộc sống cá nhân và trách nhiệm của một siêu anh hùng khi một mối đe dọa vũ trụ hoàn toàn mới xuất hiện tại thành phố New York.',
+  rating: 9.2,
+  voteCount: 14820,
+  status: 'NOW_SHOWING',
+};
+
+export const MOCK_RECOMMENDED_MOVIES: MovieCardItem[] = [
+  {
+    id: 'rec-1',
+    slug: 'conan-movie-27',
+    title: 'Thám Tử Lừng Danh Conan',
+    posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop&q=80',
+    rating: 8.9,
+    genre: 'Hoạt hình • Trinh thám',
+    formatBadge: 'IMAX 2D',
+    duration: '110 phút',
+    ageRating: 'P',
+    status: 'now-showing',
+  },
+  {
+    id: 'rec-2',
+    slug: 'mai',
+    title: 'Phim Điện Ảnh Mai',
+    posterUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80',
+    rating: 8.7,
+    genre: 'Tâm lý • Tình cảm',
+    formatBadge: '2D Lồng Tiếng',
+    duration: '131 phút',
+    ageRating: 'T18',
+    status: 'now-showing',
+  },
+  {
+    id: 'rec-3',
+    slug: 'inside-out-2',
+    title: 'Những Mảnh Mảnh Cảm Xúc 2',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
+    rating: 9.0,
+    genre: 'Hoạt hình • Gia đình',
+    formatBadge: '3D Lồng Tiếng',
+    duration: '96 phút',
+    ageRating: 'P',
+    status: 'now-showing',
+  },
+];
+
+export const MOCK_MOVIE_DETAIL_COMING_SOON_MAP: Record<string, MovieDetail> = {
+  'joker-folie-a-deux': {
+    id: 'm-7',
+    slug: 'joker-folie-a-deux',
+    title: 'Joker: Folie à Deux',
+    originalTitle: 'Joker: Folie à Deux',
+    posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80',
+    backdropUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1600&auto=format&fit=crop&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1600&auto=format&fit=crop&q=80',
+    trailerUrl: 'https://www.youtube.com/watch?v=cqGjhVJWtEg',
+    formatBadge: 'IMAX 2D',
+    ageRating: 'T18',
+    genre: ['Tâm lý', 'Âm nhạc', 'Tội phạm'],
+    duration: '138 phút',
+    releaseDate: '04/10/2026',
+    country: 'Mỹ',
+    director: 'Todd Phillips',
+    cast: ['Joaquin Phoenix', 'Lady Gaga', 'Zazie Beetz'],
+    synopsis:
+      'Hành trình tiếp nối đầy điên rồ của Arthur Fleck tại Viện tâm thần Arkham nơi hắn gặp gỡ mối tình định mệnh Harley Quinn trong một vũ trụ âm nhạc độc đáo và u tối.',
+    rating: 9.0,
+    voteCount: 8900,
+    status: 'COMING_SOON',
+  },
+  'venom-the-last-dance': {
+    id: 'm-8',
+    slug: 'venom-the-last-dance',
+    title: 'Venom: Kèo Cuối',
+    originalTitle: 'Venom: The Last Dance',
+    posterUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=600&auto=format&fit=crop&q=80',
+    backdropUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1600&auto=format&fit=crop&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1600&auto=format&fit=crop&q=80',
+    trailerUrl: 'https://www.youtube.com/watch?v=cqGjhVJWtEg',
+    formatBadge: '3D Phụ Đề',
+    ageRating: 'T16',
+    genre: ['Hành động', 'Viễn tưởng'],
+    duration: '120 phút',
+    releaseDate: '25/10/2026',
+    country: 'Mỹ',
+    director: 'Kelly Marcel',
+    cast: ['Tom Hardy', 'Chiwetel Ejiofor', 'Juno Temple'],
+    synopsis:
+      'Eddie và Venom bị săn đuổi bởi cả hai thế giới loài người và các Symbiote ngoài hành tinh. Trận chiến cuối cùng sẽ quyết định số phận của bộ đôi này.',
+    rating: 8.8,
+    voteCount: 6500,
+    status: 'COMING_SOON',
+  },
+  'gladiator-2': {
+    id: 'm-9',
+    slug: 'gladiator-2',
+    title: 'Võ Sĩ Giác Đấu 2',
+    originalTitle: 'Gladiator II',
+    posterUrl: 'https://images.unsplash.com/photo-1543536448-d247542f907d?w=600&auto=format&fit=crop&q=80',
+    backdropUrl: 'https://images.unsplash.com/photo-1543536448-d247542f907d?w=1600&auto=format&fit=crop&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1543536448-d247542f907d?w=1600&auto=format&fit=crop&q=80',
+    trailerUrl: 'https://www.youtube.com/watch?v=cqGjhVJWtEg',
+    formatBadge: 'IMAX Laser',
+    ageRating: 'T18',
+    genre: ['Hành động', 'Lịch sử'],
+    duration: '150 phút',
+    releaseDate: '22/11/2026',
+    country: 'Mỹ',
+    director: 'Ridley Scott',
+    cast: ['Paul Mescal', 'Pedro Pascal', 'Denzel Washington'],
+    synopsis:
+      'Câu chuyện tiếp nối nhiều năm sau cái chết của Maximus, theo chân Lucius khi anh trở lại đấu trường La Mã để đòi lại danh dự và sự tự do.',
+    rating: 9.3,
+    voteCount: 11200,
+    status: 'COMING_SOON',
+  },
+  'wicked-part-one': {
+    id: 'm-10',
+    slug: 'wicked-part-one',
+    title: 'Wicked: Phần Một',
+    originalTitle: 'Wicked',
+    posterUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
+    backdropUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&auto=format&fit=crop&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&auto=format&fit=crop&q=80',
+    trailerUrl: 'https://www.youtube.com/watch?v=cqGjhVJWtEg',
+    formatBadge: '2D Phụ Đề',
+    ageRating: 'P',
+    genre: ['Phép thuật', 'Âm nhạc'],
+    duration: '160 phút',
+    releaseDate: '27/11/2026',
+    country: 'Mỹ',
+    director: 'Jon M. Chu',
+    cast: ['Cynthia Erivo', 'Ariana Grande', 'Jonathan Bailey'],
+    synopsis:
+      'Câu chuyện chưa từng kể về tình bạn và hành trình biến đổi giữa Elphaba - Phù thủy phương Tây độc ác và Glinda - Phù thủy phương Đông tốt lành.',
+    rating: 9.1,
+    voteCount: 7800,
+    status: 'COMING_SOON',
+  },
+};
+
+export const MOCK_DATE_OPTIONS = [
+  { dateStr: '2026-07-30', displayDay: 'Thứ Năm', displayDate: '30/07' },
+  { dateStr: '2026-07-31', displayDay: 'Thứ Sáu', displayDate: '31/07' },
+  { dateStr: '2026-08-01', displayDay: 'Thứ Bảy', displayDate: '01/08' },
+  { dateStr: '2026-08-02', displayDay: 'Chủ Nhật', displayDate: '02/08' },
+  { dateStr: '2026-08-03', displayDay: 'Thứ Hai', displayDate: '03/08' },
+  { dateStr: '2026-08-04', displayDay: 'Thứ Ba', displayDate: '04/08' },
+  { dateStr: '2026-08-05', displayDay: 'Thứ Tư', displayDate: '05/08' },
+];
+
+export const MOCK_CINEMA_GROUPS: CinemaShowtimeGroup[] = [
+  {
+    cinemaId: 'cinema-1',
+    cinemaName: 'Galaxy CineX Hanoi Centre',
+    formatGroups: [
+      {
+        formatName: 'Onyx x Dolby Atmos 2D Phụ Đề',
+        showtimes: [
+          { id: 'st-101', time: '18:00', roomName: 'Phòng 01 (IMAX Laser)', availableSeats: 54, totalSeats: 96 },
+          { id: 'st-102', time: '19:45', roomName: 'Phòng 01 (IMAX Laser)', availableSeats: 32, totalSeats: 96 },
+          { id: 'st-103', time: '21:30', roomName: 'Phòng 01 (IMAX Laser)', availableSeats: 70, totalSeats: 96 },
+        ],
+      },
+      {
+        formatName: 'VIP - AQUALIS 2D Phụ Đề',
+        showtimes: [
+          { id: 'st-104', time: '17:30', roomName: 'Phòng 02 (VIP)', availableSeats: 20, totalSeats: 40 },
+          { id: 'st-105', time: '20:15', roomName: 'Phòng 02 (VIP)', availableSeats: 15, totalSeats: 40 },
+        ],
+      },
+      {
+        formatName: '2D Phụ Đề',
+        showtimes: [
+          { id: 'st-106', time: '16:00', roomName: 'Phòng 03 (Standard)', availableSeats: 80, totalSeats: 120 },
+          { id: 'st-107', time: '18:30', roomName: 'Phòng 03 (Standard)', availableSeats: 45, totalSeats: 120 },
+          { id: 'st-108', time: '21:00', roomName: 'Phòng 03 (Standard)', availableSeats: 90, totalSeats: 120 },
+          { id: 'st-109', time: '22:45', roomName: 'Phòng 03 (Standard)', availableSeats: 110, totalSeats: 120 },
+        ],
+      },
+    ],
+  },
+  {
+    cinemaId: 'cinema-2',
+    cinemaName: 'CineDot Landmark 81',
+    formatGroups: [
+      {
+        formatName: 'IMAX Laser 2D Phụ Đề',
+        showtimes: [
+          { id: 'st-201', time: '19:00', roomName: 'Phòng IMAX 01', availableSeats: 12, totalSeats: 150 },
+          { id: 'st-202', time: '21:45', roomName: 'Phòng IMAX 01', availableSeats: 65, totalSeats: 150 },
+        ],
+      },
+      {
+        formatName: '2D Phụ Đề',
+        showtimes: [
+          { id: 'st-203', time: '17:15', roomName: 'Phòng 04', availableSeats: 50, totalSeats: 100 },
+          { id: 'st-204', time: '20:00', roomName: 'Phòng 04', availableSeats: 40, totalSeats: 100 },
+        ],
+      },
+    ],
+  },
+];

@@ -1,0 +1,224 @@
+'use client';
+
+import React, { useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { MapPin, Clock, ArrowRight, ArrowLeft, Ticket, Timer } from 'lucide-react';
+import { ShowtimeBookingInfo, SeatItem } from '../types/seat-booking.types';
+import { startBookingTimer } from '../services/bookingTimerService';
+
+interface BookingSidebarProps {
+  info: ShowtimeBookingInfo;
+  currentShowTime: string;
+  selectedSeats: SeatItem[];
+  totalPrice: number;
+  hasSeenUpsell: boolean;
+  isTimerActive: boolean;
+  formattedCountdown: string;
+  onOpenUpsellModal: () => void;
+}
+
+export const BookingSidebar: React.FC<BookingSidebarProps> = ({
+  info,
+  currentShowTime,
+  selectedSeats,
+  totalPrice,
+  hasSeenUpsell,
+  isTimerActive,
+  formattedCountdown,
+  onOpenUpsellModal,
+}) => {
+  const router = useRouter();
+  const selectedCount = selectedSeats.length;
+  const isSelected = selectedCount > 0;
+  const selectedSeatIdsStr = selectedSeats.map((s) => s.id).join(',');
+
+  // Group selected seats by type
+  const groupedSeats = useMemo(() => {
+    const vipSeats = selectedSeats.filter((s) => s.type === 'VIP');
+    const stdSeats = selectedSeats.filter((s) => s.type === 'STANDARD');
+    const sweetboxSeats = selectedSeats.filter((s) => s.type === 'SWEETBOX');
+
+    const result: { typeName: string; countText: string; seatIds: string }[] = [];
+
+    if (vipSeats.length > 0) {
+      result.push({
+        typeName: 'Ghế VIP',
+        countText: `x${vipSeats.length}`,
+        seatIds: vipSeats.map((s) => s.id).join(', '),
+      });
+    }
+
+    if (stdSeats.length > 0) {
+      result.push({
+        typeName: 'Ghế Thường',
+        countText: `x${stdSeats.length}`,
+        seatIds: stdSeats.map((s) => s.id).join(', '),
+      });
+    }
+
+    if (sweetboxSeats.length > 0) {
+      const pairs = Array.from(new Set(sweetboxSeats.map((s) => s.pairId).filter(Boolean)));
+      result.push({
+        typeName: 'Ghế Đôi Sweetbox',
+        countText: `x${pairs.length} cặp`,
+        seatIds: sweetboxSeats.map((s) => s.id).join(', '),
+      });
+    }
+
+    return result;
+  }, [selectedSeats]);
+
+  const handleContinueClick = () => {
+    if (!isSelected) return;
+
+    // Officially start the 10-minute hold countdown timer NOW!
+    startBookingTimer(info.showtimeId);
+
+    const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+      info.showDate
+    )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
+
+    if (hasSeenUpsell) {
+      // Direct navigation when upsell has been seen/skipped
+      router.push(foodUrl);
+    } else {
+      // Trigger upsell modal
+      onOpenUpsellModal();
+    }
+  };
+
+  return (
+    <div className="w-full bg-white rounded-3xl p-6 shadow-[0_16px_50px_rgba(124,111,232,0.12),0_4px_16px_rgba(0,0,0,0.02)] border border-gray-100 flex flex-col gap-5 sticky top-28">
+      {/* 1. TOPMOST SECTION INSIDE SIDEBAR: Active Countdown Timer */}
+      {isTimerActive && (
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+          <div className="flex items-center gap-2 font-bold">
+            <Timer className="w-4 h-4 text-amber-600 animate-pulse" />
+            <span>Thời gian giữ ghế:</span>
+          </div>
+          <span className="font-extrabold text-sm text-amber-600 tracking-tight">
+            {formattedCountdown}
+          </span>
+        </div>
+      )}
+
+      {/* 2. Dynamic Movie Thumbnail & Title Info */}
+      <div className="flex gap-4 items-start border-b border-gray-100 pb-4">
+        <div className="w-20 aspect-[2/3] rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-md">
+          <img
+            src={info.posterUrl}
+            alt={info.movieTitle}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-bold uppercase">
+              {info.movieFormat}
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
+              Khán giả {info.ageRating}
+            </span>
+          </div>
+
+          <h3 className="font-bold text-base text-[#131413] leading-snug line-clamp-2">
+            {info.movieTitle}
+          </h3>
+        </div>
+      </div>
+
+      {/* 3. Cinema & Interactive Showtime Info */}
+      <div className="flex flex-col gap-2.5 text-xs text-slate-700 border-b border-gray-100 pb-4">
+        <div className="flex items-start gap-2">
+          <MapPin className="w-4 h-4 text-[#7C6FE8] shrink-0 mt-0.5" />
+          <div className="flex flex-col">
+            <span className="font-bold text-[#131413]">{info.cinemaName}</span>
+            <span className="text-slate-500">{info.roomName}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Clock className="w-[#7C6FE8] w-4 h-4 shrink-0" />
+          <span>Suất: <strong>{currentShowTime}</strong> - {info.showDate}</span>
+        </div>
+      </div>
+
+      {/* 4. Itemized Selected Seats Breakdown */}
+      <div className="flex flex-col gap-2 border-b border-gray-100 pb-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Ticket className="w-3.5 h-3.5 text-[#7C6FE8]" />
+            <span>Ghế Đã Chọn ({selectedCount})</span>
+          </span>
+        </div>
+
+        {!isSelected ? (
+          <p className="text-xs text-slate-400 font-medium italic pt-1">
+            Vui lòng nhấp chọn vị trí ghế trên sơ đồ
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2 pt-1">
+            {groupedSeats.map((group, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-2xl bg-slate-50 border border-gray-100 flex flex-col gap-1 text-xs"
+              >
+                <div className="flex items-center justify-between font-bold text-[#131413]">
+                  <span>{group.typeName} ({group.countText})</span>
+                </div>
+                <div className="text-[#7C6FE8] font-bold tracking-wide">
+                  {group.seatIds}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 5. Total Price */}
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex flex-col">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Tổng Cộng
+          </span>
+          {isSelected && (
+            <span className="text-[11px] font-semibold text-slate-500">
+              ({selectedCount} ghế đã chọn)
+            </span>
+          )}
+        </div>
+        <span className="text-2xl font-extrabold text-[#7C6FE8]">
+          {totalPrice.toLocaleString()}đ
+        </span>
+      </div>
+
+      {/* 6. Action Buttons Row */}
+      <div className="grid grid-cols-2 gap-3 pt-2">
+        <Link href={`/movies/${info.movieSlug}`}>
+          <button className="w-full py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Quay lại</span>
+          </button>
+        </Link>
+
+        <motion.button
+          whileHover={isSelected ? { scale: 1.04 } : {}}
+          whileTap={isSelected ? { scale: 0.96 } : {}}
+          disabled={!isSelected}
+          onClick={handleContinueClick}
+          className={`w-full py-3 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            isSelected
+              ? 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-lg shadow-[#7C6FE8]/35'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+          }`}
+        >
+          <span>Tiếp tục</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </motion.button>
+      </div>
+    </div>
+  );
+};

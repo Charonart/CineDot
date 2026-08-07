@@ -1,13 +1,11 @@
-import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { appRoutes } from '@/shared/routes/appRoutes';
+import React from 'react';
+import { SpecialTheatersClientPage } from '@/modules/special-theaters/components/SpecialTheatersClientPage';
 
-export const metadata: Metadata = {
-  title: 'Rạp Đặc Biệt — CineDot | IMAX, 4DX, Dolby Atmos',
-  description: 'Trải nghiệm điện ảnh đỉnh cao tại các phòng chiếu đặc biệt CineDot: IMAX, 4DX, Dolby Atmos và Cine de Kids.',
+export const metadata = {
+  title: 'Rạp Đặc Biệt & Công Nghệ Chiếu IMAX 3D, 4DX, Gold Class - CineDot',
+  description: 'Trải nghiệm công nghệ phòng chiếu điện ảnh chuẩn quốc tế: IMAX 12-Channel Laser, Ghế lắc 4DX, Giường nằm Gold Class VIP và Âm thanh vòm Dolby Atmos.',
 };
 
-export default function SpecialTheatersRootPage() {
-  // Redirect to IMAX as the flagship/default special theater
-  redirect(appRoutes.specialTheaterType('imax'));
+export default function SpecialTheatersPage() {
+  return <SpecialTheatersClientPage />;
 }

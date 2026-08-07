@@ -1,19 +1,15 @@
-import { specialTheatersApi } from '../api/special-theaters.api';
-import { specialTheatersMapper } from '../mappers/special-theaters.mapper';
-import { TheaterTypeData } from '../types/special-theaters.type';
-import { theaterTypeDataSchema } from '../schemas/special-theaters.schema';
-import { TheaterType } from '../dto/special-theaters.dto';
-import { logger } from '@lib/logger/logger';
+import { SpecialTheaterSpec, TheaterFormat, ComparisonMatrixRow } from '../types/special-theaters.types';
+import { MOCK_SPECIAL_THEATERS, MOCK_COMPARISON_MATRIX } from '../mocks/mockSpecialTheatersData';
 
-export const specialTheatersService = {
-  getTheaterType: async (type: TheaterType): Promise<TheaterTypeData> => {
-    try {
-      const response = await specialTheatersApi.getTheaterType(type);
-      const validatedData = theaterTypeDataSchema.parse(response.data);
-      return specialTheatersMapper.toTheaterTypeModel(validatedData);
-    } catch (error) {
-      logger.error('[SpecialTheatersService] getTheaterType failed:', error);
-      throw new Error('FAILED_TO_LOAD_THEATER_TYPE');
-    }
-  },
-};
+export async function fetchSpecialTheaters(format: TheaterFormat = 'ALL'): Promise<SpecialTheaterSpec[]> {
+  await new Promise((res) => setTimeout(res, 150));
+  if (format === 'ALL') {
+    return MOCK_SPECIAL_THEATERS;
+  }
+  return MOCK_SPECIAL_THEATERS.filter((th) => th.format === format);
+}
+
+export async function fetchComparisonMatrix(): Promise<ComparisonMatrixRow[]> {
+  await new Promise((res) => setTimeout(res, 100));
+  return MOCK_COMPARISON_MATRIX;
+}

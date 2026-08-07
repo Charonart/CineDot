@@ -1,20 +1,34 @@
-import { BookingSeatSelectionPageClient } from '@/modules/booking/components';
+import React from 'react';
+import { SeatBookingClientPage } from '@/modules/booking/components/SeatBookingClientPage';
 
-interface BookingSeatsPageProps {
+interface SeatBookingPageProps {
   searchParams: Promise<{
-    showtimeId?: string;
+    showtime_id?: string;
+    movie?: string;
+    seats?: string;
+    date?: string;
+    time?: string;
+    cinema?: string;
   }>;
 }
 
-/**
- * /booking/seats?showtimeId=<id>
- *
- * Entry point for Scenario B (bypass) — the user arrives here with a locked
- * showtimeId from Quick Booking, Movie Detail, or the standalone /booking
- * selector page. The showtimeId is read from the URL query param so the
- * browser history is clean and no dynamic segment is needed.
- */
-export default async function BookingSeatsPage({ searchParams }: BookingSeatsPageProps) {
-  const { showtimeId } = await searchParams;
-  return <BookingSeatSelectionPageClient showtimeId={showtimeId ?? ''} />;
+export const metadata = {
+  title: 'Chọn Ghế Xem Phim - CineDot Rạp Phim IMAX',
+  description: 'Lựa chọn vị trí ghế ngồi ưa thích trong phòng chiếu IMAX tại hệ thống rạp CineDot.',
+};
+
+export default async function SeatBookingPage({ searchParams }: SeatBookingPageProps) {
+  const { showtime_id, movie, seats, date, time, cinema } = await searchParams;
+  const showtimeId = showtime_id || 'showtime-101';
+
+  return (
+    <SeatBookingClientPage
+      showtimeId={showtimeId}
+      movieParam={movie}
+      initialSeatsParam={seats}
+      dateParam={date}
+      timeParam={time}
+      cinemaParam={cinema}
+    />
+  );
 }

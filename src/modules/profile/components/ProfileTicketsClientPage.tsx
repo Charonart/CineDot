@@ -1,0 +1,167 @@
+'use client';
+
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useProfileDashboard } from '../hooks/useProfileDashboard';
+import { ProfileSidebar } from './ProfileSidebar';
+import { UserTicketCard } from './UserTicketCard';
+import { StarShopOrdersTab } from './StarShopOrdersTab';
+import { TabAccountInfo } from './TabAccountInfo';
+import { TabTransactionHistory } from './TabTransactionHistory';
+import { TabSecurity } from './TabSecurity';
+import { TabRewards } from './TabRewards';
+import { Skeleton } from '@/shared/ui/Skeleton';
+
+export function ProfileTicketsClientPage() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  const {
+    profile,
+    activeNavTab,
+    setActiveNavTab,
+    ticketFilterTab,
+    setTicketFilterTab,
+    tickets,
+    transactions,
+    vouchers,
+    loading,
+    accountUpdateSuccess,
+    securityUpdateSuccess,
+    redeemSuccessMsg,
+    handleUpdateAccountInfo,
+    handleUpdateSecurityPassword,
+    handleRedeemVoucher,
+  } = useProfileDashboard();
+
+  useEffect(() => {
+    if (tabParam === 'my-orders' || tabParam === 'starshop' || tabParam === 'orders') {
+      setActiveNavTab('ORDERS');
+    }
+  }, [tabParam, setActiveNavTab]);
+
+  if (loading || !profile) {
+    return (
+      <div className="w-full pt-28 pb-20 bg-[#FEFEFE] min-h-screen">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-4">
+              <Skeleton variant="card" className="w-full h-[500px] rounded-3xl" />
+            </div>
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              <Skeleton variant="text" className="w-1/3 h-10" />
+              <Skeleton variant="card" className="w-full h-48 rounded-3xl" />
+              <Skeleton variant="card" className="w-full h-48 rounded-3xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-28 pb-20 selection:bg-[#7C6FE8] selection:text-white">
+      <main className="w-full">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: 25% Width (lg:col-span-4 - User Profile Sidebar Panel) */}
+            <div className="lg:col-span-4">
+              <ProfileSidebar
+                profile={profile}
+                activeTab={activeNavTab}
+                onSelectTab={setActiveNavTab}
+              />
+            </div>
+
+            {/* Right Column: 75% Width (lg:col-span-8 - Active Tab Content) */}
+            <div className="lg:col-span-8">
+              {/* TAB 1: VÉ CỦA TÔI */}
+              {activeNavTab === 'TICKETS' && (
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
+                      Vé Của Tôi
+                    </h1>
+
+                    <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-fit">
+                      <button
+                        onClick={() => setTicketFilterTab('UPCOMING')}
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                          ticketFilterTab === 'UPCOMING'
+                            ? 'bg-[#7C6FE8] text-white shadow-sm'
+                            : 'text-slate-600 hover:text-[#7C6FE8]'
+                        }`}
+                      >
+                        Vé Sắp Chiếu
+                      </button>
+
+                      <button
+                        onClick={() => setTicketFilterTab('PAST')}
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                          ticketFilterTab === 'PAST'
+                            ? 'bg-[#7C6FE8] text-white shadow-sm'
+                            : 'text-slate-600 hover:text-[#7C6FE8]'
+                        }`}
+                      >
+                        Vé Đã Xem
+                      </button>
+                    </div>
+                  </div>
+
+                  {tickets.length === 0 ? (
+                    <div className="w-full bg-white rounded-3xl p-12 text-center border border-gray-100 flex flex-col items-center gap-3">
+                      <span className="text-4xl">🎟️</span>
+                      <h3 className="font-bold text-base text-[#131413]">Không tìm thấy vé xem phim nào</h3>
+                      <p className="text-xs text-slate-400">Bạn chưa có vé xem phim ở mục này.</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {tickets.map((t) => (
+                        <UserTicketCard key={t.bookingId} ticket={t} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: ĐƠN HÀNG CỦA BẠN */}
+              {activeNavTab === 'ORDERS' && <StarShopOrdersTab />}
+
+              {/* TAB 3: THÔNG TIN CÁ NHÂN */}
+              {activeNavTab === 'ACCOUNT' && (
+                <TabAccountInfo
+                  profile={profile}
+                  onUpdate={handleUpdateAccountInfo}
+                  updateSuccess={accountUpdateSuccess}
+                />
+              )}
+
+              {/* TAB 4: LỊCH SỬ GIAO DỊCH */}
+              {activeNavTab === 'TRANSACTIONS' && (
+                <TabTransactionHistory transactions={transactions} />
+              )}
+
+              {/* TAB 5: BẢO MẬT TÀI KHOẢN */}
+              {activeNavTab === 'SECURITY' && (
+                <TabSecurity
+                  onUpdatePassword={handleUpdateSecurityPassword}
+                  updateSuccess={securityUpdateSuccess}
+                />
+              )}
+
+              {/* TAB 6: ƯU ĐÃI & ĐIỂM THƯỞNG */}
+              {activeNavTab === 'REWARDS' && (
+                <TabRewards
+                  profile={profile}
+                  vouchers={vouchers}
+                  onRedeem={handleRedeemVoucher}
+                  redeemSuccessMsg={redeemSuccessMsg}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

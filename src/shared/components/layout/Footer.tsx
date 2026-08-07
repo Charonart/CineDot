@@ -1,79 +1,94 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export const Footer: React.FC = () => {
-  const socialBtnStyle: React.CSSProperties = {
-    background: 'none',
-    border: 'none',
-    font: 'inherit',
-    color: 'inherit',
-    padding: 0,
-    cursor: 'not-allowed',
-    opacity: 0.6
-  };
-
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-top">
-          <div className="footer-brand">
-            <div className="footer-logo">CINE</div>
-            <p>
-              Đặt vé nhanh. Xem phim hay.{' '}
-              <span className="highlight-text" data-variant="underline" data-color="accent">
-                Trải nghiệm điện ảnh cao cấp.
-              </span>
+    <footer className="bg-[#0B0C0B] text-gray-400 py-16 border-t border-white/10 text-xs">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-8">
+        {/* 5 Columns Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+          {/* Col 1: Brand Info */}
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            <Link href="/" className="text-2xl font-bold tracking-tight text-white">
+              Cine<span className="text-[#7C6FE8]">Dot</span>
+            </Link>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Hệ thống rạp chiếu phim hiện đại hàng đầu Việt Nam, mang đến trải nghiệm điện ảnh tuyệt vời nhất.
             </p>
-            <div className="social-links">
-              <button type="button" className="social-link" style={socialBtnStyle}>FB</button>
-              <button type="button" className="social-link" style={socialBtnStyle}>IG</button>
-              <button type="button" className="social-link" style={socialBtnStyle}>TW</button>
-              <button type="button" className="social-link" style={socialBtnStyle}>YT</button>
+            <div className="flex items-center gap-3 pt-2">
+              <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-[#7C6FE8] transition-colors">
+                f
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-[#7C6FE8] transition-colors">
+                ▶
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-[#7C6FE8] transition-colors">
+                📷
+              </a>
             </div>
           </div>
-          <div className="footer-links-group">
-            <h4>Phim</h4>
-            <Link href="/movies?category=now-showing">Phim Đang chiếu</Link>
-            <Link href="/movies?category=coming-soon">Phim Sắp chiếu</Link>
-            <Link href="/movies?category=coming-soon">Đặt vé trước</Link>
-            <Link href="/movies?category=imax">Suất chiếu đặc biệt</Link>
+
+          {/* Col 2: Phim */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">PHIM</h4>
+            <ul className="flex flex-col gap-2.5">
+              <li><Link href="/movies?category=now-showing" className="hover:text-white transition-colors">Phim đang chiếu</Link></li>
+              <li><Link href="/movies?category=coming-soon" className="hover:text-white transition-colors">Phim sắp chiếu</Link></li>
+              <li><Link href="/star-shop" className="hover:text-white transition-colors">Star Shop Cửa hàng</Link></li>
+            </ul>
           </div>
-          <div className="footer-links-group">
-            <h4>Hệ thống rạp</h4>
-            <Link href="/coming-soon">CINE Landmark</Link>
-            <Link href="/coming-soon">CINE Crescent</Link>
-            <Link href="/coming-soon">CINE Vincom</Link>
-            <Link href="/coming-soon">Tìm rạp chiếu</Link>
+
+          {/* Col 3: Hệ Thống Rạp */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">HỆ THỐNG RẠP</h4>
+            <ul className="flex flex-col gap-2.5">
+              <li><Link href="/cinemas" className="hover:text-white transition-colors">Tất cả các rạp</Link></li>
+              <li><Link href="/special-theaters" className="hover:text-white transition-colors">Rạp đặc biệt IMAX</Link></li>
+              <li><Link href="/events" className="hover:text-white transition-colors">Sự kiện & Khuyến mãi</Link></li>
+            </ul>
           </div>
-          <div className="footer-links-group">
-            <h4>Hỗ trợ</h4>
-            <Link href="/coming-soon">Trung tâm trợ giúp</Link>
-            <Link href="/coming-soon">Câu hỏi thường gặp</Link>
-            <Link href="/coming-soon">Chính sách hoàn tiền</Link>
-            <Link href="/coming-soon">Liên hệ</Link>
+
+          {/* Col 4: Giới Thiệu & Hỗ Trợ */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">GIỚI THIỆU & HỖ TRỢ</h4>
+            <ul className="flex flex-col gap-2.5">
+              <li><Link href="/about" className="hover:text-white text-[#7C6FE8] font-bold transition-colors">Về chúng tôi (About)</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Hỏi đáp & FAQ</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Liên hệ & Trụ sở</Link></li>
+            </ul>
           </div>
-          <div className="footer-app">
-            <h4>Tải ứng dụng</h4>
-            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="app-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-              App Store
-            </a>
-            <a href="https://play.google.com" target="_blank" rel="noopener noreferrer" className="app-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3.18 23.76c.26.15.56.24.89.24.37 0 .75-.1 1.09-.3l12.96-7.48-2.79-2.79-12.15 10.33zM20.12 7.38L7.15.3c-.34-.2-.72-.3-1.09-.3-.33 0-.63.09-.89.24L17.32 12l2.8-4.62zM1 21.37V2.63L13.67 12 1 21.37zM7.15 23.7l12.97-7.48c.59-.34.97-.97.97-1.66v-.12L2.18 24c.26.15.56.24.89.24.37 0 .75-.1 1.08-.3v.02z" />
-              </svg>
-              Google Play
-            </a>
+
+          {/* Col 5: Tải App & Đã Thông Báo BCT */}
+          <div className="flex flex-col gap-3 lg:items-end">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">TẢI ỨNG DỤNG</h4>
+            <div className="flex flex-col gap-2 w-44">
+              <button className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-left text-white transition-colors">
+                <p className="text-[9px] uppercase text-gray-400">Download on</p>
+                <p className="text-xs font-bold">App Store</p>
+              </button>
+              <button className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-left text-white transition-colors">
+                <p className="text-[9px] uppercase text-gray-400">Get it on</p>
+                <p className="text-xs font-bold">Google Play</p>
+              </button>
+            </div>
+            {/* Ministry of Industry and Trade Badge */}
+            <div className="pt-2">
+              <span className="inline-block px-3 py-1 bg-blue-600/30 border border-blue-500/40 text-blue-300 text-[10px] font-bold rounded-md uppercase">
+                ✓ Đã Thông Báo BCT
+              </span>
+            </div>
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>© 2024 CINE. Bảo lưu mọi quyền.</p>
-          <div className="footer-legal">
-            <Link href="/coming-soon">Quyền riêng tư</Link>
-            <Link href="/coming-soon">Điều khoản</Link>
-            <Link href="/coming-soon">Cookie</Link>
+
+        {/* Bottom copyright */}
+        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-gray-500 text-[11px]">
+          <p>© 2026 CineDot. All rights reserved.</p>
+          <div className="flex gap-6">
+            <Link href="/about" className="hover:text-gray-300 transition-colors">Về CineDot</Link>
+            <Link href="/about" className="hover:text-gray-300 transition-colors">Quyền riêng tư</Link>
+            <Link href="/about" className="hover:text-gray-300 transition-colors">Điều khoản</Link>
           </div>
         </div>
       </div>

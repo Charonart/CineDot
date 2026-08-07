@@ -1,0 +1,152 @@
+import { SpecialTheaterSpec, ComparisonMatrixRow } from '../types/special-theaters.types';
+
+export const MOCK_SPECIAL_THEATERS: SpecialTheaterSpec[] = [
+  {
+    id: 'th-imax',
+    format: 'IMAX',
+    formatName: 'IMAX® 12-Channel Commercial Laser 3D',
+    tagline: 'Màn Chiếu Cong Khổng Lồ 22m & Âm Thanh Vòm 12 Kênh Độc Quyền',
+    description: 'Trải nghiệm đỉnh cao của điện ảnh hiện đại với máy chiếu Dual 4K Laser độc quyền, đem lại hình ảnh nét gấp 4 lần chuẩn 4K thông thường và độ tương phản tuyệt đối.',
+    imageUrl: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1000&auto=format&fit=crop&q=80',
+    badgeText: 'ĐỈNH CAO THỊ GIÁC',
+    badgeColor: 'bg-amber-500',
+    specs: [
+      'Màn chiếu cong khổng lồ 22m x 12m',
+      'Công nghệ trình chiếu Dual 4K Laser',
+      'Hệ thống âm thanh vòm IMAX 12-Channel',
+      'Khung hình mở rộng đến 26% diện tích',
+    ],
+    features: [
+      'Kính 3D công nghệ màng lọc cực sắc nét không gây mỏi mắt.',
+      'Hệ thống hiệu chỉnh âm thanh tự động Laser đo từng milimet hàng ghế.',
+      'Thiết kế độ dốc khán phòng hình bậc thang 45 độ chuẩn Hollywood.',
+    ],
+    applicableCinemas: [
+      'Galaxy CineX Hanoi Centre (Tầng 3, 54 Liễu Giai)',
+      'CineDot Landmark 81 Saigon (Tầng B1, TP.HCM)',
+    ],
+    priceRange: '160.000đ - 250.000đ / vé',
+    ctaText: 'XEM LỊCH CHIẾU PHÒNG IMAX ➔',
+  },
+  {
+    id: 'th-4dx',
+    format: '4DX',
+    formatName: '4DX® Dynamic Motion & Environmental Effects',
+    tagline: 'Đa Giác Quan Với 21 Hiệu Ứng Môi Trường & Ghế Xoay 3 Chiều',
+    description: 'Biến mỗi phút giây trên màn ảnh thành chuyến hành trình thực tế với hiệu ứng gió thổi, mưa sương, hương thơm, khói nhạt và chuyển động tương tác nhịp nhàng.',
+    imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1000&auto=format&fit=crop&q=80',
+    badgeText: 'TƯƠNG TÁC ĐA GIÁC QUAN',
+    badgeColor: 'bg-[#7C6FE8]',
+    specs: [
+      'Ghế ngả chuyển động 3 chiều (Pitch, Roll, Yaw)',
+      'Hiệu ứng mưa sương, gió thổi, bong bóng & khói',
+      'Đèn chớp nháy Lightning FX lập trình chuẩn',
+      'Hệ thống hương thơm tỏa theo cảnh phim',
+    ],
+    features: [
+      'Cơ chế túi khí đấm lưng và rung lắc chân nhịp nhàng.',
+      'Khả năng tắt hiệu ứng nước trực tiếp tại vị trí ghế.',
+    ],
+    applicableCinemas: [
+      'CineDot Ba Đình Centre (29 Liễu Giai, Hà Nội)',
+      'CineDot Đà Nẵng Premier (9 Phùng Hưng, Đà Nẵng)',
+    ],
+    priceRange: '140.000đ - 220.000đ / vé',
+    ctaText: 'XEM LỊCH CHIẾU PHÒNG 4DX ➔',
+  },
+  {
+    id: 'th-goldclass',
+    format: 'GOLD_CLASS',
+    formatName: 'Gold Class Luxury Reclining Bed Suite',
+    tagline: 'Giường Nằm Da Cao Cấp & Dịch Vụ Phục Vụ Đồ Ăn Tại Chỗ VIP',
+    description: 'Thưởng thức điện ảnh thượng lưu trên những chiếc giường nằm bọc da Ý cao cấp điều khiển điện, đi kèm thảm nhung êm ái và đội ngũ Phục vụ riêng tại chỗ.',
+    imageUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1000&auto=format&fit=crop&q=80',
+    badgeText: 'THƯỢNG LƯU LUXURY',
+    badgeColor: 'bg-emerald-600',
+    specs: [
+      'Giường bọc da Ý ngả lưng điện 180 độ',
+      'Phòng chờ VIP Lounge riêng biệt',
+      'Nút bấm gọi Phục vụ tại vị trí ngồi',
+      'Tặng kèm Welcome Drink & Chăn nhung',
+    ],
+    features: [
+      'Menu thực đơn đồ ăn nóng cao cấp phục vụ tận giường.',
+      'Khán phòng giới hạn tối đa 24 vị trí giường riêng tư.',
+    ],
+    applicableCinemas: [
+      'Galaxy CineX Hanoi Centre (Tầng 3, 54 Liễu Giai)',
+      'CineDot Landmark 81 Saigon (Tầng B1, TP.HCM)',
+    ],
+    priceRange: '300.000đ - 450.000đ / cặp giường VIP',
+    ctaText: 'TRẢI NGHIỆM GOLD CLASS VIP ➔',
+  },
+  {
+    id: 'th-dolby',
+    format: 'DOLBY_ATMOS',
+    formatName: 'Dolby Atmos® 3D Spatial Audio Surround',
+    tagline: 'Âm Thanh Vòm Không Gian 64 Loa Độc Lập Chân Thực Nghẹt Thở',
+    description: 'Đưa âm thanh di chuyển tự do xung quanh và ngay phía trên đầu bạn với công nghệ Dolby Atmos, tái tạo môi trường âm thanh chuẩn xác như đời thực.',
+    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1000&auto=format&fit=crop&q=80',
+    badgeText: 'ÂM THANH 3D CHUẨN',
+    badgeColor: 'bg-purple-600',
+    specs: [
+      'Mạng lưới 64 loa vòm công suất lớn',
+      'Hệ thống loa trần ceiling-mounted subwoofer',
+      'Định dạng âm thanh object-based 3D spatial',
+      'Bảo chứng Dolby Laboratories USA',
+    ],
+    features: [
+      'Truyền tải chính xác từng tiếng bước chân nhẹ nhàng hay tiếng động cơ gầm rú.',
+    ],
+    applicableCinemas: [
+      'Toàn bộ hệ thống 4 cụm rạp CineDot trên toàn quốc',
+    ],
+    priceRange: '110.000đ - 180.000đ / vé',
+    ctaText: 'XEM LỊCH CHIẾU DOLBY ATMOS ➔',
+  },
+];
+
+export const MOCK_COMPARISON_MATRIX: ComparisonMatrixRow[] = [
+  {
+    featureName: 'Kích thước màn chiếu',
+    imax: 'Màn cong 22m (Khổng lồ)',
+    fourDx: 'Chuẩn 16m tiêu chuẩn',
+    goldClass: 'Màn chiếu 18m UltraHD',
+    dolbyAtmos: 'Màn chiếu 18m Curved',
+  },
+  {
+    featureName: 'Công nghệ hình ảnh',
+    imax: 'Dual 4K Laser (Sắc nét gấp 4x)',
+    fourDx: '2D / 3D Digital HD',
+    goldClass: '4K Projection Master',
+    dolbyAtmos: '4K Laser Projection',
+  },
+  {
+    featureName: 'Hệ thống âm thanh',
+    imax: 'IMAX 12-Channel Laser',
+    fourDx: '7.1 Surround Dynamic',
+    goldClass: 'Dolby 7.1 Premium',
+    dolbyAtmos: 'Dolby Atmos 64 Loa 3D',
+  },
+  {
+    featureName: 'Loại ghế / Trải nghiệm',
+    imax: 'Ghế da đệm dốc 45°',
+    fourDx: 'Ghế xoay 3D + 21 Hiệu ứng',
+    goldClass: 'Giường ngả lưng điện 180°',
+    dolbyAtmos: 'Ghế cao cấp êm ái',
+  },
+  {
+    featureName: 'Đặc quyền kèm theo',
+    imax: 'Kính 3D IMAX cao cấp',
+    fourDx: 'Cảm giác chân thực theo phim',
+    goldClass: 'Welcome Drink + Phục vụ tại giường',
+    dolbyAtmos: 'Âm thanh vòm đỉnh cao',
+  },
+  {
+    featureName: 'Giá vé trung bình',
+    imax: '160.000đ - 250.000đ',
+    fourDx: '140.000đ - 220.000đ',
+    goldClass: '300.000đ - 450.000đ / cặp',
+    dolbyAtmos: '110.000đ - 180.000đ',
+  },
+];

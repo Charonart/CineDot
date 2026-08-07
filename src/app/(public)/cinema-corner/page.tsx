@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import { CinemaCornerPage } from '@/modules/cinema-corner/components/CinemaCornerPage';
+import React from 'react';
+import { CinemaCornerClientPage } from '@/modules/cinema-corner/components/CinemaCornerClientPage';
 
-export const metadata: Metadata = {
-  title: 'Góc Điện Ảnh — CineDot | Bình Luận, Blog & Hậu Trường',
-  description: 'Khám phá bình luận phim chuyên sâu, blog điện ảnh và hậu trường độc quyền từ đội ngũ CineDot.',
+export const metadata = {
+  title: 'Góc Điện Ảnh & Blog Tin Tức Phim - CineDot Rạp Phim IMAX',
+  description: 'Tổng hợp bài review phim chuyên sâu, tin bên lề rạp phim, góc đạo diễn diễn viên và hậu trường điện ảnh hấp dẫn nhất tại CineDot.',
 };
 
-export default function CinemaCornerRootPage() {
-  return <CinemaCornerPage />;
+export default function CinemaCornerPage() {
+  return <CinemaCornerClientPage />;
 }

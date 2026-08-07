@@ -44,3 +44,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+*.local.html
+
+# local design prompts & local implementation plans (do not push to git)
+ai_design_prompts/
+*.local.md
+implementation_plan*.md

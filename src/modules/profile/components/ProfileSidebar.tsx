@@ -1,190 +1,115 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { useProfile } from '../hooks/useProfile';
-import { ProfileTab } from '../types/profile.type';
-import { User, Ticket, Tag, Star } from 'lucide-react';
+import { Ticket, ShoppingBag, User, History, Shield, Gift, LogOut, Sparkles } from 'lucide-react';
+import { UserProfile, ProfileDashboardTab } from '../types/profile.types';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
-const NAV_ITEMS: { key: ProfileTab; label: string; icon: React.ReactNode; disabled?: boolean }[] = [
-  { key: 'account', label: 'Tài Khoản', icon: <User size={17} /> },
-  { key: 'tickets', label: 'Vé Của Tôi', icon: <Ticket size={17} /> },
-  { key: 'vouchers', label: 'Vouchers', icon: <Tag size={17} />, disabled: true },
-];
-
-// ─── Tier ring gradient ───────────────────────────────────────────────────────
-const TIER_RING_GRADIENT: Record<string, string> = {
-  Standard: 'linear-gradient(135deg, #9CA3AF, #6B7280)',
-  VIP: 'linear-gradient(135deg, #FCD34D, #F59E0B)',
-  VVIP: 'linear-gradient(135deg, #C084FC, #A855F7)',
-};
-
-// ─── Component ────────────────────────────────────────────────────────────────
 interface ProfileSidebarProps {
-  activeTab: ProfileTab;
-  onTabChange: (tab: ProfileTab) => void;
+  profile: UserProfile;
+  activeTab: ProfileDashboardTab;
+  onSelectTab: (tab: ProfileDashboardTab) => void;
 }
 
-export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ activeTab, onTabChange }) => {
-  const { data: profile, isLoading } = useProfile();
+export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
+  profile,
+  activeTab,
+  onSelectTab,
+}) => {
+  const { logout } = useAuthStore();
+  const pointsPercent = Math.min(100, Math.round((profile.cinePoints / profile.nextTierPoints) * 100));
 
-  const tierColor = profile?.membershipMeta?.color ?? '#6B7280';
-  const tierAccent = profile?.membershipMeta?.accentColor ?? '#9CA3AF';
-  const tierRing = TIER_RING_GRADIENT[profile?.membershipTier ?? 'Standard'];
-
-  const initials = profile?.fullName
-    ? profile.fullName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
-    : '?';
+  const navItems = [
+    { id: 'TICKETS' as ProfileDashboardTab, label: 'Vé Của Tôi', icon: Ticket },
+    { id: 'ORDERS' as ProfileDashboardTab, label: 'Đơn hàng của bạn', icon: ShoppingBag },
+    { id: 'ACCOUNT' as ProfileDashboardTab, label: 'Thông Tin Cá Nhân', icon: User },
+    { id: 'TRANSACTIONS' as ProfileDashboardTab, label: 'Lịch Sử Giao Dịch', icon: History },
+    { id: 'SECURITY' as ProfileDashboardTab, label: 'Bảo Mật Tài Khoản', icon: Shield },
+    { id: 'REWARDS' as ProfileDashboardTab, label: 'Ưu Đãi & Điểm Thưởng', icon: Gift },
+  ];
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '36px 0 24px',
-    }}>
-      {/* ── Avatar & Identity ─────────────────────────────────────────── */}
-      <div style={{ textAlign: 'center', padding: '0 24px 32px', borderBottom: '1px solid #F3F4F6' }}>
-        {/* Avatar with tier ring */}
-        <div style={{ position: 'relative', display: 'inline-block', marginBottom: 16 }}>
-          <div
-            style={{
-              width: 100,
-              height: 100,
-              borderRadius: '50%',
-              padding: 3,
-              background: tierRing,
-              boxShadow: `0 0 20px ${tierColor}40`,
-            }}
-            aria-hidden="true"
-          >
-            <div style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              background: isLoading
-                ? 'linear-gradient(135deg, #E5E7EB, #D1D5DB)'
-                : `linear-gradient(135deg, ${tierColor}, ${tierAccent})`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 30,
-              fontWeight: 800,
-              color: '#FFFFFF',
-              border: '3px solid #FFFFFF',
-              letterSpacing: '-0.02em',
-            }}>
-              {isLoading ? '…' : initials}
-            </div>
+    <div className="w-full bg-white rounded-3xl p-6 shadow-[0_16px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-6 sticky top-28">
+      {/* 1. User Info Header */}
+      <div className="flex flex-col items-center text-center gap-3 border-b border-gray-100 pb-5">
+        <div className="relative">
+          <img
+            src={profile.avatarUrl}
+            alt={profile.fullName}
+            className="w-20 h-20 rounded-full object-cover ring-4 ring-[#7C6FE8]/20 shadow-md"
+          />
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#7C6FE8] text-white flex items-center justify-center text-[10px] shadow-sm">
+            ✓
           </div>
         </div>
 
-        {/* Name */}
-        <div style={{ fontSize: 17, fontWeight: 800, color: '#1A1A1A', marginBottom: 6, letterSpacing: '-0.01em' }}>
-          {isLoading ? '—' : profile?.fullName}
-        </div>
-        <div style={{ fontSize: 12.5, color: '#9CA3AF', marginBottom: 14 }}>
-          {isLoading ? '' : profile?.email}
-        </div>
-
-        {/* Membership badge */}
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '6px 14px',
-          borderRadius: 20,
-          background: `${tierColor}18`,
-          border: `1.5px solid ${tierColor}40`,
-          boxShadow: `0 0 12px ${tierColor}20`,
-        }}>
-          <span style={{ fontSize: 14 }}>{profile?.membershipMeta?.icon ?? '⭐'}</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: tierColor, letterSpacing: '0.04em' }}>
-            {isLoading ? 'Member' : `${profile?.membershipTier} Member`}
-          </span>
+        <div className="flex flex-col gap-1">
+          <h3 className="font-extrabold text-base text-[#131413] leading-tight">
+            {profile.fullName}
+          </h3>
+          <span className="text-xs text-slate-400 font-medium">{profile.email}</span>
         </div>
 
-        {/* Points */}
-        {!isLoading && profile && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{
-              marginTop: 14,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              fontSize: 13,
-              fontWeight: 600,
-              color: '#6B7280',
-            }}
-          >
-            <Star size={13} color={tierColor} fill={tierColor} />
-            <span style={{ color: tierColor, fontWeight: 800, fontSize: 15 }}>{profile.formattedPoints}</span>
-          </motion.div>
-        )}
+        {/* Platinum Member Tier Badge */}
+        <div className="px-3.5 py-1 rounded-full bg-gradient-to-r from-[#7C6FE8] to-indigo-600 text-white text-[11px] font-extrabold shadow-sm flex items-center gap-1.5 mt-1">
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span>{profile.tierName}</span>
+        </div>
       </div>
 
-      {/* ── Navigation ────────────────────────────────────────────────── */}
-      <nav aria-label="Điều hướng tài khoản" style={{ padding: '16px 12px', flex: 1 }}>
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {NAV_ITEMS.map(({ key, label, icon, disabled }) => {
-            const isActive = activeTab === key;
-            return (
-              <li key={key}>
-                <button
-                  id={`profile-nav-${key}`}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => !disabled && onTabChange(key)}
-                  aria-current={isActive ? 'page' : undefined}
-                  aria-label={label}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '12px 16px',
-                    borderRadius: 12,
-                    border: 'none',
-                    background: isActive
-                      ? `linear-gradient(135deg, ${tierColor}18, ${tierAccent}10)`
-                      : 'transparent',
-                    color: isActive ? tierColor : disabled ? '#D1D5DB' : '#374151',
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: 14,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.18s ease',
-                    position: 'relative',
-                    boxShadow: isActive ? `inset 2px 0 0 ${tierColor}` : 'none',
-                  }}
-                  className={!disabled && !isActive ? 'profile-nav-btn' : ''}
-                >
-                  <span style={{ opacity: disabled ? 0.4 : 1 }}>{icon}</span>
-                  <span style={{ opacity: disabled ? 0.4 : 1 }}>{label}</span>
-                  {disabled && (
-                    <span style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 600, color: '#D1D5DB', letterSpacing: '0.04em' }}>
-                      Sắp ra mắt
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      {/* 2. CinePoints Loyalty Progress Bar */}
+      <div className="flex flex-col gap-2 bg-slate-50 p-4 rounded-2xl border border-gray-100">
+        <div className="flex items-center justify-between text-xs font-bold">
+          <span className="text-slate-600">Điểm CinePoints:</span>
+          <span className="text-[#7C6FE8] font-extrabold">{profile.cinePoints.toLocaleString()} CP</span>
+        </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .profile-nav-btn:hover {
-          background: #F9FAFB !important;
-          color: #1A1A1A !important;
-        }
-      `}} />
+        {/* Progress Bar Container */}
+        <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#7C6FE8] to-indigo-500 rounded-full transition-all duration-500"
+            style={{ width: `${pointsPercent}%` }}
+          />
+        </div>
+
+        <span className="text-[10px] text-slate-500 font-semibold text-right">
+          Cần thêm {(profile.nextTierPoints - profile.cinePoints).toLocaleString()} CP để nâng hạng Diamond
+        </span>
+      </div>
+
+      {/* 3. Navigation Vertical Menu */}
+      <div className="flex flex-col gap-1 text-xs font-bold pt-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => onSelectTab(item.id)}
+              className={`w-full px-4 py-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-[#7C6FE8] text-white shadow-md shadow-[#7C6FE8]/25 font-bold'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+
+        <div className="w-full border-t border-gray-100 my-2" />
+
+        {/* Logout Action */}
+        <button
+          onClick={logout}
+          className="w-full px-4 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition-colors cursor-pointer"
+        >
+          <LogOut className="w-4 h-4 text-rose-500" />
+          <span>Đăng Xuất</span>
+        </button>
+      </div>
     </div>
   );
 };

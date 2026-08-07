@@ -1,28 +1,13 @@
-import { starShopApi } from '../api/star-shop.api';
-import { productMapper } from '../mappers/star-shop.mapper';
-import { ProductList, Product } from '../types/star-shop.type';
-import { productListResponseSchema, productSchema } from '../schemas/star-shop.schema';
-import { logger } from '@lib/logger/logger';
+import { StarShopProduct, StarShopCategory } from '../types/star-shop.types';
+import { MOCK_STAR_SHOP_PRODUCTS } from '../mocks/mockStarShopData';
 
-export const starShopService = {
-  getProducts: async (params?: { category?: string; page?: number }): Promise<ProductList> => {
-    try {
-      const response = await starShopApi.getProducts(params);
-      const validatedData = productListResponseSchema.parse(response.data);
-      return productMapper.toProductListModel(validatedData);
-    } catch (error) {
-      logger.error('[StarShopService] getProducts failed:', error);
-      throw new Error('FAILED_TO_LOAD_PRODUCTS');
-    }
-  },
-  getProduct: async (id: string): Promise<Product> => {
-    try {
-      const response = await starShopApi.getProduct(id);
-      const validatedData = productSchema.parse(response.data);
-      return productMapper.toProductModel(validatedData);
-    } catch (error) {
-      logger.error(`[StarShopService] getProduct ${id} failed:`, error);
-      throw new Error('FAILED_TO_LOAD_PRODUCT');
-    }
-  },
-};
+export async function fetchStarShopProducts(category: StarShopCategory = 'ALL'): Promise<StarShopProduct[]> {
+  await new Promise((res) => setTimeout(res, 150));
+  if (category === 'ALL') return MOCK_STAR_SHOP_PRODUCTS;
+  return MOCK_STAR_SHOP_PRODUCTS.filter((p) => p.category === category);
+}
+
+export async function fetchProductBySlug(slug: string): Promise<StarShopProduct | null> {
+  await new Promise((res) => setTimeout(res, 100));
+  return MOCK_STAR_SHOP_PRODUCTS.find((p) => p.slug === slug) || null;
+}
