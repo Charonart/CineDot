@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #7C6FE8;
+  --color-brand-light: #CFC9EB;
+  --color-brand-strong: #B8AFFF;
+  --color-brand-dark: #26213D;
+  --color-bg: #FEFEFE;
+  --color-bg2: #F6F6F6;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F2F2F3;
+  --color-text: #131413;
+  --color-text2: #4B4B50;
+  --color-muted: #7A7A80;
+  --color-border: rgba(19, 20, 19, 0.08);
+  --color-footer: #0B0C0B;
+
+  --font-head: Inter, system-ui, sans-serif;
+  --font-body: Inter, system-ui, sans-serif;
+
+  --shadow-sm: 0 2px 12px rgba(19, 20, 19, 0.06);
+  --shadow-md: 0 8px 32px rgba(19, 20, 19, 0.10);
+  --shadow-lg: 0 20px 60px rgba(19, 20, 19, 0.14);
+  --shadow-glass: 0 24px 70px rgba(15, 23, 42, 0.18);
+}
+
+/* Base resets & Glassmorphism Utility Classes */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.hero-overlay {
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.95) 0%, rgba(10, 10, 10, 0.4) 50%, rgba(10, 10, 10, 0.1) 100%);
+}
+
+@keyframes animateDrift {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+.animate-drift {
+  animation: animateDrift 20s linear infinite alternate;
+}

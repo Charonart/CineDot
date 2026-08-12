@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../styles/globals.css";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { QueryProvider } from "@shared/providers/QueryProvider";
+import { GlobalTrailerModal } from "@/shared/components/visual/GlobalTrailerModal";
 
 export default function RootLayout({
   children,
@@ -31,7 +32,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col font-sans">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          {children}
+          <GlobalTrailerModal />
+        </QueryProvider>
       </body>
     </html>
   );

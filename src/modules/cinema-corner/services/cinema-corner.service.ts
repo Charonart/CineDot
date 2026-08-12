@@ -1,29 +1,28 @@
-import { cinemaCornerApi } from '../api/cinema-corner.api';
-import { cinemaCornerMapper } from '../mappers/cinema-corner.mapper';
-import { Article, ArticleList } from '../types/cinema-corner.type';
-import { articleListResponseSchema, articleSchema } from '../schemas/cinema-corner.schema';
-import { logger } from '@lib/logger/logger';
+import { CinemaCornerArticle, ArticleCategory } from '../types/cinema-corner.types';
+import { MOCK_CINEMA_ARTICLES } from '../mocks/mockCinemaCornerData';
 
-export const cinemaCornerService = {
-  getArticles: async (params?: { category?: string; page?: number }): Promise<ArticleList> => {
-    try {
-      const response = await cinemaCornerApi.getArticles(params);
-      const validatedData = articleListResponseSchema.parse(response.data);
-      return cinemaCornerMapper.toArticleListModel(validatedData);
-    } catch (error) {
-      logger.error('[CinemaCornerService] getArticles failed:', error);
-      throw new Error('FAILED_TO_LOAD_ARTICLES');
-    }
-  },
+export async function fetchArticles(category: ArticleCategory = 'ALL'): Promise<CinemaCornerArticle[]> {
+  await new Promise((res) => setTimeout(res, 150));
+  if (category === 'ALL') {
+    return MOCK_CINEMA_ARTICLES;
+  }
+  return MOCK_CINEMA_ARTICLES.filter((art) => art.category === category);
+}
 
-  getArticle: async (slug: string): Promise<Article> => {
-    try {
-      const response = await cinemaCornerApi.getArticle(slug);
-      const validatedData = articleSchema.parse(response.data);
-      return cinemaCornerMapper.toArticleModel(validatedData);
-    } catch (error) {
-      logger.error('[CinemaCornerService] getArticle failed:', error);
-      throw new Error('FAILED_TO_LOAD_ARTICLE');
-    }
-  },
-};
+export async function fetchFeaturedArticle(): Promise<CinemaCornerArticle> {
+  await new Promise((res) => setTimeout(res, 100));
+  const featured = MOCK_CINEMA_ARTICLES.find((art) => art.isFeatured);
+  return featured || MOCK_CINEMA_ARTICLES[0];
+}
+
+export async function fetchTrendingArticles(): Promise<CinemaCornerArticle[]> {
+  await new Promise((res) => setTimeout(res, 100));
+  return MOCK_CINEMA_ARTICLES.filter((art) => art.isTrending).sort(
+    (a, b) => (a.trendingRank || 99) - (b.trendingRank || 99)
+  );
+}
+
+export async function fetchArticleBySlug(slug: string): Promise<CinemaCornerArticle | null> {
+  await new Promise((res) => setTimeout(res, 100));
+  return MOCK_CINEMA_ARTICLES.find((art) => art.slug === slug) || null;
+}

@@ -213,6 +213,9 @@ export const getMockPath = (url: string): string | null => {
   }
 
   // ─── Star Shop ──────────────────────────────────────────────────────────────
+  if (/^(\/api\/v1)?\/star-shop\/products\/[^/]+$/.test(path)) {
+    return '/mocks/star-shop/product-detail.json';
+  }
   if (/^(\/api\/v1)?\/star-shop\/products$/.test(path)) {
     return '/mocks/star-shop/products.json';
   }

@@ -1,0 +1,68 @@
+{
+  "success": true,
+  "req": {
+    "method": "GET",
+    "path": "/api/v1/star-shop/products",
+    "query": { "category": "movie-verse" },
+    "description": "Mock response for Movie-verse category products"
+  },
+  "data": {
+    "page": 1,
+    "totalPages": 1,
+    "totalResults": 4,
+    "results": [
+      {
+        "id": "ss-001",
+        "slug": "dune-part-two-steelbook",
+        "name": "Dune Part Two — Steelbook 4K UHD",
+        "category": "movie-verse",
+        "price": 899000,
+        "originalPrice": 1200000,
+        "imageUrl": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=500&fit=crop",
+        "badge": "HOT",
+        "description": "Bộ sưu tập Steelbook 4K UHD phiên bản giới hạn của bom tấn Dune Part Two.",
+        "stock": 50,
+        "tags": ["steelbook", "4k", "limited"]
+      },
+      {
+        "id": "ss-002",
+        "slug": "godzilla-kong-figurine",
+        "name": "Mô hình Godzilla x Kong — Premium Edition",
+        "category": "movie-verse",
+        "price": 1490000,
+        "originalPrice": null,
+        "imageUrl": "https://images.unsplash.com/photo-1608889175250-c3b0c1667d3a?w=400&h=500&fit=crop",
+        "badge": "NEW",
+        "description": "Mô hình cao cấp Godzilla và Kong, chi tiết tỉ mỉ, cao 30cm.",
+        "stock": 20,
+        "tags": ["figurine", "collectible"]
+      },
+      {
+        "id": "ss-003",
+        "slug": "cinema-tote-bag",
+        "name": "Túi Tote CineDot — Cao cấp",
+        "category": "movie-verse",
+        "price": 249000,
+        "originalPrice": 350000,
+        "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=500&fit=crop",
+        "badge": "SALE",
+        "description": "Túi tote vải canvas cao cấp in hình logo CineDot.",
+        "stock": 200,
+        "tags": ["fashion", "bag"]
+      },
+      {
+        "id": "ss-010",
+        "slug": "avengers-mug-set",
+        "name": "Bộ ly sứ Avengers — Set 4 ly",
+        "category": "movie-verse",
+        "price": 420000,
+        "originalPrice": 580000,
+        "imageUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=500&fit=crop",
+        "badge": "HOT",
+        "description": "Bộ 4 ly sứ hình các Avengers, dung tích 350ml.",
+        "stock": 110,
+        "tags": ["mug", "avengers", "gift"]
+      }
+    ]
+  }
+}

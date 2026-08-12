@@ -4,75 +4,54 @@ import React from 'react';
 
 export const SeatLegend: React.FC = () => {
   return (
-    <div
-      className="seat-legend"
-      style={{
-        background: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid var(--border)',
-        borderRadius: '20px',
-        padding: '20px 24px',
-        boxShadow: 'var(--shadow-sm)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        gap: '24px',
-        width: '100%',
-        marginTop: '24px',
-        marginBottom: '24px',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '20px', height: '20px', border: '1px solid #d9d9d9', borderRadius: '4px', background: '#ffffff' }} />
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Ghế thường</span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '20px', height: '20px', border: '1px solid #CFC9EB', borderRadius: '4px', background: '#F0EEF9' }} />
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Ghế VIP</span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '36px', height: '20px', border: '1px solid #FFA4A4', borderRadius: '6px', background: '#FFF2F2' }} />
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Ghế đôi</span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '20px', height: '20px', border: '1px solid #4f3c93', borderRadius: '4px', background: '#4f3c93' }} />
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Đang chọn</span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '20px', height: '20px', border: '1px solid #d0d0d0', borderRadius: '4px', background: '#e0e0e0' }} />
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Đã bán</span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div
-          style={{
-            width: '20px',
-            height: '20px',
-            border: '1px solid #e8dcce',
-            borderRadius: '4px',
-            background: '#f2eae1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#c29c78',
-          }}
-        >
-          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
+    <div className="w-full flex flex-col gap-4 py-4 border-t border-gray-200 text-xs font-semibold text-slate-700">
+      {/* 1. Pure Color Blocks Seat Legend (No text numbers inside blocks) */}
+      <div className="w-full flex flex-wrap items-center justify-center gap-6">
+        {/* Standard Seat */}
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-[#F2F2F7] border border-gray-300 shadow-2xs" />
+          <span>Ghế Thường</span>
         </div>
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Đang giữ</span>
+
+        {/* VIP Seat */}
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-[#7C6FE8]/20 border border-[#7C6FE8] shadow-2xs" />
+          <span>Ghế VIP</span>
+        </div>
+
+        {/* Sweetbox Couple Seat */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-5 rounded-md bg-pink-100 border border-pink-400 shadow-2xs" />
+          <span>Ghế Đôi Sweetbox</span>
+        </div>
+
+        {/* Selected Seat */}
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-[#7C6FE8] shadow-[0_2px_8px_rgba(124,111,232,0.6)]" />
+          <span>Ghế Đang Chọn</span>
+        </div>
+
+        {/* Booked Seat */}
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-gray-200 border border-gray-300 shadow-2xs" />
+          <span>Đã Được Đặt</span>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '20px', height: '20px', border: '1px solid #d4d4d8', borderRadius: '4px', background: '#f4f4f5', opacity: 0.6 }} />
-        <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Không khả dụng</span>
+      {/* 2. Price Tariff Bar */}
+      <div className="w-full flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-gray-100 text-[11px] text-slate-500 font-medium">
+        <span>Bảng giá niêm yết:</span>
+        <span className="flex items-center gap-1">
+          <strong className="text-slate-800">Ghế Thường:</strong> 110.000đ
+        </span>
+        <span className="text-slate-300">•</span>
+        <span className="flex items-center gap-1">
+          <strong className="text-[#7C6FE8]">Ghế VIP:</strong> 140.000đ
+        </span>
+        <span className="text-slate-300">•</span>
+        <span className="flex items-center gap-1">
+          <strong className="text-pink-600">Ghế Đôi Sweetbox:</strong> 250.000đ / cặp
+        </span>
       </div>
     </div>
   );

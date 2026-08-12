@@ -1,133 +1,55 @@
-import Image from 'next/image';
-import { MovieDetail } from '../types/movie-detail.type';
-import { Star, Clock, Calendar, MapPin, Building2 } from 'lucide-react';
+'use client';
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Play } from 'lucide-react';
+import { useTrailerStore } from '@/shared/store/trailerStore';
 
 interface MovieDetailHeroProps {
-  movie: MovieDetail;
+  bannerUrl: string;
+  posterUrl: string;
+  title: string;
+  trailerUrl: string;
 }
 
-export function MovieDetailHero({ movie }: MovieDetailHeroProps) {
+export const MovieDetailHero: React.FC<MovieDetailHeroProps> = ({
+  bannerUrl,
+  posterUrl,
+  title,
+  trailerUrl,
+}) => {
+  const openTrailer = useTrailerStore((state) => state.openTrailer);
+
+  const handlePlayTrailer = () => {
+    openTrailer(trailerUrl, posterUrl, title);
+  };
+
   return (
-    <div className="relative">
-      {/* Backdrop full-bleed */}
-      <div className="relative h-[55vh] min-h-[380px] w-full overflow-hidden">
-        <Image
-          src={movie.backdropUrl}
-          alt={movie.title}
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-        />
-        {/* Multi-layer gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/80 via-transparent to-transparent" />
-      </div>
+    <div className="relative w-full h-[50vh] sm:h-[60vh] max-h-[560px] bg-slate-900 overflow-hidden pt-20">
+      {/* Landscape Backdrop Image */}
+      <img
+        src={bannerUrl}
+        alt={title}
+        className="w-full h-full object-cover object-center transform scale-105"
+      />
 
-      {/* Content: Poster + Info — nổi lên trên backdrop */}
-      <div className="container mx-auto px-4">
-        <div className="relative -mt-44 flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-8">
-          {/* Poster */}
-          <div className="relative hidden h-72 w-48 shrink-0 overflow-hidden rounded-2xl shadow-2xl ring-2 ring-white/10 sm:block md:h-80 md:w-56">
-            <Image
-              src={movie.posterUrl}
-              alt={movie.title}
-              fill
-              className="object-cover"
-              sizes="224px"
-            />
+      {/* Smooth Dark Gradient Overlays (No hard borders) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-black/40 to-black/60" />
+
+      {/* Centered Floating Play Trailer Button */}
+      <div className="absolute inset-0 flex items-center justify-center z-10">
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
+          onClick={handlePlayTrailer}
+          className="group px-7 py-3.5 bg-white/20 hover:bg-white/35 backdrop-blur-2xl border border-white/40 rounded-full text-white font-bold text-sm sm:text-base flex items-center gap-3 shadow-[0_12px_40px_rgba(124,111,232,0.4)] transition-all cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-full bg-[#7C6FE8] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <Play className="w-5 h-5 fill-white text-white translate-x-0.5" />
           </div>
-
-          {/* Title + Meta */}
-          <div className="flex flex-col gap-4 pb-4 text-white">
-            {/* Title */}
-            <div>
-              <h1 className="text-3xl font-extrabold leading-tight tracking-tight drop-shadow-lg md:text-4xl lg:text-5xl">
-                {movie.title}
-              </h1>
-              {movie.originalTitle && movie.originalTitle !== movie.title && (
-                <p className="mt-1 text-base text-zinc-400">{movie.originalTitle}</p>
-              )}
-              {movie.tagline && (
-                <p className="mt-2 text-base italic text-zinc-300/80 md:text-lg">
-                  &ldquo;{movie.tagline}&rdquo;
-                </p>
-              )}
-            </div>
-
-            {/* Meta badges */}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-300">
-              {/* Rating */}
-              <div
-                className="flex items-center gap-1.5 rounded-full bg-yellow-500/20 px-3 py-1 text-yellow-400 ring-1 ring-yellow-500/30"
-                aria-label={`Đánh giá: ${movie.rating.toFixed(1)}/10`}
-              >
-                <Star className="h-3.5 w-3.5 fill-current" />
-                <span className="font-bold">{movie.rating.toFixed(1)}</span>
-                <span className="text-xs text-zinc-400">/ 10</span>
-                <span className="text-xs text-zinc-500">({movie.voteCount.toLocaleString('vi-VN')})</span>
-              </div>
-
-              {/* Release year */}
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-zinc-400" />
-                <span>{movie.releaseYear}</span>
-              </div>
-
-              {/* Runtime */}
-              {movie.formattedRuntime && (
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-zinc-400" />
-                  <span>{movie.formattedRuntime}</span>
-                </div>
-              )}
-
-              {/* Country */}
-              {movie.countries.length > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-zinc-400" />
-                  <span>{movie.countries.map((c) => c.name).join(', ')}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Genre chips */}
-            <div className="flex flex-wrap gap-2">
-              {movie.genres.map((genre) => (
-                <span
-                  key={genre.id}
-                  className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur-sm"
-                >
-                  {genre.name}
-                </span>
-              ))}
-            </div>
-
-            {/* Production companies */}
-            {movie.productionCompanies.length > 0 && (
-              <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <span>{movie.productionCompanies.map((c) => c.name).join(' · ')}</span>
-              </div>
-            )}
-
-            {/* CTA buttons */}
-            <div className="flex flex-wrap gap-3 pt-1">
-              <a
-                href="#schedule"
-                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:bg-red-500 hover:shadow-red-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                aria-label="Đặt vé ngay"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                  <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6" />
-                  <path d="M15 3h6v6" /><path d="M10 14 21 3" />
-                </svg>
-                Đặt vé ngay
-              </a>
-            </div>
-          </div>
-        </div>
+          <span>Xem Trailer</span>
+        </motion.button>
       </div>
     </div>
   );
-}
+};

@@ -1,72 +1,37 @@
-import React, { Suspense } from 'react';
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { movieDetailService } from '@modules/movie-detail/services/movie-detail.service';
-import MovieDetailPageClient from './MovieDetailPageClient';
+import React from 'react';
+import { MovieDetailPageClient } from '@/modules/movie-detail/components/MovieDetailPageClient';
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
+interface MovieDetailPageProps {
+  params: Promise<{
+    slug: string;
+  }>;
 }
 
-/**
- * SSR Strategy: Generate Dynamic Metadata for SEO
- * Canonical URL: /movies/[slug] (no /detail/ segment)
- */
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params }: MovieDetailPageProps) {
   try {
-    const movie = await movieDetailService.getMovieDetailBySlug(slug);
+    const resolvedParams = await params;
+    const slug = resolvedParams?.slug || '';
+    const formattedTitle = slug
+      ? slug
+          .split('-')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ')
+      : 'Chi Tiết Phim';
+
     return {
-      title: `${movie.title} | CineDot`,
-      description: movie.description || `Thông tin chi tiết phim ${movie.title} trên CineDot`,
-      alternates: {
-        canonical: `/movies/${slug}`,
-      },
-      openGraph: {
-        title: movie.title,
-        description: movie.description,
-        images: [movie.backdropUrl],
-        url: `/movies/${slug}`,
-      },
+      title: `${formattedTitle} - CineDot Rạp Phim IMAX`,
+      description: `Xem lịch chiếu phim, mua vé và xem trailer bộ phim ${formattedTitle} tại hệ thống rạp CineDot.`,
     };
   } catch {
-    return { title: 'Movie Not Found | CineDot' };
+    return {
+      title: 'Chi Tiết Phim - CineDot Rạp Phim IMAX',
+    };
   }
 }
 
-async function MovieDetailPageContent({ params }: PageProps) {
-  const { slug } = await params;
+export default async function MovieDetailPage({ params }: MovieDetailPageProps) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug || 'conan-movie-27';
 
-  let movie;
-  try {
-    movie = await movieDetailService.getMovieDetailBySlug(slug);
-  } catch {
-    notFound();
-  }
-
-  return <MovieDetailPageClient movie={movie} />;
-}
-
-export default function MovieDetailPage({ params }: PageProps) {
-  return (
-    <Suspense
-      fallback={
-        <div
-          className="movie-detail-page"
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'var(--color-background)',
-            color: 'var(--color-text-primary)'
-          }}
-        >
-          <p style={{ fontSize: '16px', fontWeight: 500 }}>Đang tải thông tin phim...</p>
-        </div>
-      }
-    >
-      <MovieDetailPageContent params={params} />
-    </Suspense>
-  );
+  return <MovieDetailPageClient slug={slug} />;
 }

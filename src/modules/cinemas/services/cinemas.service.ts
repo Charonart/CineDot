@@ -1,40 +1,18 @@
-import { cinemasApi } from '../api/cinemas.api';
-import { cinemasMapper } from '../mappers/cinemas.mapper';
-import { Cinema, CinemaList, Pricing } from '../types/cinemas.type';
-import { cinemaListResponseSchema, cinemaSchema, pricingSchema } from '../schemas/cinemas.schema';
-import { logger } from '@lib/logger/logger';
+import { CinemaItem, PricingFormatTab, CinemaPricingFormat } from '../types/cinemas.types';
+import { MOCK_CINEMAS, MOCK_PRICING_DATA, MOCK_CITIES } from '../mocks/mockCinemasData';
 
-export const cinemasService = {
-  getCinemas: async (params?: { city?: string; page?: number }): Promise<CinemaList> => {
-    try {
-      const response = await cinemasApi.getCinemas(params);
-      const validatedData = cinemaListResponseSchema.parse(response.data);
-      return cinemasMapper.toCinemaListModel(validatedData);
-    } catch (error) {
-      logger.error('[CinemasService] getCinemas failed:', error);
-      throw new Error('FAILED_TO_LOAD_CINEMAS');
-    }
-  },
+export async function fetchCities(): Promise<string[]> {
+  await new Promise((res) => setTimeout(res, 100));
+  return MOCK_CITIES;
+}
 
-  getCinema: async (slug: string): Promise<Cinema> => {
-    try {
-      const response = await cinemasApi.getCinema(slug);
-      const validatedData = cinemaSchema.parse(response.data);
-      return cinemasMapper.toCinemaModel(validatedData);
-    } catch (error) {
-      logger.error('[CinemasService] getCinema failed:', error);
-      throw new Error('FAILED_TO_LOAD_CINEMA');
-    }
-  },
+export async function fetchCinemasByCity(city?: string): Promise<CinemaItem[]> {
+  await new Promise((res) => setTimeout(res, 150));
+  if (!city || city === 'Tất cả thành phố') return MOCK_CINEMAS;
+  return MOCK_CINEMAS.filter((c) => c.city === city);
+}
 
-  getPricing: async (): Promise<Pricing> => {
-    try {
-      const response = await cinemasApi.getPricing();
-      const validatedData = pricingSchema.parse(response.data);
-      return cinemasMapper.toPricingModel(validatedData);
-    } catch (error) {
-      logger.error('[CinemasService] getPricing failed:', error);
-      throw new Error('FAILED_TO_LOAD_PRICING');
-    }
-  },
-};
+export async function fetchPricingFormat(tab: PricingFormatTab): Promise<CinemaPricingFormat> {
+  await new Promise((res) => setTimeout(res, 100));
+  return MOCK_PRICING_DATA[tab] || MOCK_PRICING_DATA['2d'];
+}
