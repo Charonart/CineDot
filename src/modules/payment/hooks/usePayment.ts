@@ -2,44 +2,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PaymentMethodId, VoucherInfo } from '../types/payment.types';
-import { validateVoucherCode, processBookingPayment } from '../services/payment.service';
+import {
+  validateVoucherCode,
+  processBookingPayment,
+  calculateBookingSummary,
+} from '../services/payment.service';
 import { formatShowDate } from '@/modules/booking/services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '@/modules/booking/services/bookingTimerService';
-
-const mockMovieDatabase: Record<string, { title: string; poster: string; format: string; age: string }> = {
-  'spiderman-new-beginning': {
-    title: 'Người Nhện: Khởi Đầu Mới',
-    poster: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
-    format: '2D Phụ Đề',
-    age: 'T13',
-  },
-  'spider-man-across-the-spider-verse': {
-    title: 'Người Nhện: Khởi Đầu Mới',
-    poster: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
-    format: '2D Phụ Đề',
-    age: 'T13',
-  },
-  'mai': {
-    title: 'Phim Điện Ảnh Mai',
-    poster: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80',
-    format: '2D Lồng Tiếng',
-    age: 'T18',
-  },
-  'inside-out-2': {
-    title: 'Những Mảnh Mảnh Cảm Xúc 2',
-    poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
-    format: '3D Lồng Tiếng',
-    age: 'P',
-  },
-};
-
-const mockFoodCatalog: Record<string, { name: string; price: number }> = {
-  'food-1': { name: 'Combo Cine Single', price: 95000 },
-  'food-2': { name: 'Combo Cine Couple', price: 129000 },
-  'food-3': { name: 'Combo Cine Party (Nhóm 4)', price: 199000 },
-  'food-4': { name: 'Bắp Rang Phô Mai Hạn Số 1', price: 65000 },
-  'food-5': { name: 'Nước Ngọt Pepsi Lớn 32oz', price: 35000 },
-};
+import { getBookingSession } from '@/modules/booking/services/bookingSessionService';
 
 export function usePayment(
   showtimeId: string = 'showtime-101',
@@ -50,7 +20,7 @@ export function usePayment(
   timeParam?: string,
   cinemaParam?: string
 ) {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId>('MOMO');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId>('VNPAY');
   const [voucherInput, setVoucherInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherInfo | null>(null);
   const [voucherError, setVoucherError] = useState('');
@@ -59,6 +29,15 @@ export function usePayment(
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(() => getRemainingBookingSeconds(showtimeId));
   const [isTimeout, setIsTimeout] = useState(false);
+
+  // Server-calculated financial breakdown
+  const [serverTicketPrice, setServerTicketPrice] = useState<number | null>(null);
+  const [serverComboPrice, setServerComboPrice] = useState<number | null>(null);
+  const [serverTierDiscount, setServerTierDiscount] = useState<number>(0);
+  const [serverVoucherDiscount, setServerVoucherDiscount] = useState<number>(0);
+  const [serverFinalAmount, setServerFinalAmount] = useState<number | null>(null);
+  const [bookingId, setBookingId] = useState<string | number | undefined>(() => getBookingSession(showtimeId)?.bookingId);
+  const [bookingCode, setBookingCode] = useState<string | undefined>(() => getBookingSession(showtimeId)?.bookingCode);
 
   // Continuous Countdown timer synced with sessionStorage expiration
   useEffect(() => {
@@ -79,35 +58,47 @@ export function usePayment(
     return formatSecondsToMMSS(timeLeft);
   }, [timeLeft]);
 
-  // Movie Info
+  // Movie Info - prefer booking session, fallback to URL param
   const movieInfo = useMemo(() => {
-    const slug = movieParam || 'spiderman-new-beginning';
-    const found = mockMovieDatabase[slug];
+    const slug = movieParam || 'movie-detail';
+    const session = getBookingSession(showtimeId);
+    if (session) {
+      return {
+        slug: session.movieSlug || slug,
+        title: session.movieTitle,
+        poster: session.posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
+        format: session.movieFormat,
+        age: session.ageRating || 'P',
+      };
+    }
     return {
       slug,
-      title: found ? found.title : 'Người Nhện: Khởi Đầu Mới',
-      poster: found
-        ? found.poster
-        : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
-      format: found ? found.format : '2D Phụ Đề',
-      age: found ? found.age : 'T13',
+      title: 'Đang tải...',
+      poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
+      format: '2D Phụ Đề',
+      age: 'P',
     };
-  }, [movieParam]);
+  }, [movieParam, showtimeId]);
 
   const decodedCinemaName = useMemo(() => {
-    return cinemaParam ? decodeURIComponent(cinemaParam) : 'Galaxy CineX Hanoi Centre';
-  }, [cinemaParam]);
+    const session = getBookingSession(showtimeId);
+    if (session?.cinemaName) return session.cinemaName;
+    return cinemaParam ? decodeURIComponent(cinemaParam) : 'CineDot Cinema';
+  }, [cinemaParam, showtimeId]);
 
   const formattedShowDate = useMemo(() => {
     return formatShowDate(dateParam);
   }, [dateParam]);
 
-  // Ticket Calculation
-  const { ticketPrice, seatSummaryText } = useMemo(() => {
+  // Ticket Calculation (client-side fallback)
+  const { ticketPriceFallback, seatSummaryText } = useMemo(() => {
     const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
     if (rawSeats.length === 0) {
-      return { ticketPrice: 220000, seatSummaryText: 'Ghế Thường (x2): D09, D10' };
+      return { ticketPriceFallback: 0, seatSummaryText: 'Chưa chọn ghế' };
     }
+
+    const session = getBookingSession(showtimeId);
+    const basePrice = session?.basePrice || 110000;
 
     let calculatedPrice = 0;
     const stdList: string[] = [];
@@ -118,18 +109,18 @@ export function usePayment(
       const row = id.charAt(0).toUpperCase();
       if (['E', 'F', 'G', 'H'].includes(row)) {
         vipList.push(id);
-        calculatedPrice += 140000;
+        calculatedPrice += basePrice + 20000; // VIP surcharge
       } else if (['I', 'J'].includes(row)) {
         sweetboxList.push(id);
       } else {
         stdList.push(id);
-        calculatedPrice += 110000;
+        calculatedPrice += basePrice;
       }
     });
 
     if (sweetboxList.length > 0) {
       const sweetboxPairs = Math.ceil(sweetboxList.length / 2);
-      calculatedPrice += sweetboxPairs * 250000;
+      calculatedPrice += sweetboxPairs * (basePrice + 40000); // Sweetbox surcharge
     }
 
     const parts: string[] = [];
@@ -138,12 +129,15 @@ export function usePayment(
     if (sweetboxList.length > 0) parts.push(`Ghế Đôi Sweetbox: ${sweetboxList.join(', ')}`);
 
     return {
-      ticketPrice: calculatedPrice,
+      ticketPriceFallback: calculatedPrice,
       seatSummaryText: parts.join(' | '),
     };
-  }, [seatsParam]);
+  }, [seatsParam, showtimeId]);
 
-  // Parse Concessions from combosParam URL e.g. "food-1:1,food-2:2"
+  // Use server price if available, otherwise fallback
+  const ticketPrice = serverTicketPrice ?? ticketPriceFallback;
+
+  // Parse Concessions from combosParam URL e.g. "1:1,2:2"
   const selectedFoodList = useMemo(() => {
     if (!combosParam) return [];
     const list: { id: string; name: string; quantity: number; price: number }[] = [];
@@ -153,12 +147,11 @@ export function usePayment(
       if (id && qStr) {
         const quantity = parseInt(qStr, 10);
         if (quantity > 0) {
-          const catalog = mockFoodCatalog[id] || { name: `Combo (${id})`, price: 95000 };
           list.push({
             id,
-            name: catalog.name,
+            name: `Combo (${id})`,
             quantity,
-            price: catalog.price * quantity,
+            price: 95000 * quantity, // Will be overridden by server response
           });
         }
       }
@@ -167,13 +160,52 @@ export function usePayment(
     return list;
   }, [combosParam]);
 
-  const totalFoodPrice = useMemo(() => {
-    return selectedFoodList.reduce((sum, item) => sum + item.price, 0);
-  }, [selectedFoodList]);
+  const totalFoodPrice = serverComboPrice ?? selectedFoodList.reduce((sum, item) => sum + item.price, 0);
 
-  const discountAmount = appliedVoucher ? appliedVoucher.discountAmount : 0;
+  const discountAmount = (appliedVoucher ? appliedVoucher.discountAmount : 0) + serverTierDiscount + serverVoucherDiscount;
   const subtotal = ticketPrice + totalFoodPrice;
-  const grandTotal = Math.max(0, subtotal - discountAmount);
+  const grandTotal = serverFinalAmount ?? Math.max(0, subtotal - discountAmount);
+
+  // Call calculateBookingSummary API on mount to get exact pricing
+  useEffect(() => {
+    async function fetchSummary() {
+      const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
+      if (rawSeats.length === 0) return;
+
+      // We need showtime_seat_ids which we don't have directly from URL.
+      // The calculate-summary endpoint may accept seat codes or we pass what we have.
+      // For now, call with available data
+      const combos = combosParam
+        ? combosParam.split(',').map((pair) => {
+            const [id, qStr] = pair.split(':');
+            return { combo_id: Number(id), quantity: Number(qStr || 1) };
+          }).filter((c) => c.combo_id > 0 && c.quantity > 0)
+        : [];
+
+      const session = getBookingSession(showtimeId);
+      const sessionSeatIds = session?.showtimeSeatIds || [];
+
+      const result = await calculateBookingSummary({
+        showtime_id: showtimeId,
+        showtime_seat_ids: sessionSeatIds, 
+        combos: combos.length > 0 ? combos : undefined,
+      });
+
+      if (result) {
+        setServerTicketPrice(result.financial_breakdown.subtotal_tickets);
+        setServerComboPrice(result.financial_breakdown.subtotal_combos);
+        setServerTierDiscount(result.financial_breakdown.discounts?.tier_discount?.deducted_amount || 0);
+        setServerVoucherDiscount(result.financial_breakdown.discounts?.voucher_discount?.deducted_amount || 0);
+        setServerFinalAmount(result.financial_breakdown.final_amount_to_pay);
+
+        // Update food names from server response
+        if (result.items?.combos && result.items.combos.length > 0) {
+          // Food names will be reflected in sidebar via server data
+        }
+      }
+    }
+    fetchSummary();
+  }, [showtimeId, seatsParam, combosParam]);
 
   // Apply Voucher
   const handleApplyVoucher = async () => {
@@ -182,13 +214,14 @@ export function usePayment(
     setVoucherError('');
 
     try {
-      const result = await validateVoucherCode(voucherInput);
+      const result = await validateVoucherCode(voucherInput, subtotal);
       if (result) {
         setAppliedVoucher(result);
         setVoucherError('');
-      } else {
-        setVoucherError('Mã không hợp lệ hoặc đã hết hạn! Thử CINEDOT50K hoặc MOMODAY');
       }
+    } catch (err: any) {
+      setAppliedVoucher(null);
+      setVoucherError(err.message || 'Mã không hợp lệ hoặc đã hết hạn! Thử CINEDOT50K hoặc MOMODAY');
     } finally {
       setIsApplyingVoucher(false);
     }
@@ -198,6 +231,23 @@ export function usePayment(
     setAppliedVoucher(null);
     setVoucherInput('');
     setVoucherError('');
+  };
+
+  const handleProcessPayment = async (payload: Parameters<typeof processBookingPayment>[0]) => {
+    const combosPayload = combosParam
+      ? combosParam.split(',').map((pair) => {
+          const [id, qStr] = pair.split(':');
+          return { combo_id: Number(id), quantity: Number(qStr || 1) };
+        }).filter((c) => c.combo_id > 0 && c.quantity > 0)
+      : [];
+
+    return processBookingPayment({
+      ...payload,
+      bookingId: bookingId || payload.bookingId,
+      bookingCode: bookingCode || payload.bookingCode,
+      combos: combosPayload,
+      voucherCode: appliedVoucher?.code,
+    });
   };
 
   return {
@@ -226,6 +276,6 @@ export function usePayment(
     totalFoodPrice,
     discountAmount,
     grandTotal,
-    processBookingPayment,
+    processBookingPayment: handleProcessPayment,
   };
 }

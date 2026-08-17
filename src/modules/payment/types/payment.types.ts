@@ -1,4 +1,4 @@
-export type PaymentMethodId = 'MOMO' | 'ZALOPAY' | 'SHOPEEPAY' | 'ATM' | 'VISA' | 'VIETQR';
+export type PaymentMethodId = 'VNPAY' | 'MOMO' | 'ZALOPAY' | 'SHOPEEPAY' | 'ATM' | 'VISA' | 'VIETQR';
 
 export interface PaymentMethodItem {
   id: PaymentMethodId;

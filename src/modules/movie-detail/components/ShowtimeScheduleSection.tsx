@@ -1,16 +1,31 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ChevronDown, Bell } from 'lucide-react';
-import { MOCK_CINEMA_GROUPS, MOCK_DATE_OPTIONS } from '../mocks/mockMovieDetailData';
+import { ChevronLeft, ChevronRight, ChevronDown, Bell, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/shared/store/useAuthStore';
+import { fetchShowtimeSchedule } from '../services/movie-detail.service';
+import { CinemaShowtimeGroup } from '../types/movie-detail.types';
 
 interface ShowtimeScheduleSectionProps {
   movieSlug?: string;
   isComingSoon?: boolean;
 }
+
+const generateDateOptions = () => {
+  const dates = [];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dayStr = i === 0 ? 'Hôm nay' : ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][d.getDay()];
+    const dateQuery = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const displayDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    dates.push({ dateStr: dateQuery, displayDay: dayStr, displayDate });
+  }
+  return dates;
+};
 
 export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = ({
   movieSlug = 'conan-movie-27',
@@ -19,16 +34,32 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   const router = useRouter();
   const { isAuthenticated, openAuthModal } = useAuthStore();
 
-  const [selectedDateStr, setSelectedDateStr] = useState(MOCK_DATE_OPTIONS[0].displayDate);
+  const dateOptions = useMemo(() => generateDateOptions(), []);
+  
+  const [selectedDateStr, setSelectedDateStr] = useState(dateOptions[0].dateStr);
   const [selectedRegion, setSelectedRegion] = useState('Toàn quốc');
   const [selectedCinemaFilter, setSelectedCinemaFilter] = useState('Tất cả rạp');
   const [openDropdown, setOpenDropdown] = useState<'region' | 'cinema' | null>(null);
   const [isNotified, setIsNotified] = useState(false);
+  const [schedule, setSchedule] = useState<CinemaShowtimeGroup[]>([]);
+  const [loadingSchedule, setLoadingSchedule] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const comingSoonSlugs = ['joker-folie-a-deux', 'venom-the-last-dance', 'gladiator-2', 'wicked-part-one'];
   const isComingSoonMovie = isComingSoon || comingSoonSlugs.includes(movieSlug);
+
+  useEffect(() => {
+    if (isComingSoonMovie) return;
+    setLoadingSchedule(true);
+    fetchShowtimeSchedule(movieSlug, selectedDateStr, selectedRegion)
+      .then((data) => {
+        setSchedule(data);
+      })
+      .finally(() => {
+        setLoadingSchedule(false);
+      });
+  }, [movieSlug, selectedDateStr, selectedRegion, isComingSoonMovie]);
 
   const handleScrollLeft = () => {
     if (scrollRef.current) {
@@ -43,19 +74,21 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   };
 
   const handleShowtimeClick = (targetUrl: string) => {
-    if (isAuthenticated) {
-      router.push(targetUrl);
-    } else {
-      openAuthModal('login', 'Vui lòng đăng nhập để tiến hành chọn ghế đặt vé xem phim', targetUrl);
-    }
+    router.push(targetUrl);
   };
 
   const regionOptions = ['Toàn quốc', 'Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ'];
-  const cinemaFilterOptions = [
-    'Tất cả rạp',
-    'Galaxy CineX Hanoi Centre',
-    'Galaxy Nguyễn Du',
-  ];
+  
+  // Compute distinct cinemas from the schedule to populate the cinema filter dropdown
+  const cinemaFilterOptions = useMemo(() => {
+    const names = new Set(schedule.map(c => c.cinemaName));
+    return ['Tất cả rạp', ...Array.from(names)];
+  }, [schedule]);
+
+  const filteredSchedule = useMemo(() => {
+    if (selectedCinemaFilter === 'Tất cả rạp') return schedule;
+    return schedule.filter(c => c.cinemaName === selectedCinemaFilter);
+  }, [schedule, selectedCinemaFilter]);
 
   return (
     <div
@@ -109,12 +142,12 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
                 ref={scrollRef}
                 className="overflow-x-auto scrollbar-none py-1 flex items-center gap-2 max-w-[270px] sm:max-w-[340px] md:max-w-[380px] scroll-smooth"
               >
-                {MOCK_DATE_OPTIONS.map((d) => {
-                  const isActive = d.displayDate === selectedDateStr;
+                {dateOptions.map((d) => {
+                  const isActive = d.dateStr === selectedDateStr;
                   return (
                     <button
                       key={d.dateStr}
-                      onClick={() => setSelectedDateStr(d.displayDate)}
+                      onClick={() => setSelectedDateStr(d.dateStr)}
                       className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 transition-all shrink-0 cursor-pointer ${
                         isActive
                           ? 'bg-[#7C6FE8] text-white shadow-sm'
@@ -210,43 +243,54 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
           </div>
 
           {/* Cinema Cards Section */}
-          <div className="flex flex-col gap-8 pt-2">
-            {MOCK_CINEMA_GROUPS.map((cinema) => (
-              <div key={cinema.cinemaId} className="flex flex-col gap-4">
-                <h3 className="font-bold text-base text-[#131413]">{cinema.cinemaName}</h3>
-
-                <div className="flex flex-col gap-4">
-                  {cinema.formatGroups.map((group, gIdx) => (
-                    <div
-                      key={gIdx}
-                      className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center"
-                    >
-                      <div className="sm:col-span-4 text-xs font-semibold text-slate-600 leading-snug">
-                        {group.formatName}
-                      </div>
-
-                      <div className="sm:col-span-8 flex flex-wrap gap-2.5">
-                        {group.showtimes.map((st) => {
-                          const targetUrl = `/booking/seats?movie=${movieSlug}&showtime_id=${st.id}&date=${selectedDateStr}&time=${st.time}&cinema=${encodeURIComponent(
-                            cinema.cinemaName
-                          )}`;
-
-                          return (
-                            <button
-                              key={st.id}
-                              onClick={() => handleShowtimeClick(targetUrl)}
-                              className="w-20 py-2 rounded-lg bg-white hover:bg-[#7C6FE8] text-slate-700 hover:text-white border border-gray-200 hover:border-[#7C6FE8] font-bold text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs"
-                            >
-                              {st.time}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div className="flex flex-col gap-8 pt-2 relative min-h-[300px]">
+            {loadingSchedule ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+                <Loader2 className="w-8 h-8 text-[#7C6FE8] animate-spin" />
               </div>
-            ))}
+            ) : filteredSchedule.length === 0 ? (
+              <div className="w-full py-12 flex flex-col items-center justify-center text-slate-500 gap-3">
+                <p className="text-sm font-semibold">Không tìm thấy suất chiếu nào phù hợp.</p>
+                <p className="text-xs">Vui lòng chọn ngày hoặc rạp khác.</p>
+              </div>
+            ) : (
+              filteredSchedule.map((cinema) => (
+                <div key={cinema.cinemaId} className="flex flex-col gap-4">
+                  <h3 className="font-bold text-base text-[#131413]">{cinema.cinemaName}</h3>
+
+                  <div className="flex flex-col gap-4">
+                    {cinema.formatGroups.map((group, gIdx) => (
+                      <div
+                        key={gIdx}
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center"
+                      >
+                        <div className="sm:col-span-4 text-xs font-semibold text-slate-600 leading-snug">
+                          {group.formatName}
+                        </div>
+
+                        <div className="sm:col-span-8 flex flex-wrap gap-2.5">
+                          {group.showtimes.map((st) => {
+                            const targetUrl = `/booking/seats?movie=${movieSlug}&showtime_id=${st.id}&date=${selectedDateStr}&time=${st.time}&cinema=${encodeURIComponent(
+                              cinema.cinemaName
+                            )}`;
+
+                            return (
+                              <button
+                                key={st.id}
+                                onClick={() => handleShowtimeClick(targetUrl)}
+                                className="w-20 py-2 rounded-lg bg-white hover:bg-[#7C6FE8] text-slate-700 hover:text-white border border-gray-200 hover:border-[#7C6FE8] font-bold text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                              >
+                                {st.time}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </>
       )}

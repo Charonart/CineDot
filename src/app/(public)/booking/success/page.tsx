@@ -4,12 +4,15 @@ import { BookingSuccessClientPage } from '@/modules/booking-success/components/B
 interface BookingSuccessPageProps {
   searchParams: Promise<{
     booking_id?: string;
+    booking_code?: string;
+    showtime_id?: string;
     movie?: string;
     seats?: string;
     date?: string;
     time?: string;
     cinema?: string;
     total?: string;
+    status?: string;
   }>;
 }
 
@@ -19,17 +22,19 @@ export const metadata = {
 };
 
 export default async function BookingSuccessPage({ searchParams }: BookingSuccessPageProps) {
-  const { booking_id, movie, seats, date, time, cinema, total } = await searchParams;
+  const { booking_id, booking_code, showtime_id, movie, seats, date, time, cinema, total, status } = await searchParams;
 
   return (
     <BookingSuccessClientPage
-      bookingIdParam={booking_id}
+      bookingIdParam={booking_code || booking_id}
+      showtimeIdParam={showtime_id}
       movieParam={movie}
       seatsParam={seats}
       dateParam={date}
       timeParam={time}
       cinemaParam={cinema}
       totalParam={total}
+      statusParam={status}
     />
   );
 }

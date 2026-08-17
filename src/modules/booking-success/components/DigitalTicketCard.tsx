@@ -71,8 +71,23 @@ export const DigitalTicketCard: React.FC<DigitalTicketCardProps> = ({ ticket }) 
             <Ticket className="w-4 h-4 text-[#7C6FE8] shrink-0" />
             <span>Ghế đã chọn: <strong className="text-[#7C6FE8] text-sm">{ticket.seatLabels}</strong></span>
           </div>
+        </div>
 
-          <span className="font-extrabold text-sm text-slate-900">
+        {ticket.combos && ticket.combos.length > 0 && (
+          <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+            <span className="font-bold text-xs text-slate-500">Đồ ăn / Thức uống kèm theo:</span>
+            {ticket.combos.map((combo, idx) => (
+              <div key={idx} className="flex items-center justify-between text-slate-800">
+                <span className="font-semibold">{combo.name}</span>
+                <span className="font-bold text-[#7C6FE8]">x{combo.quantity}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+          <span className="font-bold text-xs text-slate-500 uppercase">Tổng Thanh Toán</span>
+          <span className="font-extrabold text-lg text-[#7C6FE8]">
             {ticket.totalPaid.toLocaleString()}đ
           </span>
         </div>

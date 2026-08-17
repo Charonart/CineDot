@@ -15,7 +15,7 @@ interface MovieDetailPageClientProps {
 }
 
 export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
-  const { movie, loading } = useMovieDetail(slug);
+  const { movie, loading, recommended } = useMovieDetail(slug);
 
   const scrollToSchedule = () => {
     const el = document.getElementById('showtime-schedule');
@@ -75,7 +75,7 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
 
             {/* Right Column: 32% Width (lg:col-span-4 - Hot Recommended Movies Sidebar aligned alongside Title) */}
             <div className="lg:col-span-4 pt-4 lg:pt-6">
-              <RecommendedSidebar movies={MOCK_RECOMMENDED_MOVIES} />
+              <RecommendedSidebar movies={recommended} />
             </div>
           </div>
         </div>

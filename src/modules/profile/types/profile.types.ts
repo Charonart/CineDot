@@ -2,9 +2,7 @@ export type ProfileDashboardTab =
   | 'TICKETS'
   | 'ORDERS'
   | 'ACCOUNT'
-  | 'TRANSACTIONS'
-  | 'SECURITY'
-  | 'REWARDS';
+  | 'SECURITY';
 
 export interface UserProfile {
   id: string;
@@ -53,22 +51,4 @@ export interface StarShopOrderItem {
   }[];
 }
 
-export interface TransactionItem {
-  id: string;
-  transactionCode: string;
-  date: string;
-  description: string;
-  paymentMethod: string;
-  amount: number;
-  status: 'SUCCESS' | 'REFUNDED' | 'FAILED';
-}
 
-export interface RewardVoucherItem {
-  id: string;
-  title: string;
-  description: string;
-  pointsRequired: number;
-  code: string;
-  expiryDate: string;
-  category: 'TICKET' | 'FOOD' | 'GIFT';
-}

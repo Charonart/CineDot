@@ -7,9 +7,7 @@ import { ProfileSidebar } from './ProfileSidebar';
 import { UserTicketCard } from './UserTicketCard';
 import { StarShopOrdersTab } from './StarShopOrdersTab';
 import { TabAccountInfo } from './TabAccountInfo';
-import { TabTransactionHistory } from './TabTransactionHistory';
 import { TabSecurity } from './TabSecurity';
-import { TabRewards } from './TabRewards';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function ProfileTicketsClientPage() {
@@ -23,6 +21,8 @@ export function ProfileTicketsClientPage() {
     ticketFilterTab,
     setTicketFilterTab,
     tickets,
+    orders,
+    provinces,
     transactions,
     vouchers,
     loading,
@@ -125,20 +125,16 @@ export function ProfileTicketsClientPage() {
               )}
 
               {/* TAB 2: ĐƠN HÀNG CỦA BẠN */}
-              {activeNavTab === 'ORDERS' && <StarShopOrdersTab />}
+              {activeNavTab === 'ORDERS' && <StarShopOrdersTab orders={orders} />}
 
               {/* TAB 3: THÔNG TIN CÁ NHÂN */}
               {activeNavTab === 'ACCOUNT' && (
                 <TabAccountInfo
                   profile={profile}
+                  provinces={provinces}
                   onUpdate={handleUpdateAccountInfo}
                   updateSuccess={accountUpdateSuccess}
                 />
-              )}
-
-              {/* TAB 4: LỊCH SỬ GIAO DỊCH */}
-              {activeNavTab === 'TRANSACTIONS' && (
-                <TabTransactionHistory transactions={transactions} />
               )}
 
               {/* TAB 5: BẢO MẬT TÀI KHOẢN */}
@@ -146,16 +142,6 @@ export function ProfileTicketsClientPage() {
                 <TabSecurity
                   onUpdatePassword={handleUpdateSecurityPassword}
                   updateSuccess={securityUpdateSuccess}
-                />
-              )}
-
-              {/* TAB 6: ƯU ĐÃI & ĐIỂM THƯỞNG */}
-              {activeNavTab === 'REWARDS' && (
-                <TabRewards
-                  profile={profile}
-                  vouchers={vouchers}
-                  onRedeem={handleRedeemVoucher}
-                  redeemSuccessMsg={redeemSuccessMsg}
                 />
               )}
             </div>

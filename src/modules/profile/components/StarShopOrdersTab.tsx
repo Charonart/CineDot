@@ -4,14 +4,17 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, QrCode, MapPin, Clock, CheckCircle2, X, Copy } from 'lucide-react';
 import { StarShopOrderItem } from '../types/profile.types';
-import { MOCK_STAR_SHOP_ORDERS } from '../mocks/mockProfileData';
 
-export const StarShopOrdersTab: React.FC = () => {
+interface StarShopOrdersTabProps {
+  orders: StarShopOrderItem[];
+}
+
+export const StarShopOrdersTab: React.FC<StarShopOrdersTabProps> = ({ orders }) => {
   const [filter, setFilter] = useState<'ALL' | 'WAITING_PICKUP' | 'COMPLETED'>('ALL');
   const [selectedQrOrder, setSelectedQrOrder] = useState<StarShopOrderItem | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const filteredOrders = MOCK_STAR_SHOP_ORDERS.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     if (filter === 'ALL') return true;
     return order.status === filter;
   });
@@ -29,7 +32,7 @@ export const StarShopOrdersTab: React.FC = () => {
         <div className="flex items-center gap-2">
           <ShoppingBag className="w-6 h-6 text-[#7C6FE8]" />
           <h2 className="text-xl font-extrabold text-slate-900">
-            Đơn Hàng Của Bạn ({MOCK_STAR_SHOP_ORDERS.length})
+            Đơn Hàng Của Bạn ({orders.length})
           </h2>
         </div>
 

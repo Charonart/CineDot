@@ -8,10 +8,9 @@ import { SeatLegend } from './SeatLegend';
 import { CinemaScreen } from './CinemaScreen';
 import { SeatGrid } from './SeatGrid';
 import { BookingSidebar } from './BookingSidebar';
-import { FoodUpsellModal } from './FoodUpsellModal';
 import { SeatTimeoutModal } from './SeatTimeoutModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { hasActiveBookingTimer } from '../services/bookingTimerService';
+import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
 
 interface SeatBookingClientPageProps {
   showtimeId: string;
@@ -40,10 +39,11 @@ export function SeatBookingClientPage({
     formattedCountdown,
     isTimeout,
     loading,
+    isHolding,
+    holdError,
+    handleHoldSeats,
   } = useSeatBooking(showtimeId, movieParam, initialSeatsParam, dateParam, timeParam, cinemaParam);
 
-  const [isUpsellOpen, setIsUpsellOpen] = useState(false);
-  const [hasSeenUpsell, setHasSeenUpsell] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState<boolean>(() => hasActiveBookingTimer(showtimeId));
   const [currentShowTime, setCurrentShowTime] = useState('19:30');
 
@@ -52,17 +52,6 @@ export function SeatBookingClientPage({
       setCurrentShowTime(bookingInfo.showTime);
     }
   }, [bookingInfo]);
-
-  const handleOpenUpsellModal = () => {
-    setIsUpsellOpen(true);
-    setIsTimerActive(true);
-  };
-
-  const handleCloseUpsell = () => {
-    setIsUpsellOpen(false);
-    setHasSeenUpsell(true);
-    setIsTimerActive(true);
-  };
 
   if (loading || !bookingInfo) {
     return (
@@ -125,32 +114,22 @@ export function SeatBookingClientPage({
                 currentShowTime={currentShowTime}
                 selectedSeats={selectedSeats}
                 totalPrice={totalPrice}
-                hasSeenUpsell={hasSeenUpsell}
                 isTimerActive={isTimerActive}
                 formattedCountdown={formattedCountdown}
-                onOpenUpsellModal={handleOpenUpsellModal}
+                isHolding={isHolding}
+                holdError={holdError}
+                onHoldSeats={handleHoldSeats}
               />
             </div>
           </div>
         </div>
       </main>
 
-      {/* 3. Food Combo Upsell Modal Popup */}
-      <FoodUpsellModal
-        isOpen={isUpsellOpen}
-        onClose={handleCloseUpsell}
-        showtimeId={showtimeId}
-        movieParam={bookingInfo.movieSlug}
-        seatsParam={selectedSeatIdsStr}
-        dateParam={dateParam}
-        timeParam={currentShowTime}
-        cinemaParam={bookingInfo.cinemaName}
-      />
-
       {/* 4. Seat Timeout Expiration Modal Popup */}
       <SeatTimeoutModal
         isOpen={isTimeout}
         movieSlug={bookingInfo.movieSlug}
+        onReset={() => resetBookingTimer(showtimeId)}
       />
     </div>
   );

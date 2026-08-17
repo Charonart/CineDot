@@ -1,24 +1,58 @@
 export interface ShowtimeSlot {
   id: string;
   time: string;
-  roomName: string;
+  endTime?: string;
+  roomName?: string;
+  screen?: string;
+  format?: string;
+  price?: number | string;
   availableSeats: number;
   totalSeats: number;
+}
+
+export interface FormatShowtimeGroup {
+  formatName: string;
+  showtimes: ShowtimeSlot[];
 }
 
 export interface CinemaShowtimeGroup {
   cinemaId: string;
   cinemaName: string;
-  formatGroups: {
-    formatName: string;
-    showtimes: ShowtimeSlot[];
-  }[];
+  cinemaAddress?: string;
+  province?: string;
+  phone?: string;
+  formatGroups: FormatShowtimeGroup[];
 }
 
 export interface DateOption {
   dateStr: string;
   displayDay: string;
   displayDate: string;
+}
+
+export interface MovieCastMember {
+  id: number | string;
+  name: string;
+  character?: string;
+  profileUrl?: string;
+  order?: number;
+}
+
+export interface MovieCrewMember {
+  id: number | string;
+  name: string;
+  job: string;
+  department?: string;
+  profileUrl?: string;
+}
+
+export interface MovieReviewItem {
+  review_id: number;
+  user_name: string;
+  user_avatar?: string;
+  rating: number;
+  comment: string;
+  created_at: string;
 }
 
 export interface MovieDetail {
@@ -33,11 +67,14 @@ export interface MovieDetail {
   formatBadge: string;
   ageRating: string;
   genre: string[];
+  genreIds?: number[];
   duration: string;
   releaseDate: string;
   country: string;
   director: string;
   cast: string[];
+  castMembers?: MovieCastMember[];
+  crewMembers?: MovieCrewMember[];
   synopsis: string;
   rating: number;
   voteCount: number;

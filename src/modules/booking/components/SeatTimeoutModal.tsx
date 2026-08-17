@@ -5,14 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TimerReset, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
-interface SeatTimeoutModalProps {
+export interface SeatTimeoutModalProps {
   isOpen: boolean;
   movieSlug?: string;
+  onReset?: () => void;
 }
 
 export const SeatTimeoutModal: React.FC<SeatTimeoutModalProps> = ({
   isOpen,
   movieSlug = 'spiderman-new-beginning',
+  onReset,
 }) => {
   if (!isOpen) return null;
 
@@ -53,6 +55,7 @@ export const SeatTimeoutModal: React.FC<SeatTimeoutModalProps> = ({
           <div className="w-full pt-2">
             <Link href={`/movies/${movieSlug}`}>
               <motion.button
+                onClick={onReset}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="w-full py-3.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/35 transition-all cursor-pointer"

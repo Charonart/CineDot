@@ -1,18 +1,22 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
+import https from 'https';
 import { env } from '../env/env';
 import { logger } from '../logger/logger';
 import { getMockPath } from '@mocks/mockRoutes';
 import { ApiError } from '@shared/types/api.type';
 import { isRequestCanceled } from '@shared/utils/isRequestCanceled';
 
+const isServer = typeof window === 'undefined';
+
 export const axiosClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   withCredentials: true,
   withXSRFToken: true,
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
+  httpsAgent: isServer ? new https.Agent({ rejectUnauthorized: false }) : undefined,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',

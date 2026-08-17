@@ -23,9 +23,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
     { id: 'TICKETS' as ProfileDashboardTab, label: 'Vé Của Tôi', icon: Ticket },
     { id: 'ORDERS' as ProfileDashboardTab, label: 'Đơn hàng của bạn', icon: ShoppingBag },
     { id: 'ACCOUNT' as ProfileDashboardTab, label: 'Thông Tin Cá Nhân', icon: User },
-    { id: 'TRANSACTIONS' as ProfileDashboardTab, label: 'Lịch Sử Giao Dịch', icon: History },
     { id: 'SECURITY' as ProfileDashboardTab, label: 'Bảo Mật Tài Khoản', icon: Shield },
-    { id: 'REWARDS' as ProfileDashboardTab, label: 'Ưu Đãi & Điểm Thưởng', icon: Gift },
   ];
 
   return (

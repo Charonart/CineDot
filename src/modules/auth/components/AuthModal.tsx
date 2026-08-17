@@ -57,10 +57,10 @@ export const AuthModal: React.FC = () => {
     handleFinishLogin();
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    const res = login(email || 'user@cinedot.vn', password || '123456');
+    const res = await login(email || 'user@cinedot.vn', password || '123456');
     if (res.success) {
       handleFinishLogin();
     } else {
@@ -68,14 +68,14 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (regPassword && confirmPassword && regPassword !== confirmPassword) {
       setRegError('Mật khẩu xác nhận không trùng khớp!');
       return;
     }
     setRegError('');
-    const res = register({
+    const res = await register({
       name: fullName || 'Khách Hàng Mới',
       email: regEmail,
       phone: phone || '0988776655',

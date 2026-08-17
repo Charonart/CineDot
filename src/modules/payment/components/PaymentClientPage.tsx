@@ -12,6 +12,7 @@ import { PaymentSidebar } from './PaymentSidebar';
 import { PaymentLoadingOverlay } from './PaymentLoadingOverlay';
 import { SeatTimeoutModal } from '@/modules/booking/components/SeatTimeoutModal';
 import { MOCK_PAYMENT_METHODS } from '../mocks/mockPaymentData';
+import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
 
 interface PaymentClientPageProps {
   showtimeId?: string;
@@ -82,12 +83,18 @@ export function PaymentClientPage({
       });
 
       if (res.success) {
-        // Redirect to Booking Success Page (Page 4)
-        router.push(
-          `/booking/success?booking_id=${res.bookingId}&movie=${movieInfo.slug}&seats=${seatsParam}&date=${dateParam}&time=${timeParam}&cinema=${encodeURIComponent(
-            decodedCinemaName
-          )}&total=${grandTotal}`
-        );
+        if (res.paymentUrl) {
+          window.location.href = res.paymentUrl;
+        } else {
+          // Fallback or 100% discount
+          router.push(
+            `/booking/success?booking_id=${res.bookingId}&movie=${movieInfo.slug}&seats=${seatsParam}&date=${dateParam}&time=${timeParam}&cinema=${encodeURIComponent(
+              decodedCinemaName
+            )}&total=${grandTotal}`
+          );
+        }
+      } else {
+        alert('Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại.');
       }
     } finally {
       setIsProcessing(false);
@@ -171,6 +178,7 @@ export function PaymentClientPage({
       <SeatTimeoutModal
         isOpen={isTimeout}
         movieSlug={movieInfo.slug}
+        onReset={() => resetBookingTimer(showtimeId)}
       />
     </div>
   );

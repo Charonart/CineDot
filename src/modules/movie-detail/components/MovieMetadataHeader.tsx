@@ -28,10 +28,8 @@ export const MovieMetadataHeader: React.FC<MovieMetadataHeaderProps> = ({
   };
 
   const handleBookNow = () => {
-    if (isAuthenticated) {
-      router.push(bookingUrl);
-    } else {
-      openAuthModal('login', 'Vui lòng đăng nhập để tiến hành chọn ghế đặt vé xem phim', bookingUrl);
+    if (onBookClick) {
+      onBookClick();
     }
   };
 

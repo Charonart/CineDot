@@ -2,21 +2,23 @@ import { SeatItem, ShowtimeBookingInfo } from '../types/seat-booking.types';
 
 export const mockShowtimeBookingInfo: ShowtimeBookingInfo = {
   showtimeId: 'showtime-101',
-  movieSlug: 'conan-movie-27',
-  movieTitle: 'Thám Tử Lừng Danh Conan: Ngôi Sao 5 Cánh 1 Triệu Đô',
-  movieFormat: 'IMAX 2D Phụ Đề',
-  posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80',
-  ageRating: 'P',
+  movieSlug: 'cai-chet-cua-robin-hood',
+  movieTitle: 'Cái Chết của Robin Hood',
+  movieFormat: 'IMAX Laser',
+  posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
+  ageRating: 'T16',
   cinemaName: 'CineDot Landmark 81',
   roomName: 'Phòng chiếu 01 (IMAX Laser)',
   showTime: '19:30',
-  showDate: 'Thứ Tư, 29/07/2026',
+  showDate: 'Hôm nay',
+  basePrice: 110000,
   countdownSeconds: 600, // 10 minutes
 };
 
 export const generateMockSeats = (): SeatItem[] => {
   const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
   const seats: SeatItem[] = [];
+  let seatCounter = 1;
 
   const bookedSeatIds = new Set(['C05', 'C06', 'D07', 'F06', 'F07', 'F08', 'G04', 'G05']);
 
@@ -39,6 +41,7 @@ export const generateMockSeats = (): SeatItem[] => {
 
         seats.push({
           id: `${row}${num.toString().padStart(2, '0')}`,
+          showtime_seat_id: seatCounter++,
           row,
           number: num,
           type: 'SWEETBOX',
@@ -49,6 +52,7 @@ export const generateMockSeats = (): SeatItem[] => {
 
         seats.push({
           id: `${row}${(num + 1).toString().padStart(2, '0')}`,
+          showtime_seat_id: seatCounter++,
           row,
           number: num + 1,
           type: 'SWEETBOX',
@@ -64,6 +68,7 @@ export const generateMockSeats = (): SeatItem[] => {
 
         seats.push({
           id: seatId,
+          showtime_seat_id: seatCounter++,
           row,
           number: num,
           type,

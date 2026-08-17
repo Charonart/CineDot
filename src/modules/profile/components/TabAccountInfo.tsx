@@ -3,15 +3,18 @@
 import React, { useState } from 'react';
 import { Camera, Check, User, Mail, Phone, Calendar, MapPin } from 'lucide-react';
 import { UserProfile } from '../types/profile.types';
+import { ProvinceItem } from '@/shared/services/masterData.service';
 
 interface TabAccountInfoProps {
   profile: UserProfile;
+  provinces: ProvinceItem[];
   onUpdate: (updated: Partial<UserProfile>) => void;
   updateSuccess: boolean;
 }
 
 export const TabAccountInfo: React.FC<TabAccountInfoProps> = ({
   profile,
+  provinces,
   onUpdate,
   updateSuccess,
 }) => {
@@ -125,9 +128,9 @@ export const TabAccountInfo: React.FC<TabAccountInfoProps> = ({
             onChange={(e) => setGender(e.target.value)}
             className="w-full px-4 py-2.5 rounded-2xl bg-white border border-gray-200 text-xs font-semibold focus:border-[#7C6FE8] outline-none cursor-pointer"
           >
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
+            <option value="male">Nam</option>
+            <option value="female">Nữ</option>
+            <option value="other">Khác</option>
           </select>
         </div>
 
@@ -135,13 +138,19 @@ export const TabAccountInfo: React.FC<TabAccountInfoProps> = ({
         <div className="flex flex-col gap-1.5 col-span-2 sm:col-span-1">
           <label className="text-xs font-bold text-slate-700">Thành Phố</label>
           <div className="relative">
-            <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            <input
-              type="text"
+            <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 z-10" />
+            <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-gray-200 text-xs font-semibold focus:border-[#7C6FE8] outline-none"
-            />
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-gray-200 text-xs font-semibold focus:border-[#7C6FE8] outline-none cursor-pointer appearance-none"
+            >
+              <option value="" disabled>Chọn thành phố</option>
+              {provinces.map((prov) => (
+                <option key={prov.province_id} value={prov.province_name}>
+                  {prov.province_name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

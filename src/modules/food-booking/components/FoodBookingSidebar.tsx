@@ -19,31 +19,15 @@ interface FoodBookingSidebarProps {
   cinemaParam?: string;
 }
 
+import { getBookingSession } from '@/modules/booking/services/bookingSessionService';
+
 const mockMovieDatabase: Record<string, { title: string; poster: string; format: string; age: string }> = {
   'spiderman-new-beginning': {
     title: 'Người Nhện: Khởi Đầu Mới',
     poster: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
     format: '2D Phụ Đề',
     age: 'T13',
-  },
-  'spider-man-across-the-spider-verse': {
-    title: 'Người Nhện: Khởi Đầu Mới',
-    poster: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
-    format: '2D Phụ Đề',
-    age: 'T13',
-  },
-  'mai': {
-    title: 'Phim Điện Ảnh Mai',
-    poster: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80',
-    format: '2D Lồng Tiếng',
-    age: 'T18',
-  },
-  'inside-out-2': {
-    title: 'Những Mảnh Mảnh Cảm Xúc 2',
-    poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
-    format: '3D Lồng Tiếng',
-    age: 'P',
-  },
+  }
 };
 
 export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
@@ -59,6 +43,16 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
 }) => {
   // Movie details lookup
   const movieInfo = useMemo(() => {
+    const session = getBookingSession(showtimeId);
+    if (session) {
+      return {
+        title: session.movieTitle,
+        poster: session.posterUrl || 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
+        format: session.movieFormat,
+        age: session.ageRating || 'T13',
+      };
+    }
+    
     const slug = movieParam || 'spiderman-new-beginning';
     const found = mockMovieDatabase[slug];
     return {
@@ -69,7 +63,7 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
       format: found ? found.format : '2D Phụ Đề',
       age: found ? found.age : 'T13',
     };
-  }, [movieParam]);
+  }, [movieParam, showtimeId]);
 
   // Decode Cinema Name
   const decodedCinemaName = useMemo(() => {

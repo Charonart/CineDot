@@ -6,6 +6,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/shared/store/useAuthStore';
 import { useCartStore } from '@/shared/store/useCartStore';
 import { AuthModal } from '@/modules/auth/components/AuthModal';
+import { PermissionGuard } from '@/shared/components/auth/PermissionGuard';
 import { MoviesMegaDropdown } from './MoviesMegaDropdown';
 import { CinemasMegaDropdown } from './CinemasMegaDropdown';
 import { StarShopMegaDropdown } from './StarShopMegaDropdown';
@@ -26,6 +27,7 @@ export const Navbar: React.FC = () => {
   // Prevent SSR Hydration Mismatch by ensuring client-only state updates after mount
   useEffect(() => {
     setMounted(true);
+    useAuthStore.getState().fetchMe();
   }, []);
 
   // Compute reactive cart list and total count directly from items
@@ -148,6 +150,12 @@ export const Navbar: React.FC = () => {
 
             {mounted && isAuthenticated && user ? (
               <div className="flex items-center gap-3">
+                <PermissionGuard permissions={['admin', 'manage:cinemas', 'manage:movies', 'view:reports']}>
+                  <Link href="/admin" className="text-xs font-bold text-[#7C6FE8] hover:text-[#5848c9] bg-purple-50 hover:bg-purple-100 transition-colors px-3 py-1.5 rounded-full border border-purple-200 shadow-sm hidden md:block">
+                    Quản Trị Hệ Thống
+                  </Link>
+                </PermissionGuard>
+                
                 <Link href="/profile" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-slate-100/80 px-3 py-1.5 rounded-full border border-gray-200">
                   <div className="w-7 h-7 rounded-full bg-[#7C6FE8] text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
                     {user.name ? user.name.charAt(0) : 'U'}

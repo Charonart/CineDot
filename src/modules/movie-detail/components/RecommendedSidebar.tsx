@@ -17,7 +17,7 @@ export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ movies }
       <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
         <div className="w-1.5 h-6 bg-[#7C6FE8] rounded-full shadow-[0_0_10px_rgba(124,111,232,0.6)]" />
         <h3 className="text-base font-bold text-[#131413] uppercase tracking-wider">
-          Phim Đang Chiếu Hot
+          Phim Cùng Thể Loại
         </h3>
       </div>
 

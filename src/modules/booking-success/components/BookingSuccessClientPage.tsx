@@ -17,6 +17,8 @@ interface BookingSuccessClientPageProps {
   timeParam?: string;
   cinemaParam?: string;
   totalParam?: string;
+  showtimeIdParam?: string;
+  statusParam?: string;
 }
 
 export function BookingSuccessClientPage({
@@ -27,6 +29,8 @@ export function BookingSuccessClientPage({
   timeParam,
   cinemaParam,
   totalParam,
+  showtimeIdParam,
+  statusParam,
 }: BookingSuccessClientPageProps) {
   const {
     ticket,
@@ -41,7 +45,8 @@ export function BookingSuccessClientPage({
     dateParam,
     timeParam,
     cinemaParam,
-    totalParam
+    totalParam,
+    showtimeIdParam
   );
 
   if (loading || !ticket) {
@@ -63,34 +68,51 @@ export function BookingSuccessClientPage({
       {/* 2. Main Content Container */}
       <main className="w-full">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8 flex flex-col items-center gap-8">
-          {/* Header Success Message */}
+          {/* Header Success / Error Message */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center text-center gap-3"
           >
-            <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-8 ring-emerald-50">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
-              Thanh Toán Thành Công!
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
-              Cảm ơn bạn đã lựa chọn CineDot. Vé xem phim điện tử của bạn đã được xuất thành công và sẵn sàng sử dụng.
-            </p>
+            {statusParam === 'failed' || statusParam === 'invalid_signature' ? (
+              <>
+                <div className="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center shadow-lg shadow-red-500/20 ring-8 ring-red-50">
+                  <span className="text-4xl font-black">X</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
+                  Thanh Toán Thất Bại
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
+                  Rất tiếc, giao dịch thanh toán của bạn không thành công hoặc đã bị hủy. Đơn hàng của bạn đã bị hủy bỏ.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-8 ring-emerald-50">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
+                  Thanh Toán Thành Công!
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
+                  Cảm ơn bạn đã lựa chọn CineDot. Vé xem phim điện tử của bạn đã được xuất thành công và sẵn sàng sử dụng.
+                </p>
+              </>
+            )}
           </motion.div>
 
           {/* Digital Ticket Stub Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="w-full"
-          >
-            <DigitalTicketCard ticket={ticket} />
-          </motion.div>
+          {statusParam !== 'failed' && statusParam !== 'invalid_signature' && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="w-full"
+            >
+              <DigitalTicketCard ticket={ticket} />
+            </motion.div>
+          )}
 
           {/* Action Buttons Row */}
           <motion.div
@@ -100,27 +122,29 @@ export function BookingSuccessClientPage({
             className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-lg pt-2"
           >
             {/* Download PDF Button */}
-            <button
-              onClick={handleDownloadPDF}
-              disabled={isDownloading}
-              className={`w-full sm:flex-1 py-3.5 px-6 rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                downloadSuccess
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-lg shadow-[#7C6FE8]/35'
-              }`}
-            >
-              {downloadSuccess ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>ĐÃ TẢI VÉ PDF THÀNH CÔNG</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  <span>{isDownloading ? 'ĐANG TẠO VÉ PDF...' : 'TẢI VÉ VỀ MÁY (PDF)'}</span>
-                </>
-              )}
-            </button>
+            {statusParam !== 'failed' && statusParam !== 'invalid_signature' && (
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className={`w-full sm:flex-1 py-3.5 px-6 rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  downloadSuccess
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-lg shadow-[#7C6FE8]/35'
+                }`}
+              >
+                {downloadSuccess ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>ĐÃ TẢI VÉ PDF THÀNH CÔNG</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>{isDownloading ? 'ĐANG TẠO VÉ PDF...' : 'TẢI VÉ VỀ MÁY (PDF)'}</span>
+                  </>
+                )}
+              </button>
+            )}
 
             {/* View My Tickets Link (Page 5: /profile) */}
             <Link href="/profile" className="w-full sm:flex-1">

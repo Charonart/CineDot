@@ -1,13 +1,22 @@
 import { create } from 'zustand';
+import Cookies from 'js-cookie';
 import { User } from '../types/auth.types';
+import { authService, ResetPasswordPayload } from '@/modules/auth/services/auth.service';
 
 export type AuthModalTab = 'login' | 'register' | 'forgot';
+
+export interface AuthActionResult {
+  success: boolean;
+  message?: string;
+  errors?: Record<string, string[]>;
+}
 
 interface AuthState {
   user: User | null;
   permissions: string[];
   token: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
 
   // Modal Popup states
   isAuthModalOpen: boolean;
@@ -16,9 +25,12 @@ interface AuthState {
   postLoginRedirectUrl: string | null;
 
   setAuth: (user: User, permissions: string[], token: string) => void;
-  login: (emailOrPhone: string, pass: string) => { success: boolean; message?: string };
-  register: (data: { name: string; email: string; phone: string; pass: string }) => { success: boolean; message?: string };
-  logout: () => void;
+  login: (emailOrPhone: string, pass: string) => Promise<AuthActionResult>;
+  register: (data: { name: string; email: string; phone?: string; pass: string }) => Promise<AuthActionResult>;
+  forgotPassword: (email: string) => Promise<AuthActionResult>;
+  resetPassword: (payload: ResetPasswordPayload) => Promise<AuthActionResult>;
+  logout: () => Promise<void>;
+  fetchMe: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
 
@@ -29,40 +41,60 @@ interface AuthState {
 }
 
 const MOCK_DEMO_USER: User = {
-  id: 'u-8841',
-  username: 'cinedot_user',
-  email: 'user@cinedot.vn',
-  name: 'Nguyễn Văn CineDot',
-  role_name: 'CUSTOMER',
+  id: 1,
+  user_id: 1,
+  username: 'admin',
+  email: 'admin@cinedot.com',
+  name: 'Quản Trị Viên',
+  fullname: 'Quản Trị Viên',
+  role_name: 'admin',
+  total_points: 1000,
+  user_tier: 'Diamond',
 };
 
 const getInitialState = () => {
   if (typeof window === 'undefined') {
-    return { token: null, user: null };
+    return { token: null, user: null, permissions: [] };
   }
-  const token = localStorage.getItem('cinedot_token') || localStorage.getItem('cine_token');
+  const token =
+    Cookies.get('cine_token') ||
+    Cookies.get('cinedot_token') ||
+    localStorage.getItem('cinedot_token') ||
+    localStorage.getItem('cine_token');
   const storedUser = localStorage.getItem('cinedot_current_user');
+  const storedPerms = localStorage.getItem('cinedot_permissions');
+  
   let user: User | null = null;
+  let permissions: string[] = [];
+  
   if (storedUser) {
     try {
       user = JSON.parse(storedUser);
     } catch {
-      user = MOCK_DEMO_USER;
+      user = null;
     }
-  } else if (token) {
-    user = MOCK_DEMO_USER;
   }
-  return { token, user };
+  
+  if (storedPerms) {
+    try {
+      permissions = JSON.parse(storedPerms);
+    } catch {
+      permissions = [];
+    }
+  }
+  
+  return { token: token || null, user, permissions };
 };
 
 export const useAuthStore = create<AuthState>((set, get) => {
-  const { token: initialToken, user: initialUser } = getInitialState();
+  const { token: initialToken, user: initialUser, permissions: initialPermissions } = getInitialState();
 
   return {
     user: initialUser,
-    permissions: ['BOOK_TICKET', 'VIEW_PROFILE'],
+    permissions: initialPermissions,
     token: initialToken,
     isAuthenticated: Boolean(initialToken && initialUser),
+    isLoading: false,
 
     isAuthModalOpen: false,
     authModalTab: 'login',
@@ -74,128 +106,199 @@ export const useAuthStore = create<AuthState>((set, get) => {
         localStorage.setItem('cinedot_token', token);
         localStorage.setItem('cine_token', token);
         localStorage.setItem('cinedot_current_user', JSON.stringify(user));
-        document.cookie = `cinedot_token=${token}; path=/; max-age=86400; SameSite=Strict`;
-        document.cookie = `cine_token=${token}; path=/; max-age=86400; SameSite=Strict`;
+        localStorage.setItem('cinedot_permissions', JSON.stringify(permissions));
+        Cookies.set('cinedot_token', token, { expires: 7, path: '/' });
+        Cookies.set('cine_token', token, { expires: 7, path: '/' });
       }
       set({ user, permissions, token, isAuthenticated: true });
     },
 
-    login: (emailOrPhone, pass) => {
-      if (typeof window === 'undefined') return { success: false, message: 'Thao tác không khả dụng' };
+    login: async (emailOrPhone, pass) => {
+      set({ isLoading: true });
+      try {
+        const res = await authService.login({
+          email: emailOrPhone.trim(),
+          password: pass.trim(),
+        });
 
-      const inputTarget = emailOrPhone.trim().toLowerCase();
-      const inputPass = pass.trim();
-
-      // Get registered users from localStorage
-      const registeredStr = localStorage.getItem('cinedot_registered_users');
-      let registeredList: Array<User & { pass: string; phone?: string }> = [];
-      if (registeredStr) {
-        try {
-          registeredList = JSON.parse(registeredStr);
-        } catch {
-          registeredList = [];
+        if (res.success && res.data) {
+          const u = res.data.user;
+          const userObj: User = {
+            id: u.user_id,
+            user_id: u.user_id,
+            username: u.username,
+            email: u.email,
+            fullname: u.fullname,
+            name: u.fullname,
+            phone: u.phone,
+            avatar: u.avatar,
+            total_points: u.total_points || 0,
+            user_tier: u.user_tier || 'Bronze',
+            role_name: u.role_name || 'CUSTOMER',
+          };
+          get().setAuth(userObj, res.data.permissions || [], res.data.token);
+          set({ isLoading: false, isAuthModalOpen: false });
+          return { success: true, message: res.message || 'Đăng nhập thành công' };
         }
+      } catch (err: any) {
+        set({ isLoading: false });
+        return {
+          success: false,
+          message: err?.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.',
+          errors: err?.errors,
+        };
       }
-
-      // 1. Search for existing account by email, username, or phone
-      const userFound = registeredList.find(
-        (u) =>
-          u.email.toLowerCase() === inputTarget ||
-          u.username.toLowerCase() === inputTarget ||
-          (u.phone && u.phone === inputTarget)
-      );
-
-      if (userFound) {
-        // Strict password check
-        if (userFound.pass === inputPass) {
-          const { pass: _, ...userObj } = userFound;
-          const newToken = 'user_token_' + userFound.id;
-          get().setAuth(userObj, ['BOOK_TICKET', 'VIEW_PROFILE'], newToken);
-          return { success: true };
-        } else {
-          return { success: false, message: 'Mật khẩu không chính xác! Vui lòng kiểm tra lại.' };
-        }
-      }
-
-      // 2. Check default system user fallback (user@cinedot.vn)
-      if (inputTarget === 'user@cinedot.vn' || inputTarget === 'cinedot_user') {
-        if (inputPass === '123456' || inputPass === '12345678') {
-          const demoToken = 'mock_jwt_token_cinedot_platinum_8841';
-          get().setAuth(MOCK_DEMO_USER, ['BOOK_TICKET', 'VIEW_PROFILE'], demoToken);
-          return { success: true };
-        } else {
-          return { success: false, message: 'Mật khẩu không chính xác! Vui lòng kiểm tra lại.' };
-        }
-      }
-
-      // 3. User does NOT exist in registered list
-      return {
-        success: false,
-        message: 'Tài khoản chưa tồn tại. Vui lòng chuyển sang tab Đăng Ký để tạo tài khoản mới!',
-      };
+      set({ isLoading: false });
+      return { success: false, message: 'Đăng nhập không thành công.' };
     },
 
-    register: ({ name, email, phone, pass }) => {
-      if (typeof window === 'undefined') return { success: false, message: 'Thao tác không khả dụng' };
+    register: async ({ name, email, phone, pass }) => {
+      set({ isLoading: true });
+      try {
+        const res = await authService.register({
+          fullname: name.trim(),
+          email: email.trim().toLowerCase(),
+          password: pass.trim(),
+          phone: phone ? phone.trim() : undefined,
+        });
 
-      const cleanEmail = email.trim().toLowerCase();
-      const cleanPhone = phone.trim();
-
-      const registeredStr = localStorage.getItem('cinedot_registered_users');
-      let registeredList: Array<User & { pass: string; phone?: string }> = [];
-      if (registeredStr) {
-        try {
-          registeredList = JSON.parse(registeredStr);
-        } catch {
-          registeredList = [];
+        if (res.success && res.data) {
+          const u = res.data.user;
+          const userObj: User = {
+            id: u.user_id,
+            user_id: u.user_id,
+            username: u.username,
+            email: u.email,
+            fullname: u.fullname,
+            name: u.fullname,
+            phone: u.phone,
+            avatar: u.avatar,
+            total_points: u.total_points || 0,
+            user_tier: u.user_tier || 'Bronze',
+            role_name: u.role_name || 'CUSTOMER',
+          };
+          get().setAuth(userObj, res.data.permissions || [], res.data.token);
+          set({ isLoading: false, isAuthModalOpen: false });
+          return { success: true, message: res.message || 'Đăng ký tài khoản thành công' };
         }
+      } catch (err: any) {
+        set({ isLoading: false });
+        return {
+          success: false,
+          message: err?.message || 'Đăng ký không thành công. Vui lòng thử lại.',
+          errors: err?.errors,
+        };
       }
-
-      if (registeredList.some((u) => u.email.toLowerCase() === cleanEmail)) {
-        return { success: false, message: 'Email này đã được đăng ký tài khoản! Vui lòng bấm sang tab Đăng Nhập.' };
-      }
-
-      const newUserObj: User & { pass: string; phone: string } = {
-        id: 'u-' + Date.now(),
-        username: cleanEmail.split('@')[0],
-        email: cleanEmail,
-        name: name.trim(),
-        role_name: 'CUSTOMER',
-        pass: pass.trim(),
-        phone: cleanPhone,
-      };
-
-      registeredList.push(newUserObj);
-      localStorage.setItem('cinedot_registered_users', JSON.stringify(registeredList));
-
-      const { pass: _, ...userObj } = newUserObj;
-      const newToken = 'user_token_' + newUserObj.id;
-      get().setAuth(userObj, ['BOOK_TICKET', 'VIEW_PROFILE'], newToken);
-      return { success: true };
+      set({ isLoading: false });
+      return { success: false, message: 'Đăng ký không thành công.' };
     },
 
-    logout: () => {
+    forgotPassword: async (email: string) => {
+      set({ isLoading: true });
+      try {
+        const res = await authService.forgotPassword(email.trim());
+        set({ isLoading: false });
+        return { success: true, message: res.message || 'Mã OTP đã được gửi đến email của bạn.' };
+      } catch (err: any) {
+        set({ isLoading: false });
+        return {
+          success: false,
+          message: err?.message || 'Không thể gửi mã OTP. Vui lòng kiểm tra lại email.',
+          errors: err?.errors,
+        };
+      }
+    },
+
+    resetPassword: async (payload: ResetPasswordPayload) => {
+      set({ isLoading: true });
+      try {
+        const res = await authService.resetPassword(payload);
+        set({ isLoading: false });
+        return { success: true, message: res.message || 'Đặt lại mật khẩu thành công.' };
+      } catch (err: any) {
+        set({ isLoading: false });
+        return {
+          success: false,
+          message: err?.message || 'Đặt lại mật khẩu thất bại.',
+          errors: err?.errors,
+        };
+      }
+    },
+
+    logout: async () => {
+      // 1. Clear state locally first to avoid UI blocking and infinite loop 401s
       if (typeof window !== 'undefined') {
         localStorage.removeItem('cinedot_token');
         localStorage.removeItem('cine_token');
         localStorage.removeItem('cinedot_current_user');
-        document.cookie = 'cinedot_token=; Max-Age=0; path=/;';
-        document.cookie = 'cine_token=; Max-Age=0; path=/;';
+        localStorage.removeItem('cinedot_permissions');
+        Cookies.remove('cinedot_token', { path: '/' });
+        Cookies.remove('cine_token', { path: '/' });
       }
-      set({ user: null, permissions: [], token: null, isAuthenticated: false });
+      
+      set({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        permissions: [],
+      });
+
+      // 2. Call API (if it fails, we already cleared the state)
+      try {
+        await authService.logout();
+      } catch {
+        // Silently ignore logout errors (like 401 unauthenticated)
+      }
     },
 
-    hasPermission: (permission: string) => {
+    fetchMe: async () => {
+      const token = get().token;
+      if (!token) return;
+      try {
+        const res = await authService.me();
+        if (res.success && res.data) {
+          const u = res.data.user;
+          const userObj: User = {
+            id: u.user_id,
+            user_id: u.user_id,
+            username: u.username,
+            email: u.email,
+            fullname: u.fullname,
+            name: u.fullname,
+            phone: u.phone,
+            avatar: u.avatar,
+            total_points: u.total_points || 0,
+            user_tier: u.user_tier || 'Bronze',
+            role_name: u.role_name || 'CUSTOMER',
+          };
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cinedot_current_user', JSON.stringify(userObj));
+            localStorage.setItem('cinedot_permissions', JSON.stringify(res.data.permissions || []));
+          }
+          
+          set({
+            user: userObj,
+            permissions: res.data.permissions || [],
+            isAuthenticated: true,
+          });
+        }
+      } catch {
+        // Token might be invalid
+      }
+    },
+
+    hasPermission: (permission) => {
       const { permissions } = get();
-      return permissions.includes(permission);
+      return permissions.includes(permission) || permissions.includes('*') || get().user?.role_name === 'admin';
     },
 
-    hasAnyPermission: (requiredPermissions: string[]) => {
+    hasAnyPermission: (permList) => {
       const { permissions } = get();
-      return requiredPermissions.some((p) => permissions.includes(p));
+      return permList.some((p) => permissions.includes(p)) || permissions.includes('*') || get().user?.role_name === 'admin';
     },
 
-    openAuthModal: (tab = 'login', notice = '', redirectUrl = '') => {
+    openAuthModal: (tab = 'login', notice = '', redirectUrl) => {
       set({
         isAuthModalOpen: true,
         authModalTab: tab,
@@ -213,12 +316,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     loginDemo: () => {
-      const demoToken = 'mock_jwt_token_cinedot_platinum_8841';
-      get().setAuth(MOCK_DEMO_USER, ['BOOK_TICKET', 'VIEW_PROFILE'], demoToken);
-      set({
-        isAuthModalOpen: false,
-        authNotice: '',
-      });
+      get().setAuth(MOCK_DEMO_USER, ['*'], 'mock_token_admin_101');
+      set({ isAuthModalOpen: false });
     },
   };
 });

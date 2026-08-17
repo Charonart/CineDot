@@ -2,6 +2,13 @@ import { PaymentMethodItem, VoucherInfo } from '../types/payment.types';
 
 export const MOCK_PAYMENT_METHODS: PaymentMethodItem[] = [
   {
+    id: 'VNPAY',
+    name: 'Cổng Thanh Toán VNPAY',
+    subtitle: 'Thanh toán an toàn, quét mã QR qua VNPAY-QR',
+    badgeText: 'Khuyên Dùng',
+    category: 'wallet',
+  },
+  {
     id: 'MOMO',
     name: 'Ví Điện Tử MoMo',
     subtitle: 'Thanh toán siêu tốc, nhận ưu đãi hoàn tiền 20% mỗi tuần',

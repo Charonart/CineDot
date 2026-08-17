@@ -11,7 +11,8 @@ export function useBookingSuccess(
   dateParam?: string,
   timeParam?: string,
   cinemaParam?: string,
-  totalParam?: string
+  totalParam?: string,
+  showtimeIdParam?: string
 ) {
   const [ticket, setTicket] = useState<DigitalTicketInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,8 @@ export function useBookingSuccess(
           dateParam,
           timeParam,
           cinemaParam,
-          totalParam
+          totalParam,
+          showtimeIdParam
         );
         if (isMounted) setTicket(data);
       } finally {
@@ -41,7 +43,7 @@ export function useBookingSuccess(
     return () => {
       isMounted = false;
     };
-  }, [bookingIdParam, movieParam, seatsParam, dateParam, timeParam, cinemaParam, totalParam]);
+  }, [bookingIdParam, movieParam, seatsParam, dateParam, timeParam, cinemaParam, totalParam, showtimeIdParam]);
 
   const handleDownloadPDF = () => {
     setIsDownloading(true);

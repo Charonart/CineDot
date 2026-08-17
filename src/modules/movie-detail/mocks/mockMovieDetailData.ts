@@ -1,4 +1,4 @@
-import { MovieDetail, CinemaShowtimeGroup } from '../types/movie-detail.types';
+import { MovieDetail, CinemaShowtimeGroup, MovieCastMember, MovieCrewMember } from '../types/movie-detail.types';
 import { MovieCardItem } from '@/modules/home/types/home.types';
 
 export const MOCK_MOVIE_DETAIL_SPIDERMAN: MovieDetail = {
@@ -221,3 +221,43 @@ export const MOCK_CINEMA_GROUPS: CinemaShowtimeGroup[] = [
     ],
   },
 ];
+export const MOCK_MOVIE_CREDITS: { cast: MovieCastMember[]; crew: MovieCrewMember[] } = {
+  cast: [
+    {
+      id: 1,
+      name: 'Tom Holland',
+      character: 'Peter Parker / Spider-Man',
+      profileUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80',
+      order: 1,
+    },
+    {
+      id: 2,
+      name: 'Zendaya',
+      character: 'Michelle MJ Jones',
+      profileUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+      order: 2,
+    },
+    {
+      id: 3,
+      name: 'Jacob Batalon',
+      character: 'Ned Leeds',
+      profileUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=200&auto=format&fit=crop&q=80',
+      order: 3,
+    },
+  ],
+  crew: [
+    {
+      id: 4,
+      name: 'Jon Watts',
+      job: 'Director',
+      department: 'Directing',
+      profileUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 5,
+      name: 'Kevin Feige',
+      job: 'Producer',
+      department: 'Production',
+    },
+  ],
+};

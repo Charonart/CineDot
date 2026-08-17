@@ -9,6 +9,8 @@ import { FoodBookingSidebar } from './FoodBookingSidebar';
 import { SeatTimeoutModal } from '@/modules/booking/components/SeatTimeoutModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
+import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
+
 interface FoodBookingClientPageProps {
   initialCombo?: string;
   combosParam?: string;
@@ -114,6 +116,7 @@ export function FoodBookingClientPage({
       <SeatTimeoutModal
         isOpen={isTimeout}
         movieSlug={movieParam}
+        onReset={() => resetBookingTimer(showtimeId)}
       />
     </div>
   );

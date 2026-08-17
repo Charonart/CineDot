@@ -13,10 +13,11 @@ interface BookingSidebarProps {
   currentShowTime: string;
   selectedSeats: SeatItem[];
   totalPrice: number;
-  hasSeenUpsell: boolean;
   isTimerActive: boolean;
   formattedCountdown: string;
-  onOpenUpsellModal: () => void;
+  isHolding: boolean;
+  holdError: string | null;
+  onHoldSeats: () => Promise<any>;
 }
 
 export const BookingSidebar: React.FC<BookingSidebarProps> = ({
@@ -24,10 +25,11 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
   currentShowTime,
   selectedSeats,
   totalPrice,
-  hasSeenUpsell,
   isTimerActive,
   formattedCountdown,
-  onOpenUpsellModal,
+  isHolding,
+  holdError,
+  onHoldSeats,
 }) => {
   const router = useRouter();
   const selectedCount = selectedSeats.length;
@@ -70,23 +72,31 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
     return result;
   }, [selectedSeats]);
 
-  const handleContinueClick = () => {
-    if (!isSelected) return;
+  const handleContinueClick = async () => {
+    if (!isSelected || isHolding) return;
+
+    // Call API to hold seats
+    const res = await onHoldSeats();
+    if (res?.success === false) {
+      if (res.needsAuth) {
+        import('@/shared/store/useAuthStore').then(({ useAuthStore }) => {
+          useAuthStore.getState().openAuthModal('login');
+        });
+        return;
+      }
+      alert(res.message || 'Lỗi giữ ghế, vui lòng thử lại.');
+      return;
+    }
 
     // Officially start the 10-minute hold countdown timer NOW!
-    startBookingTimer(info.showtimeId);
+    startBookingTimer(String(info.showtimeId));
 
     const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
       info.showDate
     )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
 
-    if (hasSeenUpsell) {
-      // Direct navigation when upsell has been seen/skipped
-      router.push(foodUrl);
-    } else {
-      // Trigger upsell modal
-      onOpenUpsellModal();
-    }
+    // Direct navigation, bypassing the upsell modal
+    router.push(foodUrl);
   };
 
   return (
@@ -205,18 +215,18 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
         </Link>
 
         <motion.button
-          whileHover={isSelected ? { scale: 1.04 } : {}}
-          whileTap={isSelected ? { scale: 0.96 } : {}}
-          disabled={!isSelected}
+          whileHover={isSelected && !isHolding ? { scale: 1.04 } : {}}
+          whileTap={isSelected && !isHolding ? { scale: 0.96 } : {}}
+          disabled={!isSelected || isHolding}
           onClick={handleContinueClick}
           className={`w-full py-3 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             isSelected
               ? 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-lg shadow-[#7C6FE8]/35'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-          }`}
+          } ${isHolding ? 'opacity-70 cursor-wait' : ''}`}
         >
-          <span>Tiếp tục</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>{isHolding ? 'Đang xử lý...' : 'Tiếp tục'}</span>
+          {!isHolding && <ArrowRight className="w-3.5 h-3.5" />}
         </motion.button>
       </div>
     </div>

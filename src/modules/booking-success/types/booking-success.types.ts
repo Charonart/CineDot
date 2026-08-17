@@ -14,4 +14,10 @@ export interface DigitalTicketInfo {
   totalPaid: number;
   paidAt: string;
   paymentMethodName: string;
+  combos?: {
+    name: string;
+    quantity: number;
+    price: number;
+    image: string;
+  }[];
 }

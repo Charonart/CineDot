@@ -4,47 +4,46 @@ import { useState, useEffect } from 'react';
 import {
   UserProfile,
   UserTicketItem,
-  TransactionItem,
-  RewardVoucherItem,
+  StarShopOrderItem,
   ProfileDashboardTab,
 } from '../types/profile.types';
 import {
   fetchUserProfile,
   fetchUserTickets,
-  fetchTransactions,
-  fetchRewardVouchers,
+  fetchUserOrders,
+  updateUserProfile,
 } from '../services/profile.service';
+import { masterDataService, ProvinceItem } from '@/shared/services/masterData.service';
 
 export function useProfileDashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activeNavTab, setActiveNavTab] = useState<ProfileDashboardTab>('TICKETS');
   const [ticketFilterTab, setTicketFilterTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
   const [tickets, setTickets] = useState<UserTicketItem[]>([]);
-  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
-  const [vouchers, setVouchers] = useState<RewardVoucherItem[]>([]);
+  const [orders, setOrders] = useState<StarShopOrderItem[]>([]);
+  const [provinces, setProvinces] = useState<ProvinceItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Success notifications
   const [accountUpdateSuccess, setAccountUpdateSuccess] = useState(false);
   const [securityUpdateSuccess, setSecurityUpdateSuccess] = useState(false);
-  const [redeemSuccessMsg, setRedeemSuccessMsg] = useState('');
 
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       setLoading(true);
       try {
-        const [profData, ticketsData, txData, rewardsData] = await Promise.all([
+        const [profData, ticketsData, ordersData, provincesData] = await Promise.all([
           fetchUserProfile(),
           fetchUserTickets(ticketFilterTab),
-          fetchTransactions(),
-          fetchRewardVouchers(),
+          fetchUserOrders(),
+          masterDataService.getProvinces(),
         ]);
         if (isMounted) {
           setProfile(profData);
           setTickets(ticketsData);
-          setTransactions(txData);
-          setVouchers(rewardsData);
+          setOrders(ordersData);
+          setProvinces(provincesData);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -56,28 +55,38 @@ export function useProfileDashboard() {
     };
   }, [ticketFilterTab]);
 
-  const handleUpdateAccountInfo = (updatedProfile: Partial<UserProfile>) => {
-    setProfile((prev) => (prev ? { ...prev, ...updatedProfile } : null));
-    setAccountUpdateSuccess(true);
-    setTimeout(() => setAccountUpdateSuccess(false), 3000);
+  const handleUpdateAccountInfo = async (updatedProfile: Partial<UserProfile>) => {
+    try {
+      // Find the province_id from the city name
+      const selectedProvince = provinces.find((p) => p.province_name === updatedProfile.city);
+      
+      const payload: any = {
+        fullname: updatedProfile.fullName,
+        phone: updatedProfile.phone,
+        gender: updatedProfile.gender,
+        birthday: updatedProfile.birthDate,
+      };
+      
+      if (selectedProvince) {
+        payload.province_id = selectedProvince.province_id;
+      }
+
+      const res = await updateUserProfile(payload);
+      if (res.success) {
+        setProfile((prev) => (prev ? { ...prev, ...updatedProfile } : null));
+        setAccountUpdateSuccess(true);
+        setTimeout(() => setAccountUpdateSuccess(false), 3000);
+      } else {
+        alert(res.message || 'Cập nhật thất bại');
+      }
+    } catch (err) {
+      alert('Đã xảy ra lỗi khi cập nhật thông tin');
+    }
   };
 
   const handleUpdateSecurityPassword = () => {
     setSecurityUpdateSuccess(true);
     setTimeout(() => setSecurityUpdateSuccess(false), 3000);
-  };
-
-  const handleRedeemVoucher = (voucher: RewardVoucherItem) => {
-    if (!profile) return;
-    if (profile.cinePoints < voucher.pointsRequired) {
-      alert('Bạn không đủ điểm CinePoints để đổi voucher này!');
-      return;
-    }
-    setProfile((prev) =>
-      prev ? { ...prev, cinePoints: prev.cinePoints - voucher.pointsRequired } : null
-    );
-    setRedeemSuccessMsg(`Đổi thành công ${voucher.title}! Mã voucher: ${voucher.code}`);
-    setTimeout(() => setRedeemSuccessMsg(''), 4000);
   };
 
   return {
@@ -87,14 +96,12 @@ export function useProfileDashboard() {
     ticketFilterTab,
     setTicketFilterTab,
     tickets,
-    transactions,
-    vouchers,
+    orders,
+    provinces,
     loading,
     accountUpdateSuccess,
     securityUpdateSuccess,
-    redeemSuccessMsg,
     handleUpdateAccountInfo,
     handleUpdateSecurityPassword,
-    handleRedeemVoucher,
   };
 }
