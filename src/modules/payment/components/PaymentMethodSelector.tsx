@@ -47,14 +47,20 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       <div className="flex flex-col gap-3">
         {methods.map((method) => {
           const isSelected = method.id === selectedId;
+          const isDisabled = method.isDisabled;
+
           return (
             <div
               key={method.id}
-              onClick={() => onSelect(method.id)}
-              className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
-                isSelected
-                  ? 'bg-purple-50/50 border-[#7C6FE8] ring-2 ring-[#7C6FE8]/20 shadow-sm'
-                  : 'bg-white hover:bg-slate-50 border-gray-200'
+              onClick={() => {
+                if (!isDisabled) onSelect(method.id);
+              }}
+              className={`p-4 sm:p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
+                isDisabled
+                  ? 'bg-slate-50/70 border-gray-200 opacity-60 cursor-not-allowed'
+                  : isSelected
+                  ? 'bg-purple-50/50 border-[#7C6FE8] ring-2 ring-[#7C6FE8]/20 shadow-sm cursor-pointer'
+                  : 'bg-white hover:bg-slate-50 border-gray-200 cursor-pointer'
               }`}
             >
               <div className="flex items-center gap-4">
@@ -63,11 +69,16 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-sm text-[#131413]">{method.name}</span>
                     {method.badgeText && (
                       <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
                         {method.badgeText}
+                      </span>
+                    )}
+                    {method.disabledReason && (
+                      <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[10px] font-semibold border border-gray-200">
+                        {method.disabledReason}
                       </span>
                     )}
                   </div>
@@ -78,7 +89,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               </div>
 
               <div className="shrink-0">
-                {isSelected ? (
+                {isSelected && !isDisabled ? (
                   <CheckCircle2 className="w-6 h-6 text-[#7C6FE8] fill-[#7C6FE8]/10" />
                 ) : (
                   <div className="w-5 h-5 rounded-full border-2 border-gray-300" />

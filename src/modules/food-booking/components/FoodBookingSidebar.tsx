@@ -21,66 +21,66 @@ interface FoodBookingSidebarProps {
 
 import { getBookingSession } from '@/modules/booking/services/bookingSessionService';
 
-const mockMovieDatabase: Record<string, { title: string; poster: string; format: string; age: string }> = {
-  'spiderman-new-beginning': {
-    title: 'Người Nhện: Khởi Đầu Mới',
-    poster: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
-    format: '2D Phụ Đề',
-    age: 'T13',
-  }
-};
-
 export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
   selectedFoodList,
   totalFoodPrice,
   formattedCountdown,
-  showtimeId = 'showtime-101',
-  movieParam = 'spiderman-new-beginning',
-  seatsParam = 'D09,D10',
-  dateParam = '31/07',
-  timeParam = '18:00',
-  cinemaParam = 'Galaxy CineX Hanoi Centre',
+  showtimeId = '1',
+  movieParam,
+  seatsParam,
+  dateParam,
+  timeParam,
+  cinemaParam,
 }) => {
-  // Movie details lookup
+  // Movie details lookup from real booking session
   const movieInfo = useMemo(() => {
     const session = getBookingSession(showtimeId);
     if (session) {
       return {
         title: session.movieTitle,
-        poster: session.posterUrl || 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
+        poster: session.posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
         format: session.movieFormat,
-        age: session.ageRating || 'T13',
+        age: session.ageRating || 'P',
       };
     }
-    
-    const slug = movieParam || 'spiderman-new-beginning';
-    const found = mockMovieDatabase[slug];
+
     return {
-      title: found ? found.title : 'Người Nhện: Khởi Đầu Mới',
-      poster: found
-        ? found.poster
-        : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=600&auto=format&fit=crop&q=80',
-      format: found ? found.format : '2D Phụ Đề',
-      age: found ? found.age : 'T13',
+      title: movieParam ? decodeURIComponent(movieParam).replace(/-/g, ' ').toUpperCase() : 'Thông tin phim',
+      poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop&q=80',
+      format: '2D Phụ Đề',
+      age: 'P',
     };
   }, [movieParam, showtimeId]);
 
   // Decode Cinema Name
   const decodedCinemaName = useMemo(() => {
-    return cinemaParam ? decodeURIComponent(cinemaParam) : 'Galaxy CineX Hanoi Centre';
-  }, [cinemaParam]);
+    const session = getBookingSession(showtimeId);
+    if (session?.cinemaName) return session.cinemaName;
+    return cinemaParam ? decodeURIComponent(cinemaParam) : 'CineDot Cinema';
+  }, [cinemaParam, showtimeId]);
 
   // Formatted Show Date with accurate Day of Week
   const formattedShowDate = useMemo(() => {
-    return formatShowDate(dateParam);
-  }, [dateParam]);
+    const session = getBookingSession(showtimeId);
+    return formatShowDate(dateParam || session?.showDate);
+  }, [dateParam, showtimeId]);
 
-  // Dynamic ticket price & seat breakdown computation from seatsParam
+  // Dynamic ticket price & seat breakdown computation from session or seatsParam
   const { ticketPrice, seatSummaryText } = useMemo(() => {
+    const session = getBookingSession(showtimeId);
+    if (session?.ticketTotalPrice && session?.seatSummaryText) {
+      return {
+        ticketPrice: session.ticketTotalPrice,
+        seatSummaryText: session.seatSummaryText,
+      };
+    }
+
     const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
     if (rawSeats.length === 0) {
       return { ticketPrice: 0, seatSummaryText: 'Chưa chọn ghế' };
     }
+
+    const basePrice = session?.basePrice || 90000;
 
     let calculatedPrice = 0;
     const stdList: string[] = [];
@@ -91,18 +91,18 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
       const row = id.charAt(0).toUpperCase();
       if (['E', 'F', 'G', 'H'].includes(row)) {
         vipList.push(id);
-        calculatedPrice += 140000;
+        calculatedPrice += basePrice + 20000;
       } else if (['I', 'J'].includes(row)) {
         sweetboxList.push(id);
       } else {
         stdList.push(id);
-        calculatedPrice += 110000;
+        calculatedPrice += basePrice;
       }
     });
 
     if (sweetboxList.length > 0) {
       const sweetboxPairs = Math.ceil(sweetboxList.length / 2);
-      calculatedPrice += sweetboxPairs * 250000;
+      calculatedPrice += sweetboxPairs * (basePrice + 40000) * 2;
     }
 
     const parts: string[] = [];
@@ -114,7 +114,7 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
       ticketPrice: calculatedPrice,
       seatSummaryText: parts.join(' | '),
     };
-  }, [seatsParam]);
+  }, [seatsParam, showtimeId]);
 
   const grandTotal = ticketPrice + totalFoodPrice;
 

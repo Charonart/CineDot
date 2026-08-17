@@ -17,11 +17,18 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   onSelectTab,
 }) => {
   const { logout } = useAuthStore();
-  const pointsPercent = Math.min(100, Math.round((profile.cinePoints / profile.nextTierPoints) * 100));
+  const tierInfo = profile.tierInfo;
+  const currentPoints = profile.cinePoints || 0;
+  const nextMinPoints = tierInfo?.nextTierMinPoints || profile.nextTierPoints || 500;
+  const pointsPercent = Math.min(100, Math.max(5, Math.round((currentPoints / nextMinPoints) * 100)));
+  const nextTierName = tierInfo?.nextTier;
+  const pointsNeeded = tierInfo?.pointsNeeded ?? Math.max(0, nextMinPoints - currentPoints);
 
   const navItems = [
     { id: 'TICKETS' as ProfileDashboardTab, label: 'Vé Của Tôi', icon: Ticket },
-    { id: 'ORDERS' as ProfileDashboardTab, label: 'Đơn hàng của bạn', icon: ShoppingBag },
+    { id: 'ORDERS' as ProfileDashboardTab, label: 'Đơn Hàng Của Bạn', icon: ShoppingBag },
+    { id: 'REWARDS' as ProfileDashboardTab, label: 'Kho Voucher & Ưu Đãi', icon: Gift },
+    { id: 'TRANSACTIONS' as ProfileDashboardTab, label: 'Lịch Sử Giao Dịch', icon: History },
     { id: 'ACCOUNT' as ProfileDashboardTab, label: 'Thông Tin Cá Nhân', icon: User },
     { id: 'SECURITY' as ProfileDashboardTab, label: 'Bảo Mật Tài Khoản', icon: Shield },
   ];
@@ -48,10 +55,10 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
           <span className="text-xs text-slate-400 font-medium">{profile.email}</span>
         </div>
 
-        {/* Platinum Member Tier Badge */}
+        {/* Member Tier Badge */}
         <div className="px-3.5 py-1 rounded-full bg-gradient-to-r from-[#7C6FE8] to-indigo-600 text-white text-[11px] font-extrabold shadow-sm flex items-center gap-1.5 mt-1">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>{profile.tierName}</span>
+          <span>Hạng {profile.tierName} {tierInfo?.discountPercent ? `(Giảm ${tierInfo.discountPercent}%)` : ''}</span>
         </div>
       </div>
 
@@ -59,11 +66,11 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
       <div className="flex flex-col gap-2 bg-slate-50 p-4 rounded-2xl border border-gray-100">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-slate-600">Điểm CinePoints:</span>
-          <span className="text-[#7C6FE8] font-extrabold">{profile.cinePoints.toLocaleString()} CP</span>
+          <span className="text-[#7C6FE8] font-extrabold">{currentPoints.toLocaleString()} CP</span>
         </div>
 
         {/* Progress Bar Container */}
-        <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+        <div className="w-full h-2.5 rounded-full bg-gray-200 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-[#7C6FE8] to-indigo-500 rounded-full transition-all duration-500"
             style={{ width: `${pointsPercent}%` }}
@@ -71,7 +78,11 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
         </div>
 
         <span className="text-[10px] text-slate-500 font-semibold text-right">
-          Cần thêm {(profile.nextTierPoints - profile.cinePoints).toLocaleString()} CP để nâng hạng Diamond
+          {nextTierName ? (
+            `Cần thêm ${pointsNeeded.toLocaleString()} CP để nâng hạng ${nextTierName}`
+          ) : (
+            `Bạn đang ở hạng cao nhất (${profile.tierName})`
+          )}
         </span>
       </div>
 

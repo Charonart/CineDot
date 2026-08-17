@@ -2,28 +2,57 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CinemaItem, PricingFormatTab, CinemaPricingFormat } from '../types/cinemas.types';
-import { fetchCinemasByCity, fetchPricingFormat } from '../services/cinemas.service';
+import {
+  CinemaItem,
+  PricingFormatTab,
+  CinemaPricingFormat,
+  CinemaMovieShowtime,
+} from '../types/cinemas.types';
+import {
+  fetchCities,
+  fetchCinemasByCity,
+  fetchPricingFormat,
+  fetchCinemaShowtimes,
+} from '../services/cinemas.service';
 
 export function useCinemas() {
   const searchParams = useSearchParams();
   const urlCity = searchParams ? searchParams.get('city') : null;
 
-  const [selectedCity, setSelectedCity] = useState<string>(urlCity || 'TP.Hồ Chí Minh');
+  const [cities, setCities] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string>(urlCity || 'Tất cả thành phố');
   const [cinemas, setCinemas] = useState<CinemaItem[]>([]);
   const [selectedCinema, setSelectedCinema] = useState<CinemaItem | null>(null);
   const [pricingTab, setPricingTab] = useState<PricingFormatTab>('2d');
   const [pricingFormat, setPricingFormat] = useState<CinemaPricingFormat | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [showtimes, setShowtimes] = useState<CinemaMovieShowtime[]>([]);
+  const [showtimeDate, setShowtimeDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingShowtimes, setLoadingShowtimes] = useState<boolean>(false);
 
-  // Sync selectedCity when URL parameter changes
+  // 1. Load city options once
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCityList() {
+      const cityList = await fetchCities();
+      if (isMounted) {
+        setCities(cityList);
+      }
+    }
+    loadCityList();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 2. Sync selectedCity when URL parameter changes
   useEffect(() => {
     if (urlCity) {
       setSelectedCity(urlCity);
     }
   }, [urlCity]);
 
-  // Load cinemas when city changes
+  // 3. Load cinemas when city changes
   useEffect(() => {
     let isMounted = true;
     async function loadCinemas() {
@@ -48,7 +77,7 @@ export function useCinemas() {
     };
   }, [selectedCity]);
 
-  // Load pricing when pricingTab changes
+  // 4. Load pricing when pricingTab changes
   useEffect(() => {
     let isMounted = true;
     async function loadPricing() {
@@ -61,7 +90,31 @@ export function useCinemas() {
     };
   }, [pricingTab]);
 
+  // 5. Load showtimes when selectedCinema or showtimeDate changes
+  useEffect(() => {
+    if (!selectedCinema?.slug) {
+      setShowtimes([]);
+      return;
+    }
+
+    let isMounted = true;
+    async function loadShowtimes() {
+      setLoadingShowtimes(true);
+      try {
+        const data = await fetchCinemaShowtimes(selectedCinema!.slug, showtimeDate);
+        if (isMounted) setShowtimes(data);
+      } finally {
+        if (isMounted) setLoadingShowtimes(false);
+      }
+    }
+    loadShowtimes();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCinema?.slug, showtimeDate]);
+
   return {
+    cities,
     selectedCity,
     setSelectedCity,
     cinemas,
@@ -70,6 +123,10 @@ export function useCinemas() {
     pricingTab,
     setPricingTab,
     pricingFormat,
+    showtimes,
+    showtimeDate,
+    setShowtimeDate,
     loading,
+    loadingShowtimes,
   };
 }

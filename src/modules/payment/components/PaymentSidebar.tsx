@@ -11,6 +11,15 @@ interface SelectedFoodItem {
   price: number;
 }
 
+export interface VatBreakdownInfo {
+  ticketVatRate: number;
+  ticketVatAmount: number;
+  comboVatRate: number;
+  comboVatAmount: number;
+  totalVatAmount: number;
+  isIncluded?: boolean;
+}
+
 interface PaymentSidebarProps {
   movieTitle: string;
   movieFormat: string;
@@ -23,7 +32,11 @@ interface PaymentSidebarProps {
   ticketPrice: number;
   selectedFoodList?: SelectedFoodItem[];
   totalFoodPrice?: number;
-  discountAmount: number;
+  tierDiscountAmount?: number;
+  tierName?: string;
+  voucherDiscountAmount?: number;
+  discountAmount?: number;
+  vatBreakdown?: VatBreakdownInfo;
   grandTotal: number;
   formattedCountdown: string;
   isAgreedTerms: boolean;
@@ -44,7 +57,11 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
   ticketPrice,
   selectedFoodList = [],
   totalFoodPrice = 0,
-  discountAmount,
+  tierDiscountAmount = 0,
+  tierName,
+  voucherDiscountAmount = 0,
+  discountAmount = 0,
+  vatBreakdown,
   grandTotal,
   formattedCountdown,
   isAgreedTerms,
@@ -148,11 +165,60 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
         </div>
       )}
 
-      {/* 6. Discount Voucher Line (If applied) */}
-      {discountAmount > 0 && (
-        <div className="flex items-center justify-between border-b border-gray-100 pb-4 text-xs font-bold text-emerald-600">
+      {/* 6. Discounts Breakdown Lines */}
+      {tierDiscountAmount > 0 && (
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs font-bold text-amber-600">
+          <span>Ưu đãi thành viên {tierName ? `(${tierName})` : ''}</span>
+          <span>-{tierDiscountAmount.toLocaleString()}đ</span>
+        </div>
+      )}
+
+      {voucherDiscountAmount > 0 && (
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs font-bold text-emerald-600">
           <span>Voucher Khuyến Mãi</span>
+          <span>-{voucherDiscountAmount.toLocaleString()}đ</span>
+        </div>
+      )}
+
+      {/* Fallback discount line if neither specific discount is provided but total discountAmount > 0 */}
+      {tierDiscountAmount === 0 && voucherDiscountAmount === 0 && discountAmount > 0 && (
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs font-bold text-emerald-600">
+          <span>Khuyến Mãi / Giảm Giá</span>
           <span>-{discountAmount.toLocaleString()}đ</span>
+        </div>
+      )}
+
+      {/* 6.5. Detailed VAT Tax Breakdown Line */}
+      {vatBreakdown && vatBreakdown.totalVatAmount > 0 && (
+        <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-50 border border-gray-100 text-xs">
+          <div className="flex items-center justify-between text-slate-700 font-bold">
+            <div className="flex items-center gap-1.5">
+              <span>Thuế GTGT (VAT)</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                Đã gồm trong giá
+              </span>
+            </div>
+            <span className="font-extrabold text-slate-800">
+              {vatBreakdown.totalVatAmount.toLocaleString()}đ
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1 pt-1 border-t border-gray-200/60 text-[11px] text-slate-500 font-medium">
+            <div className="flex items-center justify-between">
+              <span>• VAT Vé xem phim ({vatBreakdown.ticketVatRate}%):</span>
+              <span className="font-semibold text-slate-700">
+                {vatBreakdown.ticketVatAmount.toLocaleString()}đ
+              </span>
+            </div>
+            {vatBreakdown.comboVatAmount > 0 && (
+              <div className="flex items-center justify-between">
+                <span>• VAT Bắp nước F&B ({vatBreakdown.comboVatRate}%):</span>
+                <span className="font-semibold text-slate-700">
+                  {vatBreakdown.comboVatAmount.toLocaleString()}đ
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

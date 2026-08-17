@@ -6,6 +6,8 @@ import { useProfileDashboard } from '../hooks/useProfileDashboard';
 import { ProfileSidebar } from './ProfileSidebar';
 import { UserTicketCard } from './UserTicketCard';
 import { StarShopOrdersTab } from './StarShopOrdersTab';
+import { TabRewards } from './TabRewards';
+import { TabTransactionHistory } from './TabTransactionHistory';
 import { TabAccountInfo } from './TabAccountInfo';
 import { TabSecurity } from './TabSecurity';
 import { Skeleton } from '@/shared/ui/Skeleton';
@@ -22,21 +24,34 @@ export function ProfileTicketsClientPage() {
     setTicketFilterTab,
     tickets,
     orders,
-    provinces,
-    transactions,
     vouchers,
+    transactions,
+    provinces,
     loading,
     accountUpdateSuccess,
     securityUpdateSuccess,
-    redeemSuccessMsg,
+    securityErrorMsg,
+    cancellingTicketId,
     handleUpdateAccountInfo,
     handleUpdateSecurityPassword,
-    handleRedeemVoucher,
+    handleCancelTicket,
   } = useProfileDashboard();
 
   useEffect(() => {
-    if (tabParam === 'my-orders' || tabParam === 'starshop' || tabParam === 'orders') {
+    if (!tabParam) return;
+    const lower = tabParam.toLowerCase();
+    if (lower === 'my-orders' || lower === 'starshop' || lower === 'orders') {
       setActiveNavTab('ORDERS');
+    } else if (lower === 'rewards' || lower === 'vouchers' || lower === 'promotions') {
+      setActiveNavTab('REWARDS');
+    } else if (lower === 'transactions' || lower === 'history') {
+      setActiveNavTab('TRANSACTIONS');
+    } else if (lower === 'account' || lower === 'profile') {
+      setActiveNavTab('ACCOUNT');
+    } else if (lower === 'security' || lower === 'password') {
+      setActiveNavTab('SECURITY');
+    } else if (lower === 'tickets' || lower === 'my-tickets') {
+      setActiveNavTab('TICKETS');
     }
   }, [tabParam, setActiveNavTab]);
 
@@ -117,7 +132,12 @@ export function ProfileTicketsClientPage() {
                   ) : (
                     <div className="flex flex-col gap-4">
                       {tickets.map((t) => (
-                        <UserTicketCard key={t.bookingId} ticket={t} />
+                        <UserTicketCard
+                          key={t.bookingId}
+                          ticket={t}
+                          onCancel={handleCancelTicket}
+                          isCancelling={cancellingTicketId === t.bookingId}
+                        />
                       ))}
                     </div>
                   )}
@@ -127,7 +147,13 @@ export function ProfileTicketsClientPage() {
               {/* TAB 2: ĐƠN HÀNG CỦA BẠN */}
               {activeNavTab === 'ORDERS' && <StarShopOrdersTab orders={orders} />}
 
-              {/* TAB 3: THÔNG TIN CÁ NHÂN */}
+              {/* TAB 3: KHO VOUCHER & ƯU ĐÃI */}
+              {activeNavTab === 'REWARDS' && <TabRewards profile={profile} vouchers={vouchers} />}
+
+              {/* TAB 4: LỊCH SỬ GIAO DỊCH */}
+              {activeNavTab === 'TRANSACTIONS' && <TabTransactionHistory transactions={transactions} />}
+
+              {/* TAB 5: THÔNG TIN CÁ NHÂN */}
               {activeNavTab === 'ACCOUNT' && (
                 <TabAccountInfo
                   profile={profile}
@@ -137,11 +163,12 @@ export function ProfileTicketsClientPage() {
                 />
               )}
 
-              {/* TAB 5: BẢO MẬT TÀI KHOẢN */}
+              {/* TAB 6: BẢO MẬT TÀI KHOẢN */}
               {activeNavTab === 'SECURITY' && (
                 <TabSecurity
                   onUpdatePassword={handleUpdateSecurityPassword}
                   updateSuccess={securityUpdateSuccess}
+                  errorMsg={securityErrorMsg}
                 />
               )}
             </div>

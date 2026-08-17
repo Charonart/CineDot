@@ -8,7 +8,9 @@ import { ApiResponse } from '@/shared/types/api.types';
 
 export interface CalculateSummaryPayload {
   showtime_id: number | string;
-  showtime_seat_ids: number[];
+  showtime_seat_ids?: number[];
+  seats?: string;
+  seat_codes?: string[];
   combos?: { combo_id: number; quantity: number }[];
   voucher_code?: string;
 }
@@ -46,7 +48,17 @@ export interface CalculateSummaryResult {
     subtotal_tickets: number;
     subtotal_combos: number;
     total_subtotal: number;
-    discounts: {
+    tier_discount_amount?: number;
+    voucher_discount_amount?: number;
+    vat_breakdown?: {
+      ticket_vat_rate: number;
+      ticket_vat_amount: number;
+      combo_vat_rate: number;
+      combo_vat_amount: number;
+      total_vat_amount: number;
+      is_included_in_price: boolean;
+    };
+    discounts?: {
       tier_discount?: {
         tier_name: string;
         discount_percent: number;
@@ -54,6 +66,7 @@ export interface CalculateSummaryResult {
       };
       voucher_discount?: {
         voucher_code: string;
+        discount_type?: string;
         deducted_amount: number;
       };
     };
@@ -67,11 +80,18 @@ export async function calculateBookingSummary(
 ): Promise<CalculateSummaryResult | null> {
   try {
     const res = await apiClient.post(ENDPOINTS.BOOKINGS.CALCULATE_SUMMARY, payload);
-    if (res.data?.success && res.data?.data) {
-      return res.data.data;
+    const data = res.data;
+    if (data?.success && data?.data?.financial_breakdown) {
+      return data.data;
     }
-  } catch {
-    // Fallback
+    if (data?.data && data?.data?.financial_breakdown) {
+      return data.data;
+    }
+    if (data?.financial_breakdown) {
+      return data;
+    }
+  } catch (err) {
+    console.warn('calculateBookingSummary error:', err);
   }
   return null;
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import { MapPin, Clock, Ticket, QrCode, Sparkles } from 'lucide-react';
 import { DigitalTicketInfo } from '../types/booking-success.types';
+import { QRCodeImage } from '@/shared/ui/QRCodeImage';
 
 interface DigitalTicketCardProps {
   ticket: DigitalTicketInfo;
@@ -103,8 +104,9 @@ export const DigitalTicketCard: React.FC<DigitalTicketCardProps> = ({ ticket }) 
       {/* Bottom Scannable QR Code Section */}
       <div className="p-6 sm:p-8 bg-slate-50 flex flex-col items-center text-center gap-4">
         <div className="w-44 h-44 bg-white p-3 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-center">
-          <img
-            src={ticket.qrCodeUrl}
+          <QRCodeImage
+            value={ticket.qrCodeUrl || ticket.bookingId}
+            size={180}
             alt={`QR Code ${ticket.bookingId}`}
             className="w-full h-full object-contain"
           />

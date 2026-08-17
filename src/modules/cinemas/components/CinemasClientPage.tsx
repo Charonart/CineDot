@@ -5,11 +5,13 @@ import { useCinemas } from '../hooks/useCinemas';
 import { CinemaSidebar } from './CinemaSidebar';
 import { CinemaDetailHeader } from './CinemaDetailHeader';
 import { CinemaPricingTable } from './CinemaPricingTable';
+import { CinemaShowtimesSection } from './CinemaShowtimesSection';
 import { CinemaAmenities } from './CinemaAmenities';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function CinemasClientPage() {
   const {
+    cities,
     selectedCity,
     setSelectedCity,
     cinemas,
@@ -18,7 +20,11 @@ export function CinemasClientPage() {
     pricingTab,
     setPricingTab,
     pricingFormat,
+    showtimes,
+    showtimeDate,
+    setShowtimeDate,
     loading,
+    loadingShowtimes,
   } = useCinemas();
 
   return (
@@ -40,6 +46,7 @@ export function CinemasClientPage() {
             {/* Left Column: Cinema Selector Sidebar (lg:col-span-4 - 320px) */}
             <div className="lg:col-span-4">
               <CinemaSidebar
+                cities={cities}
                 selectedCity={selectedCity}
                 onSelectCity={setSelectedCity}
                 cinemas={cinemas}
@@ -67,7 +74,18 @@ export function CinemasClientPage() {
                     pricingFormat={pricingFormat}
                   />
 
-                  {/* 3. Premium Amenities */}
+                  {/* 3. Live Cinema Showtimes */}
+                  <div id="cinema-showtimes">
+                    <CinemaShowtimesSection
+                      cinemaName={selectedCinema.name}
+                      showtimes={showtimes}
+                      selectedDate={showtimeDate}
+                      onSelectDate={setShowtimeDate}
+                      loading={loadingShowtimes}
+                    />
+                  </div>
+
+                  {/* 4. Premium Amenities */}
                   <CinemaAmenities />
                 </>
               )}

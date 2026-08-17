@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Copy, ShoppingBag, ArrowRight, ArrowLeft, MapPin, Clock, QrCode, Sparkles } from 'lucide-react';
+import { QRCodeImage } from '@/shared/ui/QRCodeImage';
 
 export interface PurchasedItem {
   name: string;
@@ -106,11 +107,10 @@ export function StarShopSuccessClientPage({
               </span>
 
               {/* Mock QR Code Display */}
-              <div className="p-3 bg-white rounded-2xl border border-gray-200 shadow-md">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-                    orderId
-                  )}`}
+              <div className="p-3 bg-white rounded-2xl border border-gray-200 shadow-md flex items-center justify-center">
+                <QRCodeImage
+                  value={orderId}
+                  size={150}
                   alt="Mã QR nhận hàng"
                   className="w-36 h-36 object-contain"
                 />

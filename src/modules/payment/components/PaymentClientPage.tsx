@@ -59,7 +59,11 @@ export function PaymentClientPage({
     ticketPrice,
     selectedFoodList,
     totalFoodPrice,
+    tierDiscountAmount,
+    tierName,
+    voucherDiscountAmount,
     discountAmount,
+    vatBreakdown,
     grandTotal,
     processBookingPayment,
   } = usePayment(showtimeId, movieParam, seatsParam, combosParam, dateParam, timeParam, cinemaParam);
@@ -155,7 +159,11 @@ export function PaymentClientPage({
                 ticketPrice={ticketPrice}
                 selectedFoodList={selectedFoodList}
                 totalFoodPrice={totalFoodPrice}
+                tierDiscountAmount={tierDiscountAmount}
+                tierName={tierName}
+                voucherDiscountAmount={voucherDiscountAmount}
                 discountAmount={discountAmount}
+                vatBreakdown={vatBreakdown}
                 grandTotal={grandTotal}
                 formattedCountdown={formattedCountdown}
                 isAgreedTerms={isAgreedTerms}

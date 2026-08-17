@@ -16,7 +16,7 @@ interface MovieTabsSectionProps {
 
 export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLoading }) => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon' | 'early-ticket'>('now-showing');
+  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>('now-showing');
   const openTrailer = useTrailerStore((state) => state.openTrailer);
 
   const filteredMovies = movies.filter((m) => m.status === activeTab);
@@ -47,7 +47,6 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
   const tabs = [
     { id: 'now-showing', label: 'Đang Chiếu' },
     { id: 'coming-soon', label: 'Sắp Chiếu' },
-    { id: 'early-ticket', label: 'Vé Bán Sớm' },
   ] as const;
 
   const viewMoreLink = activeTab === 'coming-soon' ? '/movies?tab=coming-soon' : '/movies?tab=now-showing';
@@ -99,90 +98,107 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
           </div>
         ) : (
           <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial="hidden"
-              animate="show"
-              exit="hidden"
-              variants={{
-                hidden: { opacity: 0 },
-                show: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.06,
+            {filteredMovies.length === 0 ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full py-16 px-6 rounded-3xl bg-white/60 border border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-center"
+              >
+                <span className="text-sm font-extrabold text-slate-700">
+                  {activeTab === 'coming-soon' ? 'Chưa có phim sắp chiếu trong danh mục này' : 'Chưa có phim đang chiếu trong danh mục này'}
+                </span>
+                <span className="text-xs text-slate-400">
+                  Vui lòng quay lại sau để cập nhật những bom tấn mới nhất nhé!
+                </span>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={activeTab}
+                initial="hidden"
+                animate="show"
+                exit="hidden"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.06,
+                    },
                   },
-                },
-              }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
-            >
-              {filteredMovies.map((movie) => (
-                <motion.div
-                  key={movie.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 25 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-                  }}
-                  whileHover={{ y: -6 }}
-                  className="group flex flex-col gap-2 cursor-pointer"
-                  onClick={() => router.push(`/movies/${movie.slug}`)}
-                >
-                  {/* Poster Box */}
-                  <div className="relative aspect-[2/3] w-full rounded-3xl overflow-hidden bg-slate-900 shadow-md group-hover:shadow-2xl transition-all">
-                    <img
-                      src={movie.posterUrl}
-                      alt={movie.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                }}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+              >
+                {filteredMovies.map((movie) => (
+                  <motion.div
+                    key={movie.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 25 },
+                      show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+                    }}
+                    whileHover={{ y: -6 }}
+                    className="group flex flex-col gap-2 cursor-pointer"
+                    onClick={() => router.push(`/movies/${movie.slug}`)}
+                  >
+                    {/* Poster Box */}
+                    <div className="relative aspect-[2/3] w-full rounded-3xl overflow-hidden bg-slate-900 shadow-md group-hover:shadow-2xl transition-all">
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
 
-                    {/* Badges */}
-                    <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10 pointer-events-none">
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-bold uppercase shadow-sm">
-                        {movie.formatBadge || '2D'}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold shadow-sm">
-                        {movie.ageRating}
-                      </span>
+                      {/* Badges */}
+                      <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10 pointer-events-none">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-bold uppercase shadow-sm">
+                          {movie.formatBadge || '2D'}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold shadow-sm">
+                          {movie.ageRating}
+                        </span>
+                      </div>
+
+                      {/* Hover Overlay with Proportional Pill Buttons */}
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center p-4 gap-3 z-20">
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={(e) => handleBookClick(e, movie)}
+                          className="w-[82%] max-w-[170px] py-2.5 px-4 bg-[#7C6FE8] hover:bg-[#685bc7] text-white rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/40 transition-all cursor-pointer"
+                        >
+                          <Ticket className="w-4 h-4 fill-white shrink-0" />
+                          <span className="truncate">{activeTab === 'now-showing' ? 'MUA VÉ' : 'CHI TIẾT'}</span>
+                        </motion.button>
+
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={(e) => handleWatchTrailer(e, movie)}
+                          className="w-[82%] max-w-[170px] py-2.5 px-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full font-bold text-xs backdrop-blur-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-white shrink-0" />
+                          <span className="truncate">Xem Trailer</span>
+                        </motion.button>
+                      </div>
                     </div>
 
-                    {/* Hover Overlay with Proportional Pill Buttons */}
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center p-4 gap-3 z-20">
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={(e) => handleBookClick(e, movie)}
-                        className="w-[82%] max-w-[170px] py-2.5 px-4 bg-[#7C6FE8] hover:bg-[#685bc7] text-white rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/40 transition-all cursor-pointer"
-                      >
-                        <Ticket className="w-4 h-4 fill-white shrink-0" />
-                        <span className="truncate">{activeTab === 'now-showing' ? 'MUA VÉ' : 'CHI TIẾT'}</span>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={(e) => handleWatchTrailer(e, movie)}
-                        className="w-[82%] max-w-[170px] py-2.5 px-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full font-bold text-xs backdrop-blur-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-white shrink-0" />
-                        <span className="truncate">Xem Trailer</span>
-                      </motion.button>
+                    {/* Info Below */}
+                    <div className="flex flex-col gap-1 px-1">
+                      <h3 className="font-extrabold text-base text-[#131413] group-hover:text-[#7C6FE8] transition-colors line-clamp-1">
+                        {movie.title}
+                      </h3>
+                      <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+                        <span className="flex items-center text-amber-500 font-bold">
+                          ★ {movie.rating > 0 ? movie.rating : 'N/A'}
+                        </span>
+                        <span className="truncate">{movie.genre}</span>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Info Below */}
-                  <div className="flex flex-col gap-1 px-1">
-                    <h3 className="font-extrabold text-base text-[#131413] group-hover:text-[#7C6FE8] transition-colors line-clamp-1">
-                      {movie.title}
-                    </h3>
-                    <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
-                      <span className="flex items-center text-amber-500 font-bold">
-                        ★ {movie.rating > 0 ? movie.rating : 'N/A'}
-                      </span>
-                      <span className="truncate">{movie.genre}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </AnimatePresence>
         )}
 

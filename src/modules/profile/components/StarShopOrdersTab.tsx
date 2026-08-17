@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, QrCode, MapPin, Clock, CheckCircle2, X, Copy } from 'lucide-react';
 import { StarShopOrderItem } from '../types/profile.types';
+import { QRCodeImage } from '@/shared/ui/QRCodeImage';
 
 interface StarShopOrdersTabProps {
   orders: StarShopOrderItem[];
@@ -189,9 +190,10 @@ export const StarShopOrdersTab: React.FC<StarShopOrdersTabProps> = ({ orders }) 
                 Mã Đơn Hàng #{selectedQrOrder.orderId}
               </span>
 
-              <div className="p-3 bg-white rounded-2xl border border-gray-200 shadow-md">
-                <img
-                  src={selectedQrOrder.qrCodeUrl}
+              <div className="p-3 bg-white rounded-2xl border border-gray-200 shadow-md flex items-center justify-center">
+                <QRCodeImage
+                  value={selectedQrOrder.qrCodeUrl || selectedQrOrder.orderId}
+                  size={180}
                   alt="QR Code nhận hàng"
                   className="w-44 h-44 object-contain"
                 />

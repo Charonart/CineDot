@@ -1,21 +1,173 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  fetchQuickBookingMovies,
+  fetchMovieShowtimesTree,
+} from '../services/home.service';
+import { DynamicDateOption, QuickShowtimeOption } from '../types/home.types';
+
+interface QuickMovieOption {
+  id: string;
+  slug: string;
+  title: string;
+}
+
+interface QuickCinemaOption {
+  id: string;
+  name: string;
+}
 
 interface BookingStripProps {
   onQuickBook?: (selection: { movieId: string; cinemaId: string; date: string; time: string }) => void;
 }
 
 export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
+  const router = useRouter();
+  const [moviesList, setMoviesList] = useState<QuickMovieOption[]>([]);
+  const [cinemasList, setCinemasList] = useState<QuickCinemaOption[]>([]);
+  const [datesList, setDatesList] = useState<DynamicDateOption[]>([]);
+  const [timesList, setTimesList] = useState<QuickShowtimeOption[]>([]);
+  const [showtimesTree, setShowtimesTree] = useState<any[]>([]);
+
   const [movieId, setMovieId] = useState('');
   const [cinemaId, setCinemaId] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
 
+  useEffect(() => {
+    let isMounted = true;
+    async function loadMovies() {
+      const list = await fetchQuickBookingMovies();
+      if (isMounted && list.length > 0) {
+        setMoviesList(list);
+      }
+    }
+    loadMovies();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleMovieChange = async (newMovieId: string) => {
+    setMovieId(newMovieId);
+    setCinemaId('');
+    setDate('');
+    setTime('');
+    setCinemasList([]);
+    setDatesList([]);
+    setTimesList([]);
+    setShowtimesTree([]);
+
+    if (!newMovieId) return;
+    const movie = moviesList.find((m) => m.id === newMovieId);
+    if (movie) {
+      const tree = await fetchMovieShowtimesTree(movie.slug);
+      setShowtimesTree(tree);
+
+      const cinemaMap = new Map<string, string>();
+      tree.forEach((day: any) => {
+        if (Array.isArray(day.cinemas)) {
+          day.cinemas.forEach((c: any) => {
+            const cObj = c.cinema || {};
+            const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+            const cName = cObj.cinema_name || cObj.name || c.cinema_name || '';
+            const hasTimes = Array.isArray(c.times) && c.times.length > 0;
+            if (cId && cName && hasTimes && !cinemaMap.has(cId)) {
+              cinemaMap.set(cId, cName);
+            }
+          });
+        }
+      });
+      setCinemasList(Array.from(cinemaMap.entries()).map(([cId, name]) => ({ id: cId, name })));
+    }
+  };
+
+  const handleCinemaChange = (newCinemaId: string) => {
+    setCinemaId(newCinemaId);
+    setDate('');
+    setTime('');
+    setDatesList([]);
+    setTimesList([]);
+
+    if (!newCinemaId) return;
+
+    const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const validDates: DynamicDateOption[] = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    showtimesTree.forEach((day: any) => {
+      const hasShowtimesForCinema = Array.isArray(day.cinemas) && day.cinemas.some((c: any) => {
+        const cObj = c.cinema || {};
+        const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+        return cId === String(newCinemaId) && Array.isArray(c.times) && c.times.length > 0;
+      });
+
+      if (hasShowtimesForCinema && day.date) {
+        const d = new Date(day.date);
+        const isToday = day.date === todayStr;
+        const isTomorrow = day.date === tomorrowStr;
+        const dayLabel = isToday ? 'Hôm nay' : isTomorrow ? 'Ngày mai' : (daysOfWeek[d.getDay()] || 'Ngày chiếu');
+        const dateFormatted = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+        validDates.push({
+          id: day.date,
+          dateStr: dateFormatted,
+          label: `${dayLabel} (${dateFormatted})`,
+        });
+      }
+    });
+
+    setDatesList(validDates);
+  };
+
+  const handleDateChange = (newDate: string) => {
+    setDate(newDate);
+    setTime('');
+    setTimesList([]);
+
+    if (!newDate || !cinemaId) return;
+
+    const dayEntry = showtimesTree.find((d: any) => d.date === newDate);
+    const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
+      const cObj = c.cinema || {};
+      const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+      return cId === String(cinemaId);
+    });
+
+    const slots: QuickShowtimeOption[] = [];
+    if (cinemaEntry && Array.isArray(cinemaEntry.times)) {
+      cinemaEntry.times.forEach((st: any) => {
+        const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
+        const room = st.room || {};
+        const format = room.room_type || st.format || '2D';
+        const roomName = room.room_name ? ` (${room.room_name})` : '';
+
+        slots.push({
+          id: String(st.showtime_id || st.id),
+          showtimeId: st.showtime_id || st.id || '',
+          time: startTime,
+          format,
+          label: `${startTime} - ${format}${roomName}`,
+        });
+      });
+    }
+
+    setTimesList(slots);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!movieId || !cinemaId || !date || !time) return;
+
     if (onQuickBook) {
       onQuickBook({ movieId, cinemaId, date, time });
+    } else {
+      router.push(`/booking/seats?showtime_id=${encodeURIComponent(time)}`);
     }
   };
 
@@ -32,17 +184,17 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             </span>
             <select
               value={movieId}
-              onChange={(e) => setMovieId(e.target.value)}
+              onChange={(e) => handleMovieChange(e.target.value)}
               className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
             >
-              <option value="">Venom: Ký Sinh...</option>
-              <option value="dune-2">Dune: Hành tinh cát 2</option>
-              <option value="avatar-2">Avatar: Dòng chảy nước</option>
+              <option value="">-- Chọn Phim --</option>
+              {moviesList.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.title}
+                </option>
+              ))}
             </select>
           </div>
-          <svg className="w-4 h-4 text-[var(--muted)] ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-          </svg>
         </div>
 
         <div className="hidden md:block w-[1px] h-10 bg-slate-800/10 mx-2" />
@@ -54,17 +206,18 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             </span>
             <select
               value={cinemaId}
-              onChange={(e) => setCinemaId(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
+              disabled={!movieId}
+              onChange={(e) => handleCinemaChange(e.target.value)}
+              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
             >
-              <option value="">Chọn rạp</option>
-              <option value="c-1">CineDot Landmark 81</option>
-              <option value="c-2">CineDot Quận 1</option>
+              <option value="">-- Chọn Rạp --</option>
+              {cinemasList.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
-          <svg className="w-4 h-4 text-[var(--muted)] ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-          </svg>
         </div>
 
         <div className="hidden md:block w-[1px] h-10 bg-slate-800/10 mx-2" />
@@ -76,17 +229,18 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             </span>
             <select
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
+              disabled={!cinemaId}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
             >
-              <option value="">Chọn ngày</option>
-              <option value="today">Hôm nay</option>
-              <option value="tomorrow">Ngày mai</option>
+              <option value="">-- Chọn Ngày --</option>
+              {datesList.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label}
+                </option>
+              ))}
             </select>
           </div>
-          <svg className="w-4 h-4 text-[var(--muted)] ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-          </svg>
         </div>
 
         <div className="hidden md:block w-[1px] h-10 bg-slate-800/10 mx-2" />
@@ -98,22 +252,24 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             </span>
             <select
               value={time}
+              disabled={!date}
               onChange={(e) => setTime(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
+              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
             >
-              <option value="">Chọn giờ</option>
-              <option value="19:00">19:00 - IMAX</option>
-              <option value="21:15">21:15 - 2D</option>
+              <option value="">-- Chọn Giờ --</option>
+              {timesList.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
             </select>
           </div>
-          <svg className="w-4 h-4 text-[var(--muted)] ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-          </svg>
         </div>
 
         <button
           type="submit"
-          className="w-full md:w-auto ml-0 md:ml-4 bg-[#7C6FE8] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:bg-[#685bc7] transition-colors shrink-0"
+          disabled={!movieId || !cinemaId || !date || !time}
+          className="w-full md:w-auto ml-0 md:ml-4 bg-[#7C6FE8] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:bg-[#685bc7] transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           MUA VÉ
         </button>

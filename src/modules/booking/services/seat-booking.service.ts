@@ -98,9 +98,6 @@ export const seatBookingService = {
             canvas: s.canvas,
           };
         });
-      } else {
-        // Fallback default 60-seat matrix if empty
-        mappedSeats = generateFallbackSeats(showtimeInfo.basePrice);
       }
 
       // 4. Group seats by Row (A, B, C, D, E, F, G)
@@ -125,23 +122,63 @@ export const seatBookingService = {
         seats: mappedSeats,
         seatRowGroups,
       };
-    } catch {
-      // Return safe fallback
-      const showtimeInfo = getFallbackShowtimeInfo(cleanId);
-      const seats = generateFallbackSeats(showtimeInfo.basePrice);
-      const rowMap: Record<string, SeatItem[]> = {};
-      for (const s of seats) {
-        if (!rowMap[s.row]) rowMap[s.row] = [];
-        rowMap[s.row].push(s);
-      }
-      const seatRowGroups = Object.keys(rowMap)
-        .sort()
-        .map((rowName) => ({
-          rowName,
-          seats: rowMap[rowName].sort((a, b) => a.number - b.number),
-        }));
+    } catch (err) {
+      console.warn('fetchShowtimeBookingData error:', err);
+      throw err;
+    }
+  },
 
-      return { showtimeInfo, seats, seatRowGroups };
+  /**
+   * Lấy danh sách các suất chiếu thực tế cùng rạp & cùng phim trong ngày để chuyển đổi nhanh
+   */
+  async fetchSiblingShowtimes(
+    movieSlugOrId: string | number,
+    dateStr?: string,
+    cinemaNameOrId?: string
+  ): Promise<Array<{ id: string; time: string; format?: string }>> {
+    try {
+      const params: Record<string, any> = { movie_id: movieSlugOrId };
+      if (dateStr) params.date = dateStr;
+
+      const res = await apiClient.get(ENDPOINTS.SHOWTIMES.LIST, { params });
+      if (res.data?.success && res.data?.data) {
+        const payload = res.data.data;
+        const results = Array.isArray(payload) ? payload : (payload.results || []);
+        const targetGroup = results[0] || payload;
+        const rawCinemas = targetGroup?.cinemas || [];
+
+        const targetCinema = rawCinemas.find((cg: any) => {
+          const c = cg.cinema || cg;
+          const cName = c.cinema_name || c.name || '';
+          const cId = String(c.cinema_id || c.id || '');
+          if (cinemaNameOrId) {
+            return (
+              cName.toLowerCase().includes(cinemaNameOrId.toLowerCase()) ||
+              cinemaNameOrId.toLowerCase().includes(cName.toLowerCase()) ||
+              cId === String(cinemaNameOrId)
+            );
+          }
+          return true;
+        }) || rawCinemas[0];
+
+        if (targetCinema && Array.isArray(targetCinema.times)) {
+          return targetCinema.times.map((t: any) => ({
+            id: String(t.id || t.showtime_id),
+            time:
+              t.startTime ||
+              (t.showtime_start
+                ? new Date(t.showtime_start).toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : '19:30'),
+            format: t.format || t.screen_type,
+          }));
+        }
+      }
+      return [];
+    } catch {
+      return [];
     }
   },
 
@@ -195,51 +232,3 @@ export const seatBookingService = {
     }
   },
 };
-
-function generateFallbackSeats(basePrice: number): SeatItem[] {
-  const seats: SeatItem[] = [];
-  const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
-  let seatCounter = 1;
-
-  for (let rIdx = 0; rIdx < rows.length; rIdx++) {
-    const row = rows[rIdx];
-    const isVip = rIdx >= 2 && rIdx <= 4;
-    const isSweetbox = rIdx === 5;
-    const type: SeatType = isSweetbox ? 'SWEETBOX' : isVip ? 'VIP' : 'STANDARD';
-    const surcharge = isSweetbox ? 40000 : isVip ? 20000 : 0;
-    const totalCols = isSweetbox ? 4 : 10;
-
-    for (let c = 1; c <= totalCols; c++) {
-      const code = `${row}${c}`;
-      seats.push({
-        id: code,
-        showtime_seat_id: seatCounter++,
-        row,
-        number: c,
-        type,
-        status: 'AVAILABLE',
-        price: basePrice + surcharge,
-        surcharge,
-      });
-    }
-  }
-  return seats;
-}
-
-function getFallbackShowtimeInfo(id: string): ShowtimeBookingInfo {
-  return {
-    showtimeId: id,
-    movieSlug: 'cai-chet-cua-robin-hood',
-    movieTitle: 'Cái Chết của Robin Hood',
-    movieFormat: 'IMAX Laser',
-    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800',
-    ageRating: 'T16',
-    duration: '123 phút',
-    cinemaName: 'CineDot Vincom Bà Triệu',
-    roomName: 'Phòng 01 (IMAX Laser)',
-    showTime: '19:30',
-    showDate: 'Hôm nay',
-    basePrice: 110000,
-    countdownSeconds: 600,
-  };
-}

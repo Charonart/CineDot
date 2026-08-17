@@ -4,20 +4,36 @@ import React from 'react';
 import { MapPin, Clock, Ticket, QrCode, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { UserTicketItem } from '../types/profile.types';
+import { QRCodeImage } from '@/shared/ui/QRCodeImage';
 
 interface UserTicketCardProps {
   ticket: UserTicketItem;
+  onCancel?: (ticketId: string) => void;
+  isCancelling?: boolean;
 }
 
-export const UserTicketCard: React.FC<UserTicketCardProps> = ({ ticket }) => {
+export const UserTicketCard: React.FC<UserTicketCardProps> = ({
+  ticket,
+  onCancel,
+  isCancelling,
+}) => {
   const isUpcoming = ticket.status === 'UPCOMING';
+  const isCancelled = ticket.status === 'CANCELLED';
+
+  const handleCancelClick = () => {
+    if (confirm(`Bạn có chắc chắn muốn hủy đơn vé #${ticket.bookingId} (${ticket.movieTitle}) không? Tiền sẽ được hoàn trả theo quy định.`)) {
+      onCancel?.(ticket.bookingId);
+    }
+  };
 
   return (
     <div
       className={`w-full bg-white rounded-3xl p-6 border transition-all flex flex-col md:flex-row gap-6 items-center justify-between ${
-        isUpcoming
+        isCancelled
+          ? 'border-rose-100 bg-rose-50/20 opacity-70'
+          : isUpcoming
           ? 'border-purple-200 shadow-[0_12px_40px_rgba(124,111,232,0.12)] ring-1 ring-[#7C6FE8]/20'
-          : 'border-gray-200 opacity-80'
+          : 'border-gray-200 opacity-85'
       }`}
     >
       {/* Left: Movie Poster & Details */}
@@ -35,12 +51,20 @@ export const UserTicketCard: React.FC<UserTicketCardProps> = ({ ticket }) => {
             <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-bold uppercase">
               {ticket.movieFormat}
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
               Khán giả {ticket.ageRating}
             </span>
-            {isUpcoming && (
+            {isCancelled ? (
+              <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold border border-rose-200">
+                Đã hủy vé
+              </span>
+            ) : isUpcoming ? (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
                 Sắp chiếu
+              </span>
+            ) : (
+              <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold border border-gray-200">
+                Đã xem
               </span>
             )}
           </div>
@@ -62,16 +86,20 @@ export const UserTicketCard: React.FC<UserTicketCardProps> = ({ ticket }) => {
               <Ticket className="w-3.5 h-3.5 text-[#7C6FE8]" />
               Ghế: <strong className="text-[#7C6FE8]">{ticket.seatLabels}</strong>
             </span>
+            <span className="text-[11px] text-slate-400 font-semibold pt-0.5">
+              Tổng tiền: <strong className="text-slate-800">{ticket.totalPaid.toLocaleString()}đ</strong>
+            </span>
           </div>
         </div>
       </div>
 
       {/* Right: Dashed Line & QR Code Stub */}
-      <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto border-t md:border-t-0 md:border-l border-dashed border-gray-200 pt-4 md:pt-0 md:pl-6">
+      <div className="flex flex-col md:flex-row items-center gap-5 w-full md:w-auto border-t md:border-t-0 md:border-l border-dashed border-gray-200 pt-4 md:pt-0 md:pl-6">
         <div className="flex flex-col items-center text-center gap-2">
           <div className="w-24 h-24 bg-slate-50 p-2 rounded-xl border border-gray-200 flex items-center justify-center shadow-2xs">
-            <img
-              src={ticket.qrCodeUrl}
+            <QRCodeImage
+              value={ticket.qrCodeUrl || ticket.bookingId}
+              size={120}
               alt={`QR ${ticket.bookingId}`}
               className="w-full h-full object-contain"
             />
@@ -82,17 +110,30 @@ export const UserTicketCard: React.FC<UserTicketCardProps> = ({ ticket }) => {
           </span>
         </div>
 
-        {/* View Details Action Link */}
-        <Link
-          href={`/booking/success?booking_id=${ticket.bookingId}&movie=${ticket.movieSlug}&seats=${ticket.seatLabels}&time=${ticket.showTime}&cinema=${encodeURIComponent(
-            ticket.cinemaName
-          )}`}
-        >
-          <button className="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-[#7C6FE8] text-slate-700 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0">
-            <span>Chi tiết vé</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
-        </Link>
+        <div className="flex flex-col gap-2 w-full sm:w-auto">
+          {/* View Details Action Link */}
+          <Link
+            href={`/booking/success?booking_id=${ticket.bookingId}&movie=${ticket.movieSlug}&seats=${ticket.seatLabels}&time=${ticket.showTime}&cinema=${encodeURIComponent(
+              ticket.cinemaName
+            )}`}
+          >
+            <button className="w-full px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-[#7C6FE8] text-slate-700 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0">
+              <span>Chi tiết vé</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+          </Link>
+
+          {/* Cancel Ticket Button (Available if canCancel) */}
+          {isUpcoming && ticket.canCancel && onCancel && (
+            <button
+              onClick={handleCancelClick}
+              disabled={isCancelling}
+              className="w-full px-4 py-2 rounded-2xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isCancelling ? 'Đang hủy...' : 'Hủy vé & Hoàn tiền'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,17 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   UserProfile,
   UserTicketItem,
   StarShopOrderItem,
+  RewardVoucherItem,
+  TransactionItem,
   ProfileDashboardTab,
+  ChangePasswordPayload,
 } from '../types/profile.types';
 import {
   fetchUserProfile,
   fetchUserTickets,
   fetchUserOrders,
+  fetchUserVouchers,
+  fetchUserTransactions,
   updateUserProfile,
+  changeUserPassword,
+  cancelBooking,
 } from '../services/profile.service';
 import { masterDataService, ProvinceItem } from '@/shared/services/masterData.service';
 
@@ -21,52 +28,55 @@ export function useProfileDashboard() {
   const [ticketFilterTab, setTicketFilterTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
   const [tickets, setTickets] = useState<UserTicketItem[]>([]);
   const [orders, setOrders] = useState<StarShopOrderItem[]>([]);
+  const [vouchers, setVouchers] = useState<RewardVoucherItem[]>([]);
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [provinces, setProvinces] = useState<ProvinceItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Success notifications
+  // Success / Feedback notifications
   const [accountUpdateSuccess, setAccountUpdateSuccess] = useState(false);
   const [securityUpdateSuccess, setSecurityUpdateSuccess] = useState(false);
+  const [securityErrorMsg, setSecurityErrorMsg] = useState('');
+  const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadData() {
-      setLoading(true);
-      try {
-        const [profData, ticketsData, ordersData, provincesData] = await Promise.all([
-          fetchUserProfile(),
+  const loadData = useCallback(async () => {
+    try {
+      const [profData, ticketsData, ordersData, vouchersData, transData, provincesData] =
+        await Promise.all([
+          fetchUserProfile().catch(() => null),
           fetchUserTickets(ticketFilterTab),
           fetchUserOrders(),
+          fetchUserVouchers(),
+          fetchUserTransactions(),
           masterDataService.getProvinces(),
         ]);
-        if (isMounted) {
-          setProfile(profData);
-          setTickets(ticketsData);
-          setOrders(ordersData);
-          setProvinces(provincesData);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+
+      if (profData) setProfile(profData);
+      setTickets(ticketsData);
+      setOrders(ordersData);
+      setVouchers(vouchersData);
+      setTransactions(transData);
+      setProvinces(provincesData);
+    } finally {
+      setLoading(false);
     }
-    loadData();
-    return () => {
-      isMounted = false;
-    };
   }, [ticketFilterTab]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleUpdateAccountInfo = async (updatedProfile: Partial<UserProfile>) => {
     try {
-      // Find the province_id from the city name
       const selectedProvince = provinces.find((p) => p.province_name === updatedProfile.city);
-      
+
       const payload: any = {
         fullname: updatedProfile.fullName,
         phone: updatedProfile.phone,
         gender: updatedProfile.gender,
         birthday: updatedProfile.birthDate,
       };
-      
+
       if (selectedProvince) {
         payload.province_id = selectedProvince.province_id;
       }
@@ -79,14 +89,38 @@ export function useProfileDashboard() {
       } else {
         alert(res.message || 'Cập nhật thất bại');
       }
-    } catch (err) {
+    } catch {
       alert('Đã xảy ra lỗi khi cập nhật thông tin');
     }
   };
 
-  const handleUpdateSecurityPassword = () => {
-    setSecurityUpdateSuccess(true);
-    setTimeout(() => setSecurityUpdateSuccess(false), 3000);
+  const handleUpdateSecurityPassword = async (payload: ChangePasswordPayload): Promise<{ success: boolean; message?: string }> => {
+    setSecurityErrorMsg('');
+    const res = await changeUserPassword(payload);
+    if (res.success) {
+      setSecurityUpdateSuccess(true);
+      setTimeout(() => setSecurityUpdateSuccess(false), 4000);
+    } else {
+      setSecurityErrorMsg(res.message || 'Đổi mật khẩu thất bại');
+    }
+    return res;
+  };
+
+  const handleCancelTicket = async (ticketId: string) => {
+    setCancellingTicketId(ticketId);
+    try {
+      const res = await cancelBooking(ticketId);
+      if (res.success) {
+        alert('Hủy vé thành công! Yêu cầu hoàn tiền đã được tiếp nhận.');
+        await loadData();
+      } else {
+        alert(res.message || 'Không thể hủy vé');
+      }
+    } catch {
+      alert('Đã xảy ra lỗi khi hủy vé');
+    } finally {
+      setCancellingTicketId(null);
+    }
   };
 
   return {
@@ -97,11 +131,17 @@ export function useProfileDashboard() {
     setTicketFilterTab,
     tickets,
     orders,
+    vouchers,
+    transactions,
     provinces,
     loading,
     accountUpdateSuccess,
     securityUpdateSuccess,
+    securityErrorMsg,
+    cancellingTicketId,
     handleUpdateAccountInfo,
     handleUpdateSecurityPassword,
+    handleCancelTicket,
+    refreshDashboard: loadData,
   };
 }

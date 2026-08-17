@@ -31,32 +31,55 @@ export const TabTransactionHistory: React.FC<TabTransactionHistoryProps> = ({ tr
                 <th className="p-4">Ngày Giờ</th>
                 <th className="p-4">Phương Thức</th>
                 <th className="p-4 text-right">Số Tiền</th>
+                <th className="p-4 text-center">Điểm CP</th>
                 <th className="p-4 text-center">Trạng Thái</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-xs font-semibold text-slate-700">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-4 font-mono font-bold text-[#7C6FE8]">{tx.transactionCode}</td>
-                  <td className="p-4 max-w-xs truncate">{tx.description}</td>
-                  <td className="p-4 text-slate-500 font-medium whitespace-nowrap">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      {tx.date}
-                    </span>
-                  </td>
-                  <td className="p-4 font-bold">{tx.paymentMethod}</td>
-                  <td className="p-4 text-right font-extrabold text-slate-900 whitespace-nowrap">
-                    {tx.amount.toLocaleString()}đ
-                  </td>
-                  <td className="p-4 text-center whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                      <CheckCircle className="w-3 h-3" />
-                      Thành công
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {transactions.map((tx) => {
+                const isSuccess = tx.status === 'completed' || tx.status === 'paid';
+                const isRefund = tx.status === 'cancelled';
+
+                return (
+                  <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-4 font-mono font-bold text-[#7C6FE8]">{tx.transactionCode}</td>
+                    <td className="p-4 max-w-xs truncate">{tx.description}</td>
+                    <td className="p-4 text-slate-500 font-medium whitespace-nowrap">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        {tx.date}
+                      </span>
+                    </td>
+                    <td className="p-4 font-bold">{tx.paymentMethod}</td>
+                    <td className="p-4 text-right font-extrabold text-slate-900 whitespace-nowrap">
+                      {isRefund ? `-${tx.amount.toLocaleString()}đ` : `${tx.amount.toLocaleString()}đ`}
+                    </td>
+                    <td className="p-4 text-center whitespace-nowrap">
+                      {tx.pointsEarned > 0 ? (
+                        <span className="font-extrabold text-purple-600">+{tx.pointsEarned} CP</span>
+                      ) : (
+                        <span className="text-slate-400 font-normal">-</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center whitespace-nowrap">
+                      {isRefund ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200">
+                          {tx.statusLabel}
+                        </span>
+                      ) : isSuccess ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                          <CheckCircle className="w-3 h-3" />
+                          {tx.statusLabel}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
+                          {tx.statusLabel}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

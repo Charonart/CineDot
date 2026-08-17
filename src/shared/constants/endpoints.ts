@@ -19,6 +19,9 @@ export const ENDPOINTS = {
     PROFILE: '/users/profile',
     UPDATE_PROFILE: '/users/profile',
     MY_BOOKINGS: '/users/bookings',
+    FNB_ORDERS: '/users/fnb-orders',
+    CHANGE_PASSWORD: '/users/change-password',
+    TRANSACTIONS: '/users/transactions',
   },
 
   // ── 2. Master Data ──
@@ -76,6 +79,7 @@ export const ENDPOINTS = {
     HISTORY: '/bookings/history',
   },
   VOUCHERS: {
+    LIST: '/vouchers',
     APPLY_STANDALONE: '/vouchers/apply',
   },
 

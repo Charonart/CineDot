@@ -3,6 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+import { QRCodeImage } from '@/shared/ui/QRCodeImage';
+
 export const MobileAppBanner: React.FC = () => {
   return (
     <section className="w-full py-16 bg-[var(--bg2)]">
@@ -58,13 +60,16 @@ export const MobileAppBanner: React.FC = () => {
             {/* QR Code & Store Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
               {/* QR Code Box */}
-              <div className="bg-white p-3 rounded-2xl flex items-center gap-3 shrink-0 shadow-lg text-slate-900">
-                <div className="w-16 h-16 bg-slate-900 p-1.5 rounded-lg flex items-center justify-center">
-                  <svg className="w-full h-full text-white fill-current" viewBox="0 0 24 24">
-                    <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm8-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm13-2h3v2h-3v-2zm-3 3h2v3h-2v-3zm3 2h2v3h-2v-3z" />
-                  </svg>
+              <div className="bg-white p-2.5 rounded-2xl flex items-center gap-3 shrink-0 shadow-lg text-slate-900">
+                <div className="w-16 h-16 bg-white p-1 rounded-lg flex items-center justify-center">
+                  <QRCodeImage
+                    value="https://cinedot.vn/app"
+                    size={64}
+                    alt="CineDot App Download QR"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                <div className="text-left text-xs font-medium">
+                <div className="text-left text-xs font-medium pr-2">
                   <p className="font-bold text-slate-900">Quét mã QR</p>
                   <p className="text-gray-500 text-[10px]">Tải App iOS / Android</p>
                 </div>

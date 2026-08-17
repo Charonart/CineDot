@@ -5,7 +5,9 @@ import { FoodItem, FoodCategory, SelectedFoodItem } from '../types/food-booking.
 import { fetchFoodItems } from '../services/food-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '@/modules/booking/services/bookingTimerService';
 
-export function useFoodBooking(initialCombo?: string, showtimeId: string = 'showtime-101', combosParam?: string) {
+import { updateBookingSession } from '@/modules/booking/services/bookingSessionService';
+
+export function useFoodBooking(initialCombo?: string, showtimeId: string = '1', combosParam?: string) {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<FoodCategory>('ALL');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -106,6 +108,29 @@ export function useFoodBooking(initialCombo?: string, showtimeId: string = 'show
   const totalFoodPrice = useMemo(() => {
     return selectedFoodList.reduce((sum, curr) => sum + curr.food.price * curr.quantity, 0);
   }, [selectedFoodList]);
+
+  // Synchronize selected combos with sessionStorage
+  useEffect(() => {
+    if (selectedFoodList.length > 0) {
+      const combosData = selectedFoodList.map((item) => ({
+        combo_id: item.food.id,
+        name: item.food.name,
+        quantity: item.quantity,
+        unit_price: item.food.price,
+        price: item.food.price * item.quantity,
+        image_url: item.food.imageUrl,
+      }));
+      updateBookingSession(showtimeId, {
+        combos: combosData,
+        totalFoodPrice,
+      });
+    } else {
+      updateBookingSession(showtimeId, {
+        combos: [],
+        totalFoodPrice: 0,
+      });
+    }
+  }, [selectedFoodList, totalFoodPrice, showtimeId]);
 
   return {
     foodItems: filteredFoodItems,

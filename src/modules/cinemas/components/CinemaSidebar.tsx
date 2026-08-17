@@ -4,9 +4,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { CinemaItem } from '../types/cinemas.types';
-import { MOCK_CITIES } from '../mocks/mockCinemasData';
-
 interface CinemaSidebarProps {
+  cities: string[];
   selectedCity: string;
   onSelectCity: (city: string) => void;
   cinemas: CinemaItem[];
@@ -15,6 +14,7 @@ interface CinemaSidebarProps {
 }
 
 export const CinemaSidebar: React.FC<CinemaSidebarProps> = ({
+  cities,
   selectedCity,
   onSelectCity,
   cinemas,
@@ -50,16 +50,16 @@ export const CinemaSidebar: React.FC<CinemaSidebarProps> = ({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
-              className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-30 overflow-hidden"
+              className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-30 overflow-hidden max-h-[300px] overflow-y-auto scrollbar-none"
             >
-              {MOCK_CITIES.map((city) => (
+              {cities.map((city) => (
                 <button
                   key={city}
                   onClick={() => {
                     onSelectCity(city);
                     setIsCityDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between ${
+                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between cursor-pointer ${
                     selectedCity === city
                       ? 'bg-[#7C6FE8]/10 text-[#7C6FE8]'
                       : 'text-slate-700 hover:bg-slate-50'

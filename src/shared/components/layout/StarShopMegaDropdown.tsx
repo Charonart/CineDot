@@ -15,32 +15,32 @@ export const StarShopMegaDropdown: React.FC<StarShopMegaDropdownProps> = ({ onCl
       name: 'Tất Cả Các Sản Phẩm',
       desc: 'Khám phá trọn bộ vật phẩm',
       icon: LayoutGrid,
-      href: '/star-shop#products',
+      href: '/star-shop',
       isHighlight: true,
     },
     {
       name: 'Mô Hình / Figurine',
       desc: 'Hot Toys, Marvel, DC 1:6',
       icon: Package,
-      href: '/star-shop#products',
+      href: '/star-shop?category=figurine',
     },
     {
       name: 'Cốc Limited & Tumbler',
       desc: 'Venom 3D, IMAX Metallic',
       icon: CupSoda,
-      href: '/star-shop#products',
+      href: '/star-shop?category=tumbler',
     },
     {
       name: 'Thời Trang & Phụ Kiện',
       desc: 'Áo Conan, Mũ Gladiator',
       icon: Shirt,
-      href: '/star-shop#products',
+      href: '/star-shop?category=fashion',
     },
     {
       name: 'Combo Quà Tặng Hot',
       desc: 'Inside Out 2, Wicked Box',
       icon: Gift,
-      href: '/star-shop#products',
+      href: '/star-shop?category=combo',
     },
   ];
 

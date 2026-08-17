@@ -32,12 +32,11 @@ export interface QuickShowtimeOption {
   showtimeId: string | number;
 }
 
-export function mapMovieToCardItem(m: any, defaultStatus: 'now-showing' | 'coming-soon' | 'early-ticket' = 'now-showing'): MovieCardItem {
+export function mapMovieToCardItem(m: any, defaultStatus: 'now-showing' | 'coming-soon' = 'now-showing'): MovieCardItem {
   const statusStr = (m.status || '').toLowerCase();
-  let status: 'now-showing' | 'coming-soon' | 'early-ticket' = defaultStatus;
+  let status: 'now-showing' | 'coming-soon' = defaultStatus;
   if (statusStr === 'now_showing' || statusStr === 'now-showing') status = 'now-showing';
   else if (statusStr === 'coming_soon' || statusStr === 'coming-soon' || statusStr === 'upcoming') status = 'coming-soon';
-  else if (statusStr === 'early_ticket' || statusStr === 'early-ticket') status = 'early-ticket';
 
   const genres = Array.isArray(m.genres)
     ? m.genres.map((g: any) => g.name || g).join(', ')
@@ -116,21 +115,48 @@ export async function fetchPromoBanners(): Promise<PromoBanner[]> {
 
 export async function fetchHomeMovies(): Promise<MovieCardItem[]> {
   try {
-    const res = await apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { per_page: 20 } });
-    if (res.data?.success && res.data?.data) {
-      const payload = res.data.data;
-      const raw = Array.isArray(payload) ? payload : payload?.results || payload?.data || [];
-      if (raw.length > 0) {
-        return raw.map((m: any) => mapMovieToCardItem(m, 'now-showing'));
-      }
+    const [nowShowingRes, upcomingRes] = await Promise.all([
+      apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { status: 'now_showing', per_page: 12 } }),
+      apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { status: 'upcoming', per_page: 12 } }),
+    ]);
+
+    const nowShowingPayload = nowShowingRes.data?.data;
+    const nowShowingRaw = Array.isArray(nowShowingPayload)
+      ? nowShowingPayload
+      : nowShowingPayload?.results || nowShowingPayload?.data || [];
+
+    const upcomingPayload = upcomingRes.data?.data;
+    const upcomingRaw = Array.isArray(upcomingPayload)
+      ? upcomingPayload
+      : upcomingPayload?.results || upcomingPayload?.data || [];
+
+    const nowShowingCards = nowShowingRaw.map((m: any) => mapMovieToCardItem(m, 'now-showing'));
+    const upcomingCards = upcomingRaw.map((m: any) => mapMovieToCardItem(m, 'coming-soon'));
+
+    if (nowShowingCards.length > 0 || upcomingCards.length > 0) {
+      return [...nowShowingCards, ...upcomingCards];
     }
-    
-    if (!APP_CONFIG.USE_MOCK_DATA) return [];
-    return [...MOCK_MOVIES, ...MOCK_COMING_SOON_MOVIES, ...MOCK_EARLY_TICKET_MOVIES];
-  } catch {
-    if (!APP_CONFIG.USE_MOCK_DATA) return [];
-    return [...MOCK_MOVIES, ...MOCK_COMING_SOON_MOVIES, ...MOCK_EARLY_TICKET_MOVIES];
+  } catch (e) {
+    console.error('Failed to fetch home movies', e);
   }
+  return [];
+}
+
+export async function fetchQuickBookingMovies(): Promise<{ id: string; slug: string; title: string }[]> {
+  try {
+    const res = await apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { per_page: 30 } });
+    if (res.data?.success && res.data?.data) {
+      const results = Array.isArray(res.data.data) ? res.data.data : res.data.data.results || res.data.data.data || [];
+      return results.map((m: any) => ({
+        id: String(m.id || m.movie_id),
+        slug: m.slug || 'movie-detail',
+        title: m.title || m.original_title || 'Tên Phim',
+      }));
+    }
+  } catch (e) {
+    console.error('Failed to fetch quick booking movies', e);
+  }
+  return [];
 }
 
 export async function fetchHomeCinemas(): Promise<HomeCinemaOption[]> {
@@ -143,81 +169,51 @@ export async function fetchHomeCinemas(): Promise<HomeCinemaOption[]> {
         city: c.city || c.province_name,
       }));
     }
-  } catch {
-    // Fallback
+  } catch (e) {
+    console.error('Failed to fetch home cinemas', e);
   }
-  return [
-    { id: 'c-1', name: 'CineDot Landmark 81 Saigon' },
-    { id: 'c-2', name: 'CineDot Hanoi Centre' },
-    { id: 'c-3', name: 'CineDot Danang Riverside' },
-  ];
+  return [];
 }
 
-export function generateDynamicDateOptions(): DynamicDateOption[] {
-  const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-  const dates: DynamicDateOption[] = [];
-  const today = new Date();
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-
-    const dayName = i === 0 ? 'Hôm nay' : i === 1 ? 'Ngày mai' : daysOfWeek[d.getDay()];
-    const dateFormatted = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-    dates.push({
-      id: isoDate,
-      label: `${dayName} (${dateFormatted})`,
-      dateStr: dateFormatted,
-    });
-  }
-
-  return dates;
+export interface MovieShowtimeTreeCinema {
+  cinema: {
+    id?: string | number;
+    cinema_id?: string | number;
+    name?: string;
+    cinema_name?: string;
+  };
+  times: {
+    id?: string | number;
+    showtime_id?: string | number;
+    time?: string;
+    showtime_start?: string;
+    format?: string;
+    room?: {
+      room_id?: string | number;
+      room_name?: string;
+      room_type?: string;
+    };
+  }[];
 }
 
-export async function fetchQuickShowtimes(
-  movieSlug: string,
-  cinemaId?: string,
-  date?: string
-): Promise<QuickShowtimeOption[]> {
+export interface MovieShowtimeTreeDay {
+  date: string;
+  cinemas: MovieShowtimeTreeCinema[];
+}
+
+export async function fetchMovieShowtimesTree(movieSlug: string): Promise<MovieShowtimeTreeDay[]> {
   try {
-    if (movieSlug) {
-      const res = await apiClient.get(ENDPOINTS.MOVIES.SHOWTIMES(movieSlug), {
-        params: { date, cinema_id: cinemaId },
-      });
-      if (res.data?.success && Array.isArray(res.data?.data)) {
-        const slots: QuickShowtimeOption[] = [];
-        res.data.data.forEach((group: any) => {
-          if (Array.isArray(group.formatGroups)) {
-            group.formatGroups.forEach((fg: any) => {
-              if (Array.isArray(fg.showtimes)) {
-                fg.showtimes.forEach((st: any) => {
-                  slots.push({
-                    id: String(st.id),
-                    showtimeId: st.id,
-                    time: st.time,
-                    format: fg.formatName || '2D Phụ Đề',
-                    label: `${st.time} - ${fg.formatName || '2D'}`,
-                  });
-                });
-              }
-            });
-          }
-        });
-        if (slots.length > 0) return slots;
+    const res = await apiClient.get(ENDPOINTS.MOVIES.SHOWTIMES(movieSlug));
+    if (res.data?.success && res.data?.data) {
+      const results = res.data.data.results || res.data.data;
+      if (Array.isArray(results)) {
+        return results;
       }
     }
-  } catch {
-    // Fallback
+  } catch (e) {
+    console.error('Failed to fetch movie showtimes tree', e);
   }
-
-  return [
-    { id: 'st-1', showtimeId: 'showtime-101', time: '18:30', format: 'IMAX 2D', label: '18:30 - IMAX 2D' },
-    { id: 'st-2', showtimeId: 'showtime-102', time: '19:45', format: '2D Phụ Đề', label: '19:45 - 2D Phụ Đề' },
-    { id: 'st-3', showtimeId: 'showtime-103', time: '21:15', format: '4DX 3D', label: '21:15 - 4DX 3D' },
-    { id: 'st-4', showtimeId: 'showtime-104', time: '22:30', format: '2D Lồng Tiếng', label: '22:30 - 2D Lồng Tiếng' },
-  ];
+  return [];
 }
 
 export async function fetchNavbarMovies(): Promise<{ nowShowing: MovieCardItem[]; comingSoon: MovieCardItem[] }> {

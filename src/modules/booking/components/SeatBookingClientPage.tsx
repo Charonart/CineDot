@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSeatBooking } from '../hooks/useSeatBooking';
 import { BookingStepWizard } from './BookingStepWizard';
-import { SeatBookingHeader } from './SeatBookingHeader';
+import { SeatBookingHeader, SiblingShowtimeItem } from './SeatBookingHeader';
 import { SeatLegend } from './SeatLegend';
 import { CinemaScreen } from './CinemaScreen';
 import { SeatGrid } from './SeatGrid';
@@ -11,6 +12,7 @@ import { BookingSidebar } from './BookingSidebar';
 import { SeatTimeoutModal } from './SeatTimeoutModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
+import { seatBookingService } from '../services/seat-booking.service';
 
 interface SeatBookingClientPageProps {
   showtimeId: string;
@@ -29,6 +31,7 @@ export function SeatBookingClientPage({
   timeParam,
   cinemaParam,
 }: SeatBookingClientPageProps) {
+  const router = useRouter();
   const {
     bookingInfo,
     seats,
@@ -46,12 +49,33 @@ export function SeatBookingClientPage({
 
   const [isTimerActive, setIsTimerActive] = useState<boolean>(() => hasActiveBookingTimer(showtimeId));
   const [currentShowTime, setCurrentShowTime] = useState('19:30');
+  const [siblingShowtimes, setSiblingShowtimes] = useState<SiblingShowtimeItem[]>([]);
 
   useEffect(() => {
     if (bookingInfo) {
       setCurrentShowTime(bookingInfo.showTime);
+
+      // Fetch real sibling showtimes for this cinema & movie
+      seatBookingService
+        .fetchSiblingShowtimes(
+          bookingInfo.movieSlug || movieParam || '1',
+          bookingInfo.showDate || dateParam,
+          bookingInfo.cinemaName || cinemaParam
+        )
+        .then((items) => {
+          if (items.length > 0) {
+            setSiblingShowtimes(items);
+          }
+        })
+        .catch(() => {});
     }
-  }, [bookingInfo]);
+  }, [bookingInfo, movieParam, dateParam, cinemaParam]);
+
+  const handleSelectSiblingShowtime = (item: SiblingShowtimeItem) => {
+    if (item.id === showtimeId) return;
+    const targetUrl = `/booking/seats?showtime_id=${item.id}&movie=${movieParam || bookingInfo?.movieSlug || ''}&date=${dateParam || bookingInfo?.showDate || ''}&time=${item.time}&cinema=${encodeURIComponent(cinemaParam || bookingInfo?.cinemaName || '')}`;
+    router.push(targetUrl);
+  };
 
   if (loading || !bookingInfo) {
     return (
@@ -71,7 +95,19 @@ export function SeatBookingClientPage({
     );
   }
 
-  const selectedSeatIdsStr = selectedSeatIds.join(',');
+  // Derive dynamic seat prices from seats & showtime booking info
+  const basePrice = bookingInfo?.basePrice || 110000;
+  const standardSeat = seats.find((s) => s.type === 'STANDARD');
+  const vipSeat = seats.find((s) => s.type === 'VIP');
+  const sweetboxSeat = seats.find((s) => s.type === 'SWEETBOX');
+
+  const standardPrice = standardSeat ? standardSeat.price : basePrice;
+  const vipPrice = vipSeat ? vipSeat.price : basePrice + 20000;
+  const sweetboxPrice = sweetboxSeat ? sweetboxSeat.price * 2 : (basePrice + 40000) * 2;
+
+  const hasStandard = seats.some((s) => s.type === 'STANDARD') || seats.length === 0;
+  const hasVip = seats.some((s) => s.type === 'VIP');
+  const hasSweetbox = seats.some((s) => s.type === 'SWEETBOX');
 
   return (
     <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white relative">
@@ -87,7 +123,9 @@ export function SeatBookingClientPage({
               {/* Interactive Quick Showtime Switcher */}
               <SeatBookingHeader
                 currentShowTime={currentShowTime}
-                onSelectShowTime={(newTime) => setCurrentShowTime(newTime)}
+                currentShowtimeId={showtimeId}
+                showtimes={siblingShowtimes}
+                onSelectShowTime={handleSelectSiblingShowtime}
               />
 
               {/* Main Seat Map White Card */}
@@ -102,8 +140,15 @@ export function SeatBookingClientPage({
                   onToggleSeat={toggleSelectSeat}
                 />
 
-                {/* Seat Legend & Price Tariff Bar */}
-                <SeatLegend />
+                {/* Seat Legend & Dynamic Price Tariff Bar */}
+                <SeatLegend
+                  standardPrice={standardPrice}
+                  vipPrice={vipPrice}
+                  sweetboxPrice={sweetboxPrice}
+                  hasStandard={hasStandard}
+                  hasVip={hasVip}
+                  hasSweetbox={hasSweetbox}
+                />
               </div>
             </div>
 

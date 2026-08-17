@@ -40,12 +40,16 @@ export const CinemaDetailHeader: React.FC<CinemaDetailHeaderProps> = ({ cinema }
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <Link href={`/movies?tab=now-showing`}>
-              <button className="px-5 py-2.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#7C6FE8]/40 transition-all cursor-pointer">
-                <Calendar className="w-4 h-4" />
-                <span>Xem Lịch Chiếu</span>
-              </button>
-            </Link>
+            <button
+              onClick={() => {
+                const el = document.getElementById('cinema-showtimes');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-5 py-2.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#7C6FE8]/40 transition-all cursor-pointer"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Xem Lịch Chiếu</span>
+            </button>
 
             <a
               href={cinema.mapUrl}

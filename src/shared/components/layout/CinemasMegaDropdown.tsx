@@ -1,28 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
+import { masterDataService, ProvinceItem } from '@/shared/services/masterData.service';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 interface CinemasMegaDropdownProps {
   onClose?: () => void;
 }
 
-const CITIES_LIST = [
-  'TP.Hồ Chí Minh',
-  'Hà Nội',
-  'Đà Nẵng',
-  'Cần Thơ',
-  'Hải Phòng',
-  'Nha Trang',
-  'Huế',
-  'Vũng Tàu',
-  'Biên Hòa',
-];
-
 export const CinemasMegaDropdown: React.FC<CinemasMegaDropdownProps> = ({ onClose }) => {
   const router = useRouter();
+  const [provinces, setProvinces] = useState<ProvinceItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadProvinces() {
+      try {
+        const list = await masterDataService.getProvinces();
+        if (isMounted) {
+          setProvinces(list);
+        }
+      } catch (e) {
+        console.error('Failed to load provinces in dropdown', e);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    loadProvinces();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSelectCity = (city: string) => {
     if (onClose) onClose();
@@ -45,15 +57,26 @@ export const CinemasMegaDropdown: React.FC<CinemasMegaDropdownProps> = ({ onClos
       </div>
 
       <div className="flex flex-col gap-0.5">
-        {CITIES_LIST.map((city) => (
-          <button
-            key={city}
-            onClick={() => handleSelectCity(city)}
-            className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold text-slate-700 hover:bg-[#7C6FE8]/10 hover:text-[#7C6FE8] transition-all flex items-center justify-between cursor-pointer"
-          >
-            <span>{city}</span>
-          </button>
-        ))}
+        {isLoading ? (
+          <div className="flex flex-col gap-2 p-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} variant="text" className="w-full h-7 rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          provinces.map((prov) => {
+            const cityName = prov.province_name;
+            return (
+              <button
+                key={prov.province_id || cityName}
+                onClick={() => handleSelectCity(cityName)}
+                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold text-slate-700 hover:bg-[#7C6FE8]/10 hover:text-[#7C6FE8] transition-all flex items-center justify-between cursor-pointer"
+              >
+                <span>{cityName}</span>
+              </button>
+            );
+          })
+        )}
       </div>
     </motion.div>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { SeatItem, SeatRowGroup, ShowtimeBookingInfo } from '../types/seat-booking.types';
 import { seatBookingService } from '../services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '../services/bookingTimerService';
-import { saveBookingSession } from '../services/bookingSessionService';
+import { saveBookingSession, updateBookingSession } from '../services/bookingSessionService';
 
 export function useSeatBooking(
   showtimeId: string = '1726',
@@ -156,12 +156,21 @@ export function useSeatBooking(
         setHoldError(res.message || 'Không thể giữ ghế');
       } else {
         // Save to session
-        import('../services/bookingSessionService').then(({ updateBookingSession }) => {
-          updateBookingSession(showtimeId, {
-            bookingId: res.booking_id,
-            bookingCode: res.booking_code,
-            showtimeSeatIds: showtimeSeatIds
-          });
+        updateBookingSession(showtimeId, {
+          bookingId: res.booking_id,
+          bookingCode: res.booking_code,
+          showtimeSeatIds: showtimeSeatIds,
+          selectedSeatCodes: selectedSeats.map((s) => s.id),
+          selectedSeats: selectedSeats.map((s) => ({
+            id: s.id,
+            showtime_seat_id: s.showtime_seat_id,
+            row: s.row,
+            number: s.number,
+            type: s.type,
+            price: s.price,
+          })),
+          seatSummaryText: selectedSeatLabels,
+          ticketTotalPrice: totalPrice,
         });
       }
       return res;

@@ -11,25 +11,54 @@
 
 const SESSION_KEY_PREFIX = 'cinedot_booking_session_';
 
+export interface BookingSessionSeatItem {
+  id: string; // e.g. "B4"
+  showtime_seat_id: number;
+  row: string;
+  number: number;
+  type: string;
+  price: number;
+}
+
+export interface BookingSessionComboItem {
+  combo_id: number | string;
+  name: string;
+  quantity: number;
+  unit_price: number;
+  price: number;
+  image_url?: string;
+}
+
 export interface BookingSessionData {
   showtimeId: string;
   movieSlug: string;
   movieTitle: string;
   movieFormat: string;
   posterUrl: string;
+  backdropUrl?: string;
   ageRating: string;
   duration: string;
   cinemaName: string;
   cinemaAddress?: string;
+  cinemaId?: string | number;
   roomName: string;
   showTime: string;
   endTime?: string;
   showDate: string;
+  dateStr?: string;
   basePrice: number;
   /** booking_id returned from hold-seats */
   bookingId?: number | string;
   bookingCode?: string;
   showtimeSeatIds?: number[];
+  selectedSeatCodes?: string[];
+  selectedSeats?: BookingSessionSeatItem[];
+  seatSummaryText?: string;
+  ticketTotalPrice?: number;
+  combos?: BookingSessionComboItem[];
+  totalFoodPrice?: number;
+  totalPaid?: number;
+  paymentMethod?: string;
 }
 
 export function saveBookingSession(data: BookingSessionData): void {

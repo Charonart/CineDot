@@ -7,9 +7,10 @@ import {
   processBookingPayment,
   calculateBookingSummary,
 } from '../services/payment.service';
-import { formatShowDate } from '@/modules/booking/services/seat-booking.service';
+import { formatShowDate, seatBookingService } from '@/modules/booking/services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '@/modules/booking/services/bookingTimerService';
-import { getBookingSession } from '@/modules/booking/services/bookingSessionService';
+import { getBookingSession, updateBookingSession } from '@/modules/booking/services/bookingSessionService';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
 export function usePayment(
   showtimeId: string = 'showtime-101',
@@ -20,6 +21,7 @@ export function usePayment(
   timeParam?: string,
   cinemaParam?: string
 ) {
+  const authUser = useAuthStore((state) => state.user);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId>('VNPAY');
   const [voucherInput, setVoucherInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherInfo | null>(null);
@@ -34,8 +36,18 @@ export function usePayment(
   const [serverTicketPrice, setServerTicketPrice] = useState<number | null>(null);
   const [serverComboPrice, setServerComboPrice] = useState<number | null>(null);
   const [serverTierDiscount, setServerTierDiscount] = useState<number>(0);
+  const [serverTierName, setServerTierName] = useState<string | undefined>(undefined);
   const [serverVoucherDiscount, setServerVoucherDiscount] = useState<number>(0);
+  const [serverFoodList, setServerFoodList] = useState<{ id: string; name: string; quantity: number; price: number }[] | null>(null);
   const [serverFinalAmount, setServerFinalAmount] = useState<number | null>(null);
+  const [serverVatBreakdown, setServerVatBreakdown] = useState<{
+    ticket_vat_rate: number;
+    ticket_vat_amount: number;
+    combo_vat_rate: number;
+    combo_vat_amount: number;
+    total_vat_amount: number;
+    is_included_in_price: boolean;
+  } | null>(null);
   const [bookingId, setBookingId] = useState<string | number | undefined>(() => getBookingSession(showtimeId)?.bookingId);
   const [bookingCode, setBookingCode] = useState<string | undefined>(() => getBookingSession(showtimeId)?.bookingCode);
 
@@ -120,7 +132,7 @@ export function usePayment(
 
     if (sweetboxList.length > 0) {
       const sweetboxPairs = Math.ceil(sweetboxList.length / 2);
-      calculatedPrice += sweetboxPairs * (basePrice + 40000); // Sweetbox surcharge
+      calculatedPrice += sweetboxPairs * (basePrice + 40000) * 2; // Sweetbox couple pair (2 seats)
     }
 
     const parts: string[] = [];
@@ -137,8 +149,8 @@ export function usePayment(
   // Use server price if available, otherwise fallback
   const ticketPrice = serverTicketPrice ?? ticketPriceFallback;
 
-  // Parse Concessions from combosParam URL e.g. "1:1,2:2"
-  const selectedFoodList = useMemo(() => {
+  // Concessions Food List: use server authoritative name and price if available
+  const fallbackFoodList = useMemo(() => {
     if (!combosParam) return [];
     const list: { id: string; name: string; quantity: number; price: number }[] = [];
 
@@ -151,7 +163,7 @@ export function usePayment(
             id,
             name: `Combo (${id})`,
             quantity,
-            price: 95000 * quantity, // Will be overridden by server response
+            price: 0,
           });
         }
       }
@@ -160,50 +172,166 @@ export function usePayment(
     return list;
   }, [combosParam]);
 
+  const selectedFoodList = serverFoodList ?? fallbackFoodList;
+
   const totalFoodPrice = serverComboPrice ?? selectedFoodList.reduce((sum, item) => sum + item.price, 0);
 
-  const discountAmount = (appliedVoucher ? appliedVoucher.discountAmount : 0) + serverTierDiscount + serverVoucherDiscount;
   const subtotal = ticketPrice + totalFoodPrice;
-  const grandTotal = serverFinalAmount ?? Math.max(0, subtotal - discountAmount);
 
-  // Call calculateBookingSummary API on mount to get exact pricing
-  useEffect(() => {
-    async function fetchSummary() {
-      const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
-      if (rawSeats.length === 0) return;
+  // Tier info & fallback discount
+  const effectiveTierName = useMemo(() => {
+    if (serverTierName) return serverTierName;
+    if (authUser?.user_tier) return authUser.user_tier;
+    const pts = authUser?.total_points || 0;
+    if (pts >= 2000) return 'Platinum';
+    if (pts >= 1000) return 'Gold';
+    if (pts >= 500) return 'Silver';
+    if (authUser) return 'Bronze';
+    return undefined;
+  }, [serverTierName, authUser]);
 
-      // We need showtime_seat_ids which we don't have directly from URL.
-      // The calculate-summary endpoint may accept seat codes or we pass what we have.
-      // For now, call with available data
-      const combos = combosParam
-        ? combosParam.split(',').map((pair) => {
+  const clientTierDiscount = useMemo(() => {
+    if (serverTierDiscount > 0) return serverTierDiscount;
+    if (!authUser) return 0;
+
+    const tier = (effectiveTierName || '').toLowerCase();
+    let percent = 0;
+    if (tier.includes('diamond') || tier.includes('platinum')) percent = 0.15;
+    else if (tier.includes('gold')) percent = 0.10;
+    else if (tier.includes('silver')) percent = 0.05;
+    else if ((authUser.total_points || 0) >= 2000) percent = 0.15;
+    else if ((authUser.total_points || 0) >= 1000) percent = 0.10;
+    else if ((authUser.total_points || 0) >= 500) percent = 0.05;
+
+    return percent > 0 ? Math.round(subtotal * percent) : 0;
+  }, [serverTierDiscount, authUser, effectiveTierName, subtotal]);
+
+  const tierDiscountAmount = serverTierDiscount > 0 ? serverTierDiscount : clientTierDiscount;
+  const voucherDiscountAmount = appliedVoucher
+    ? (serverVoucherDiscount > 0 ? serverVoucherDiscount : appliedVoucher.discountAmount)
+    : serverVoucherDiscount;
+  const discountAmount = tierDiscountAmount + voucherDiscountAmount;
+
+  // VAT breakdown (5% for movie tickets, 8% for F&B concessions - included in prices)
+  const vatBreakdown = useMemo(() => {
+    if (serverVatBreakdown) {
+      return {
+        ticketVatRate: serverVatBreakdown.ticket_vat_rate,
+        ticketVatAmount: serverVatBreakdown.ticket_vat_amount,
+        comboVatRate: serverVatBreakdown.combo_vat_rate,
+        comboVatAmount: serverVatBreakdown.combo_vat_amount,
+        totalVatAmount: serverVatBreakdown.total_vat_amount,
+        isIncluded: true,
+      };
+    }
+
+    const ticketVatRate = 0.05;
+    const comboVatRate = 0.08;
+
+    const ticketNet = Math.round(ticketPrice / (1 + ticketVatRate));
+    const ticketVat = ticketPrice - ticketNet;
+
+    const comboNet = Math.round(totalFoodPrice / (1 + comboVatRate));
+    const comboVat = totalFoodPrice - comboNet;
+
+    const totalVat = ticketVat + comboVat;
+
+    return {
+      ticketVatRate: 5,
+      ticketVatAmount: ticketVat,
+      comboVatRate: 8,
+      comboVatAmount: comboVat,
+      totalVatAmount: totalVat,
+      isIncluded: true,
+    };
+  }, [serverVatBreakdown, ticketPrice, totalFoodPrice]);
+
+  const grandTotal =
+    serverFinalAmount !== null && (!appliedVoucher || serverVoucherDiscount > 0)
+      ? serverFinalAmount
+      : Math.max(0, subtotal - discountAmount);
+
+  // Call calculateBookingSummary API
+  const fetchSummary = async (voucherCodeToUse?: string) => {
+    const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
+    if (rawSeats.length === 0) return;
+
+    const cleanShowtimeId = String(showtimeId).replace('showtime-', '');
+
+    const combos = combosParam
+      ? combosParam
+          .split(',')
+          .map((pair) => {
             const [id, qStr] = pair.split(':');
             return { combo_id: Number(id), quantity: Number(qStr || 1) };
-          }).filter((c) => c.combo_id > 0 && c.quantity > 0)
-        : [];
+          })
+          .filter((c) => c.combo_id > 0 && c.quantity > 0)
+      : [];
 
-      const session = getBookingSession(showtimeId);
-      const sessionSeatIds = session?.showtimeSeatIds || [];
+    const session = getBookingSession(showtimeId);
+    let sessionSeatIds = session?.showtimeSeatIds || [];
 
-      const result = await calculateBookingSummary({
-        showtime_id: showtimeId,
-        showtime_seat_ids: sessionSeatIds, 
-        combos: combos.length > 0 ? combos : undefined,
-      });
-
-      if (result) {
-        setServerTicketPrice(result.financial_breakdown.subtotal_tickets);
-        setServerComboPrice(result.financial_breakdown.subtotal_combos);
-        setServerTierDiscount(result.financial_breakdown.discounts?.tier_discount?.deducted_amount || 0);
-        setServerVoucherDiscount(result.financial_breakdown.discounts?.voucher_discount?.deducted_amount || 0);
-        setServerFinalAmount(result.financial_breakdown.final_amount_to_pay);
-
-        // Update food names from server response
-        if (result.items?.combos && result.items.combos.length > 0) {
-          // Food names will be reflected in sidebar via server data
+    // If session doesn't have seat IDs, fetch seats from seatBookingService
+    if (sessionSeatIds.length === 0 && rawSeats.length > 0) {
+      try {
+        const seatData = await seatBookingService.fetchShowtimeBookingData(cleanShowtimeId);
+        if (seatData?.seats?.length > 0) {
+          sessionSeatIds = seatData.seats
+            .filter((s) => rawSeats.includes(s.id))
+            .map((s) => s.showtime_seat_id);
+          if (sessionSeatIds.length > 0) {
+            updateBookingSession(showtimeId, { showtimeSeatIds: sessionSeatIds });
+          }
         }
+      } catch {
+        // Fallback
       }
     }
+
+    const result = await calculateBookingSummary({
+      showtime_id: cleanShowtimeId,
+      showtime_seat_ids: sessionSeatIds.length > 0 ? sessionSeatIds : undefined,
+      seats: seatsParam,
+      combos: combos.length > 0 ? combos : undefined,
+      voucher_code: voucherCodeToUse,
+    });
+
+    if (result && result.financial_breakdown) {
+      const fb = result.financial_breakdown;
+      setServerTicketPrice(fb.subtotal_tickets);
+      setServerComboPrice(fb.subtotal_combos);
+
+      const tierD = fb.discounts?.tier_discount;
+      const tierAmt = fb.tier_discount_amount ?? tierD?.deducted_amount ?? 0;
+      setServerTierDiscount(tierAmt);
+      if (tierD?.tier_name) {
+        setServerTierName(tierD.tier_name);
+      }
+
+      const vD = fb.discounts?.voucher_discount;
+      const vAmt = fb.voucher_discount_amount ?? vD?.deducted_amount ?? 0;
+      setServerVoucherDiscount(vAmt);
+
+      if (fb.vat_breakdown) {
+        setServerVatBreakdown(fb.vat_breakdown);
+      }
+
+      // Update food combo names and real prices from server response
+      if (result.items?.combos && result.items.combos.length > 0) {
+        const mappedCombos = result.items.combos.map((c) => ({
+          id: String(c.combo_id),
+          name: c.name,
+          quantity: c.quantity,
+          price: c.total_combo_price,
+        }));
+        setServerFoodList(mappedCombos);
+      }
+
+      setServerFinalAmount(fb.final_amount_to_pay);
+    }
+  };
+
+  useEffect(() => {
     fetchSummary();
   }, [showtimeId, seatsParam, combosParam]);
 
@@ -214,10 +342,12 @@ export function usePayment(
     setVoucherError('');
 
     try {
-      const result = await validateVoucherCode(voucherInput, subtotal);
+      const code = voucherInput.trim().toUpperCase();
+      const result = await validateVoucherCode(code, subtotal);
       if (result) {
         setAppliedVoucher(result);
         setVoucherError('');
+        await fetchSummary(code);
       }
     } catch (err: any) {
       setAppliedVoucher(null);
@@ -227,18 +357,23 @@ export function usePayment(
     }
   };
 
-  const handleRemoveVoucher = () => {
+  const handleRemoveVoucher = async () => {
     setAppliedVoucher(null);
     setVoucherInput('');
     setVoucherError('');
+    setServerVoucherDiscount(0);
+    await fetchSummary();
   };
 
   const handleProcessPayment = async (payload: Parameters<typeof processBookingPayment>[0]) => {
     const combosPayload = combosParam
-      ? combosParam.split(',').map((pair) => {
-          const [id, qStr] = pair.split(':');
-          return { combo_id: Number(id), quantity: Number(qStr || 1) };
-        }).filter((c) => c.combo_id > 0 && c.quantity > 0)
+      ? combosParam
+          .split(',')
+          .map((pair) => {
+            const [id, qStr] = pair.split(':');
+            return { combo_id: Number(id), quantity: Number(qStr || 1) };
+          })
+          .filter((c) => c.combo_id > 0 && c.quantity > 0)
       : [];
 
     return processBookingPayment({
@@ -274,7 +409,11 @@ export function usePayment(
     ticketPrice,
     selectedFoodList,
     totalFoodPrice,
+    tierDiscountAmount,
+    tierName: effectiveTierName,
+    voucherDiscountAmount,
     discountAmount,
+    vatBreakdown,
     grandTotal,
     processBookingPayment: handleProcessPayment,
   };

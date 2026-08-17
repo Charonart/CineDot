@@ -15,7 +15,7 @@ export interface MovieCardItem {
   rating: number;
   ageRating: string;
   posterUrl: string;
-  status: 'now-showing' | 'coming-soon' | 'early-ticket';
+  status: 'now-showing' | 'coming-soon';
   isHot?: boolean;
   formatBadge?: string; // e.g. 'IMAX', '4DX', '2D', 'Dolby Atmos'
   trailerUrl?: string;
@@ -47,4 +47,18 @@ export interface QuickBookingSelection {
   cinemaId: string;
   date: string;
   time: string;
+}
+
+export interface DynamicDateOption {
+  id: string;
+  label: string;
+  dateStr: string;
+}
+
+export interface QuickShowtimeOption {
+  id: string;
+  label: string;
+  time: string;
+  format: string;
+  showtimeId: string | number;
 }

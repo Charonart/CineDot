@@ -158,7 +158,7 @@ export const MOCK_EARLY_TICKET_MOVIES: MovieCardItem[] = [
     ageRating: 'T18',
     formatBadge: 'IMAX 3D',
     posterUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop',
-    status: 'early-ticket',
+    status: 'coming-soon',
   },
   {
     id: 'et-2',
@@ -170,7 +170,7 @@ export const MOCK_EARLY_TICKET_MOVIES: MovieCardItem[] = [
     ageRating: 'T16',
     formatBadge: 'Onyx LED',
     posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
-    status: 'early-ticket',
+    status: 'coming-soon',
   },
 ];
 

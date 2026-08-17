@@ -7,6 +7,8 @@ export interface PaymentMethodItem {
   iconUrl?: string;
   badgeText?: string;
   category: 'wallet' | 'bank' | 'card';
+  isDisabled?: boolean;
+  disabledReason?: string;
 }
 
 export interface VoucherInfo {

@@ -28,3 +28,22 @@ export interface CinemaPricingFormat {
   formatBadge: string;
   categories: TicketPriceCategory[];
 }
+
+export interface CinemaShowtimeSlot {
+  id: string | number;
+  showtimeId: string | number;
+  time: string;
+  format: string;
+  roomName: string;
+}
+
+export interface CinemaMovieShowtime {
+  movieId: string | number;
+  title: string;
+  slug: string;
+  posterUrl: string;
+  ageRating: string;
+  duration: string;
+  genres: string;
+  slots: CinemaShowtimeSlot[];
+}
