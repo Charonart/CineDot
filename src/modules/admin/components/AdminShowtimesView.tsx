@@ -37,9 +37,9 @@ import {
   Sliders,
   ShieldAlert,
   Bot,
-  Percent,
 } from 'lucide-react';
 import { MOCK_MOVIES_LISTING } from '@/modules/movies-listing/mocks/mockMoviesListingData';
+import { AdminPosterCard, AdminBackdropBanner } from './ui';
 
 export interface AdminShowtimeGridItem {
   id: string;
@@ -995,7 +995,14 @@ export function AdminShowtimesView() {
               onDragEnd={() => setDraggedMovie(null)}
               className="p-2.5 rounded-2xl bg-white border border-purple-100 hover:border-[#7C6FE8] shadow-xs flex items-center gap-2.5 shrink-0 cursor-grab active:cursor-grabbing transition-transform hover:-translate-y-0.5"
             >
-              <img src={m.posterUrl} alt={m.title} className="w-8 h-11 rounded-lg object-cover border border-gray-200" />
+              <AdminPosterCard
+                src={m.posterUrl}
+                alt={m.title}
+                size="xs"
+                rounded="lg"
+                fallbackText={m.title}
+                className="border border-gray-200"
+              />
               <div className="flex flex-col min-w-0 pr-2">
                 <span className="font-extrabold text-xs text-slate-900 line-clamp-1">{m.title}</span>
                 <span className="text-[10px] font-bold text-slate-400">{m.duration} • Drag me</span>
@@ -1157,10 +1164,13 @@ export function AdminShowtimesView() {
                             {/* Card Top Section */}
                             <div className="flex items-start justify-between gap-2 w-full overflow-hidden">
                               <div className="flex items-center gap-2 min-w-0 flex-1">
-                                <img
+                                <AdminPosterCard
                                   src={st.posterUrl}
                                   alt={st.movieTitle}
-                                  className="w-7 h-10 object-cover rounded-md border border-white/40 shrink-0 hidden sm:block shadow-2xs"
+                                  size="xs"
+                                  rounded="lg"
+                                  fallbackText={st.movieTitle}
+                                  className="border border-white/40 shrink-0 hidden sm:block shadow-2xs"
                                 />
                                 <div className="flex flex-col min-w-0 flex-1">
                                   <div className="flex items-center gap-1 min-w-0">
@@ -1406,10 +1416,13 @@ export function AdminShowtimesView() {
             </div>
 
             <div className="flex items-start gap-4">
-              <img
+              <AdminPosterCard
                 src={viewingShowtime.posterUrl}
                 alt={viewingShowtime.movieTitle}
-                className="w-24 h-36 object-cover rounded-2xl border border-gray-200 shadow-md shrink-0"
+                size="md"
+                rounded="2xl"
+                fallbackText={viewingShowtime.movieTitle}
+                className="w-24 h-36 border border-gray-200 shadow-md shrink-0"
               />
               <div className="flex flex-col gap-2 flex-1">
                 <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-[#7C6FE8] font-extrabold text-[11px] border border-purple-200 w-fit">

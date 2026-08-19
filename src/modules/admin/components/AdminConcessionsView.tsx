@@ -84,7 +84,11 @@ export function AdminConcessionsView() {
             <img
               src={p.imageUrl}
               alt={p.name}
-              className="w-20 h-20 rounded-2xl object-cover border border-gray-200 shrink-0"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=400&auto=format&fit=crop&q=80';
+              }}
+              className="w-20 h-20 rounded-2xl object-cover border border-gray-200 shrink-0 bg-slate-100"
             />
             <div className="flex flex-col justify-between flex-1 gap-1">
               <span className="text-[10px] font-extrabold text-[#7C6FE8] uppercase">

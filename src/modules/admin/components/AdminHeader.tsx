@@ -1,16 +1,22 @@
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminAuthStore } from '../store/useAdminAuthStore';
-import { LogOut, Building2, Bell } from 'lucide-react';
+import { useAdminAuth } from '../hooks/useAdminAuth';
+import { LogOut, Building2, Bell, Loader2 } from 'lucide-react';
 
 export const AdminHeader: React.FC = () => {
   const router = useRouter();
-  const { adminUser, logoutAdmin } = useAdminAuthStore();
+  const { adminUser } = useAdminAuthStore();
+  const { logout, isLoggingOut } = useAdminAuth();
 
-  const handleLogout = () => {
-    logoutAdmin();
-    router.push('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      router.push('/admin/login');
+    }
   };
 
   return (
@@ -37,7 +43,7 @@ export const AdminHeader: React.FC = () => {
         {/* User Info Capsule */}
         <div className="flex items-center gap-3 bg-slate-100 px-3.5 py-1.5 rounded-full border border-gray-200">
           <div className="w-7 h-7 rounded-full bg-[#7C6FE8] text-white flex items-center justify-center font-extrabold text-xs shadow-xs">
-            {adminUser?.name ? adminUser.name.charAt(0) : 'A'}
+            {adminUser?.name ? adminUser.name.charAt(0).toUpperCase() : 'A'}
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-extrabold text-slate-900 leading-tight">
@@ -52,10 +58,15 @@ export const AdminHeader: React.FC = () => {
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="p-2 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-gray-200 transition-all cursor-pointer"
+          disabled={isLoggingOut}
+          className="p-2 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-gray-200 transition-all cursor-pointer disabled:opacity-50"
           title="Đăng xuất khỏi Admin"
         >
-          <LogOut className="w-4 h-4" />
+          {isLoggingOut ? (
+            <Loader2 className="w-4 h-4 animate-spin text-[#7C6FE8]" />
+          ) : (
+            <LogOut className="w-4 h-4" />
+          )}
         </button>
       </div>
     </header>

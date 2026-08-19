@@ -1,387 +1,586 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Tag, Sparkles, Lightbulb, Plus, Edit3, Film, ArrowUpRight, Flame, Layers, Check, X, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-interface GenreCardItem {
-  id: string;
-  name: string;
-  slug: string;
-  gradientBg: string;
-  textColor: string;
-  revenueShare: string;
-  moviesCount: number;
-  ticketsSold: string;
-  badge: string;
-  badgeType: 'hot' | 'active';
-  posters: string[];
-  isActive: boolean;
-}
-
-const INITIAL_GENRES: GenreCardItem[] = [
-  {
-    id: 'g-1',
-    name: 'HÀNH ĐỘNG',
-    slug: '/hanh-dong',
-    gradientBg: 'from-[#FF2E93] to-[#FF8A00]',
-    textColor: 'text-white',
-    revenueShare: '34.5% Doanh Thu',
-    moviesCount: 12,
-    ticketsSold: '184.200 Vé Bán',
-    badge: '🔥 HOT TRENDING',
-    badgeType: 'hot',
-    posters: [
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=500&auto=format&fit=crop&q=80',
-    ],
-    isActive: true,
-  },
-  {
-    id: 'g-2',
-    name: 'VIỄN TƯỞNG',
-    slug: '/vien-tuong',
-    gradientBg: 'from-[#00F2FE] to-[#4FACFE]',
-    textColor: 'text-white',
-    revenueShare: '28.2% Doanh Thu',
-    moviesCount: 8,
-    ticketsSold: '142.000 Vé Bán',
-    badge: 'ACTIVE',
-    badgeType: 'active',
-    posters: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=80',
-    ],
-    isActive: true,
-  },
-  {
-    id: 'g-3',
-    name: 'KINH DỊ',
-    slug: '/kinh-di',
-    gradientBg: 'from-[#8A0000] to-[#1A0000]',
-    textColor: 'text-white',
-    revenueShare: '15.8% Doanh Thu',
-    moviesCount: 5,
-    ticketsSold: '89.400 Vé Bán',
-    badge: 'ACTIVE',
-    badgeType: 'active',
-    posters: [
-      'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80',
-    ],
-    isActive: true,
-  },
-  {
-    id: 'g-4',
-    name: 'HOẠT HÌNH & ANIME',
-    slug: '/anime',
-    gradientBg: 'from-[#FF9A9E] to-[#FECFEF]',
-    textColor: 'text-slate-900',
-    revenueShare: '12.5% Doanh Thu',
-    moviesCount: 6,
-    ticketsSold: '76.100 Vé Bán',
-    badge: '🔥 TRENDING',
-    badgeType: 'hot',
-    posters: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=500&auto=format&fit=crop&q=80',
-    ],
-    isActive: true,
-  },
-  {
-    id: 'g-5',
-    name: 'LÃNG MẠN',
-    slug: '/lang-man',
-    gradientBg: 'from-[#FAD0C4] to-[#FFD1FF]',
-    textColor: 'text-slate-900',
-    revenueShare: '9.0% Doanh Thu',
-    moviesCount: 4,
-    ticketsSold: '42.000 Vé Bán',
-    badge: 'ACTIVE',
-    badgeType: 'active',
-    posters: [
-      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80',
-    ],
-    isActive: true,
-  },
-];
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Tag,
+  Plus,
+  Edit3,
+  Trash2,
+  Film,
+  Search,
+  X,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  ArrowUpRight,
+} from 'lucide-react';
+import { useAdminGenres, useGenreMovies } from '../hooks/useAdminGenres';
+import { AdminGenreItem } from '../types/adminGenre.types';
+import { createGenreSchema } from '../schemas/adminGenre.schema';
+import { Skeleton } from '@/shared/ui/Skeleton';
+import { AdminPosterCard } from './ui';
 
 export function AdminMovieGenresView() {
-  const [genres, setGenres] = useState<GenreCardItem[]>(INITIAL_GENRES);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newGenreName, setNewGenreName] = useState('');
-  const [newSlug, setNewSlug] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  // Search & Pagination States
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const handleToggleGenreActive = (id: string) => {
-    setGenres(
-      genres.map((g) => (g.id === id ? { ...g, isActive: !g.isActive } : g))
-    );
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(searchInput.trim());
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Hook 100% Real API
+  const {
+    genresList,
+    pagination,
+    isLoading,
+    isFetching,
+    createGenre,
+    isCreating,
+    updateGenre,
+    isUpdating,
+    deleteGenre,
+    isDeleting,
+  } = useAdminGenres({
+    search: searchTerm || undefined,
+    page: currentPage,
+    limit: 10,
+  });
+
+  // Modal States
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingGenre, setEditingGenre] = useState<AdminGenreItem | null>(null);
+  const [deletingGenre, setDeletingGenre] = useState<AdminGenreItem | null>(null);
+  const [drilldownGenre, setDrilldownGenre] = useState<AdminGenreItem | null>(null);
+
+  // Form State
+  const [addGenreName, setAddGenreName] = useState('');
+  const [addError, setAddError] = useState('');
+  const [addSuccess, setAddSuccess] = useState('');
+
+  const [editGenreName, setEditGenreName] = useState('');
+  const [editError, setEditError] = useState('');
+  const [editSuccess, setEditSuccess] = useState('');
+
+  // Drilldown Movies Hook
+  const { data: drilldownData, isLoading: isLoadingDrilldown } = useGenreMovies(drilldownGenre?.id || null);
+
+  const handleOpenEdit = (genre: AdminGenreItem) => {
+    setEditingGenre(genre);
+    setEditGenreName(genre.name);
+    setEditError('');
+    setEditSuccess('');
   };
 
-  const handleAddGenre = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGenreName.trim()) return;
+    setAddError('');
+    setAddSuccess('');
 
-    const newGenre: GenreCardItem = {
-      id: 'g-' + Date.now(),
-      name: newGenreName.trim().toUpperCase(),
-      slug: newSlug.trim() || '/' + newGenreName.toLowerCase().replace(/ /g, '-'),
-      gradientBg: 'from-purple-600 to-indigo-600',
-      textColor: 'text-white',
-      revenueShare: '0.0% Doanh Thu',
-      moviesCount: 0,
-      ticketsSold: '0 Vé Bán',
-      badge: 'NEW',
-      badgeType: 'active',
-      posters: [
-        'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=80',
-      ],
-      isActive: true,
-    };
+    const validation = createGenreSchema.safeParse({ genreName: addGenreName.trim() });
+    if (!validation.success) {
+      setAddError(validation.error.errors[0]?.message || 'Tên thể loại không hợp lệ');
+      return;
+    }
 
-    setGenres([...genres, newGenre]);
-    setSuccessMsg(`Đã tạo thành công thể loại "${newGenreName}"!`);
-    setTimeout(() => {
-      setIsModalOpen(false);
-      setNewGenreName('');
-      setNewSlug('');
-      setSuccessMsg('');
-    }, 1500);
+    try {
+      await createGenre({ genre_name: addGenreName.trim() });
+      setAddSuccess(`Đã tạo thành công thể loại "${addGenreName.trim()}"!`);
+      setTimeout(() => {
+        setIsAddModalOpen(false);
+        setAddGenreName('');
+        setAddSuccess('');
+      }, 1000);
+    } catch (err: unknown) {
+      const errObj = err as { message?: string };
+      setAddError(errObj?.message || 'Không thể tạo thể loại mới. Có thể tên đã tồn tại!');
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGenre) return;
+    setEditError('');
+    setEditSuccess('');
+
+    const validation = createGenreSchema.safeParse({ genreName: editGenreName.trim() });
+    if (!validation.success) {
+      setEditError(validation.error.errors[0]?.message || 'Tên thể loại không hợp lệ');
+      return;
+    }
+
+    try {
+      await updateGenre({
+        id: editingGenre.id,
+        payload: { genre_name: editGenreName.trim() },
+      });
+      setEditSuccess(`Đã cập nhật thể loại "${editGenreName.trim()}" thành công!`);
+      setTimeout(() => {
+        setEditingGenre(null);
+        setEditSuccess('');
+      }, 1000);
+    } catch (err: unknown) {
+      const errObj = err as { message?: string };
+      setEditError(errObj?.message || 'Không thể cập nhật thể loại.');
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingGenre) return;
+    try {
+      await deleteGenre(deletingGenre.id);
+      setDeletingGenre(null);
+    } catch (err: unknown) {
+      const errObj = err as { message?: string };
+      alert(errObj?.message || 'Không thể xóa thể loại này!');
+    }
   };
 
   return (
-    <div className="flex flex-col gap-8 font-sans">
-      {/* 2.1 Top Section: Header Title */}
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-          <Tag className="w-4 h-4" />
-          <span>PHÂN TÍCH & QUẢN LÝ THỂ LOẠI PHIM</span>
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Phân Tích & Quản Lý Thể Loại Phim
-        </h1>
-        <p className="text-xs text-slate-500 font-medium">
-          Theo dõi thị phần doanh thu, số lượng vé bán ra và xu hướng khán giả theo từng thể loại.
-        </p>
-      </div>
-
-      {/* Market Share Distribution Bar */}
-      <div className="p-6 rounded-3xl bg-white border border-gray-200/80 shadow-sm flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#7C6FE8]" />
-            <span>Thị Phần Doanh Thu Theo Thể Loại (Q3/2026)</span>
-          </h3>
-          <span className="text-xs font-bold text-[#7C6FE8] bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
-            Tổng 100% Doanh Thu
+    <div className="flex flex-col gap-6 font-sans">
+      {/* 1. Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+            <Tag className="w-4 h-4" />
+            <span>QUẢN LÝ THỂ LOẠI PHIM</span>
           </span>
-        </div>
-
-        {/* Stacked Progress Bar */}
-        <div className="w-full h-4 rounded-full bg-slate-100 flex overflow-hidden shadow-inner">
-          <div style={{ width: '42%' }} className="bg-[#FF2E93] h-full" title="Hành Động: 42%" />
-          <div style={{ width: '28%' }} className="bg-[#00F2FE] h-full" title="Viễn Tưởng: 28%" />
-          <div style={{ width: '15%' }} className="bg-amber-500 h-full" title="Hoạt Hình & Anime: 15%" />
-          <div style={{ width: '10%' }} className="bg-[#8A0000] h-full" title="Kinh Dị: 10%" />
-          <div style={{ width: '5%' }} className="bg-pink-300 h-full" title="Lãng Mạn: 5%" />
-        </div>
-
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 text-xs font-extrabold text-slate-700 pt-1">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#FF2E93]" />
-            <span>Hành Động (42%)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#00F2FE]" />
-            <span>Viễn Tưởng (28%)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-amber-500" />
-            <span>Hoạt Hình (15%)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#8A0000]" />
-            <span>Kinh Dị (10%)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-pink-300" />
-            <span>Lãng Mạn (5%)</span>
-          </div>
-        </div>
-      </div>
-
-      {/* AI Smart Insight Banner */}
-      <div className="p-5 rounded-3xl bg-[#F3E8FF] border border-[#C084FC] text-slate-900 flex items-start gap-3.5 shadow-sm">
-        <div className="w-9 h-9 rounded-2xl bg-[#7C3AED] text-white flex items-center justify-center shrink-0 shadow-md">
-          <Lightbulb className="w-5 h-5 text-amber-300" />
-        </div>
-        <div className="flex flex-col gap-0.5 text-xs">
-          <span className="font-extrabold text-[#7C3AED] uppercase tracking-wider">AI Market Insight</span>
-          <p className="font-medium text-slate-800 leading-relaxed">
-            Thể loại <strong className="text-slate-900 font-extrabold">Phim Anime</strong> đang có tỉ lệ lấp đầy ghế tăng <strong className="text-emerald-700 font-extrabold">+28%</strong> trong tháng này. Khuyến nghị nhập thêm phim & xếp thêm suất chiếu giờ vàng!
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Danh Mục Thể Loại Phim
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
+            Quản lý các thể loại và phân loại phim trong hệ thống CineDot
           </p>
         </div>
+
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer self-start sm:self-auto shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>THÊM THỂ LOẠI MỚI</span>
+        </button>
       </div>
 
-      {/* 2.2 Main Section: Visual Genre Cards Grid (3D Poster Stacks) */}
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-slate-900">Danh Mục Thể Loại Phim</h2>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Thêm Thể Loại Mới</span>
-          </button>
+      {/* 2. Action Bar (Search + Count) */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Tìm kiếm thể loại phim..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] shadow-2xs"
+          />
         </div>
 
-        {/* 3-Column Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {genres.map((g) => (
-            <motion.div
-              key={g.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`rounded-3xl bg-gradient-to-br ${g.gradientBg} ${g.textColor} p-6 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[220px] transition-transform hover:-translate-y-1`}
+        <div className="text-xs font-semibold text-slate-500 self-end sm:self-auto">
+          Tổng số: <strong className="text-slate-900 font-bold">{pagination.totalResults}</strong> thể loại
+        </div>
+      </div>
+
+      {/* 3. Main Table View */}
+      <div className="rounded-3xl bg-white border border-gray-200/90 shadow-sm overflow-hidden flex flex-col relative">
+        {isFetching && !isLoading && (
+          <div className="absolute top-4 right-6 flex items-center gap-1.5 text-xs font-bold text-[#7C6FE8] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 animate-pulse z-10">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <span>Đang nạp dữ liệu...</span>
+          </div>
+        )}
+
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr className="border-b border-gray-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50/80">
+                <th className="p-4 rounded-tl-3xl w-[15%]">MÃ ID</th>
+                <th className="p-4 w-[50%]">TÊN THỂ LOẠI</th>
+                <th className="p-4 w-[20%] text-center">SỐ LƯỢNG PHIM</th>
+                <th className="p-4 rounded-tr-3xl text-center w-[15%]">THAO TÁC</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-xs font-semibold text-slate-700">
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <tr key={idx}>
+                    <td className="p-4"><Skeleton variant="text" className="w-12 h-4" /></td>
+                    <td className="p-4"><Skeleton variant="text" className="w-48 h-5" /></td>
+                    <td className="p-4 text-center"><Skeleton variant="text" className="w-20 h-4 mx-auto" /></td>
+                    <td className="p-4 text-center"><Skeleton variant="text" className="w-16 h-4 mx-auto" /></td>
+                  </tr>
+                ))
+              ) : genresList.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="p-12 text-center text-slate-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <Tag className="w-8 h-8 text-slate-300" />
+                      <span className="font-bold text-slate-700">Không tìm thấy thể loại nào</span>
+                      <span className="text-[11px] text-slate-400">Thử tìm kiếm với từ khóa khác hoặc bấm Thêm Thể Loại Mới.</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                genresList.map((g) => (
+                  <tr key={g.id} className="hover:bg-purple-50/30 transition-colors">
+                    <td className="p-4 font-mono font-bold text-slate-500">#{g.id}</td>
+                    <td className="p-4">
+                      <span className="font-extrabold text-slate-900 text-sm">{g.name}</span>
+                    </td>
+                    <td className="p-4 text-center">
+                      <button
+                        onClick={() => setDrilldownGenre(g)}
+                        className="px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#7C6FE8] font-bold text-xs inline-flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Bấm để xem danh sách phim thuộc thể loại này"
+                      >
+                        <span>{g.moviesCount} phim</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </button>
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenEdit(g)}
+                          className="p-1.5 rounded-xl hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
+                          title="Chỉnh Sửa"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeletingGenre(g)}
+                          className="p-1.5 rounded-xl hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
+                          title="Xóa"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 4. Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between p-4 rounded-3xl bg-white border border-gray-200 shadow-2xs">
+          <span className="text-xs text-slate-500 font-medium">
+            Trang {pagination.currentPage} / {pagination.totalPages} ({pagination.totalResults} thể loại)
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={pagination.currentPage <= 1}
+              className="p-2 rounded-xl bg-slate-50 border border-gray-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all cursor-pointer"
             >
-              {/* 3D Overlapping Poster Stacks */}
-              <div className="absolute right-3 top-3 flex items-center -space-x-4 pointer-events-none opacity-90">
-                {g.posters.map((url, idx) => (
-                  <img
-                    key={idx}
-                    src={url}
-                    alt="poster"
-                    className="w-14 h-20 rounded-xl object-cover border-2 border-white/60 shadow-xl transform rotate-6 hover:rotate-0 transition-transform"
-                    style={{ transform: `rotate(${idx === 0 ? '-6deg' : '6deg'})` }}
-                  />
-                ))}
-              </div>
-
-              {/* Card Header & Badge */}
-              <div className="flex flex-col gap-1 relative z-10 pr-20">
-                <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-wider w-fit border border-white/30">
-                  {g.badge}
-                </span>
-                <h3 className="text-2xl font-black tracking-tight mt-2">{g.name}</h3>
-                <span className="text-xs font-semibold opacity-80 font-mono">{g.slug}</span>
-              </div>
-
-              {/* Card Metrics & Actions */}
-              <div className="flex items-center justify-between pt-6 relative z-10 border-t border-white/20 text-xs font-extrabold">
-                <div className="flex flex-col">
-                  <span>{g.revenueShare}</span>
-                  <span className="text-[10px] opacity-80 font-normal">{g.moviesCount} Phim • {g.ticketsSold}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleToggleGenreActive(g.id)}
-                    className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all cursor-pointer ${
-                      g.isActive
-                        ? 'bg-white text-slate-900 border-white shadow-xs'
-                        : 'bg-black/30 text-white border-white/40 opacity-60'
-                    }`}
-                  >
-                    {g.isActive ? 'BẬT' : 'TẮT'}
-                  </button>
-                  <button
-                    onClick={() => alert(`Đang sửa thể loại ${g.name}`)}
-                    className="p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white backdrop-blur-md transition-colors cursor-pointer"
-                    title="Sửa Thể Loại"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Card 6: Create New Genre Card */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="rounded-3xl border-2 border-dashed border-[#7C6FE8] hover:border-[#685bc7] bg-white hover:bg-purple-50/40 p-6 flex flex-col items-center justify-center gap-3 text-center transition-all cursor-pointer min-h-[220px] shadow-xs group"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 group-hover:bg-[#7C6FE8] text-[#7C6FE8] group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
-              <Plus className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="font-extrabold text-sm text-slate-900">Tạo Thể Loại Mới</span>
-              <span className="text-xs text-slate-500 font-medium">Thiết lập danh mục & gán màu badge</span>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Modal + Thêm Thể Loại Mới */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white border border-purple-100 rounded-3xl p-6 sm:p-8 flex flex-col gap-5 shadow-2xl relative text-slate-900">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-              <div className="flex items-center gap-2">
-                <Tag className="w-5 h-5 text-[#7C6FE8]" />
-                <h3 className="text-lg font-extrabold text-slate-900">Thêm Thể Loại Phim Mới</h3>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {successMsg && (
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                <span>{successMsg}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleAddGenre} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-slate-700">Tên Thể Loại</label>
-                <input
-                  type="text"
-                  value={newGenreName}
-                  onChange={(e) => setNewGenreName(e.target.value)}
-                  placeholder="Ví dụ: TÂM LÝ XÃ HỘI"
-                  required
-                  className="px-4 py-2.5 rounded-xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-slate-700">Slug đường dẫn</label>
-                <input
-                  type="text"
-                  value={newSlug}
-                  onChange={(e) => setNewSlug(e.target.value)}
-                  placeholder="/tam-ly-xa-hoi"
-                  className="px-4 py-2.5 rounded-xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white font-mono"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs cursor-pointer"
-                >
-                  Hủy Bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider shadow-md cursor-pointer"
-                >
-                  TẠO THỂ LOẠI
-                </button>
-              </div>
-            </form>
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
+              disabled={pagination.currentPage >= pagination.totalPages}
+              className="p-2 rounded-xl bg-slate-50 border border-gray-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
+
+      {/* 5. Modal Thêm Mới Thể Loại */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in font-sans">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md bg-white rounded-3xl border border-purple-100 p-6 shadow-2xl flex flex-col gap-5"
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-bold">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">Thêm Thể Loại Mới</h3>
+                    <span className="text-xs text-slate-400">Nhập tên thể loại phim</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {addError && (
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{addError}</span>
+                </div>
+              )}
+
+              {addSuccess && (
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{addSuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleAddSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-700">Tên Thể Loại *</label>
+                  <input
+                    type="text"
+                    value={addGenreName}
+                    onChange={(e) => setAddGenreName(e.target.value)}
+                    placeholder="VD: Hành Động, Kinh Dị, Hoạt Hình..."
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    disabled={isCreating}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreating || !addGenreName.trim()}
+                    className="px-5 py-2.5 rounded-xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    <span>Tạo Thể Loại</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 6. Modal Chỉnh Sửa Thể Loại */}
+      <AnimatePresence>
+        {editingGenre && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in font-sans">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md bg-white rounded-3xl border border-blue-100 p-6 shadow-2xl flex flex-col gap-5"
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <Edit3 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">Chỉnh Sửa Thể Loại</h3>
+                    <span className="text-xs text-slate-400">ID: #{editingGenre.id}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingGenre(null)}
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {editError && (
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              {editSuccess && (
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{editSuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-700">Tên Thể Loại *</label>
+                  <input
+                    type="text"
+                    value={editGenreName}
+                    onChange={(e) => setEditGenreName(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setEditingGenre(null)}
+                    disabled={isUpdating}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdating || !editGenreName.trim()}
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-md shadow-blue-600/30 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    <span>Lưu Thay Đổi</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 7. Modal Drilldown Xem Danh Sách Phim Thuộc Thể Loại */}
+      <AnimatePresence>
+        {drilldownGenre && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in font-sans">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl bg-white rounded-3xl border border-purple-100 p-6 shadow-2xl flex flex-col gap-5 max-h-[85vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-100 text-[#7C6FE8] flex items-center justify-center font-bold">
+                    <Film className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      Danh Sách Phim: {drilldownGenre.name}
+                    </h3>
+                    <span className="text-xs text-slate-400">
+                      {drilldownData?.totalResults || 0} bộ phim được phân loại
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDrilldownGenre(null)}
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {isLoadingDrilldown ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
+                  <Loader2 className="w-8 h-8 text-[#7C6FE8] animate-spin" />
+                  <span className="text-xs font-medium">Đang nạp danh sách phim...</span>
+                </div>
+              ) : drilldownData?.movies && drilldownData.movies.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                  {drilldownData.movies.map((m) => (
+                    <div
+                      key={m.id}
+                      className="p-3 rounded-2xl bg-slate-50 border border-gray-200 flex items-center gap-3 hover:border-purple-200 transition-colors"
+                    >
+                      <AdminPosterCard
+                        src={m.posterUrl}
+                        alt={m.title}
+                        size="sm"
+                        fallbackText={m.title}
+                        className="shrink-0 border border-gray-200 shadow-2xs"
+                      />
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <h4 className="text-xs font-extrabold text-slate-900 truncate">{m.title}</h4>
+                        <span className="text-[10px] text-slate-400 truncate italic">{m.originalTitle}</span>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-semibold mt-1">
+                          <span className="flex items-center gap-0.5 text-amber-600 font-bold">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <span>{m.rating}</span>
+                          </span>
+                          <span>•</span>
+                          <span>{m.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-slate-400 text-xs font-medium">
+                  Chưa có bộ phim nào được gán thể loại này trong hệ thống.
+                </div>
+              )}
+
+              <button
+                onClick={() => setDrilldownGenre(null)}
+                className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+              >
+                Đóng
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 8. Modal Xác Nhận Xóa */}
+      <AnimatePresence>
+        {deletingGenre && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in font-sans">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md bg-white rounded-3xl border border-rose-100 p-6 shadow-2xl flex flex-col gap-4 text-center items-center"
+            >
+              <div className="w-14 h-14 rounded-3xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <Trash2 className="w-7 h-7" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-lg font-black text-slate-900">Xác Nhận Xóa Thể Loại?</h3>
+                <p className="text-xs text-slate-500">
+                  Bạn có chắc chắn muốn xóa thể loại <strong className="text-slate-900 font-bold">"{deletingGenre.name}"</strong>?
+                  Hành động này không thể hoàn tác.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-center gap-3 w-full pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeletingGenre(null)}
+                  disabled={isDeleting}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={isDeleting}
+                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30"
+                >
+                  {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  <span>Xác Nhận Xóa</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

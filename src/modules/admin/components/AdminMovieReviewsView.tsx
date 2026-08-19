@@ -211,7 +211,11 @@ export function AdminMovieReviewsView() {
                       <img
                         src={rev.customerAvatar}
                         alt={rev.customerName}
-                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-xs shrink-0"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
+                        }}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-xs shrink-0 bg-slate-100"
                       />
                       <div className="flex flex-col">
                         <span className="font-extrabold text-slate-900">{rev.customerName}</span>

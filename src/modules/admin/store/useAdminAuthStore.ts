@@ -1,173 +1,163 @@
 'use client';
 
 import { create } from 'zustand';
-import { AdminUser, AdminRole } from '../types/admin.types';
-import { INITIAL_ADMIN_USERS } from '../mocks/mockAdminData';
-
-export interface AdminUserRecord extends AdminUser {
-  passwordHash: string;
-}
+import Cookies from 'js-cookie';
+import { AdminUser, AdminRole, PermissionSlug } from '../types/admin.types';
 
 interface AdminAuthState {
   adminUser: AdminUser | null;
+  permissions: string[];
+  token: string | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
-  adminUsersList: AdminUserRecord[];
-  
-  // Actions
-  loginAdmin: (email: string, pass: string) => { success: boolean; error?: string };
-  logoutAdmin: () => void;
-  addStaffAccount: (data: {
-    name: string;
-    email: string;
-    password: string;
-    role: AdminRole;
-    cinemaName?: string;
-    phone?: string;
-  }) => { success: boolean; error?: string };
+
+  // Session Actions
+  setSession: (adminUser: AdminUser, permissions: string[], token: string) => void;
+  clearSession: () => void;
   initAdminStore: () => void;
+
+  // RBAC Helper Methods
+  hasPermission: (permission: PermissionSlug | string) => boolean;
+  hasAnyPermission: (permissions: (PermissionSlug | string)[]) => boolean;
+  hasRole: (roles: AdminRole | AdminRole[]) => boolean;
+  canManageCinema: (cinemaId: string | number | null | undefined) => boolean;
 }
 
-const LOCAL_KEY_ADMIN_USERS = 'cinedot_admin_users';
-const LOCAL_KEY_CURRENT_ADMIN = 'cinedot_current_admin';
+const LOCAL_KEY_ADMIN_USER = 'cinedot_admin_user';
+const LOCAL_KEY_ADMIN_PERMS = 'cinedot_admin_permissions';
+const COOKIE_KEY_TOKEN = 'cine_token';
 
 export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   adminUser: null,
+  permissions: [],
+  token: null,
   isAuthenticated: false,
   isInitialized: false,
-  adminUsersList: [],
 
   initAdminStore: () => {
     if (typeof window === 'undefined') return;
 
-    // Load or initialize admin users list
-    let list: AdminUserRecord[] = [];
+    const token =
+      Cookies.get(COOKIE_KEY_TOKEN) ||
+      Cookies.get('cinedot_token') ||
+      localStorage.getItem('cinedot_token') ||
+      localStorage.getItem('cinedot_admin_token');
+
+    let adminUser: AdminUser | null = null;
+    let permissions: string[] = [];
+
     try {
-      const storedList = localStorage.getItem(LOCAL_KEY_ADMIN_USERS);
-      if (storedList) {
-        list = JSON.parse(storedList);
-      } else {
-        list = INITIAL_ADMIN_USERS;
-        localStorage.setItem(LOCAL_KEY_ADMIN_USERS, JSON.stringify(list));
+      const storedUser = localStorage.getItem(LOCAL_KEY_ADMIN_USER);
+      if (storedUser) {
+        adminUser = JSON.parse(storedUser);
       }
     } catch {
-      list = INITIAL_ADMIN_USERS;
+      adminUser = null;
     }
 
-    // Load current active admin session
-    let current: AdminUser | null = null;
     try {
-      const storedCurrent = localStorage.getItem(LOCAL_KEY_CURRENT_ADMIN);
-      if (storedCurrent) {
-        current = JSON.parse(storedCurrent);
+      const storedPerms = localStorage.getItem(LOCAL_KEY_ADMIN_PERMS);
+      if (storedPerms) {
+        permissions = JSON.parse(storedPerms);
       }
     } catch {
-      current = null;
+      permissions = [];
     }
 
     set({
-      adminUsersList: list,
-      adminUser: current,
-      isAuthenticated: !!current,
+      token: token || null,
+      adminUser,
+      permissions: permissions.length > 0 ? permissions : adminUser?.permissions || [],
+      isAuthenticated: Boolean(token && adminUser),
       isInitialized: true,
     });
   },
 
-  loginAdmin: (email: string, pass: string) => {
-    const { adminUsersList } = get();
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPass = pass.trim();
-
-    // 1. Find user account by email
-    const foundRecord = adminUsersList.find(
-      (u) => u.email.toLowerCase() === cleanEmail
-    );
-
-    if (!foundRecord) {
-      return { success: false, error: 'Email hoặc Mật khẩu quản trị không chính xác!' };
-    }
-
-    // 2. Strict Password match check
-    if (foundRecord.passwordHash !== cleanPass) {
-      return { success: false, error: 'Mật khẩu quản trị không chính xác!' };
-    }
-
-    if (foundRecord.status === 'DISABLED') {
-      return { success: false, error: 'Tài khoản nhân sự này hiện đã bị tạm khóa!' };
-    }
-
-    // Prepare clean User object without passwordHash
-    const userSession: AdminUser = {
-      id: foundRecord.id,
-      email: foundRecord.email,
-      name: foundRecord.name,
-      role: foundRecord.role,
-      roleName: foundRecord.roleName,
-      cinemaName: foundRecord.cinemaName,
-      phone: foundRecord.phone,
-      createdAt: foundRecord.createdAt,
-      status: foundRecord.status,
-    };
-
+  setSession: (adminUser: AdminUser, permissions: string[], token: string) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_KEY_CURRENT_ADMIN, JSON.stringify(userSession));
+      if (token) {
+        Cookies.set(COOKIE_KEY_TOKEN, token, { expires: 7, path: '/' });
+        localStorage.setItem('cinedot_admin_token', token);
+      }
+      localStorage.setItem(LOCAL_KEY_ADMIN_USER, JSON.stringify(adminUser));
+      localStorage.setItem(LOCAL_KEY_ADMIN_PERMS, JSON.stringify(permissions));
     }
 
     set({
-      adminUser: userSession,
+      adminUser,
+      permissions,
+      token,
       isAuthenticated: true,
+      isInitialized: true,
     });
-
-    return { success: true };
   },
 
-  logoutAdmin: () => {
+  clearSession: () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(LOCAL_KEY_CURRENT_ADMIN);
+      Cookies.remove(COOKIE_KEY_TOKEN, { path: '/' });
+      Cookies.remove('cinedot_token', { path: '/' });
+      localStorage.removeItem('cinedot_admin_token');
+      localStorage.removeItem(LOCAL_KEY_ADMIN_USER);
+      localStorage.removeItem(LOCAL_KEY_ADMIN_PERMS);
     }
+
     set({
       adminUser: null,
+      permissions: [],
+      token: null,
       isAuthenticated: false,
+      isInitialized: true,
     });
   },
 
-  addStaffAccount: (data) => {
-    const { adminUsersList } = get();
-    const cleanEmail = data.email.trim().toLowerCase();
+  /**
+   * Kiểm tra quyền hạn chi tiết (hỗ trợ wildcard *)
+   */
+  hasPermission: (permission: PermissionSlug | string) => {
+    const { permissions, adminUser } = get();
 
-    // Check duplicate email
-    const exists = adminUsersList.some((u) => u.email.toLowerCase() === cleanEmail);
-    if (exists) {
-      return { success: false, error: 'Email nhân sự này đã tồn tại trên hệ thống!' };
+    if (!adminUser) return false;
+    if (adminUser.role === 'SUPER_ADMIN') return true;
+    if (permissions.includes('*')) return true;
+    if (permissions.includes(permission)) return true;
+
+    // Hỗ trợ kiểm tra nhóm wildcard (ví dụ: 'movies.*' match 'movies.view')
+    const prefix = permission.split('.')[0] + '.*';
+    if (permissions.includes(prefix)) return true;
+
+    return false;
+  },
+
+  /**
+   * Kiểm tra xem user có ít nhất một trong các quyền trong mảng hay không
+   */
+  hasAnyPermission: (permList: (PermissionSlug | string)[]) => {
+    const { hasPermission } = get();
+    return permList.some((p) => hasPermission(p));
+  },
+
+  /**
+   * Kiểm tra vai trò của tài khoản
+   */
+  hasRole: (roles: AdminRole | AdminRole[]) => {
+    const { adminUser } = get();
+    if (!adminUser) return false;
+
+    if (Array.isArray(roles)) {
+      return roles.includes(adminUser.role);
     }
+    return adminUser.role === roles;
+  },
 
-    const roleNameMap: Record<AdminRole, string> = {
-      SUPER_ADMIN: 'Tổng Quản Trị Hệ Thống',
-      CINEMA_MANAGER: 'Quản Lý Cụm Rạp',
-      TICKET_STAFF: 'Nhân Viên Soát Vé Cổng',
-    };
+  /**
+   * Kiểm tra xem user có quyền quản lý cụm rạp chỉ định hay không (Cinema Scoping)
+   */
+  canManageCinema: (cinemaId: string | number | null | undefined) => {
+    const { adminUser } = get();
+    if (!adminUser) return false;
+    if (adminUser.role === 'SUPER_ADMIN') return true;
+    if (!cinemaId) return true;
 
-    const newRecord: AdminUserRecord = {
-      id: 'adm-' + Date.now().toString().slice(-4),
-      email: cleanEmail,
-      passwordHash: data.password.trim(),
-      name: data.name.trim(),
-      role: data.role,
-      roleName: roleNameMap[data.role] || 'Nhân Viên',
-      cinemaName: data.cinemaName || 'Toàn Bộ Cụm Rạp',
-      phone: data.phone || 'Chưa cập nhật',
-      createdAt: new Date().toLocaleDateString('vi-VN'),
-      status: 'ACTIVE',
-    };
-
-    const updatedList = [...adminUsersList, newRecord];
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_KEY_ADMIN_USERS, JSON.stringify(updatedList));
-    }
-
-    set({ adminUsersList: updatedList });
-
-    return { success: true };
+    return String(adminUser.cinemaId) === String(cinemaId);
   },
 }));

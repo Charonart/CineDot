@@ -132,12 +132,21 @@ export const ENDPOINTS = {
 
     PROVINCES: '/admin/provinces',
     GENRES: '/admin/genres',
+    GENRE_DETAIL: (id: number | string) => `/admin/genres/${id}`,
     PERSONS: '/admin/persons',
 
     PRICING_RULES: '/admin/pricing-rules',
     PRICING_RULE_DETAIL: (id: number | string) => `/admin/pricing-rules/${id}`,
     PRICING_RULE_TOGGLE: (id: number | string) => `/admin/pricing-rules/${id}/toggle-active`,
 
+    // Tickets Scanner
+    TICKETS_LOOKUP: '/admin/tickets/lookup',
+    TICKETS_SCAN: '/admin/tickets/scan',
+    TICKETS_CHECK_IN: '/admin/tickets/check-in',
+    TICKETS_CLAIM_FNB: '/admin/tickets/claim-fnb',
+    TICKETS_RECENT_SCANS: '/admin/tickets/recent-scans',
+
+    // Bookings & Transactions
     BOOKINGS: '/admin/bookings',
     BOOKING_DETAIL: (id: number | string) => `/admin/bookings/${id}`,
     BOOKING_REFUND: (id: number | string) => `/admin/bookings/${id}/refund`,
@@ -146,9 +155,12 @@ export const ENDPOINTS = {
     REVIEW_DELETE: (id: number | string) => `/admin/reviews/${id}`,
 
     USERS: '/admin/users',
+    USER_DETAIL: (id: number | string) => `/admin/users/${id}`,
     USER_UPDATE_ROLE: (id: number | string) => `/admin/users/${id}/role`,
+    USER_TOGGLE_STATUS: (id: number | string) => `/admin/users/${id}/toggle-status`,
     USER_ROLES: (userId: number | string) => `/admin/users/${userId}/roles`,
     USER_ROLE_REVOKE: (userId: number | string, id: number | string) => `/admin/users/${userId}/roles/${id}`,
+    ROLES: '/admin/roles',
 
     REVENUE_REPORT: '/admin/reports/revenue',
   },

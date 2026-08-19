@@ -3,47 +3,67 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, Mail, ArrowRight, AlertCircle, Info } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { useAdminAuth } from '../hooks/useAdminAuth';
+import { adminLoginSchema } from '../schemas/adminAuth.schema';
 import { useAdminAuthStore } from '../store/useAdminAuthStore';
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const { loginAdmin, initAdminStore, isAuthenticated } = useAdminAuthStore();
+  const { login, isLoggingIn } = useAdminAuth();
+  const { isAuthenticated, adminUser, initAdminStore } = useAdminAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   useEffect(() => {
     initAdminStore();
   }, [initAdminStore]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/admin');
+    if (isAuthenticated && adminUser) {
+      if (adminUser.role === 'TICKET_STAFF') {
+        router.push('/admin/ticket-scanner');
+      } else {
+        router.push('/admin');
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, adminUser, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+    setFieldErrors({});
 
-    if (!email.trim() || !password.trim()) {
-      setErrorMsg('Vui lòng nhập đầy đủ Email và Mật khẩu quản trị!');
+    // 1. Zod Client Validation
+    const validationResult = adminLoginSchema.safeParse({ email, password });
+    if (!validationResult.success) {
+      const formatted = validationResult.error.format();
+      setFieldErrors({
+        email: formatted.email?._errors[0],
+        password: formatted.password?._errors[0],
+      });
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      const res = loginAdmin(email, password);
-      setLoading(false);
-      if (res.success) {
-        router.push('/admin');
+    // 2. Real API Authentication Call
+    try {
+      const result = await login({ email: email.trim(), password });
+      if (result.adminUser.role === 'TICKET_STAFF') {
+        router.push('/admin/ticket-scanner');
       } else {
-        setErrorMsg(res.error || 'Đăng nhập thất bại!');
+        router.push('/admin');
       }
-    }, 400);
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string; response?: { data?: { message?: string } } };
+      const msg =
+        errorObj?.message ||
+        errorObj?.response?.data?.message ||
+        'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!';
+      setErrorMsg(msg);
+    }
   };
 
   return (
@@ -65,7 +85,7 @@ export function AdminLoginForm() {
           </div>
 
           <span className="text-[11px] font-extrabold text-[#7C6FE8] uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
-            CINEDOT SYSTEM PORTAL
+            CINEDOT ADMIN PORTAL
           </span>
 
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -73,7 +93,7 @@ export function AdminLoginForm() {
           </h1>
 
           <p className="text-xs text-slate-500 font-medium">
-            Cổng làm việc dành riêng cho Ban quản trị & Nhân sự rạp CineDot
+            Cổng làm việc dành riêng cho Ban quản trị & Nhân sự hệ thống CineDot
           </p>
         </div>
 
@@ -97,12 +117,21 @@ export function AdminLoginForm() {
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (errorMsg) setErrorMsg('');
+                  if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
                 }}
-                placeholder="admin@cinedot.vn"
+                placeholder="admin@cinedot.com"
+                disabled={isLoggingIn}
                 required
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
+                className={`w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border text-xs font-medium text-slate-900 focus:outline-none focus:bg-white transition-all ${
+                  fieldErrors.email
+                    ? 'border-rose-400 focus:border-rose-500'
+                    : 'border-gray-200 focus:border-[#7C6FE8]'
+                }`}
               />
             </div>
+            {fieldErrors.email && (
+              <span className="text-[11px] text-rose-500 font-semibold">{fieldErrors.email}</span>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -115,21 +144,36 @@ export function AdminLoginForm() {
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (errorMsg) setErrorMsg('');
+                  if (fieldErrors.password)
+                    setFieldErrors((prev) => ({ ...prev, password: undefined }));
                 }}
                 placeholder="••••••••"
+                disabled={isLoggingIn}
                 required
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
+                className={`w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border text-xs font-medium text-slate-900 focus:outline-none focus:bg-white transition-all ${
+                  fieldErrors.password
+                    ? 'border-rose-400 focus:border-rose-500'
+                    : 'border-gray-200 focus:border-[#7C6FE8]'
+                }`}
               />
             </div>
+            {fieldErrors.password && (
+              <span className="text-[11px] text-rose-500 font-semibold">
+                {fieldErrors.password}
+              </span>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-3.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/30 transition-all cursor-pointer mt-1 disabled:opacity-50"
+            disabled={isLoggingIn}
+            className="w-full py-3.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/30 transition-all cursor-pointer mt-1 disabled:opacity-60"
           >
-            {loading ? (
-              <span>Đang xác thực...</span>
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>ĐANG XÁC THỰC...</span>
+              </>
             ) : (
               <>
                 <span>ĐĂNG NHẬP VÀO ADMIN</span>
@@ -138,12 +182,6 @@ export function AdminLoginForm() {
             )}
           </button>
         </form>
-
-        {/* Info Box */}
-        <div className="p-3.5 rounded-2xl bg-purple-50/70 border border-purple-100 text-[11px] text-slate-600 font-medium flex items-start gap-2.5">
-          <Info className="w-4 h-4 text-[#7C6FE8] shrink-0 mt-0.5" />
-          <span>Tài khoản gốc Super Admin ban đầu: <strong className="text-slate-900">admin@cinedot.vn</strong> / <strong className="text-slate-900">admin123</strong></span>
-        </div>
       </motion.div>
     </div>
   );
