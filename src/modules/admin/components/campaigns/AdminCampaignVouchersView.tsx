@@ -15,11 +15,9 @@ import {
   Sparkles,
   Percent,
   DollarSign,
-  Calendar,
   Layers,
   Clock,
 } from 'lucide-react';
-import { MarketingSubNavTabs } from './MarketingSubNavTabs';
 import { VoucherStudioModal } from './VoucherStudioModal';
 import { useAdminVouchers } from '../../hooks/useAdminVouchers';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
@@ -107,10 +105,7 @@ export function AdminCampaignVouchersView() {
         </button>
       </div>
 
-      {/* 2. Marketing Suite SubNav Tabs */}
-      <MarketingSubNavTabs />
-
-      {/* 3. KPI Statistics Cards */}
+      {/* 2. KPI Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Tổng Voucher */}
         <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">

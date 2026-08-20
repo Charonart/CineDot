@@ -13,7 +13,6 @@ import {
   Layers,
   Hash,
 } from 'lucide-react';
-import { MarketingSubNavTabs } from './MarketingSubNavTabs';
 import { BannerStudioModal } from './BannerStudioModal';
 import { useAdminBanners } from '../../hooks/useAdminBanners';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
@@ -93,10 +92,7 @@ export function AdminCampaignBannersView() {
         </button>
       </div>
 
-      {/* 2. Marketing Suite SubNav Tabs */}
-      <MarketingSubNavTabs />
-
-      {/* 3. KPI Statistics Cards */}
+      {/* 2. KPI Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Card 1: Tổng Banner */}
         <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">

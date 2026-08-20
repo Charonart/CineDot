@@ -17,7 +17,6 @@ import {
   Sparkles,
   ArrowUpRight,
 } from 'lucide-react';
-import { MarketingSubNavTabs } from './MarketingSubNavTabs';
 import { CampaignStudioModal } from './CampaignStudioModal';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
 import { AdminCampaign } from '../../types/adminCampaign.types';
@@ -92,10 +91,7 @@ export function AdminCampaignsView() {
         </button>
       </div>
 
-      {/* 2. Marketing Suite SubNav Tabs */}
-      <MarketingSubNavTabs />
-
-      {/* 3. Overview KPI Stats Cards */}
+      {/* 2. Overview KPI Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Card 1: Tổng Chiến Dịch */}
         <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">

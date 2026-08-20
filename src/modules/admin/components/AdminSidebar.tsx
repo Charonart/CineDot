@@ -23,6 +23,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   X,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useAdminAuthStore } from '../store/useAdminAuthStore';
 import { useAdminUiStore } from '../store/useAdminUiStore';
@@ -39,6 +40,9 @@ export const AdminSidebar: React.FC = () => {
 
   const [moviesMenuOpen, setMoviesMenuOpen] = useState(pathname.startsWith('/admin/movies'));
   const [staffMenuOpen, setStaffMenuOpen] = useState(pathname.startsWith('/admin/users-staff'));
+  const [campaignMenuOpen, setCampaignMenuOpen] = useState(
+    pathname.startsWith('/admin/campaign') || pathname.startsWith('/admin/vouchers')
+  );
 
   // Auto-expand active submenus on navigation
   useEffect(() => {
@@ -48,12 +52,16 @@ export const AdminSidebar: React.FC = () => {
     if (pathname.startsWith('/admin/users-staff')) {
       setStaffMenuOpen(true);
     }
+    if (pathname.startsWith('/admin/campaign') || pathname.startsWith('/admin/vouchers')) {
+      setCampaignMenuOpen(true);
+    }
     // Auto-close mobile drawer on route change
     closeMobileMenu();
   }, [pathname, closeMobileMenu]);
 
   const isMoviesActive = pathname.startsWith('/admin/movies');
   const isStaffActive = pathname.startsWith('/admin/users-staff');
+  const isCampaignActive = pathname.startsWith('/admin/campaign') || pathname.startsWith('/admin/vouchers');
 
   // Permissions check for menu items
   const canViewMovies = hasPermission('movies.view');
@@ -326,23 +334,84 @@ export const AdminSidebar: React.FC = () => {
         </div>
       )}
 
-      {/* 8. Chiến Dịch & Marketing */}
+      {/* 8. Chiến Dịch & Marketing (Collapsible Submenu) */}
       {canViewMarketing && (
-        <Link
-          href="/admin/campaign"
-          onClick={closeMobileMenu}
-          title={isSidebarCollapsed && !isMobile ? 'Chiến Dịch & Marketing' : undefined}
-          className={`flex items-center ${
-            isSidebarCollapsed && !isMobile ? 'justify-center px-2 py-3' : 'gap-3 px-3.5 py-3'
-          } rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-            pathname.startsWith('/admin/campaign') || pathname === '/admin/vouchers'
-              ? 'bg-[#7C6FE8] text-white shadow-md shadow-[#7C6FE8]/25'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
-          }`}
-        >
-          <Target className="w-4 h-4 shrink-0" />
-          {(!isSidebarCollapsed || isMobile) && <span className="truncate">Chiến Dịch & Marketing</span>}
-        </Link>
+        <div className="flex flex-col gap-0.5">
+          <button
+            onClick={() => setCampaignMenuOpen(!campaignMenuOpen)}
+            title={isSidebarCollapsed && !isMobile ? 'Chiến Dịch & Marketing' : undefined}
+            className={`w-full flex items-center ${
+              isSidebarCollapsed && !isMobile ? 'justify-center px-2 py-3' : 'justify-between px-3.5 py-3'
+            } rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+              isCampaignActive
+                ? 'bg-purple-50 text-[#7C6FE8] border border-purple-100'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Target className={`w-4 h-4 shrink-0 ${isCampaignActive ? 'text-[#7C6FE8]' : ''}`} />
+              {(!isSidebarCollapsed || isMobile) && <span>Chiến Dịch & Marketing</span>}
+            </div>
+            {(!isSidebarCollapsed || isMobile) && (
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  campaignMenuOpen ? 'rotate-180 text-[#7C6FE8]' : 'text-slate-400'
+                }`}
+              />
+            )}
+          </button>
+
+          <AnimatePresence initial={false}>
+            {campaignMenuOpen && (!isSidebarCollapsed || isMobile) && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden flex flex-col pl-4 pr-1 gap-1 pt-1"
+              >
+                <Link
+                  href="/admin/campaign"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                    pathname === '/admin/campaign'
+                      ? 'bg-[#7C6FE8] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Target className="w-3.5 h-3.5 shrink-0" />
+                  <span>Chiến Dịch Tiếp Thị</span>
+                </Link>
+
+                <Link
+                  href="/admin/campaign/voucher"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                    pathname === '/admin/campaign/voucher' || pathname === '/admin/vouchers'
+                      ? 'bg-[#7C6FE8] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Ticket className="w-3.5 h-3.5 shrink-0" />
+                  <span>Mã Giảm Giá (Vouchers)</span>
+                </Link>
+
+                <Link
+                  href="/admin/campaign/banner"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                    pathname === '/admin/campaign/banner'
+                      ? 'bg-[#7C6FE8] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <ImageIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span>Banner Quảng Cáo</span>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
     </nav>
   );
