@@ -36,40 +36,29 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
   const isSelected = selectedCount > 0;
   const selectedSeatIdsStr = selectedSeats.map((s) => s.id).join(',');
 
-  // Group selected seats by type
+  // Group selected seats dynamically by seat type
   const groupedSeats = useMemo(() => {
-    const vipSeats = selectedSeats.filter((s) => s.type === 'VIP');
-    const stdSeats = selectedSeats.filter((s) => s.type === 'STANDARD');
-    const sweetboxSeats = selectedSeats.filter((s) => s.type === 'SWEETBOX');
+    const map: Record<string, { typeName: string; seats: SeatItem[]; isCouple: boolean }> = {};
 
-    const result: { typeName: string; countText: string; seatIds: string }[] = [];
+    for (const s of selectedSeats) {
+      const typeKey = (s.type || 'STANDARD').toUpperCase();
+      const normType = typeKey.toLowerCase();
+      const isCouple = normType === 'sweetbox' || normType === 'couple';
+      const name = s.typeName || (normType === 'vip' ? 'Ghế VIP' : isCouple ? 'Ghế Đôi Sweetbox' : normType === 'bed' ? 'Ghế Giường Nằm' : normType === 'deluxe' ? 'Ghế Deluxe' : 'Ghế Thường');
 
-    if (vipSeats.length > 0) {
-      result.push({
-        typeName: 'Ghế VIP',
-        countText: `x${vipSeats.length}`,
-        seatIds: vipSeats.map((s) => s.id).join(', '),
-      });
+      if (!map[typeKey]) {
+        map[typeKey] = { typeName: name, seats: [], isCouple };
+      }
+      map[typeKey].seats.push(s);
     }
 
-    if (stdSeats.length > 0) {
-      result.push({
-        typeName: 'Ghế Thường',
-        countText: `x${stdSeats.length}`,
-        seatIds: stdSeats.map((s) => s.id).join(', '),
-      });
-    }
-
-    if (sweetboxSeats.length > 0) {
-      const pairs = Array.from(new Set(sweetboxSeats.map((s) => s.pairId).filter(Boolean)));
-      result.push({
-        typeName: 'Ghế Đôi Sweetbox',
-        countText: `x${pairs.length} cặp`,
-        seatIds: sweetboxSeats.map((s) => s.id).join(', '),
-      });
-    }
-
-    return result;
+    return Object.values(map).map((group) => ({
+      typeName: group.typeName,
+      countText: group.isCouple
+        ? `x${Math.ceil(group.seats.length / 2)} cặp`
+        : `x${group.seats.length}`,
+      seatIds: group.seats.map((s) => s.id).join(', '),
+    }));
   }, [selectedSeats]);
 
   const handleContinueClick = async () => {

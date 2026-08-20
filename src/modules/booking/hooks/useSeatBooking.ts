@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { SeatItem, SeatRowGroup, ShowtimeBookingInfo } from '../types/seat-booking.types';
+import { SeatItem, SeatRowGroup, ShowtimeBookingInfo, SeatTypeInfo } from '../types/seat-booking.types';
 import { seatBookingService } from '../services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '../services/bookingTimerService';
 import { saveBookingSession, updateBookingSession } from '../services/bookingSessionService';
@@ -16,6 +16,7 @@ export function useSeatBooking(
 ) {
   const [bookingInfo, setBookingInfo] = useState<ShowtimeBookingInfo | null>(null);
   const [seats, setSeats] = useState<SeatItem[]>([]);
+  const [seatTypes, setSeatTypes] = useState<SeatTypeInfo[]>([]);
   const [seatRowGroups, setSeatRowGroups] = useState<SeatRowGroup[]>([]);
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +34,7 @@ export function useSeatBooking(
         if (isMounted) {
           setBookingInfo(data.showtimeInfo);
           setSeats(data.seats);
+          setSeatTypes(data.seatTypes || []);
           setSeatRowGroups(data.seatRowGroups);
           setIsTimeout(false);
 
@@ -182,6 +184,7 @@ export function useSeatBooking(
   return {
     bookingInfo,
     seats,
+    seatTypes,
     seatRowGroups,
     selectedSeatIds,
     toggleSelectSeat,

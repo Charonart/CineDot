@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { AdminSeatItem, SeatType } from '../../types/adminCinema.types';
 import { adminCinemaMapper } from '../../mappers/adminCinema.mapper';
+import { useAdminSeatTypes } from '../../hooks/useAdminSeatTypes';
+import { renderSeatIcon } from '../cinemas/SeatTypesStudioModal';
 
 interface AdminSeatCanvasEditorProps {
   seats: AdminSeatItem[];
@@ -46,6 +48,7 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const { seatTypes = [] } = useAdminSeatTypes();
 
   // -------------------------------------------------------------
   // UNDO / REDO HISTORY STACK
@@ -747,39 +750,44 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
               {/* Render all seats */}
               {seats.map((seat) => {
                 const isSelected = selectedSeatIds.includes(seat.id);
-                const isVip = seat.type === 'VIP';
-                const isCouple = seat.type === 'SWEETBOX';
-                const isMaintenance = seat.type === 'MAINTENANCE';
+                const normType = (seat.type || 'standard').toLowerCase();
+                const isMaintenance = normType === 'maintenance' || normType === 'blocked';
+                const matchedType = seatTypes.find(
+                  (st) =>
+                    st.key.toLowerCase() === normType ||
+                    (normType === 'regular' && st.key.toLowerCase() === 'standard')
+                );
 
-                let seatStyle = 'bg-white text-slate-700 hover:bg-slate-50 border-gray-300 shadow-2xs';
-                let icon = null;
+                const isCoupleLike =
+                  normType === 'couple' ||
+                  normType === 'sweetbox' ||
+                  normType === 'bed' ||
+                  matchedType?.icon === 'heart' ||
+                  matchedType?.icon === 'bed';
 
-                if (isVip) {
-                  seatStyle = 'bg-[#7C6FE8] text-white shadow-xs font-black border-[#7C6FE8]';
-                } else if (isCouple) {
-                  seatStyle = 'bg-pink-500 text-white shadow-xs font-black border-pink-400';
-                  icon = <Heart className="w-3 h-3 fill-white shrink-0" />;
-                } else if (isMaintenance) {
-                  seatStyle = 'bg-rose-500 text-white shadow-xs font-black border-rose-400';
-                  icon = <Wrench className="w-3 h-3 shrink-0" />;
+                let seatBg = matchedType ? matchedType.color : '#64748B';
+
+                if (isMaintenance) {
+                  seatBg = '#EF4444';
                 }
 
                 return (
                   <div
                     key={seat.id}
                     onPointerDown={(e) => handleSeatPointerDown(e, seat.id)}
-                    title={`Ghế ${seat.id} (Tọa độ: X:${seat.cx}, Y:${seat.cy}, Góc:${seat.angle}°)\nGiữ Shift + Click để chọn nhiều ghế\nKéo chuột để di chuyển • Phím mũi tên dịch chuyển`}
-                    className={`absolute rounded-xl text-[10px] font-extrabold flex items-center justify-center gap-0.5 border select-none transition-shadow cursor-grab active:cursor-grabbing ${seatStyle} ${
+                    title={`Ghế ${seat.id} (${matchedType ? matchedType.name : seat.type})\nTọa độ: X:${seat.cx}, Y:${seat.cy}, Góc:${seat.angle}°\nGiữ Shift + Click để chọn nhiều ghế\nKéo chuột để di chuyển`}
+                    className={`absolute rounded-xl text-[11px] font-black flex items-center justify-center border border-black/10 select-none transition-all cursor-grab active:cursor-grabbing text-white shadow-2xs ${
                       isSelected
-                        ? 'ring-3 ring-[#7C6FE8] ring-offset-2 z-40 shadow-lg scale-105'
-                        : 'hover:border-[#7C6FE8] z-10'
+                        ? 'ring-3 ring-offset-2 ring-[#7C6FE8] z-40 shadow-lg scale-105'
+                        : 'hover:brightness-110 z-10'
                     }`}
                     style={{
                       left: seat.cx,
                       top: seat.cy,
-                      width: isCouple ? SEAT_SIZE * 1.5 : SEAT_SIZE,
+                      width: isCoupleLike ? SEAT_SIZE * 1.5 : SEAT_SIZE,
                       height: SEAT_SIZE,
                       transform: `rotate(${seat.angle}deg)`,
+                      backgroundColor: seatBg,
                     }}
                   >
                     {/* Rotation Handle on Top of Selected Seat (Shown when only 1 seat selected or on the primary selected seat) */}
@@ -793,8 +801,7 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                       </div>
                     )}
 
-                    {icon}
-                    <span>{seat.id}</span>
+                    <span className="leading-none tracking-tight">{seat.id}</span>
                   </div>
                 );
               })}
@@ -857,80 +864,59 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                   </div>
                 </div>
 
-                {/* 2. Seat Type Selector (4 Explicit Buttons) */}
+                {/* 2. Dynamic Seat Type Selector */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-                    Loại Ghế
+                    Loại Ghế (Từ CSDL)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSeatType('REGULAR')}
-                      className={`p-2.5 rounded-xl border text-left text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
-                        singleSelectedSeat.type === 'REGULAR'
-                          ? 'bg-slate-100 border-slate-400 text-slate-900 shadow-xs'
-                          : 'bg-white border-gray-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-md bg-slate-200 border border-slate-300" />
-                        <span>Thường</span>
-                      </div>
-                      {singleSelectedSeat.type === 'REGULAR' && <Check className="w-3.5 h-3.5 text-slate-700" />}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSeatType('VIP')}
-                      className={`p-2.5 rounded-xl border text-left text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
-                        singleSelectedSeat.type === 'VIP'
-                          ? 'bg-purple-50 border-[#7C6FE8] text-[#7C6FE8] shadow-xs'
-                          : 'bg-white border-gray-200 text-slate-600 hover:bg-purple-50/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-md bg-[#7C6FE8] text-white flex items-center justify-center text-[8px]">
-                          ★
-                        </div>
-                        <span>Ghế VIP</span>
-                      </div>
-                      {singleSelectedSeat.type === 'VIP' && <Check className="w-3.5 h-3.5 text-[#7C6FE8]" />}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSeatType('SWEETBOX')}
-                      className={`p-2.5 rounded-xl border text-left text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
-                        singleSelectedSeat.type === 'SWEETBOX'
-                          ? 'bg-pink-50 border-pink-400 text-pink-700 shadow-xs'
-                          : 'bg-white border-gray-200 text-slate-600 hover:bg-pink-50/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-md bg-pink-500 text-white flex items-center justify-center">
-                          <Heart className="w-2.5 h-2.5 fill-white" />
-                        </div>
-                        <span>Sweetbox</span>
-                      </div>
-                      {singleSelectedSeat.type === 'SWEETBOX' && <Check className="w-3.5 h-3.5 text-pink-600" />}
-                    </button>
+                    {seatTypes.map((st) => {
+                      const isCurrent =
+                        singleSelectedSeat.type.toLowerCase() === st.key.toLowerCase() ||
+                        (singleSelectedSeat.type.toUpperCase() === 'REGULAR' && st.key.toLowerCase() === 'standard');
+                      return (
+                        <button
+                          key={st.key}
+                          type="button"
+                          onClick={() => handleUpdateSeatType(st.key.toUpperCase())}
+                          className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
+                            isCurrent
+                              ? 'bg-purple-50 border-[#7C6FE8] text-[#7C6FE8] shadow-xs'
+                              : 'bg-white border-gray-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 truncate">
+                            <div
+                              style={{ backgroundColor: st.color }}
+                              className="w-3.5 h-3.5 rounded-md text-white flex items-center justify-center text-[8px] shrink-0"
+                            >
+                              {renderSeatIcon(st.icon, 'w-2.5 h-2.5')}
+                            </div>
+                            <span className="truncate">{st.name}</span>
+                          </div>
+                          {isCurrent && <Check className="w-3.5 h-3.5 text-[#7C6FE8] shrink-0" />}
+                        </button>
+                      );
+                    })}
 
                     <button
                       type="button"
                       onClick={() => handleUpdateSeatType('MAINTENANCE')}
-                      className={`p-2.5 rounded-xl border text-left text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
-                        singleSelectedSeat.type === 'MAINTENANCE'
+                      className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
+                        singleSelectedSeat.type === 'MAINTENANCE' || singleSelectedSeat.type === 'BLOCKED'
                           ? 'bg-rose-50 border-rose-400 text-rose-700 shadow-xs'
                           : 'bg-white border-gray-200 text-slate-600 hover:bg-rose-50/50'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-md bg-rose-500 text-white flex items-center justify-center">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3.5 h-3.5 rounded-md bg-rose-500 text-white flex items-center justify-center shrink-0">
                           <Wrench className="w-2.5 h-2.5" />
                         </div>
                         <span>Bảo Trì</span>
                       </div>
-                      {singleSelectedSeat.type === 'MAINTENANCE' && <Check className="w-3.5 h-3.5 text-rose-600" />}
+                      {(singleSelectedSeat.type === 'MAINTENANCE' || singleSelectedSeat.type === 'BLOCKED') && (
+                        <Check className="w-3.5 h-3.5 text-rose-600" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -1093,42 +1079,30 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                 {/* 1. Batch Seat Type Selector */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-                    Đổi Loại Toàn Bộ {selectedSeatIds.length} Ghế
+                    Đổi Loại Toàn Bộ {selectedSeatIds.length} Ghế (Từ CSDL)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSeatType('REGULAR')}
-                      className="p-2.5 rounded-xl border bg-white border-gray-200 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <div className="w-3.5 h-3.5 rounded-md bg-slate-200 border border-slate-300" />
-                      <span>Ghế Thường</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSeatType('VIP')}
-                      className="p-2.5 rounded-xl border bg-purple-50 border-[#7C6FE8] text-[#7C6FE8] hover:bg-purple-100 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <div className="w-3.5 h-3.5 rounded-md bg-[#7C6FE8] text-white flex items-center justify-center text-[8px]">
-                        ★
-                      </div>
-                      <span>Ghế VIP</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSeatType('SWEETBOX')}
-                      className="p-2.5 rounded-xl border bg-pink-50 border-pink-400 text-pink-700 hover:bg-pink-100 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500" />
-                      <span>Sweetbox</span>
-                    </button>
+                    {seatTypes.map((st) => (
+                      <button
+                        key={st.key}
+                        type="button"
+                        onClick={() => handleUpdateSeatType(st.key.toUpperCase())}
+                        className="p-2 rounded-xl border bg-white border-gray-200 text-slate-700 hover:bg-purple-50 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer truncate"
+                      >
+                        <div
+                          style={{ backgroundColor: st.color }}
+                          className="w-3.5 h-3.5 rounded-md text-white flex items-center justify-center text-[8px] shrink-0"
+                        >
+                          {renderSeatIcon(st.icon, 'w-2.5 h-2.5')}
+                        </div>
+                        <span className="truncate">{st.name}</span>
+                      </button>
+                    ))}
 
                     <button
                       type="button"
                       onClick={() => handleUpdateSeatType('MAINTENANCE')}
-                      className="p-2.5 rounded-xl border bg-rose-50 border-rose-400 text-rose-700 hover:bg-rose-100 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+                      className="p-2 rounded-xl border bg-rose-50 border-rose-400 text-rose-700 hover:bg-rose-100 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Wrench className="w-3.5 h-3.5 text-rose-600" />
                       <span>Bảo Trì</span>
@@ -1404,9 +1378,11 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                     onChange={(e) => setNewRowType(e.target.value as SeatType)}
                     className="px-3.5 py-2 rounded-xl bg-slate-50 border border-gray-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C6FE8]"
                   >
-                    <option value="REGULAR">Ghế Thường</option>
-                    <option value="VIP">Ghế VIP</option>
-                    <option value="SWEETBOX">Sweetbox Đôi</option>
+                    {seatTypes.map((st) => (
+                      <option key={st.key} value={st.key.toUpperCase()}>
+                        {st.name} {st.surcharge > 0 ? `(+${st.surcharge.toLocaleString()} ₫)` : ''}
+                      </option>
+                    ))}
                     <option value="MAINTENANCE">Bảo Trì</option>
                   </select>
                 </div>

@@ -7,6 +7,7 @@ import {
   HoldSeatsPayload,
   HoldSeatsResult,
   SeatType,
+  SeatTypeInfo,
   SeatStatus,
 } from '../types/seat-booking.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
@@ -26,6 +27,7 @@ export const seatBookingService = {
     showtimeInfo: ShowtimeBookingInfo;
     seats: SeatItem[];
     seatRowGroups: SeatRowGroup[];
+    seatTypes: SeatTypeInfo[];
   }> {
     const cleanId = String(showtimeId).replace('showtime-', '');
 
@@ -39,6 +41,7 @@ export const seatBookingService = {
       const stData = showtimeRes?.data?.data || {};
       const seatPayload = seatsRes?.data?.data || {};
       const rawSeats = Array.isArray(seatPayload.seats) ? seatPayload.seats : [];
+      const rawSeatTypes = Array.isArray(seatPayload.seat_types) ? seatPayload.seat_types : [];
       const showtimeMeta = seatPayload.showtime || stData || {};
 
       // 2. Parse Showtime metadata
@@ -74,6 +77,10 @@ export const seatBookingService = {
             ? 'VIP'
             : rawType.includes('couple') || rawType.includes('sweet')
             ? 'SWEETBOX'
+            : rawType.includes('bed')
+            ? 'BED'
+            : rawType.includes('deluxe')
+            ? 'DELUXE'
             : 'STANDARD';
 
           const rawStatus = (s.status || 'AVAILABLE').toUpperCase();
@@ -96,11 +103,25 @@ export const seatBookingService = {
             price: Number(s.final_price || showtimeInfo.basePrice + (s.surcharge || 0)),
             surcharge: Number(s.surcharge || 0),
             canvas: s.canvas,
+            color: s.color_code,
+            icon: s.icon_name,
+            typeName: s.type_name,
           };
         });
       }
 
-      // 4. Group seats by Row (A, B, C, D, E, F, G)
+      // 4. Parse Seat Types list
+      const seatTypes: SeatTypeInfo[] = rawSeatTypes.map((st: any) => ({
+        key: st.seat_type,
+        name: st.type_name || st.name,
+        surcharge: Number(st.surcharge_amount || st.surcharge) || 0,
+        color: st.color_code || st.color || '#64748B',
+        icon: st.icon_name || st.icon,
+        description: st.description,
+        price: Number(showtimeInfo.basePrice + (Number(st.surcharge_amount) || 0)),
+      }));
+
+      // 5. Group seats by Row (A, B, C, D, E, F, G)
       const rowMap: Record<string, SeatItem[]> = {};
       for (const seat of mappedSeats) {
         if (!rowMap[seat.row]) {
@@ -121,6 +142,7 @@ export const seatBookingService = {
         showtimeInfo,
         seats: mappedSeats,
         seatRowGroups,
+        seatTypes,
       };
     } catch (err) {
       console.warn('fetchShowtimeBookingData error:', err);

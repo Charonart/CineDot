@@ -4,11 +4,13 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminAuthStore } from '../store/useAdminAuthStore';
 import { useAdminAuth } from '../hooks/useAdminAuth';
-import { LogOut, Building2, Bell, Loader2 } from 'lucide-react';
+import { useAdminUiStore } from '../store/useAdminUiStore';
+import { LogOut, Building2, Bell, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 export const AdminHeader: React.FC = () => {
   const router = useRouter();
   const { adminUser } = useAdminAuthStore();
+  const { isSidebarCollapsed, toggleSidebar } = useAdminUiStore();
   const { logout, isLoggingOut } = useAdminAuth();
 
   const handleLogout = async () => {
@@ -20,13 +22,27 @@ export const AdminHeader: React.FC = () => {
   };
 
   return (
-    <header className="w-full bg-white border-b border-gray-200/80 text-slate-900 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-2xs">
+    <header className="w-full bg-white border-b border-gray-200/80 text-slate-900 px-6 py-3.5 flex items-center justify-between sticky top-0 z-10 shadow-2xs">
       <div className="flex items-center gap-3">
+        {/* Toggle Sidebar Button */}
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded-xl bg-slate-100 hover:bg-purple-50 text-slate-600 hover:text-[#7C6FE8] transition-colors cursor-pointer"
+          title={isSidebarCollapsed ? 'Mở rộng thanh menu (Sidebar)' : 'Thu gọn thanh menu (Sidebar)'}
+        >
+          {isSidebarCollapsed ? (
+            <PanelLeftOpen className="w-4 h-4" />
+          ) : (
+            <PanelLeftClose className="w-4 h-4" />
+          )}
+        </button>
+
         <span className="text-xs font-extrabold text-[#7C6FE8] uppercase bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
           {adminUser?.roleName || 'BẢO MẬT HỆ THỐNG'}
         </span>
+
         {adminUser?.cinemaName && (
-          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 border-l border-gray-200 pl-3">
+          <span className="text-xs font-semibold text-slate-500 hidden sm:flex items-center gap-1.5 border-l border-gray-200 pl-3">
             <Building2 className="w-3.5 h-3.5 text-[#7C6FE8]" />
             <span>{adminUser.cinemaName}</span>
           </span>

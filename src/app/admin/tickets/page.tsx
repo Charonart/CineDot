@@ -1,6 +1,5 @@
-import React from 'react';
-import { AdminTicketsView } from '@/modules/admin/components/AdminTicketsView';
+import { redirect } from 'next/navigation';
 
-export default function AdminTicketsPage() {
-  return <AdminTicketsView />;
+export default function AdminTicketsRedirectPage() {
+  redirect('/admin/booking');
 }

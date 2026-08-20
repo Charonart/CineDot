@@ -2,7 +2,7 @@
  * Admin Cinema Domain Models & UI State Types
  */
 
-export type SeatType = 'REGULAR' | 'VIP' | 'SWEETBOX' | 'MAINTENANCE';
+export type SeatType = 'REGULAR' | 'STANDARD' | 'VIP' | 'COUPLE' | 'SWEETBOX' | 'DELUXE' | 'BED' | 'MAINTENANCE' | string;
 
 export interface AdminSeatItem {
   id: string; // e.g. "A01"

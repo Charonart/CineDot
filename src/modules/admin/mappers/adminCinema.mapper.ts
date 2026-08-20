@@ -44,18 +44,17 @@ export const adminCinemaMapper = {
   },
 
   seatTypeToDomain(rawType?: string): SeatType {
-    const t = (rawType || '').toUpperCase();
-    if (t === 'VIP') return 'VIP';
-    if (t === 'SWEETBOX' || t === 'COUPLE') return 'SWEETBOX';
-    if (t === 'MAINTENANCE' || t === 'BLOCKED' || t === 'LOCKED') return 'MAINTENANCE';
-    return 'REGULAR';
+    if (!rawType) return 'STANDARD';
+    const t = rawType.toUpperCase();
+    if (t === 'REGULAR' || t === 'STD') return 'STANDARD';
+    return t;
   },
 
   seatTypeToBackend(type: SeatType): string {
-    if (type === 'VIP') return 'VIP';
-    if (type === 'SWEETBOX') return 'SWEETBOX';
-    if (type === 'MAINTENANCE') return 'MAINTENANCE';
-    return 'STANDARD';
+    if (!type) return 'standard';
+    const t = type.toUpperCase();
+    if (t === 'REGULAR' || t === 'STD') return 'standard';
+    return type.toLowerCase();
   },
 
   /**

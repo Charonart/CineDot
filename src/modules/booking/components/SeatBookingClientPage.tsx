@@ -35,6 +35,7 @@ export function SeatBookingClientPage({
   const {
     bookingInfo,
     seats,
+    seatTypes,
     selectedSeatIds,
     toggleSelectSeat,
     selectedSeats,
@@ -95,20 +96,6 @@ export function SeatBookingClientPage({
     );
   }
 
-  // Derive dynamic seat prices from seats & showtime booking info
-  const basePrice = bookingInfo?.basePrice || 110000;
-  const standardSeat = seats.find((s) => s.type === 'STANDARD');
-  const vipSeat = seats.find((s) => s.type === 'VIP');
-  const sweetboxSeat = seats.find((s) => s.type === 'SWEETBOX');
-
-  const standardPrice = standardSeat ? standardSeat.price : basePrice;
-  const vipPrice = vipSeat ? vipSeat.price : basePrice + 20000;
-  const sweetboxPrice = sweetboxSeat ? sweetboxSeat.price * 2 : (basePrice + 40000) * 2;
-
-  const hasStandard = seats.some((s) => s.type === 'STANDARD') || seats.length === 0;
-  const hasVip = seats.some((s) => s.type === 'VIP');
-  const hasSweetbox = seats.some((s) => s.type === 'SWEETBOX');
-
   return (
     <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white relative">
       {/* 1. Step Progress Wizard Bar */}
@@ -142,12 +129,9 @@ export function SeatBookingClientPage({
 
                 {/* Seat Legend & Dynamic Price Tariff Bar */}
                 <SeatLegend
-                  standardPrice={standardPrice}
-                  vipPrice={vipPrice}
-                  sweetboxPrice={sweetboxPrice}
-                  hasStandard={hasStandard}
-                  hasVip={hasVip}
-                  hasSweetbox={hasSweetbox}
+                  seatTypes={seatTypes}
+                  seats={seats}
+                  basePrice={bookingInfo?.basePrice || 110000}
                 />
               </div>
             </div>

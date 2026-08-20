@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { SeatItem, SeatType, SeatStatus, SeatCanvas } from '../types/seat-booking.types';
 import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 
@@ -18,6 +20,9 @@ interface ProcessedSeat {
   canvas: SeatCanvas;
   width: number;
   label: string;
+  color?: string;
+  typeName?: string;
+  price: number;
 }
 
 export const SeatGrid: React.FC<SeatGridProps> = ({
@@ -32,7 +37,7 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
   const SEAT_SIZE = 30;
   const SEAT_GAP = 35; // Distance between cx of adjacent seats
 
-  // Process seats: merge couple/sweetbox seats
+  // Process seats: merge couple/sweetbox seats naturally by pair (1-2, 3-4, 5-6...)
   const processedSeats = useMemo(() => {
     const sortedSeats = [...seats].sort((a, b) => {
       if (a.row !== b.row) return a.row.localeCompare(b.row);
@@ -43,12 +48,21 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
     let i = 0;
     while (i < sortedSeats.length) {
       const seat = sortedSeats[i];
-      const isCouple = seat.type.toLowerCase() === 'couple' || seat.type.toLowerCase() === 'sweetbox';
+      const normType = (seat.type || 'standard').toLowerCase();
+      const isCouple = normType === 'couple' || normType === 'sweetbox';
       
       const nextSeat = i + 1 < sortedSeats.length ? sortedSeats[i + 1] : null;
-      const isNextCouple = nextSeat && (nextSeat.type.toLowerCase() === 'couple' || nextSeat.type.toLowerCase() === 'sweetbox');
+      const isNextCouple = nextSeat && ((nextSeat.type || 'standard').toLowerCase() === 'couple' || (nextSeat.type || 'standard').toLowerCase() === 'sweetbox');
 
-      if (isCouple && nextSeat && isNextCouple && nextSeat.row === seat.row) {
+      // Pair natural odd-even couple seats (e.g. 1 & 2, 3 & 4) in the same row
+      const isNaturalPair =
+        isCouple &&
+        nextSeat &&
+        isNextCouple &&
+        nextSeat.row === seat.row &&
+        (seat.number % 2 !== 0 && nextSeat.number === seat.number + 1);
+
+      if (isNaturalPair && nextSeat) {
         result.push({
           id: `${seat.id}-${nextSeat.id}`,
           seatIds: [seat.id, nextSeat.id],
@@ -60,8 +74,11 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
             cy: seat.canvas?.cy || 0,
             angle: seat.canvas?.angle || 0,
           },
-          width: SEAT_SIZE + SEAT_GAP, // e.g. 30 + 35 = 65
-          label: `${seat.id}-${nextSeat.id}`
+          width: SEAT_SIZE + SEAT_GAP, // 30 + 35 = 65px
+          label: `${seat.id}-${nextSeat.id}`,
+          color: seat.color || '#EC4899',
+          typeName: seat.typeName || 'Ghế Đôi Sweetbox',
+          price: seat.price + nextSeat.price,
         });
         i += 2;
       } else {
@@ -76,8 +93,11 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
             cy: seat.canvas?.cy || 0,
             angle: seat.canvas?.angle || 0,
           },
-          width: SEAT_SIZE,
-          label: String(seat.id)
+          width: isCouple ? SEAT_SIZE * 1.5 : SEAT_SIZE,
+          label: String(seat.id),
+          color: seat.color || (normType === 'vip' ? '#7C6FE8' : isCouple ? '#EC4899' : '#64748B'),
+          typeName: seat.typeName,
+          price: seat.price,
         });
         i += 1;
       }
@@ -103,16 +123,15 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
   useEffect(() => {
     if (containerRef.current && mapWidth > 0) {
       const containerW = containerRef.current.clientWidth;
-      // if map is wider than container, scale down. Add some padding.
       const bestScale = Math.min(1, (containerW - 40) / mapWidth);
       setScale(bestScale);
     }
   }, [mapWidth]);
 
-  const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2));
-  const handleZoomOut = () => setScale(prev => Math.max(prev - 0.1, 0.4));
+  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.1, 2));
+  const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.1, 0.4));
   const handleResetZoom = () => {
-    if (containerRef.current) {
+    if (containerRef.current && mapWidth > 0) {
       const bestScale = Math.min(1, (containerRef.current.clientWidth - 40) / mapWidth);
       setScale(bestScale);
     }
@@ -123,12 +142,27 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-2 relative">
+    <div className="w-full flex flex-col gap-2 relative select-none">
       {/* Zoom Controls */}
       <div className="absolute right-0 top-0 z-20 flex flex-col gap-2 bg-white/80 p-2 rounded-xl shadow-sm backdrop-blur-sm border border-gray-100">
-        <button onClick={handleZoomIn} className="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-600 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer"><ZoomIn className="w-4 h-4" /></button>
-        <button onClick={handleResetZoom} className="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-600 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer"><Maximize className="w-4 h-4" /></button>
-        <button onClick={handleZoomOut} className="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-600 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer"><ZoomOut className="w-4 h-4" /></button>
+        <button
+          onClick={handleZoomIn}
+          className="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-600 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer"
+        >
+          <ZoomIn className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleResetZoom}
+          className="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-600 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer"
+        >
+          <Maximize className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleZoomOut}
+          className="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-600 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer"
+        >
+          <ZoomOut className="w-4 h-4" />
+        </button>
       </div>
 
       <div 
@@ -144,15 +178,31 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
           }}
         >
           {processedSeats.map((seat) => {
-            // Determine if fully selected (both merged ids selected)
-            const isSelected = seat.seatIds.every(id => selectedSeatIds.includes(id));
+            const isSelected = seat.seatIds.every((id) => selectedSeatIds.includes(id));
             const isBooked = seat.status !== 'AVAILABLE';
-            const isVip = seat.type.toLowerCase() === 'vip';
-            const isCouple = seat.type.toLowerCase() === 'couple' || seat.type.toLowerCase() === 'sweetbox';
+            const normType = (seat.type || 'standard').toLowerCase();
+            const isStandard = normType === 'standard' || normType === 'regular';
+            const seatColor = seat.color || '#64748B';
 
-            let baseClass = 'bg-[#F2F2F7] border-gray-300 text-slate-700'; // Standard
-            if (isVip) baseClass = 'bg-[#7C6FE8]/15 border-[#7C6FE8]/50 text-[#7C6FE8]';
-            if (isCouple) baseClass = 'bg-pink-50 border-pink-300 text-pink-700';
+            let dynamicBg = `${seatColor}1A`; // ~10% tint
+            let dynamicBorder = seatColor;
+            let dynamicText = seatColor;
+
+            if (isStandard) {
+              dynamicBg = '#F2F2F7';
+              dynamicBorder = '#CBD5E1';
+              dynamicText = '#334155';
+            }
+
+            if (isBooked) {
+              dynamicBg = '#E2E8F0';
+              dynamicBorder = '#CBD5E1';
+              dynamicText = '#94A3B8';
+            } else if (isSelected) {
+              dynamicBg = '#7C6FE8';
+              dynamicBorder = '#7C6FE8';
+              dynamicText = '#FFFFFF';
+            }
 
             return (
               <motion.button
@@ -161,21 +211,24 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
                 whileTap={!isBooked ? { scale: 0.95 } : {}}
                 onClick={() => handleToggle(seat.seatIds)}
                 disabled={isBooked}
-                title={`Ghế ${seat.label} - ${seat.type}`}
-                className={`absolute rounded-xl text-[10px] font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer border ${
-                  isBooked
-                    ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed shadow-none'
-                    : isSelected
-                    ? 'bg-[#7C6FE8] text-white border-[#7C6FE8] shadow-[0_4px_12px_rgba(124,111,232,0.4)]'
-                    : `${baseClass} hover:border-[#7C6FE8] hover:bg-white`
-                }`}
+                title={`Ghế ${seat.label} (${seat.typeName || seat.type}) - ${seat.price.toLocaleString('vi-VN')}đ`}
                 style={{
                   left: seat.canvas.cx,
                   top: seat.canvas.cy,
                   width: seat.width,
                   height: SEAT_SIZE,
-                  transform: `rotate(${seat.canvas.angle}deg)`
+                  transform: `rotate(${seat.canvas.angle}deg)`,
+                  backgroundColor: dynamicBg,
+                  borderColor: dynamicBorder,
+                  color: dynamicText,
                 }}
+                className={`absolute rounded-xl text-[10px] font-black flex items-center justify-center transition-colors shadow-2xs cursor-pointer border ${
+                  isBooked
+                    ? 'cursor-not-allowed shadow-none'
+                    : isSelected
+                    ? 'shadow-[0_4px_12px_rgba(124,111,232,0.5)] z-20'
+                    : 'hover:brightness-95'
+                }`}
               >
                 {seat.label}
               </motion.button>

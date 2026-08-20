@@ -23,11 +23,13 @@ import {
   Globe,
   FileText,
   Search,
+  Sparkles,
 } from 'lucide-react';
 import { useAdminCinemas } from '../hooks/useAdminCinemas';
 import { AdminCinemaItem, AdminRoomItem, AdminSeatItem, SeatType } from '../types/adminCinema.types';
 import { adminCinemaMapper } from '../mappers/adminCinema.mapper';
 import { AdminSeatCanvasEditor } from './ui';
+import { SeatTypesStudioModal } from './cinemas/SeatTypesStudioModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function AdminCinemasView() {
@@ -38,6 +40,7 @@ export function AdminCinemasView() {
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [isCinemaDropdownOpen, setIsCinemaDropdownOpen] = useState(false);
   const cinemaDropdownRef = useRef<HTMLDivElement>(null);
+  const [isSeatTypesModalOpen, setIsSeatTypesModalOpen] = useState(false);
 
   // Collapse Left Panel State (0% width when collapsed, 100% canvas)
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
@@ -498,6 +501,16 @@ export function AdminCinemasView() {
               </motion.div>
             )}
           </div>
+
+          {/* Seat Types Management Studio Button */}
+          <button
+            type="button"
+            onClick={() => setIsSeatTypesModalOpen(true)}
+            className="px-4 py-2.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-[#7C6FE8] font-extrabold text-xs flex items-center gap-2 border border-purple-200 shadow-2xs transition-all cursor-pointer hover:shadow-xs"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>QUẢN LÝ LOẠI GHẾ</span>
+          </button>
 
           {/* Add Cinema Button */}
           <button
@@ -1209,6 +1222,12 @@ export function AdminCinemasView() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* 💺 MODAL QUẢN LÝ LOẠI GHẾ & BẢNG PHỤ PHÍ (SEAT TYPES STUDIO) */}
+      <SeatTypesStudioModal
+        isOpen={isSeatTypesModalOpen}
+        onClose={() => setIsSeatTypesModalOpen(false)}
+      />
     </div>
   );
 }

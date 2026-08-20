@@ -1,4 +1,4 @@
-export type SeatType = 'STANDARD' | 'VIP' | 'SWEETBOX' | 'COUPLE';
+export type SeatType = 'STANDARD' | 'VIP' | 'SWEETBOX' | 'COUPLE' | 'DELUXE' | 'BED' | string;
 
 export type SeatStatus = 'AVAILABLE' | 'SELECTED' | 'BOOKED' | 'HOLDING' | 'BLOCKED';
 
@@ -6,6 +6,16 @@ export interface SeatCanvas {
   cx: number;
   cy: number;
   angle: number;
+}
+
+export interface SeatTypeInfo {
+  key: string;
+  name: string;
+  surcharge: number;
+  color: string;
+  icon?: string;
+  description?: string;
+  price?: number;
 }
 
 export interface SeatItem {
@@ -19,6 +29,9 @@ export interface SeatItem {
   surcharge?: number;
   pairId?: string; // Optional for Sweetbox / Couple double seats
   canvas?: SeatCanvas;
+  color?: string;
+  icon?: string;
+  typeName?: string;
 }
 
 export interface SeatRowGroup {

@@ -59,6 +59,7 @@ export const ENDPOINTS = {
     SPECIAL_THEATERS: (type: string) => `/special-theaters/${type}`,
     ROOM_SEATS: (roomId: number | string) => `/rooms/${roomId}/seats`,
     ROOM_LAYOUT: (roomId: number | string) => `/rooms/${roomId}/layout`,
+    SEAT_TYPES: '/seat-types',
   },
   SHOWTIMES: {
     LIST: '/showtimes',
@@ -112,23 +113,32 @@ export const ENDPOINTS = {
     CINEMA_ROOMS: (cinemaId: number | string) => `/admin/cinemas/${cinemaId}/rooms`,
     ROOM_DETAIL: (roomId: number | string) => `/admin/rooms/${roomId}`,
 
+    SHOWTIMES: '/admin/showtimes',
+    SHOWTIME_DETAIL: (id: number | string) => `/admin/showtimes/${id}`,
+    SHOWTIME_CLONE_DATE: '/admin/showtimes/clone-date',
     SHOWTIMES_QUICK_CREATE: '/admin/showtimes',
     SCHEDULES: '/admin/schedules',
     SCHEDULE_DETAIL: (id: number | string) => `/admin/schedules/${id}`,
 
     CAMPAIGNS: '/admin/campaigns',
+    CAMPAIGNS_STATS: '/admin/campaigns/stats',
+    CAMPAIGN_DETAIL: (id: number | string) => `/admin/campaigns/${id}`,
+    CAMPAIGN_TOGGLE: (id: number | string) => `/admin/campaigns/${id}/toggle-status`,
     CAMPAIGN_VOUCHERS: (id: number | string) => `/admin/campaigns/${id}/vouchers`,
     CAMPAIGN_BANNERS: (id: number | string) => `/admin/campaigns/${id}/banners`,
     CAMPAIGN_ROI: (id: number | string) => `/admin/campaigns/${id}/roi`,
 
     VOUCHERS: '/admin/vouchers',
+    VOUCHERS_STATS: '/admin/vouchers/stats',
     VOUCHER_DETAIL: (id: number | string) => `/admin/vouchers/${id}`,
-
-    COMBOS: '/admin/combos',
-    COMBO_DETAIL: (id: number | string) => `/admin/combos/${id}`,
+    VOUCHER_TOGGLE: (id: number | string) => `/admin/vouchers/${id}/toggle-status`,
 
     BANNERS: '/admin/banners',
     BANNER_DETAIL: (id: number | string) => `/admin/banners/${id}`,
+    BANNER_TOGGLE: (id: number | string) => `/admin/banners/${id}/toggle-status`,
+
+    COMBOS: '/admin/combos',
+    COMBO_DETAIL: (id: number | string) => `/admin/combos/${id}`,
 
     PROVINCES: '/admin/provinces',
     GENRES: '/admin/genres',
@@ -148,6 +158,7 @@ export const ENDPOINTS = {
 
     // Bookings & Transactions
     BOOKINGS: '/admin/bookings',
+    BOOKINGS_STATS: '/admin/bookings/stats',
     BOOKING_DETAIL: (id: number | string) => `/admin/bookings/${id}`,
     BOOKING_REFUND: (id: number | string) => `/admin/bookings/${id}/refund`,
 
@@ -163,5 +174,9 @@ export const ENDPOINTS = {
     ROLES: '/admin/roles',
 
     REVENUE_REPORT: '/admin/reports/revenue',
+
+    // Seat Types Management
+    SEAT_TYPES: '/admin/seat-types',
+    SEAT_TYPE_DETAIL: (id: string | number) => `/admin/seat-types/${id}`,
   },
 };

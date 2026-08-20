@@ -15,6 +15,7 @@ interface RoutePermissionConfig {
 
 const ROUTE_PERMISSIONS: RoutePermissionConfig[] = [
   { pathPrefix: '/admin/users-staff', requiredPermission: 'staff.manage', allowedRoles: ['SUPER_ADMIN'] },
+  { pathPrefix: '/admin/campaign', requiredPermission: 'vouchers.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/vouchers', requiredPermission: 'vouchers.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/settings', requiredPermission: 'settings.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/movies/genres', requiredPermission: 'movies.genres.manage', allowedRoles: ['SUPER_ADMIN'] },
@@ -22,6 +23,7 @@ const ROUTE_PERMISSIONS: RoutePermissionConfig[] = [
   { pathPrefix: '/admin/movies', requiredPermission: 'movies.view' },
   { pathPrefix: '/admin/cinemas', requiredPermission: 'cinemas.view' },
   { pathPrefix: '/admin/showtimes', requiredPermission: 'showtimes.view' },
+  { pathPrefix: '/admin/booking', requiredPermission: 'bookings.view' },
   { pathPrefix: '/admin/tickets', requiredPermission: 'bookings.view' },
   { pathPrefix: '/admin/concessions', requiredPermission: 'concessions.view' },
   { pathPrefix: '/admin/ticket-scanner', requiredPermission: 'tickets.scan' },
