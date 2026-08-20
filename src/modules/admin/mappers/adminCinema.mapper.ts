@@ -30,8 +30,8 @@ const TYPE_TO_FORMAT: Record<string, string> = {
 
 const DEFAULT_ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const COLS_PER_ROW = 12;
-const SEAT_SIZE = 30;
-const SEAT_GAP = 35;
+const SEAT_SIZE = 34;
+const SEAT_GAP = 42;
 
 export const adminCinemaMapper = {
   formatToRoomType(format: string): string {
@@ -76,7 +76,7 @@ export const adminCinemaMapper = {
         }
 
         const cx = startX + (c - 1) * SEAT_GAP;
-        const cy = startY + rowIdx * (SEAT_SIZE + 15);
+        const cy = startY + rowIdx * (SEAT_SIZE + 16);
 
         seats.push({
           id: seatId,

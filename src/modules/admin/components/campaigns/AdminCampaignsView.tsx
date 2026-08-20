@@ -6,7 +6,6 @@ import {
   Target,
   Plus,
   Search,
-  TrendingUp,
   DollarSign,
   Ticket,
   Image as ImageIcon,
@@ -73,22 +72,23 @@ export function AdminCampaignsView() {
     <div className="flex flex-col gap-6 w-full">
       {/* 1. Header & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-black text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Target className="w-4 h-4" />
-            <span>MARKETING & PROMOTIONS SUITE</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Quản Lý Chiến Dịch Tiếp Thị & Khuyến Mãi
-          </h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Target className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Chiến Dịch Tiếp Thị & Khuyến Mãi
+            </h1>
+          </div>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-3 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
+          className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>+ TẠO CHIẾN DỊCH MỚI</span>
+          <span>TẠO CHIẾN DỊCH MỚI</span>
         </button>
       </div>
 
@@ -96,7 +96,7 @@ export function AdminCampaignsView() {
       <MarketingSubNavTabs />
 
       {/* 3. Overview KPI Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Card 1: Tổng Chiến Dịch */}
         <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
@@ -132,19 +132,6 @@ export function AdminCampaignsView() {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Ngân Sách</span>
             <span className="text-xl font-black text-slate-900 font-mono">
               {isStatsLoading ? '...' : `${(Number(stats?.total_budget ?? 0) / 1000000).toLocaleString('vi-VN')}M`}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 4: Doanh Thu & ROI */}
-        <div className="p-5 rounded-3xl bg-white border border-indigo-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tỷ Suất ROI Hệ Thống</span>
-            <span className="text-2xl font-black text-indigo-600 font-mono">
-              {isStatsLoading ? '...' : `+${stats?.overall_roi_percentage ?? 0}%`}
             </span>
           </div>
         </div>

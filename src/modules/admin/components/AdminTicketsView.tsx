@@ -22,17 +22,18 @@ export function AdminTicketsView() {
   });
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Ticket className="w-4 h-4" />
-            <span>QUẢN LÝ ĐƠN HÀNG VÉ PHIM</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Danh Sách Đơn Vé Đã Thanh Toán
-          </h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Ticket className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Danh Sách Đơn Vé Đã Thanh Toán
+            </h1>
+          </div>
         </div>
       </div>
 

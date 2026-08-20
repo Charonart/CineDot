@@ -20,8 +20,8 @@ export function HomePageClient() {
       {/* Section 2: Movie Tabs (8 Movie Cards Grid) */}
       <MovieTabsSection movies={movies} isLoading={loading} />
 
-      {/* Section 3: Cinema Corner (1 Large Featured + 3 Small Articles) */}
-      <CinemaCornerSection articles={articles} />
+      {/* Section 3: Cinema Corner (Temporarily hidden) */}
+      {/* <CinemaCornerSection articles={articles} /> */}
 
       {/* Section 4: Promotions Grid (4 Cards) */}
       <PromotionsSection promotions={promotions} />

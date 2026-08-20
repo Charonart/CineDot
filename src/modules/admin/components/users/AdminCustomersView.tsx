@@ -18,7 +18,7 @@ import {
   Phone,
   ShieldAlert,
 } from 'lucide-react';
-import { UsersStaffSubNavTabs } from './UsersStaffSubNavTabs';
+
 import { useAdminCustomers } from '../../hooks/useAdminCustomers';
 import { CustomerDetailDrawer } from './CustomerDetailDrawer';
 import { PointsAdjustmentModal } from './PointsAdjustmentModal';
@@ -311,30 +311,25 @@ export function AdminCustomersView() {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-fadeIn">
-      {/* Shared Sub-Nav Tabs */}
-      <UsersStaffSubNavTabs />
-
       {/* 1. Header & Primary CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-black text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <UserCheck className="w-4 h-4" />
-            <span>DANH MỤC KHÁCH HÀNG & HỘI VIÊN (NOTION & SHEETS DATA GRID)</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Quản Lý Khách Hàng CineDot
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium">
-            Lọc đa dạng tại đầu cột, nhấp đúp để sửa ô trực tiếp, đồng bộ URL SearchParams và thao tác hàng loạt.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Quản Lý Khách Hàng & Hội Viên
+            </h1>
+          </div>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-3 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-[#7C6FE8]/25 transition-all flex items-center gap-2 cursor-pointer shrink-0"
+          className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-[#7C6FE8]/25 transition-all flex items-center gap-2 cursor-pointer shrink-0"
         >
           <UserPlus className="w-4 h-4" />
-          <span>+ ĐĂNG KÝ HỘI VIÊN</span>
+          <span>ĐĂNG KÝ HỘI VIÊN</span>
         </button>
       </div>
 

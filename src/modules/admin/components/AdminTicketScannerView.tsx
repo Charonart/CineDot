@@ -167,26 +167,26 @@ export function AdminTicketScannerView() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-6xl mx-auto font-sans pb-12">
+    <div className="flex flex-col gap-6 max-w-6xl mx-auto font-sans pb-12">
       {/* 1. Header & Live Indicator */}
-      <div className="flex flex-col items-center text-center gap-2">
-        <div className="flex items-center gap-2">
-          <span className="px-3.5 py-1.5 rounded-full bg-purple-50 text-[#7C6FE8] text-xs font-extrabold uppercase border border-purple-100 flex items-center gap-1.5 shadow-2xs">
-            <QrCode className="w-4 h-4 text-[#7C6FE8]" />
-            <span>KIOSK SOÁT VÉ CỔNG RẠP CINEDOT</span>
-          </span>
-          <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Hệ Thống Trực Tuyến 100% Real API</span>
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <QrCode className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Cổng Quét Mã QR Code Soát Vé & Trả Bắp Nước
+            </h1>
+          </div>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Cổng Quét Mã QR Code Soát Vé & Trả Bắp Nước
-        </h1>
-        <p className="text-xs text-slate-500 font-medium max-w-xl">
-          Nhập mã đặt vé, quét bằng máy đọc mã vạch USB hoặc sử dụng Camera để kiểm duyệt vé vào phòng chiếu và phát combo bắp nước cho khán giả.
-        </p>
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Hệ Thống Trực Tuyến</span>
+          </span>
+        </div>
       </div>
 
       {/* 2. Main Workspace (Scanner on Left / Result Details on Right) */}

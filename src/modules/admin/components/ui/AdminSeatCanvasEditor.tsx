@@ -36,8 +36,8 @@ interface AdminSeatCanvasEditorProps {
   onResetToDefaultLayout?: () => void;
 }
 
-const SEAT_SIZE = 30;
-const SEAT_GAP = 35; // Khoảng cách chuẩn giữa 2 tâm ghế liền kề
+const SEAT_SIZE = 34;
+const SEAT_GAP = 42; // Khoảng cách chuẩn giữa 2 tâm ghế liền kề
 
 export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
   seats,
@@ -161,18 +161,18 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
   useEffect(() => {
     if (containerRef.current && mapWidth > 0) {
       const containerW = containerRef.current.clientWidth;
-      const bestScale = Math.min(1, Math.max(0.4, (containerW - 40) / mapWidth));
+      const bestScale = Math.min(1.25, Math.max(0.6, (containerW - 40) / mapWidth));
       setScale(bestScale);
     }
   }, [mapWidth]);
 
-  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.1, 1.8));
+  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.1, 2.0));
   const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.1, 0.4));
   const handleResetZoomAndPan = () => {
     setPanOffset({ x: 0, y: 0 });
     if (containerRef.current) {
       const containerW = containerRef.current.clientWidth;
-      const bestScale = Math.min(1, Math.max(0.4, (containerW - 40) / mapWidth));
+      const bestScale = Math.min(1.25, Math.max(0.6, (containerW - 40) / mapWidth));
       setScale(bestScale);
     }
   };
@@ -718,12 +718,12 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
 
       {/* 2. Main Workspace (Canvas on Left / Inspector on Right) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-        {/* Left Side: Interactive Canvas Workspace (8 Cols) */}
-        <div className="xl:col-span-8 flex flex-col gap-4">
+        {/* Left Side: Interactive Canvas Workspace (Expanded to 9 Cols) */}
+        <div className="xl:col-span-9 flex flex-col gap-4">
           <div
             ref={containerRef}
             onPointerDown={handleCanvasPointerDown}
-            className={`canvas-bg w-full h-[540px] overflow-hidden bg-[#F9F9FB] rounded-3xl border border-dashed border-gray-300 flex flex-col items-center relative shadow-inner p-6 select-none ${
+            className={`canvas-bg w-full h-[620px] overflow-hidden bg-[#F9F9FB] rounded-3xl border border-dashed border-gray-300 flex flex-col items-center relative shadow-inner p-6 select-none ${
               isPanning ? 'cursor-grabbing' : 'cursor-grab'
             }`}
           >
@@ -776,7 +776,7 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                     key={seat.id}
                     onPointerDown={(e) => handleSeatPointerDown(e, seat.id)}
                     title={`Ghế ${seat.id} (${matchedType ? matchedType.name : seat.type})\nTọa độ: X:${seat.cx}, Y:${seat.cy}, Góc:${seat.angle}°\nGiữ Shift + Click để chọn nhiều ghế\nKéo chuột để di chuyển`}
-                    className={`absolute rounded-xl text-[11px] font-black flex items-center justify-center border border-black/10 select-none transition-all cursor-grab active:cursor-grabbing text-white shadow-2xs ${
+                    className={`absolute rounded-xl text-xs font-black flex items-center justify-center border border-black/10 select-none transition-all cursor-grab active:cursor-grabbing text-white shadow-2xs ${
                       isSelected
                         ? 'ring-3 ring-offset-2 ring-[#7C6FE8] z-40 shadow-lg scale-105'
                         : 'hover:brightness-110 z-10'
@@ -784,13 +784,13 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                     style={{
                       left: seat.cx,
                       top: seat.cy,
-                      width: isCoupleLike ? SEAT_SIZE * 1.5 : SEAT_SIZE,
+                      width: isCoupleLike ? SEAT_SIZE * 1.6 : SEAT_SIZE,
                       height: SEAT_SIZE,
                       transform: `rotate(${seat.angle}deg)`,
                       backgroundColor: seatBg,
                     }}
                   >
-                    {/* Rotation Handle on Top of Selected Seat (Shown when only 1 seat selected or on the primary selected seat) */}
+                    {/* Rotation Handle on Top of Selected Seat */}
                     {isSelected && selectedSeatIds[0] === seat.id && (
                       <div
                         onPointerDown={handleRotateHandleDown}
@@ -809,8 +809,8 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Seat Inspector Panel (4 Cols) */}
-        <div className="xl:col-span-4 flex flex-col gap-4">
+        {/* Right Side: Seat Inspector Panel (Compact 3 Cols) */}
+        <div className="xl:col-span-3 flex flex-col gap-4">
           <div className="p-5 rounded-3xl bg-white border border-gray-200 shadow-sm flex flex-col gap-4">
             {singleSelectedSeat ? (
               /* PANEL A: SINGLE SELECTED SEAT PROPERTIES */
