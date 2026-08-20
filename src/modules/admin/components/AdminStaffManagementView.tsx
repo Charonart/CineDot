@@ -24,7 +24,7 @@ import {
   Calendar,
   Loader2,
 } from 'lucide-react';
-import { UsersStaffSubNavTabs } from './users/UsersStaffSubNavTabs';
+
 import { useAdminRoles } from '../hooks/useAdminRoles';
 import { adminStaffService } from '../services/adminStaff.service';
 import { CineDataTable, useServerTable } from '@/shared/components/table';
@@ -500,32 +500,27 @@ export function AdminStaffManagementView() {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-fadeIn">
-      {/* Shared Sub-Nav Tabs */}
-      <UsersStaffSubNavTabs />
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Users className="w-4 h-4" />
-            <span>QUẢN TRỊ QUYỀN HẠN & NHÂN SỰ (NOTION & SHEETS DATA GRID)</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Danh Sách Tài Khoản Nhân Sự
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium">
-            Quản lý đội ngũ nhân viên rạp chiếu, gán vai trò theo ngữ cảnh và phân quyền toàn diện.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Danh Sách Tài Khoản Nhân Sự
+            </h1>
+          </div>
         </div>
 
         {/* Create Staff Button (Visible to Super Admin) */}
         {adminUser?.role === 'SUPER_ADMIN' && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-5 py-3 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
+            className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
           >
             <UserPlus className="w-4 h-4" />
-            <span>+ THÊM NHÂN VIÊN MỚI</span>
+            <span>THÊM NHÂN VIÊN MỚI</span>
           </button>
         )}
       </div>

@@ -335,7 +335,6 @@ export function AdminBookingsView() {
       <CineDataTable<AdminBookingItem>
         table={table}
         title="Danh Sách Đơn Vé & Giao Dịch"
-        subtitle="Theo dõi đơn đặt vé trực tuyến, lọc đa dạng, in vé tại quầy và xử lý hóa đơn hoàn tiền sự cố."
         icon={<Ticket className="w-6 h-6 text-[#7C6FE8]" />}
         headerActions={
           <div className="flex items-center gap-3">

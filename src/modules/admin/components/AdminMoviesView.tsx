@@ -499,12 +499,11 @@ export function AdminMoviesView() {
   );
 
   return (
-    <div className="flex flex-col gap-8 font-sans">
+    <div className="flex flex-col gap-6 font-sans">
       {/* Universal Notion/Sheets CineDataTable */}
       <CineDataTable<AdminMovieItem>
         table={table}
         title="Quản Lý Danh Sách Phim"
-        subtitle="Quản lý toàn diện kho phim, phân loại thể loại, ảnh TMDB, độ tuổi, sửa ô trực tiếp và đồng bộ URL"
         icon={<Film className="w-6 h-6 text-[#7C6FE8]" />}
         headerActions={
           <div className="flex items-center gap-2">

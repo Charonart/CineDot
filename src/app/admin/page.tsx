@@ -1,6 +1,6 @@
-import React from 'react';
-import { AdminDashboardView } from '@/modules/admin/components/AdminDashboardView';
+import { redirect } from 'next/navigation';
 
 export default function AdminDashboardPage() {
-  return <AdminDashboardView />;
+  redirect('/admin/movies');
 }
+

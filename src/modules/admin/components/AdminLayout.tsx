@@ -30,11 +30,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
     if (!isAuthenticated && pathname !== '/admin/login') {
       router.replace('/admin/login');
-    } else if (isAuthenticated && pathname === '/admin/login') {
+    } else if (isAuthenticated && (pathname === '/admin/login' || pathname === '/admin')) {
       if (adminUser?.role === 'TICKET_STAFF') {
         router.replace('/admin/ticket-scanner');
       } else {
-        router.replace('/admin');
+        router.replace('/admin/movies');
       }
     }
   }, [isInitialized, isAuthenticated, pathname, router, adminUser]);
@@ -62,19 +62,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Main Admin Layout with Sidebar, Header and Route Guard
+  // Main Admin Layout with Sidebar only and Route Guard
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex font-sans selection:bg-[#7C6FE8] selection:text-white">
       {/* Left Navigation Sidebar */}
       <AdminSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <AdminHeader />
-        <main className="p-6 sm:p-8 flex-1 overflow-y-auto">
-          <AdminRouteGuard>{children}</AdminRouteGuard>
-        </main>
-      </div>
+      <main className="flex-1 min-w-0 p-6 sm:p-8 overflow-y-auto">
+        <AdminRouteGuard>{children}</AdminRouteGuard>
+      </main>
     </div>
   );
 }
