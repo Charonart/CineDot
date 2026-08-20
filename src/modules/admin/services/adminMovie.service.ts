@@ -52,51 +52,55 @@ export const adminMovieService = {
    * Lấy danh sách phim quản trị (Server-side Pagination, Filter, Search)
    */
   async getMovies(params?: AdminMovieListRequestDTO): Promise<PaginatedMovieResult> {
-    try {
-      const res = await apiClient.get<
-        ApiResponse<ApiPaginatedData<AdminMovieItemDTO> | AdminMovieItemDTO[]>
-      >(ENDPOINTS.ADMIN.MOVIES, { params });
+    const res = await apiClient.get<any>(ENDPOINTS.ADMIN.MOVIES, { params });
+    const data = res.data?.data;
+    const meta = res.data?.meta;
 
-      const data = res.data?.data;
-
-      // Hỗ trợ cả phản hồi dạng mảng lẫn đối tượng phân trang
-      if (Array.isArray(data)) {
-        return {
-          items: data.map(adminMovieMapper.toDomain),
-          currentPage: 1,
-          lastPage: 1,
-          perPage: data.length,
-          total: data.length,
-        };
-      }
-
-      const rawList = data?.data || data?.items || [];
+    if (Array.isArray(data) && meta) {
       return {
-        items: rawList.map(adminMovieMapper.toDomain),
-        currentPage: data?.current_page || 1,
-        lastPage: data?.last_page || 1,
-        perPage: data?.per_page || (params?.per_page || 6),
-        total: data?.total || rawList.length,
+        items: data.map(adminMovieMapper.toDomain),
+        currentPage: meta.current_page,
+        lastPage: meta.last_page,
+        perPage: meta.per_page,
+        total: meta.total,
       };
-    } catch (err: unknown) {
-      const errorObj = err as { status?: number; code?: string };
-      // Fallback: nếu /admin/movies trả về 404/405, gọi endpoint public /movies
-      if (errorObj?.status === 404 || errorObj?.status === 405 || String(errorObj?.code) === '404') {
-        const publicRes = await apiClient.get<
-          ApiResponse<AdminMovieItemDTO[] | { results?: AdminMovieItemDTO[]; data?: AdminMovieItemDTO[] }>
-        >(ENDPOINTS.MOVIES.LIST, { params });
-        const pData = publicRes.data?.data;
-        const list = Array.isArray(pData) ? pData : (pData?.results || pData?.data || []);
-        return {
-          items: list.map(adminMovieMapper.toDomain),
-          currentPage: 1,
-          lastPage: 1,
-          perPage: list.length,
-          total: list.length,
-        };
-      }
-      throw err;
     }
+
+    const rawList = Array.isArray(data) ? data : (data?.data || data?.items || []);
+    return {
+      items: rawList.map(adminMovieMapper.toDomain),
+      currentPage: meta?.current_page || data?.current_page || 1,
+      lastPage: meta?.last_page || data?.last_page || 1,
+      perPage: meta?.per_page || data?.per_page || 15,
+      total: meta?.total || data?.total || rawList.length,
+    };
+  },
+
+  async updateCell(id: number | string, field: string, value: any): Promise<AdminMovieItem> {
+    const res = await apiClient.patch<ApiResponse<AdminMovieItemDTO>>(
+      `/api/v1/admin/movies/${id}/cell`,
+      { field, value }
+    );
+    return adminMovieMapper.toDomain(res.data.data);
+  },
+
+  async toggleMovieStatus(id: number | string): Promise<AdminMovieItem> {
+    const res = await apiClient.patch<ApiResponse<AdminMovieItemDTO>>(
+      `/api/v1/admin/movies/${id}/toggle-status`
+    );
+    return adminMovieMapper.toDomain(res.data.data);
+  },
+
+  async bulkAction(
+    action: 'delete' | 'set_now_showing' | 'set_upcoming' | 'set_ended',
+    ids: (string | number)[],
+    payload?: any
+  ): Promise<{ success: boolean; message: string }> {
+    const res = await apiClient.post<{ success: boolean; message: string }>(
+      '/api/v1/admin/movies/bulk',
+      { action, ids, payload }
+    );
+    return res.data;
   },
 
   /**

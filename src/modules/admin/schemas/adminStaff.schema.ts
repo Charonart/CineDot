@@ -12,9 +12,9 @@ export const createStaffSchema = z.object({
   password: z
     .string({ required_error: 'Vui lòng nhập mật khẩu khởi tạo' })
     .min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-  role: z.enum(['SUPER_ADMIN', 'CINEMA_MANAGER', 'TICKET_STAFF'], {
+  role: z.string({
     required_error: 'Vui lòng chọn vai trò phân quyền',
-  }),
+  }).min(1, 'Vui lòng chọn vai trò'),
   cinemaName: z.string().optional(),
   cinemaId: z.union([z.string(), z.number()]).optional().nullable(),
   phone: z
@@ -27,7 +27,7 @@ export const createStaffSchema = z.object({
 export type CreateStaffFormValues = z.infer<typeof createStaffSchema>;
 
 export const updateStaffRoleSchema = z.object({
-  role: z.enum(['SUPER_ADMIN', 'CINEMA_MANAGER', 'TICKET_STAFF']),
+  role: z.string().min(1, 'Vui lòng chọn vai trò'),
   cinemaId: z.union([z.string(), z.number()]).optional().nullable(),
   cinemaName: z.string().optional(),
   permissions: z.array(z.string()).optional(),

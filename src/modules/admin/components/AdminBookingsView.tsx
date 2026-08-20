@@ -28,71 +28,25 @@ import {
   Scissors,
 } from 'lucide-react';
 import { useAdminBookings } from '../hooks/useAdminBookings';
+import { adminBookingService } from '../services/adminBooking.service';
 import { AdminBookingItem } from '../types/adminBooking.types';
+import { CineDataTable, useServerTable } from '@/shared/components/table';
+import { CineColumnDef, BulkAction } from '@/shared/types/dataTable.types';
 
 export function AdminBookingsView() {
-  // Search, Filter & Pagination State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(15);
-
   // Selected Booking for Detail Modal, Refund Modal & Ticket Print Modal
   const [selectedBooking, setSelectedBooking] = useState<AdminBookingItem | null>(null);
   const [refundTargetBooking, setRefundTargetBooking] = useState<AdminBookingItem | null>(null);
   const [refundReason, setRefundReason] = useState('');
   const [printTicketBooking, setPrintTicketBooking] = useState<AdminBookingItem | null>(null);
 
-  // Memoized query params
-  const queryParams = useMemo(
-    () => ({
-      page: currentPage,
-      limit: perPage,
-      status: statusFilter !== 'ALL' && statusFilter !== 'checked_in' ? statusFilter : undefined,
-      search: searchTerm.trim() || undefined,
-    }),
-    [currentPage, perPage, statusFilter, searchTerm]
-  );
-
   // Hook 100% Real API
   const {
-    bookingsList,
-    pagination,
-    isLoadingBookings,
-    isFetchingBookings,
-    refetchBookings,
     refundBooking,
     isRefunding,
-  } = useAdminBookings(queryParams);
+  } = useAdminBookings();
 
-  // Client-side filtering for statuses
-  const displayedBookings = useMemo(() => {
-    if (statusFilter === 'checked_in') {
-      return bookingsList.filter((b) => b.isCheckedIn && b.status !== 'refunded' && b.status !== 'cancelled');
-    }
-    if (statusFilter === 'refunded') {
-      return bookingsList.filter((b) => b.status === 'refunded');
-    }
-    if (statusFilter === 'cancelled') {
-      return bookingsList.filter((b) => b.status === 'cancelled');
-    }
-    if (statusFilter === 'completed') {
-      return bookingsList.filter((b) => (b.status === 'completed' || b.status === 'paid') && !b.isCheckedIn);
-    }
-    return bookingsList;
-  }, [bookingsList, statusFilter]);
 
-  // Handle Search Input Change
-  const handleSearchChange = (val: string) => {
-    setSearchTerm(val);
-    setCurrentPage(1);
-  };
-
-  // Handle Status Filter Change
-  const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
-    setCurrentPage(1);
-  };
 
   // Handle Refund Submit
   const handleRefundSubmit = async (e: React.FormEvent) => {
@@ -120,6 +74,226 @@ export function AdminBookingsView() {
   const formatVND = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
+
+  // ── CineColumnDef for Admin Bookings Grid ──
+  const columns: CineColumnDef<AdminBookingItem>[] = useMemo(
+    () => [
+      {
+        key: 'booking_code',
+        title: 'Mã Đơn / Khách Hàng',
+        minWidth: 180,
+        dataType: 'custom',
+        sortable: true,
+        filterable: true,
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-mono font-extrabold text-[#7C6FE8] text-xs">
+              {row.bookingCode}
+            </span>
+            <span className="text-[11px] text-slate-900 font-bold">{row.customerName}</span>
+            {row.customerPhone && (
+              <span className="text-[10px] text-slate-400 font-mono">{row.customerPhone}</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'movie_title',
+        title: 'Bộ Phim & Cụm Rạp',
+        minWidth: 220,
+        dataType: 'custom',
+        filterable: true,
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2.5">
+            {row.moviePoster ? (
+              <img
+                src={row.moviePoster}
+                alt={row.movieTitle}
+                className="w-8 h-11 object-cover rounded-lg shadow-2xs shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-11 rounded-lg bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
+                <Film className="w-4 h-4" />
+              </div>
+            )}
+            <div className="flex flex-col truncate">
+              <span className="font-bold text-slate-900 truncate" title={row.movieTitle}>
+                {row.movieTitle}
+              </span>
+              <span className="text-[10px] text-slate-500 truncate">
+                {row.cinemaName} • {row.roomName}
+              </span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'showtime',
+        title: 'Suất Chiếu',
+        dataType: 'text',
+        sortable: true,
+        filterable: true,
+        cell: ({ row }) => (
+          <span className="text-slate-600 font-mono text-xs">{row.showtimeFormatted}</span>
+        ),
+      },
+      {
+        key: 'seats',
+        title: 'Vị Trí Ghế',
+        dataType: 'text',
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-mono font-bold text-[#7C6FE8]">{row.seatsFormatted}</span>
+            <span className="text-[10px] text-slate-400">{row.seatCount} vé</span>
+          </div>
+        ),
+      },
+      {
+        key: 'combos',
+        title: 'Bắp Nước',
+        dataType: 'text',
+        cell: ({ row }) => (
+          row.combos.length > 0 ? (
+            <span className="px-2 py-0.5 rounded-md bg-pink-50 text-pink-700 font-bold text-[11px]">
+              {row.combosCount} phần
+            </span>
+          ) : (
+            <span className="text-[11px] text-slate-400">Không có</span>
+          )
+        ),
+      },
+      {
+        key: 'final_amount',
+        title: 'Tổng Tiền',
+        dataType: 'currency',
+        sortable: true,
+        filterable: true,
+        align: 'right',
+        cell: ({ row }) => (
+          <span className="font-mono font-extrabold text-slate-900">
+            {formatVND(row.finalAmount)}
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Trạng Thái',
+        dataType: 'badge',
+        sortable: true,
+        filterable: true,
+        options: [
+          { label: 'Đã Thanh Toán', value: 'completed', badgeClass: 'bg-purple-50 text-[#7C6FE8] border-purple-200' },
+          { label: 'Đã Soát Vé', value: 'checked_in', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+          { label: 'Chờ Thanh Toán', value: 'pending', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
+          { label: 'Đã Hủy', value: 'cancelled', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' },
+          { label: 'Đã Hoàn Tiền', value: 'refunded', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' },
+        ],
+        cell: ({ row }) => {
+          if (row.status === 'refunded') {
+            return (
+              <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-extrabold border border-rose-200 flex items-center gap-1 w-fit">
+                <RotateCcw className="w-3 h-3 text-rose-600" />
+                <span>ĐÃ HOÀN TIỀN</span>
+              </span>
+            );
+          }
+          if (row.status === 'cancelled') {
+            return (
+              <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-slate-200 flex items-center gap-1 w-fit">
+                <span>ĐÃ HỦY</span>
+              </span>
+            );
+          }
+          if (row.isCheckedIn) {
+            return (
+              <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200 flex items-center gap-1 w-fit">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                <span>ĐÃ SOÁT VÉ</span>
+              </span>
+            );
+          }
+          if (row.status === 'completed' || row.status === 'paid') {
+            return (
+              <span className="px-2.5 py-1 rounded-full bg-purple-50 text-[#7C6FE8] text-[10px] font-extrabold border border-purple-200 flex items-center gap-1 w-fit">
+                <Clock className="w-3 h-3 text-[#7C6FE8]" />
+                <span>ĐÃ THANH TOÁN</span>
+              </span>
+            );
+          }
+          return (
+            <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200 flex items-center gap-1 w-fit">
+              <span>CHỜ THANH TOÁN</span>
+            </span>
+          );
+        },
+      },
+      {
+        key: 'actions',
+        title: 'Thao Tác',
+        width: 130,
+        align: 'center',
+        cell: ({ row }) => (
+          <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setSelectedBooking(row)}
+              className="p-2 rounded-xl hover:bg-purple-100 text-[#7C6FE8] transition-colors cursor-pointer"
+              title="Xem Chi Tiết & Bảng Kê Tài Chính"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPrintTicketBooking(row)}
+              className="p-2 rounded-xl hover:bg-slate-100 text-slate-700 hover:text-[#7C6FE8] transition-colors cursor-pointer"
+              title="In Vé Xem Phim (Thermal Cinema Ticket)"
+            >
+              <Printer className="w-4 h-4" />
+            </button>
+            {(row.status === 'completed' || row.status === 'paid') && (
+              <button
+                onClick={() => {
+                  setRefundTargetBooking(row);
+                  setRefundReason('Sự cố kỹ thuật tại rạp / Khách yêu cầu hoàn tiền');
+                }}
+                className="p-2 rounded-xl hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                title="Xử Lý Hoàn Tiền Sự Cố"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  // ── Hook: Server-Side Table Controller (URL Sync + Query + Inline Edit + Bulk) ──
+  const table = useServerTable<AdminBookingItem>({
+    queryKey: ['admin', 'bookings'],
+    fetcher: (params) => adminBookingService.getBookings(params),
+    bulkAction: (action, ids) => adminBookingService.bulkAction(action as any, ids),
+    columns,
+    exportFileName: 'danh_sach_don_dat_ve_cinedot',
+    defaultPerPage: 15,
+  });
+
+  // ── Bulk Actions for Bookings ──
+  const bulkActions: BulkAction<AdminBookingItem>[] = useMemo(
+    () => [
+      {
+        key: 'bulk_refund',
+        label: 'Hoàn Tiền Hàng Loạt',
+        variant: 'danger',
+        icon: <RotateCcw className="w-3.5 h-3.5" />,
+        onClick: async (selectedRows, ids) => {
+          if (confirm(`Bạn có chắc muốn xử lý hoàn tiền cho ${ids.length} đơn đặt vé này không?`)) {
+            await table.handleBulkAction('bulk_refund');
+          }
+        },
+      },
+    ],
+    [table]
+  );
 
   // Print Trigger
   const handlePrint = () => {
@@ -157,308 +331,26 @@ export function AdminBookingsView() {
         }
       `}</style>
 
-      {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Ticket className="w-4 h-4" />
-            <span>HỆ THỐNG QUẢN LÝ ĐƠN ĐẶT VÉ (BOOKINGS)</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Danh Sách Đơn Vé & Giao Dịch
-          </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Theo dõi tất cả đơn đặt vé trực tuyến, in vé xem phim tại quầy và xử lý hóa đơn hoàn tiền sự cố.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => refetchBookings()}
-            disabled={isFetchingBookings}
-            className="px-4 py-2.5 rounded-2xl bg-white border border-gray-200 text-slate-700 hover:text-[#7C6FE8] hover:border-[#7C6FE8] font-bold text-xs flex items-center gap-2 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isFetchingBookings ? 'animate-spin' : ''}`} />
-            <span>Làm Mới</span>
-          </button>
-
-          <Link
-            href="/admin/ticket-scanner"
-            className="px-4 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer"
-          >
-            <QrCode className="w-4 h-4" />
-            <span>Kiosk Soát Vé</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 2. Filter & Search Toolbar */}
-      <div className="p-5 rounded-3xl bg-white border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Search Box */}
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Tìm theo Mã đơn, Khách hàng, Phim..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-colors"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => handleSearchChange('')}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer"
+      {/* Universal Notion/Sheets CineDataTable */}
+      <CineDataTable<AdminBookingItem>
+        table={table}
+        title="Danh Sách Đơn Vé & Giao Dịch"
+        subtitle="Theo dõi đơn đặt vé trực tuyến, lọc đa dạng, in vé tại quầy và xử lý hóa đơn hoàn tiền sự cố."
+        icon={<Ticket className="w-6 h-6 text-[#7C6FE8]" />}
+        headerActions={
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/ticket-scanner"
+              className="px-4 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-          {[
-            { id: 'ALL', label: 'Tất Cả' },
-            { id: 'completed', label: 'Đã Thanh Toán' },
-            { id: 'checked_in', label: 'Đã Soát Vé' },
-            { id: 'pending', label: 'Chờ Thanh Toán' },
-            { id: 'cancelled', label: 'Đã Hủy' },
-            { id: 'refunded', label: 'Đã Hoàn Tiền' },
-          ].map((st) => (
-            <button
-              key={st.id}
-              onClick={() => handleStatusChange(st.id)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                statusFilter === st.id
-                  ? 'bg-[#7C6FE8] text-white shadow-md shadow-[#7C6FE8]/25'
-                  : 'bg-slate-50 text-slate-600 border border-gray-200 hover:bg-slate-100'
-              }`}
-            >
-              {st.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 3. Bookings Data Table */}
-      <div className="p-6 rounded-3xl bg-white border border-gray-200 shadow-sm flex flex-col gap-4">
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[950px]">
-            <thead>
-              <tr className="border-b border-gray-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50">
-                <th className="p-3.5 rounded-l-xl">Mã Đơn / Khách Hàng</th>
-                <th className="p-3.5">Bộ Phim & Cụm Rạp</th>
-                <th className="p-3.5">Suất Chiếu</th>
-                <th className="p-3.5">Vị Trí Ghế</th>
-                <th className="p-3.5">Bắp Nước</th>
-                <th className="p-3.5">Tổng Tiền</th>
-                <th className="p-3.5">Trạng Thái</th>
-                <th className="p-3.5 rounded-r-xl text-center">Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-xs font-semibold text-slate-700">
-              {isLoadingBookings ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="w-6 h-6 animate-spin text-[#7C6FE8]" />
-                      <span className="font-bold">Đang tải danh sách đơn đặt vé...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : displayedBookings.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 font-medium">
-                    Không tìm thấy đơn đặt vé nào phù hợp với bộ lọc.
-                  </td>
-                </tr>
-              ) : (
-                displayedBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-purple-50/40 transition-colors">
-                    {/* Mã Đơn & Khách Hàng */}
-                    <td className="p-3.5">
-                      <div className="flex flex-col">
-                        <span className="font-mono font-extrabold text-[#7C6FE8] text-xs">
-                          {b.bookingCode}
-                        </span>
-                        <span className="text-[11px] text-slate-900 font-bold">{b.customerName}</span>
-                        {b.customerPhone && (
-                          <span className="text-[10px] text-slate-400 font-mono">{b.customerPhone}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Bộ Phim & Cụm Rạp */}
-                    <td className="p-3.5 max-w-[220px]">
-                      <div className="flex items-center gap-2.5">
-                        {b.moviePoster ? (
-                          <img
-                            src={b.moviePoster}
-                            alt={b.movieTitle}
-                            className="w-8 h-11 object-cover rounded-lg shadow-2xs shrink-0"
-                          />
-                        ) : (
-                          <div className="w-8 h-11 rounded-lg bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
-                            <Film className="w-4 h-4" />
-                          </div>
-                        )}
-                        <div className="flex flex-col truncate">
-                          <span className="font-bold text-slate-900 truncate" title={b.movieTitle}>
-                            {b.movieTitle}
-                          </span>
-                          <span className="text-[10px] text-slate-500 truncate">
-                            {b.cinemaName} • {b.roomName}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Suất Chiếu */}
-                    <td className="p-3.5 text-slate-600 whitespace-nowrap">
-                      {b.showtimeFormatted}
-                    </td>
-
-                    {/* Vị Trí Ghế */}
-                    <td className="p-3.5">
-                      <div className="flex flex-col">
-                        <span className="font-mono font-bold text-[#7C6FE8]">{b.seatsFormatted}</span>
-                        <span className="text-[10px] text-slate-400">{b.seatCount} vé</span>
-                      </div>
-                    </td>
-
-                    {/* Bắp Nước */}
-                    <td className="p-3.5">
-                      {b.combos.length > 0 ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 rounded-md bg-pink-50 text-pink-700 font-bold text-[11px]">
-                            {b.combosCount} phần
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-slate-400">Không có</span>
-                      )}
-                    </td>
-
-                    {/* Tổng Tiền */}
-                    <td className="p-3.5 font-mono font-extrabold text-slate-900 whitespace-nowrap">
-                      {formatVND(b.finalAmount)}
-                    </td>
-
-                    {/* Trạng Thái (Ưu tiên: Refunded > Cancelled > CheckedIn > Paid > Pending) */}
-                    <td className="p-3.5 whitespace-nowrap">
-                      {b.status === 'refunded' ? (
-                        <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-extrabold border border-rose-200 flex items-center gap-1 w-fit">
-                          <RotateCcw className="w-3 h-3 text-rose-600" />
-                          <span>ĐÃ HOÀN TIỀN</span>
-                        </span>
-                      ) : b.status === 'cancelled' ? (
-                        <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-slate-200 flex items-center gap-1 w-fit">
-                          <span>ĐÃ HỦY</span>
-                        </span>
-                      ) : b.isCheckedIn ? (
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200 flex items-center gap-1 w-fit">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          <span>ĐÃ SOÁT VÉ</span>
-                        </span>
-                      ) : b.status === 'completed' || b.status === 'paid' ? (
-                        <span className="px-2.5 py-1 rounded-full bg-purple-50 text-[#7C6FE8] text-[10px] font-extrabold border border-purple-200 flex items-center gap-1 w-fit">
-                          <Clock className="w-3 h-3 text-[#7C6FE8]" />
-                          <span>ĐÃ THANH TOÁN</span>
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200 flex items-center gap-1 w-fit">
-                          <span>CHỜ THANH TOÁN</span>
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Thao Tác */}
-                    <td className="p-3.5 text-center whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => setSelectedBooking(b)}
-                          className="p-2 rounded-xl hover:bg-purple-100 text-[#7C6FE8] transition-colors cursor-pointer"
-                          title="Xem Chi Tiết & Bảng Kê Tài Chính"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setPrintTicketBooking(b)}
-                          className="p-2 rounded-xl hover:bg-slate-100 text-slate-700 hover:text-[#7C6FE8] transition-colors cursor-pointer"
-                          title="In Vé Xem Phim (Thermal Cinema Ticket)"
-                        >
-                          <Printer className="w-4 h-4" />
-                        </button>
-                        {(b.status === 'completed' || b.status === 'paid') && (
-                          <button
-                            onClick={() => {
-                              setRefundTargetBooking(b);
-                              setRefundReason('Sự cố kỹ thuật tại rạp / Khách yêu cầu hoàn tiền');
-                            }}
-                            className="p-2 rounded-xl hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
-                            title="Xử Lý Hoàn Tiền Sự Cố"
-                          >
-                            <RotateCcw className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* 4. Pagination Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-100 text-xs">
-          <div className="flex items-center gap-2 text-slate-500 font-medium">
-            <span>
-              Hiển thị <strong>{displayedBookings.length}</strong> / <strong>{pagination.totalResults}</strong> đơn đặt vé
-            </span>
-            <span className="text-slate-300">•</span>
-            <div className="flex items-center gap-1">
-              <span>Mỗi trang:</span>
-              <select
-                value={perPage}
-                onChange={(e) => {
-                  setPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="px-2 py-1 rounded-lg border border-gray-200 bg-slate-50 text-slate-800 font-bold focus:outline-none focus:border-[#7C6FE8]"
-              >
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
+              <QrCode className="w-4 h-4" />
+              <span>Kiosk Soát Vé</span>
+            </Link>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1 || isLoadingBookings}
-              className="px-3 py-1.5 rounded-xl border border-gray-200 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-1 disabled:opacity-40 cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Trước</span>
-            </button>
-
-            <span className="px-3 py-1.5 rounded-xl bg-purple-50 text-[#7C6FE8] font-black">
-              Trang {currentPage} / {pagination.totalPages || 1}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
-              disabled={currentPage >= pagination.totalPages || isLoadingBookings}
-              className="px-3 py-1.5 rounded-xl border border-gray-200 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-1 disabled:opacity-40 cursor-pointer"
-            >
-              <span>Sau</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+        }
+        bulkActions={bulkActions}
+        exportFileName="danh_sach_don_dat_ve_cinedot"
+      />
 
       {/* 5. Modal Chi Tiết Hóa Đơn & Đơn Đặt Vé */}
       {selectedBooking && (

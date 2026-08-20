@@ -2,7 +2,15 @@
  * RBAC (Role-Based Access Control) Type Definitions
  */
 
-export type AdminRole = 'SUPER_ADMIN' | 'CINEMA_MANAGER' | 'TICKET_STAFF';
+export type AdminRole =
+  | 'SUPER_ADMIN'
+  | 'CINEMA_MANAGER'
+  | 'TICKET_STAFF'
+  | 'FNB_STAFF'
+  | 'MARKETING'
+  | 'ACCOUNTANT'
+  | 'STAFF'
+  | 'CUSTOMER';
 
 export type PermissionSlug =
   | '*'
@@ -96,7 +104,7 @@ export const ROLE_DEFINITIONS: Record<AdminRole, RoleInfo> = {
   },
   TICKET_STAFF: {
     role: 'TICKET_STAFF',
-    roleName: 'Nhân Viên Soát Vé Cổng',
+    roleName: 'Nhân Viên Soát Vé',
     description: 'Thực hiện quét vé QR, đổi bắp nước (F&B Claim) tại cửa soát vé rạp.',
     defaultPermissions: [
       'tickets.scan',
@@ -105,10 +113,45 @@ export const ROLE_DEFINITIONS: Record<AdminRole, RoleInfo> = {
       'showtimes.view',
     ],
   },
+  FNB_STAFF: {
+    role: 'FNB_STAFF',
+    roleName: 'Nhân Viên Quầy F&B',
+    description: 'Quản lý quầy bắp nước, trả combo cho khách và kiểm kê tồn kho quầy.',
+    defaultPermissions: ['fnb.claim', 'concessions.view', 'concessions.manage'],
+  },
+  MARKETING: {
+    role: 'MARKETING',
+    roleName: 'Chuyên Viên Marketing',
+    description: 'Quản lý chiến dịch tiếp thị, tạo mã khuyến mãi, voucher và banner.',
+    defaultPermissions: ['vouchers.*', 'reports.dashboard.view'],
+  },
+  ACCOUNTANT: {
+    role: 'ACCOUNTANT',
+    roleName: 'Kế Toán & Doanh Thu',
+    description: 'Theo dõi báo cáo doanh thu vé, đối soát giao dịch và hoàn tiền đơn vé.',
+    defaultPermissions: ['reports.revenue', 'reports.tickets', 'bookings.view', 'bookings.refund'],
+  },
+  STAFF: {
+    role: 'STAFF',
+    roleName: 'Nhân Viên Vận Hành',
+    description: 'Nhân viên tổng hợp hỗ trợ bán vé và soát vé tại cụm rạp.',
+    defaultPermissions: ['tickets.scan', 'tickets.checkin', 'fnb.claim'],
+  },
+  CUSTOMER: {
+    role: 'CUSTOMER',
+    roleName: 'Khách Hàng Hội Viên',
+    description: 'Tài khoản khách hàng thành viên CineDot.',
+    defaultPermissions: [],
+  },
 };
 
 export const ROLE_NAME_MAP: Record<AdminRole, string> = {
   SUPER_ADMIN: 'Tổng Quản Trị Hệ Thống',
   CINEMA_MANAGER: 'Quản Lý Cụm Rạp',
-  TICKET_STAFF: 'Nhân Viên Soát Vé Cổng',
+  TICKET_STAFF: 'Nhân Viên Soát Vé',
+  FNB_STAFF: 'Nhân Viên Quầy F&B',
+  MARKETING: 'Chuyên Viên Marketing',
+  ACCOUNTANT: 'Kế Toán & Doanh Thu',
+  STAFF: 'Nhân Viên Vận Hành',
+  CUSTOMER: 'Khách Hàng Hội Viên',
 };

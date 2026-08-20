@@ -58,22 +58,15 @@ export const adminCinemaService = {
    * Lấy danh sách cụm rạp (GET /api/v1/admin/cinemas)
    */
   async getCinemas(
-    params?: GetAdminCinemasParams,
+    params?: GetAdminCinemasParams & { sort_by?: string; sort_dir?: 'asc' | 'desc'; filters?: Record<string, any>; [key: string]: any },
     provincesMap?: Record<number, string>
   ): Promise<{
     items: AdminCinemaItem[];
     pagination: AdminCinemaPagination;
   }> {
-    const queryParams = new URLSearchParams();
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.province_id) queryParams.append('province_id', String(params.province_id));
-    if (params?.page) queryParams.append('page', String(params.page));
-    if (params?.per_page || params?.limit)
-      queryParams.append('per_page', String(params.per_page || params.limit));
-
-    const url = `${ENDPOINTS.ADMIN.CINEMAS}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    const res = await apiClient.get<ApiResponse<AdminCinemaListResponseDTO>>(url);
+    const res = await apiClient.get<any>(ENDPOINTS.ADMIN.CINEMAS, { params });
     const data = res.data?.data;
+    const meta = res.data?.meta;
 
     let rawList: AdminCinemaItemDTO[] = [];
     if (Array.isArray(data)) {
@@ -86,12 +79,39 @@ export const adminCinemaService = {
 
     const items = rawList.map((dto) => adminCinemaMapper.cinemaToDomain(dto, provincesMap));
     const pagination: AdminCinemaPagination = {
-      currentPage: data?.current_page || data?.page || 1,
-      totalPages: data?.last_page || data?.totalPages || 1,
-      totalResults: data?.total || data?.totalResults || items.length,
+      currentPage: meta?.current_page || data?.current_page || data?.page || 1,
+      totalPages: meta?.last_page || data?.last_page || data?.totalPages || 1,
+      totalResults: meta?.total || data?.total || data?.totalResults || items.length,
     };
 
     return { items, pagination };
+  },
+
+  async updateCell(id: number | string, field: string, value: any): Promise<AdminCinemaItem> {
+    const res = await apiClient.patch<ApiResponse<AdminCinemaItemDTO>>(
+      `/api/v1/admin/cinemas/${id}/cell`,
+      { field, value }
+    );
+    return adminCinemaMapper.cinemaToDomain(res.data.data);
+  },
+
+  async toggleCinemaStatus(id: number | string): Promise<AdminCinemaItem> {
+    const res = await apiClient.patch<ApiResponse<AdminCinemaItemDTO>>(
+      `/api/v1/admin/cinemas/${id}/toggle-status`
+    );
+    return adminCinemaMapper.cinemaToDomain(res.data.data);
+  },
+
+  async bulkAction(
+    action: 'delete' | 'set_active' | 'set_inactive',
+    ids: (string | number)[],
+    payload?: any
+  ): Promise<{ success: boolean; message: string }> {
+    const res = await apiClient.post<{ success: boolean; message: string }>(
+      '/api/v1/admin/cinemas/bulk',
+      { action, ids, payload }
+    );
+    return res.data;
   },
 
   /**

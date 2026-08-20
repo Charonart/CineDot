@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Film,
@@ -30,12 +30,15 @@ import {
   FileText,
 } from 'lucide-react';
 import { useAdminMovies, useAdminMovieCredits } from '../hooks/useAdminMovies';
+import { adminMovieService } from '../services/adminMovie.service';
 import { AdminMovieItem } from '../types/adminMovie.types';
 import { createMovieSchema } from '../schemas/adminMovie.schema';
 import { AdminTmdbSyncModal } from './modals/AdminTmdbSyncModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { imageHelper } from '@/shared/utils/imageHelper';
 import { AdminBackdropBanner, AdminPosterCard, AdminBannerLivePreview } from './ui';
+import { CineDataTable, useServerTable } from '@/shared/components/table';
+import { CineColumnDef, BulkAction } from '@/shared/types/dataTable.types';
 
 const STATUS_OPTIONS = [
   { id: 'ALL', label: 'Trạng thái: Tất cả', apiKey: undefined },
@@ -62,7 +65,6 @@ const QUICK_DURATIONS = [90, 105, 120, 135, 150, 180];
 function cleanTmdbPath(val: string): string {
   const trimmed = val.trim();
   if (!trimmed) return '';
-  // Check if user pasted full TMDB URL e.g. https://image.tmdb.org/t/p/w500/z8OWDTR7pQuZi7jkEuR7yMXRrQt.jpg
   const tmdbMatch = trimmed.match(/image\.tmdb\.org\/t\/p\/[^/]+(\/.+)/i);
   if (tmdbMatch && tmdbMatch[1]) {
     return tmdbMatch[1];
@@ -71,44 +73,18 @@ function cleanTmdbPath(val: string): string {
 }
 
 export function AdminMoviesView() {
-  // Search & Filter States
-  const [searchInput, setSearchInput] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'NOW_SHOWING' | 'COMING_SOON' | 'STOPPED'>('ALL');
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  const statusDropdownRef = useRef<HTMLDivElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Debounce search term
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchTerm(searchInput.trim());
-      setCurrentPage(1);
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  const activeStatusApiKey = STATUS_OPTIONS.find((s) => s.id === statusFilter)?.apiKey;
-
   // Hook 100% Real API
   const {
-    moviesList,
     genres,
-    pagination,
-    isLoading,
-    isFetching,
     createMovie,
     isCreating,
     updateMovie,
     isUpdating,
     deleteMovie,
     isDeleting,
-  } = useAdminMovies({
-    search: searchTerm || undefined,
-    status: activeStatusApiKey,
-    page: currentPage,
-    per_page: 6,
-  });
+    updateCell,
+    bulkAction,
+  } = useAdminMovies();
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -153,17 +129,6 @@ export function AdminMoviesView() {
 
   // Credits hook for detail view
   const { credits, isLoadingCredits } = useAdminMovieCredits(viewingMovie?.id || null);
-
-  // Click outside listener for custom dropdown
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
-        setIsStatusDropdownOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Pre-fill Edit Modal Form
   const handleOpenEditModal = (movie: AdminMovieItem) => {
@@ -329,285 +294,240 @@ export function AdminMoviesView() {
     }
   };
 
-  return (
-    <div className="flex flex-col gap-8 font-sans">
-      {/* 2.1 Action Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Film className="w-4 h-4" />
-            <span>KHO DỮ LIỆU ĐIỆN ẢNH CINEDOT</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Quản Lý Danh Sách Phim
-          </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Quản lý toàn diện kho phim, phân loại thể loại, ảnh TMDB, độ tuổi và thời lượng
-          </p>
-        </div>
-
-        {/* Right Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Tìm kiếm theo tên phim..."
-              className="w-60 pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] shadow-2xs"
+  // ── CineColumnDef for Admin Movie Grid ──
+  const columns: CineColumnDef<AdminMovieItem>[] = useMemo(
+    () => [
+      {
+        key: 'poster_url',
+        title: 'Phim',
+        minWidth: 260,
+        dataType: 'custom',
+        cell: ({ row }: { row: AdminMovieItem }) => (
+          <div className="flex items-center gap-3">
+            <AdminPosterCard
+              src={row.posterUrl}
+              alt={row.title}
+              size="sm"
+              adult={row.adult}
+              fallbackText={row.title}
+              className="shrink-0 border border-gray-200 shadow-xs"
             />
-          </div>
-
-          {/* Custom Popover Status Filter Dropdown */}
-          <div ref={statusDropdownRef} className="relative">
-            <button
-              onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className={`flex items-center gap-2 bg-white px-3.5 py-2.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer shadow-2xs ${
-                isStatusDropdownOpen
-                  ? 'border-[#7C6FE8] bg-purple-50/60 text-[#7C6FE8]'
-                  : 'border-gray-200 text-slate-700 hover:border-[#7C6FE8]'
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5 text-[#7C6FE8] shrink-0" />
-              <span>{STATUS_OPTIONS.find((s) => s.id === statusFilter)?.label || 'Trạng thái: Tất cả'}</span>
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                  isStatusDropdownOpen ? 'rotate-180 text-[#7C6FE8]' : ''
-                }`}
-              />
-            </button>
-
-            {isStatusDropdownOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-64 bg-white border border-purple-100 rounded-2xl p-1.5 shadow-[0_12px_40px_rgba(124,111,232,0.15)] z-50 flex flex-col gap-0.5"
-              >
-                {STATUS_OPTIONS.map((opt) => {
-                  const isSelected = statusFilter === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => {
-                        setStatusFilter(opt.id as 'ALL' | 'NOW_SHOWING' | 'COMING_SOON' | 'STOPPED');
-                        setIsStatusDropdownOpen(false);
-                        setCurrentPage(1);
-                      }}
-                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'bg-purple-50 text-[#7C6FE8]'
-                          : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-[#7C6FE8] shrink-0 ml-2" />}
-                    </button>
-                  );
-                })}
-              </motion.div>
-            )}
-          </div>
-
-          {/* TMDB Smart Sync Button */}
-          <button
-            onClick={() => setIsTmdbModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-[#7C6FE8] border border-purple-200 font-extrabold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-            title="Tự động đồng bộ thông tin phim từ TMDB"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>ĐỒNG BỘ TMDB</span>
-          </button>
-
-          {/* Primary Add Button */}
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>THÊM PHIM MỚI</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2.2 Movies Data Table */}
-      <div className="rounded-3xl bg-white border border-gray-200/80 shadow-sm overflow-hidden flex flex-col relative">
-        {isFetching && !isLoading && (
-          <div className="absolute top-4 right-6 flex items-center gap-1.5 text-xs font-bold text-[#7C6FE8] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 animate-pulse z-10">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>Đang tải...</span>
-          </div>
-        )}
-
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[950px]">
-            <thead>
-              <tr className="border-b border-gray-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50/80">
-                <th className="p-4 rounded-tl-3xl w-[32%] whitespace-nowrap">PHIM</th>
-                <th className="p-4 w-[14%] whitespace-nowrap">THỂ LOẠI</th>
-                <th className="p-4 w-[11%] whitespace-nowrap">THỜI LƯỢNG</th>
-                <th className="p-4 w-[13%] whitespace-nowrap">KHỞI CHIẾU</th>
-                <th className="p-4 w-[10%] whitespace-nowrap">NGÔN NGỮ</th>
-                <th className="p-4 w-[10%] whitespace-nowrap">TRẠNG THÁI</th>
-                <th className="p-4 rounded-tr-3xl text-center w-[10%] whitespace-nowrap">THAO TÁC</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-xs font-semibold text-slate-700">
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <tr key={idx} className="animate-pulse">
-                    <td className="p-4"><Skeleton variant="text" className="w-48 h-5" /></td>
-                    <td className="p-4"><Skeleton variant="text" className="w-28 h-4" /></td>
-                    <td className="p-4"><Skeleton variant="text" className="w-16 h-4" /></td>
-                    <td className="p-4"><Skeleton variant="text" className="w-24 h-4" /></td>
-                    <td className="p-4"><Skeleton variant="text" className="w-16 h-4" /></td>
-                    <td className="p-4"><Skeleton variant="text" className="w-20 h-4" /></td>
-                    <td className="p-4 text-center"><Skeleton variant="text" className="w-20 h-4 mx-auto" /></td>
-                  </tr>
-                ))
-              ) : moviesList.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-10 text-center text-slate-400 font-medium">
-                    Không tìm thấy bộ phim nào phù hợp với điều kiện tìm kiếm.
-                  </td>
-                </tr>
-              ) : (
-                moviesList.map((m) => (
-                  <tr key={m.id} className="hover:bg-purple-50/30 transition-colors">
-                    {/* Column 1: PHIM (Poster + Title + Original Title + 18+ badge) */}
-                    <td className="p-4">
-                      <div className="flex items-center gap-3.5">
-                        <AdminPosterCard
-                          src={m.posterUrl}
-                          alt={m.title}
-                          size="sm"
-                          adult={m.adult}
-                          fallbackText={m.title}
-                          className="shrink-0 border border-gray-200 shadow-xs"
-                        />
-                        <div className="flex flex-col gap-0.5 max-w-[220px]">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h3 className="font-extrabold text-sm text-slate-900 line-clamp-1">{m.title}</h3>
-                            {m.adult && (
-                              <span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-black">
-                                18+
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[11px] text-slate-400 font-medium line-clamp-1 italic">
-                            {m.originalTitle}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Column 2: THỂ LOẠI */}
-                    <td className="p-4">
-                      <div className="flex flex-wrap gap-1 max-w-[150px]">
-                        {m.genre.slice(0, 2).map((g, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold"
-                          >
-                            {g}
-                          </span>
-                        ))}
-                        {m.genre.length > 2 && (
-                          <span className="text-[10px] text-slate-400 font-bold">+{m.genre.length - 2}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Column 3: THỜI LƯỢNG */}
-                    <td className="p-4 text-slate-800 font-bold whitespace-nowrap">{m.duration}</td>
-
-                    {/* Column 4: KHỞI CHIẾU */}
-                    <td className="p-4 text-slate-600 font-mono whitespace-nowrap">{m.releaseDate}</td>
-
-                    {/* Column 5: NGÔN NGỮ */}
-                    <td className="p-4 whitespace-nowrap">
-                      <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase">
-                        {m.originalLanguage || 'vi'}
-                      </span>
-                    </td>
-
-                    {/* Column 6: TRẠNG THÁI */}
-                    <td className="p-4 whitespace-nowrap">
-                      {m.status === 'NOW_SHOWING' ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200">
-                          Đang chiếu
-                        </span>
-                      ) : m.status === 'COMING_SOON' ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-200">
-                          Sắp chiếu
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-gray-200">
-                          Ngừng chiếu
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Column 7: THAO TÁC */}
-                    <td className="p-4 text-center whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          onClick={() => setViewingMovie(m)}
-                          className="p-1.5 rounded-xl hover:bg-purple-50 text-slate-500 hover:text-[#7C6FE8] transition-colors cursor-pointer"
-                          title="Xem Chi Tiết"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleOpenEditModal(m)}
-                          className="p-1.5 rounded-xl hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
-                          title="Chỉnh Sửa"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeletingMovie(m)}
-                          className="p-1.5 rounded-xl hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
-                          title="Xóa Phim"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* 2.3 Pagination Controls */}
-        {pagination.lastPage > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-gray-100">
-            <span className="text-xs text-slate-500 font-medium">
-              Trang {pagination.currentPage} / {pagination.lastPage} ({pagination.total} bộ phim)
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={pagination.currentPage <= 1}
-                className="p-2 rounded-xl bg-slate-50 border border-gray-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(pagination.lastPage, p + 1))}
-                disabled={pagination.currentPage >= pagination.lastPage}
-                className="p-2 rounded-xl bg-slate-50 border border-gray-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all cursor-pointer"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
+            <div className="flex flex-col gap-0.5 max-w-[200px]">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3
+                  onClick={() => setViewingMovie(row)}
+                  className="font-extrabold text-sm text-slate-900 line-clamp-1 hover:text-[#7C6FE8] cursor-pointer"
+                >
+                  {row.title}
+                </h3>
+                {row.adult && (
+                  <span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-black">
+                    18+
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-slate-400 font-medium line-clamp-1 italic">
+                {row.originalTitle}
+              </span>
             </div>
           </div>
-        )}
-      </div>
+        ),
+      },
+      {
+        key: 'genre',
+        title: 'Thể Loại',
+        dataType: 'select',
+        filterable: true,
+        options: genres.map((g: { id: number; name: string }) => ({ label: g.name, value: g.name })),
+        cell: ({ row }: { row: AdminMovieItem }) => (
+          <div className="flex flex-wrap gap-1 max-w-[150px]">
+            {row.genre.slice(0, 2).map((g: string, idx: number) => (
+              <span
+                key={idx}
+                className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold"
+              >
+                {g}
+              </span>
+            ))}
+            {row.genre.length > 2 && (
+              <span className="text-[10px] text-slate-400 font-bold">+{row.genre.length - 2}</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'duration',
+        title: 'Thời Lượng',
+        dataType: 'text',
+        sortable: true,
+        filterable: true,
+        editable: true,
+        cell: ({ value }: { value: any }) => <span className="font-bold text-slate-800">{value}</span>,
+      },
+      {
+        key: 'release_date',
+        title: 'Khởi Chiếu',
+        dataType: 'date',
+        sortable: true,
+        filterable: true,
+        editable: true,
+        cell: ({ row }: { row: AdminMovieItem }) => <span className="font-mono text-slate-600">{row.releaseDate}</span>,
+      },
+      {
+        key: 'original_language',
+        title: 'Ngôn Ngữ',
+        dataType: 'select',
+        options: LANGUAGE_OPTIONS.map((l) => ({ label: l.label, value: l.code })),
+        cell: ({ row }: { row: AdminMovieItem }) => (
+          <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase">
+            {row.originalLanguage || 'vi'}
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Trạng Thái',
+        dataType: 'badge',
+        sortable: true,
+        filterable: true,
+        editable: true,
+        options: [
+          { label: 'Đang chiếu', value: 'now_showing', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+          { label: 'Sắp chiếu', value: 'upcoming', badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+          { label: 'Ngừng chiếu', value: 'ended', badgeClass: 'bg-slate-100 text-slate-600 border-gray-200' },
+        ],
+        cell: ({ row }: { row: AdminMovieItem }) => {
+          if (row.status === 'NOW_SHOWING') {
+            return (
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200">
+                Đang chiếu
+              </span>
+            );
+          }
+          if (row.status === 'COMING_SOON') {
+            return (
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-200">
+                Sắp chiếu
+              </span>
+            );
+          }
+          return (
+            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-gray-200">
+              Ngừng chiếu
+            </span>
+          );
+        },
+      },
+      {
+        key: 'actions',
+        title: 'Thao Tác',
+        width: 120,
+        align: 'center',
+        cell: ({ row }: { row: AdminMovieItem }) => (
+          <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setViewingMovie(row)}
+              className="p-1.5 rounded-xl hover:bg-purple-50 text-slate-500 hover:text-[#7C6FE8] transition-colors cursor-pointer"
+              title="Xem Chi Tiết"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleOpenEditModal(row)}
+              className="p-1.5 rounded-xl hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
+              title="Chỉnh Sửa"
+            >
+              <Edit3 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setDeletingMovie(row)}
+              className="p-1.5 rounded-xl hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
+              title="Xóa Phim"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [genres]
+  );
+
+  // ── Hook: Server Table Controller with URL Sync ──
+  const table = useServerTable<AdminMovieItem>({
+    queryKey: ['admin', 'movies'],
+    fetcher: (params) => adminMovieService.getMovies(params),
+    updateCell: (id, field, value) => updateCell({ id, field, value }),
+    bulkAction: (action, ids) => bulkAction({ action: action as any, ids }),
+    columns,
+    exportFileName: 'danh_sach_phim_cinedot',
+    defaultPerPage: 15,
+  });
+
+  // ── Bulk Actions for Movie Grid ──
+  const bulkActions: BulkAction<AdminMovieItem>[] = useMemo(
+    () => [
+      {
+        key: 'set_now_showing',
+        label: 'Chuyển Đang Chiếu',
+        variant: 'primary',
+        onClick: async (selectedRows: AdminMovieItem[], ids: (string | number)[]) => {
+          await table.handleBulkAction('set_now_showing');
+        },
+      },
+      {
+        key: 'set_upcoming',
+        label: 'Chuyển Sắp Chiếu',
+        variant: 'default',
+        onClick: async (selectedRows: AdminMovieItem[], ids: (string | number)[]) => {
+          await table.handleBulkAction('set_upcoming');
+        },
+      },
+      {
+        key: 'delete',
+        label: 'Xóa Phim Đã Chọn',
+        variant: 'danger',
+        icon: <Trash2 className="w-3.5 h-3.5" />,
+        onClick: async (selectedRows: AdminMovieItem[], ids: (string | number)[]) => {
+          if (confirm(`Bạn có chắc chắn muốn xóa ${ids.length} bộ phim đã chọn không?`)) {
+            await table.handleBulkAction('delete');
+          }
+        },
+      },
+    ],
+    [table]
+  );
+
+  return (
+    <div className="flex flex-col gap-8 font-sans">
+      {/* Universal Notion/Sheets CineDataTable */}
+      <CineDataTable<AdminMovieItem>
+        table={table}
+        title="Quản Lý Danh Sách Phim"
+        subtitle="Quản lý toàn diện kho phim, phân loại thể loại, ảnh TMDB, độ tuổi, sửa ô trực tiếp và đồng bộ URL"
+        icon={<Film className="w-6 h-6 text-[#7C6FE8]" />}
+        headerActions={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsTmdbModalOpen(true)}
+              className="px-4 py-2.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-[#7C6FE8] border border-purple-200 font-extrabold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+              title="Tự động đồng bộ thông tin phim từ TMDB"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>ĐỒNG BỘ TMDB</span>
+            </button>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>THÊM PHIM MỚI</span>
+            </button>
+          </div>
+        }
+        bulkActions={bulkActions}
+        exportFileName="danh_sach_phim_cinedot"
+      />
 
       {/* TMDB Smart Sync Modal */}
       <AdminTmdbSyncModal

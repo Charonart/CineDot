@@ -78,19 +78,60 @@ export const useAdminMovies = (params?: AdminMovieListRequestDTO) => {
     mutationFn: (query: string) => adminMovieService.syncMoviesFromTmdb(query),
   });
 
+  // Mutation: Inline update a single cell
+  const updateCellMutation = useMutation({
+    mutationFn: ({ id, field, value }: { id: string | number; field: string; value: any }) =>
+      adminMovieService.updateCell(id, field, value),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: adminMovieKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminMovieKeys.detail(variables.id) });
+    },
+  });
+
+  // Mutation: Toggle Movie Status
+  const toggleStatusMutation = useMutation({
+    mutationFn: (id: string | number) => adminMovieService.toggleMovieStatus(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: adminMovieKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminMovieKeys.detail(id) });
+    },
+  });
+
+  // Mutation: Bulk Action
+  const bulkActionMutation = useMutation({
+    mutationFn: ({
+      action,
+      ids,
+      payload,
+    }: {
+      action: 'delete' | 'set_now_showing' | 'set_upcoming' | 'set_ended';
+      ids: (string | number)[];
+      payload?: any;
+    }) => adminMovieService.bulkAction(action, ids, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminMovieKeys.lists() });
+    },
+  });
+
   return {
-    moviesList: moviesListQuery.data?.items || [],
     genres: genresQuery.data || [],
     isLoadingGenres: genresQuery.isLoading,
+
+    movies: moviesListQuery.data?.items || [],
+    moviesList: moviesListQuery.data?.items || [],
     pagination: {
       currentPage: moviesListQuery.data?.currentPage || 1,
       lastPage: moviesListQuery.data?.lastPage || 1,
-      perPage: moviesListQuery.data?.perPage || 6,
+      totalPages: moviesListQuery.data?.lastPage || 1,
       total: moviesListQuery.data?.total || 0,
+      totalResults: moviesListQuery.data?.total || 0,
+      perPage: moviesListQuery.data?.perPage || 15,
     },
     isLoading: moviesListQuery.isLoading,
     isFetching: moviesListQuery.isFetching,
+    isError: moviesListQuery.isError,
     error: moviesListQuery.error,
+    refetch: moviesListQuery.refetch,
     refetchMovies: moviesListQuery.refetch,
 
     createMovie: createMovieMutation.mutateAsync,
@@ -98,6 +139,15 @@ export const useAdminMovies = (params?: AdminMovieListRequestDTO) => {
 
     updateMovie: updateMovieMutation.mutateAsync,
     isUpdating: updateMovieMutation.isPending,
+
+    updateCell: updateCellMutation.mutateAsync,
+    isUpdatingCell: updateCellMutation.isPending,
+
+    toggleStatus: toggleStatusMutation.mutateAsync,
+    isTogglingStatus: toggleStatusMutation.isPending,
+
+    bulkAction: bulkActionMutation.mutateAsync,
+    isBulkActionPending: bulkActionMutation.isPending,
 
     deleteMovie: deleteMovieMutation.mutateAsync,
     isDeleting: deleteMovieMutation.isPending,

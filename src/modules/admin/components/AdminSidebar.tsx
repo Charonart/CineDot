@@ -306,7 +306,7 @@ export const AdminSidebar: React.FC = () => {
               className={`flex items-center ${
                 isSidebarCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-3.5 py-3'
               } rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                pathname === '/admin/users-staff'
+                pathname.startsWith('/admin/users-staff')
                   ? 'bg-[#7C6FE8] text-white shadow-md shadow-[#7C6FE8]/30'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
               }`}
