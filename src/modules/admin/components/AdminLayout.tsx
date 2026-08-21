@@ -27,17 +27,31 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     initAdminStore();
   }, [initAdminStore]);
 
+  const VALID_ADMIN_ROLES = [
+    'SUPER_ADMIN',
+    'CINEMA_MANAGER',
+    'TICKET_STAFF',
+    'FNB_STAFF',
+    'MARKETING',
+    'ACCOUNTANT',
+    'STAFF',
+  ];
+
   // Hook 2: Auth Redirect Enforcement
   useEffect(() => {
     if (!isInitialized) return;
 
-    if (!isAuthenticated && pathname !== '/admin/login') {
+    const hasValidAdminRole = Boolean(adminUser && VALID_ADMIN_ROLES.includes(adminUser.role));
+
+    if ((!isAuthenticated || !hasValidAdminRole) && pathname !== '/admin/login') {
       router.replace('/admin/login');
-    } else if (isAuthenticated && (pathname === '/admin/login' || pathname === '/admin')) {
-      if (adminUser?.role === 'TICKET_STAFF') {
-        router.replace('/admin/ticket-scanner');
-      } else {
-        router.replace('/admin/movies');
+    } else if (isAuthenticated && hasValidAdminRole) {
+      if (pathname === '/admin/login') {
+        if (adminUser?.role === 'TICKET_STAFF') {
+          router.replace('/admin/ticket-scanner');
+        } else {
+          router.replace('/admin/movies');
+        }
       }
     }
   }, [isInitialized, isAuthenticated, pathname, router, adminUser]);
@@ -57,7 +71,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   // If unauthenticated on protected routes, show loading while redirecting
-  if (!isAuthenticated || !adminUser) {
+  const hasValidAdminRole = Boolean(adminUser && VALID_ADMIN_ROLES.includes(adminUser.role));
+
+  if (!isAuthenticated || !hasValidAdminRole) {
     return (
       <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
         <Skeleton variant="card" className="w-96 h-64 rounded-3xl" />

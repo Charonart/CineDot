@@ -13,7 +13,6 @@ import {
   Layers,
   Hash,
 } from 'lucide-react';
-import { MarketingSubNavTabs } from './MarketingSubNavTabs';
 import { BannerStudioModal } from './BannerStudioModal';
 import { useAdminBanners } from '../../hooks/useAdminBanners';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
@@ -93,48 +92,7 @@ export function AdminCampaignBannersView() {
         </button>
       </div>
 
-      {/* 2. Marketing Suite SubNav Tabs */}
-      <MarketingSubNavTabs />
-
-      {/* 3. KPI Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Card 1: Tổng Banner */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
-            <ImageIcon className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Banner</span>
-            <span className="text-2xl font-black text-slate-900 font-mono">{banners.length}</span>
-          </div>
-        </div>
-
-        {/* Card 2: Đang Hiển Thị */}
-        <div className="p-5 rounded-3xl bg-white border border-emerald-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đang Hiển Thị</span>
-            <span className="text-2xl font-black text-emerald-600 font-mono">{activeCount}</span>
-          </div>
-        </div>
-
-        {/* Card 3: Thuộc Chiến Dịch */}
-        <div className="p-5 rounded-3xl bg-white border border-indigo-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <Layers className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gắn Chiến Dịch</span>
-            <span className="text-2xl font-black text-indigo-600 font-mono">
-              {banners.filter((b: AdminBanner) => b.campaignId).length}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Toolbar & Filters */}
+      {/* 2. Toolbar & Filters */}
       <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -203,11 +161,11 @@ export function AdminCampaignBannersView() {
               {/* Banner Image Preview Container */}
               <div className="w-full h-48 bg-slate-100 relative overflow-hidden">
                 <img
-                  src={b.imageUrl}
-                  alt={b.title}
+                  src={b.imageUrl || (b as any).image_url || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&auto=format&fit=crop&q=80'}
+                  alt={b.title || 'Banner quảng cáo'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
-                    (e.target as any).src = 'https://placehold.co/800x400/png?text=Invalid+Image';
+                    (e.target as any).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&auto=format&fit=crop&q=80';
                   }}
                 />
 

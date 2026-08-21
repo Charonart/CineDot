@@ -178,19 +178,24 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
       </div>
 
       {/* 5. Total Price */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex flex-col">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Tổng Cộng
-          </span>
-          {isSelected && (
-            <span className="text-[11px] font-semibold text-slate-500">
-              ({selectedCount} ghế đã chọn)
+      <div className="flex flex-col gap-1.5 pt-1">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Tạm tính tiền vé
             </span>
-          )}
+            {isSelected && (
+              <span className="text-[11px] font-semibold text-slate-500">
+                ({selectedCount} ghế đã chọn)
+              </span>
+            )}
+          </div>
+          <span className="text-2xl font-extrabold text-[#7C6FE8]">
+            {totalPrice.toLocaleString()}đ
+          </span>
         </div>
-        <span className="text-2xl font-extrabold text-[#7C6FE8]">
-          {totalPrice.toLocaleString()}đ
+        <span className="text-[10px] text-slate-400 font-medium">
+          * Phụ thu giờ vàng/cuối tuần hoặc ưu đãi giảm giá theo suất chiếu sẽ được bóc tách chi tiết tại bước thanh toán.
         </span>
       </div>
 

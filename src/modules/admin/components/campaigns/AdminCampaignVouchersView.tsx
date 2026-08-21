@@ -19,7 +19,6 @@ import {
   Layers,
   Clock,
 } from 'lucide-react';
-import { MarketingSubNavTabs } from './MarketingSubNavTabs';
 import { VoucherStudioModal } from './VoucherStudioModal';
 import { useAdminVouchers } from '../../hooks/useAdminVouchers';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
@@ -107,65 +106,7 @@ export function AdminCampaignVouchersView() {
         </button>
       </div>
 
-      {/* 2. Marketing Suite SubNav Tabs */}
-      <MarketingSubNavTabs />
-
-      {/* 3. KPI Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Tổng Voucher */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
-            <Ticket className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Voucher</span>
-            <span className="text-2xl font-black text-slate-900 font-mono">
-              {isStatsLoading ? '...' : stats?.total_vouchers ?? vouchers.length}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 2: Đang Hiệu Lực */}
-        <div className="p-5 rounded-3xl bg-white border border-emerald-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đang Khả Dụng</span>
-            <span className="text-2xl font-black text-emerald-600 font-mono">
-              {isStatsLoading ? '...' : stats?.active_vouchers ?? 0}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 3: Lượt Đã Áp Dụng */}
-        <div className="p-5 rounded-3xl bg-white border border-indigo-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lượt Đã Dùng</span>
-            <span className="text-2xl font-black text-indigo-600 font-mono">
-              {isStatsLoading ? '...' : (stats?.total_used_count ?? 0).toLocaleString('vi-VN')}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 4: Sắp Hết Hạn */}
-        <div className="p-5 rounded-3xl bg-white border border-amber-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Hết Hạn Trong 7 Ngày</span>
-            <span className="text-2xl font-black text-amber-600 font-mono">
-              {isStatsLoading ? '...' : stats?.expiring_soon_count ?? 0}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Toolbar & Multi-Filter Bar */}
+      {/* 2. Toolbar & Multi-Filter Bar */}
       <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-3">
         {/* Left: Search input */}
         <div className="relative w-full lg:w-72">
@@ -291,13 +232,13 @@ export function AdminCampaignVouchersView() {
           {vouchers.map((v: AdminVoucher) => {
             const usagePercent =
               v.systemLimit && v.systemLimit > 0
-                ? Math.min(Math.round((v.usedCount / v.systemLimit) * 100), 100)
+                ? Math.min(Math.round((Number(v.usedCount) || 0) / Number(v.systemLimit) * 100), 100)
                 : null;
 
             const isPercentage = v.discountType === 'percentage';
             const discountLabel = isPercentage
-              ? `-${v.discountValue}%`
-              : `-${v.discountValue.toLocaleString('vi-VN')} đ`;
+              ? `-${Number(v.discountValue) || 0}%`
+              : `-${(Number(v.discountValue) || 0).toLocaleString('vi-VN')} đ`;
 
             return (
               <div
@@ -376,7 +317,7 @@ export function AdminCampaignVouchersView() {
                     <div className="flex flex-col">
                       <span className="text-[10px] text-slate-400 font-bold uppercase">Đơn Tối Thiểu</span>
                       <span className="font-mono font-bold text-slate-800">
-                        {v.minOrderValue > 0 ? `${v.minOrderValue.toLocaleString('vi-VN')} đ` : '0 đ'}
+                        {(Number(v.minOrderValue) || 0) > 0 ? `${(Number(v.minOrderValue) || 0).toLocaleString('vi-VN')} đ` : '0 đ'}
                       </span>
                     </div>
 
@@ -398,13 +339,13 @@ export function AdminCampaignVouchersView() {
                         />
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold">
-                        <span>Đã dùng: {v.usedCount}/{v.systemLimit} lượt</span>
+                        <span>Đã dùng: {Number(v.usedCount) || 0}/{v.systemLimit} lượt</span>
                         <span>{usagePercent}%</span>
                       </div>
                     </div>
                   ) : (
                     <div className="text-[10px] text-slate-400 font-bold">
-                      Đã áp dụng: {v.usedCount} lượt (Không giới hạn)
+                      Đã áp dụng: {Number(v.usedCount) || 0} lượt (Không giới hạn)
                     </div>
                   )}
 
@@ -466,14 +407,14 @@ export function AdminCampaignVouchersView() {
                     </td>
                     <td className="py-3 px-4 font-mono font-black text-slate-900">
                       {v.discountType === 'percentage'
-                        ? `${v.discountValue}%`
-                        : `${v.discountValue.toLocaleString('vi-VN')} đ`}
+                        ? `${Number(v.discountValue) || 0}%`
+                        : `${(Number(v.discountValue) || 0).toLocaleString('vi-VN')} đ`}
                     </td>
                     <td className="py-3 px-4 font-mono text-slate-600">
-                      {v.minOrderValue > 0 ? `${v.minOrderValue.toLocaleString('vi-VN')} đ` : '0 đ'}
+                      {(Number(v.minOrderValue) || 0) > 0 ? `${(Number(v.minOrderValue) || 0).toLocaleString('vi-VN')} đ` : '0 đ'}
                     </td>
                     <td className="py-3 px-4 font-mono text-slate-600">
-                      {v.usedCount} {v.systemLimit ? `/ ${v.systemLimit}` : ''}
+                      {Number(v.usedCount) || 0} {v.systemLimit ? `/ ${v.systemLimit}` : ''}
                     </td>
                     <td className="py-3 px-4 text-slate-500 font-medium">
                       {v.validUntil ? v.validUntil.slice(0, 10) : 'Vô thời hạn'}

@@ -15,18 +15,19 @@ interface RoutePermissionConfig {
 
 const ROUTE_PERMISSIONS: RoutePermissionConfig[] = [
   { pathPrefix: '/admin/users-staff', requiredPermission: 'staff.manage', allowedRoles: ['SUPER_ADMIN'] },
-  { pathPrefix: '/admin/campaign', requiredPermission: 'vouchers.manage', allowedRoles: ['SUPER_ADMIN'] },
-  { pathPrefix: '/admin/vouchers', requiredPermission: 'vouchers.manage', allowedRoles: ['SUPER_ADMIN'] },
+  { pathPrefix: '/admin/campaign', requiredPermission: 'vouchers.view', allowedRoles: ['SUPER_ADMIN', 'MARKETING'] },
+  { pathPrefix: '/admin/vouchers', requiredPermission: 'vouchers.view', allowedRoles: ['SUPER_ADMIN', 'MARKETING'] },
+  { pathPrefix: '/admin/pricing-rules', requiredPermission: 'pricing.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/settings', requiredPermission: 'settings.manage', allowedRoles: ['SUPER_ADMIN'] },
-  { pathPrefix: '/admin/movies/genres', requiredPermission: 'movies.genres.manage', allowedRoles: ['SUPER_ADMIN'] },
-  { pathPrefix: '/admin/movies/reviews', requiredPermission: 'reviews.view' },
-  { pathPrefix: '/admin/movies', requiredPermission: 'movies.view' },
-  { pathPrefix: '/admin/cinemas', requiredPermission: 'cinemas.view' },
-  { pathPrefix: '/admin/showtimes', requiredPermission: 'showtimes.view' },
-  { pathPrefix: '/admin/booking', requiredPermission: 'bookings.view' },
-  { pathPrefix: '/admin/tickets', requiredPermission: 'bookings.view' },
-  { pathPrefix: '/admin/concessions', requiredPermission: 'concessions.view' },
-  { pathPrefix: '/admin/ticket-scanner', requiredPermission: 'tickets.scan' },
+  { pathPrefix: '/admin/movies/genres', requiredPermission: 'movies.genres.manage', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
+  { pathPrefix: '/admin/movies/reviews', requiredPermission: 'reviews.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
+  { pathPrefix: '/admin/movies', requiredPermission: 'movies.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
+  { pathPrefix: '/admin/cinemas', requiredPermission: 'cinemas.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
+  { pathPrefix: '/admin/showtimes', requiredPermission: 'showtimes.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER', 'TICKET_STAFF', 'STAFF'] },
+  { pathPrefix: '/admin/booking', requiredPermission: 'bookings.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER', 'ACCOUNTANT'] },
+  { pathPrefix: '/admin/tickets', requiredPermission: 'bookings.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER', 'ACCOUNTANT', 'STAFF'] },
+  { pathPrefix: '/admin/concessions', requiredPermission: 'concessions.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER', 'FNB_STAFF'] },
+  { pathPrefix: '/admin/ticket-scanner', requiredPermission: 'tickets.scan', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER', 'TICKET_STAFF', 'STAFF'] },
 ];
 
 export const AdminRouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -47,14 +48,15 @@ export const AdminRouteGuard: React.FC<{ children: React.ReactNode }> = ({ child
     return pathname.startsWith(rule.pathPrefix);
   });
 
-  // If rule exists, check permission
-  if (matchedRule) {
-    const hasRoleAccess = matchedRule.allowedRoles
-      ? matchedRule.allowedRoles.includes(adminUser.role)
-      : true;
-    const hasPermAccess = hasPermission(matchedRule.requiredPermission);
+  // Check permissions: If rule exists, verify it. If no rule matched, require SUPER_ADMIN
+  const hasRoleAccess = matchedRule
+    ? (matchedRule.allowedRoles ? matchedRule.allowedRoles.includes(adminUser.role) : true)
+    : adminUser.role === 'SUPER_ADMIN';
+  const hasPermAccess = matchedRule
+    ? hasPermission(matchedRule.requiredPermission)
+    : adminUser.role === 'SUPER_ADMIN';
 
-    if (!hasRoleAccess || !hasPermAccess) {
+  if (!hasRoleAccess || !hasPermAccess) {
       return (
         <div className="w-full min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
           <div className="w-20 h-20 rounded-3xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mb-6 shadow-lg shadow-rose-500/10">
@@ -105,7 +107,6 @@ export const AdminRouteGuard: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
       );
     }
-  }
 
   return <>{children}</>;
 };

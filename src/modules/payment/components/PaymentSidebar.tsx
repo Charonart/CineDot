@@ -4,6 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Timer, Ticket, ShieldCheck, ArrowRight, ShoppingBag } from 'lucide-react';
 
+import { AppliedPricingRuleSummary, TicketPriceComposition } from '../hooks/usePayment';
+
 interface SelectedFoodItem {
   id: string;
   name: string;
@@ -30,6 +32,8 @@ interface PaymentSidebarProps {
   showDate: string;
   seatSummaryText: string;
   ticketPrice: number;
+  appliedPricingRules?: AppliedPricingRuleSummary[];
+  ticketPriceComposition?: TicketPriceComposition | null;
   selectedFoodList?: SelectedFoodItem[];
   totalFoodPrice?: number;
   tierDiscountAmount?: number;
@@ -55,6 +59,8 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
   showDate,
   seatSummaryText,
   ticketPrice,
+  appliedPricingRules = [],
+  ticketPriceComposition,
   selectedFoodList = [],
   totalFoodPrice = 0,
   tierDiscountAmount = 0,
@@ -124,17 +130,74 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
         </div>
       </div>
 
-      {/* 4. Selected Seats Summary */}
-      <div className="flex flex-col gap-1 border-b border-gray-100 pb-4">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Ticket className="w-3.5 h-3.5 text-[#7C6FE8]" />
-          <span>Tiền Vé Xem Phim</span>
-        </span>
-        <div className="flex flex-col gap-1 text-xs pt-1">
-          <span className="font-bold text-[#131413] leading-relaxed">{seatSummaryText}</span>
-          <span className="font-extrabold text-[#7C6FE8] text-sm self-end">
+      {/* 4. Selected Seats Summary & Pricing Rules Breakdown */}
+      <div className="flex flex-col gap-2.5 border-b border-gray-100 pb-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Ticket className="w-3.5 h-3.5 text-[#7C6FE8]" />
+            <span>Tiền Vé Xem Phim</span>
+          </span>
+          <span className="font-extrabold text-[#7C6FE8] text-base">
             {ticketPrice.toLocaleString()}đ
           </span>
+        </div>
+
+        <div className="flex flex-col gap-2 text-xs">
+          <div className="p-3 rounded-2xl bg-slate-50 border border-gray-100 flex flex-col gap-1.5">
+            <span className="font-bold text-[#131413] leading-relaxed">{seatSummaryText}</span>
+
+            {/* Price Composition Breakdown */}
+            {ticketPriceComposition && (
+              <div className="pt-2 mt-1 border-t border-gray-200/60 flex flex-col gap-1 text-[11px] text-slate-500">
+                <div className="flex items-center justify-between">
+                  <span>• Giá vé cơ bản:</span>
+                  <span className="font-semibold text-slate-700">
+                    {ticketPriceComposition.totalBasePrice.toLocaleString()}đ
+                  </span>
+                </div>
+
+                {ticketPriceComposition.totalSurcharge > 0 && (
+                  <div className="flex items-center justify-between text-amber-700">
+                    <span>• Phụ thu loại ghế (VIP/Đôi):</span>
+                    <span className="font-semibold">
+                      +{ticketPriceComposition.totalSurcharge.toLocaleString()}đ
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Applied Pricing Rules Badges / Tags */}
+          {appliedPricingRules.length > 0 && (
+            <div className="flex flex-col gap-1.5 pt-1">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                Quy tắc định giá áp dụng:
+              </span>
+              {appliedPricingRules.map((rule) => (
+                <div
+                  key={rule.ruleId}
+                  className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold ${
+                    rule.isDiscount
+                      ? 'bg-emerald-50/80 border-emerald-200 text-emerald-800'
+                      : 'bg-purple-50/80 border-purple-200 text-purple-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>{rule.isDiscount ? '🎉' : '⚡'}</span>
+                    <span>{rule.name}</span>
+                    <span className="text-[10px] opacity-75 font-medium">
+                      ({rule.ticketCount} vé)
+                    </span>
+                  </div>
+                  <span className="font-extrabold">
+                    {rule.isDiscount ? '-' : '+'}
+                    {Math.abs(rule.totalAdjustment).toLocaleString()}đ
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

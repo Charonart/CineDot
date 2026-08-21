@@ -43,6 +43,9 @@ export const adminAuthService = {
     const permissions = responseData?.permissions || [];
 
     const adminUser = adminAuthMapper.toDomain(userDto, permissions);
+    if (!adminUser) {
+      throw new Error('Tài khoản của bạn không có quyền truy cập vào Cổng Quản Trị.');
+    }
 
     return {
       token,
@@ -61,6 +64,9 @@ export const adminAuthService = {
     const permissions = responseData?.permissions || [];
 
     const adminUser = adminAuthMapper.toDomain(userDto, permissions);
+    if (!adminUser) {
+      throw new Error('Tài khoản hiện tại không có quyền hạn Quản trị viên.');
+    }
 
     return {
       adminUser,

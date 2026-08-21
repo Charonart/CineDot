@@ -31,6 +31,12 @@ const TABS: TabItem[] = [
     icon: ImageIcon,
     description: 'Slider & Poster sự kiện',
   },
+  {
+    name: 'Quy Tắc Định Giá (Pricing Rules)',
+    href: '/admin/pricing-rules',
+    icon: Sparkles,
+    description: 'Phụ thu & Giảm giá tự động',
+  },
 ];
 
 export const MarketingSubNavTabs: React.FC = () => {

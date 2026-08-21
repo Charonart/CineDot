@@ -333,62 +333,7 @@ export function AdminCustomersView() {
         </button>
       </div>
 
-      {/* 2. KPI Metrics Banner */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Customers */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Hội Viên</span>
-            <span className="text-2xl font-black text-slate-900 font-mono">
-              {isStatsLoading ? '...' : (stats?.total_customers || 0).toLocaleString('vi-VN')}
-            </span>
-          </div>
-        </div>
-
-        {/* Verified Accounts */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã Xác Thực Email</span>
-            <span className="text-2xl font-black text-emerald-600 font-mono">
-              {isStatsLoading ? '...' : (stats?.verified_users || 0).toLocaleString('vi-VN')}
-            </span>
-          </div>
-        </div>
-
-        {/* Active Accounts */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tài Khoản Hoạt Động</span>
-            <span className="text-2xl font-black text-blue-600 font-mono">
-              {isStatsLoading ? '...' : (stats?.active_users || 0).toLocaleString('vi-VN')}
-            </span>
-          </div>
-        </div>
-
-        {/* Total Points Distributed */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điểm Tích Lũy</span>
-            <span className="text-2xl font-black text-amber-600 font-mono">
-              {isStatsLoading ? '...' : (stats?.total_points || 0).toLocaleString('vi-VN')} Pts
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Universal Notion/Sheets CineDataTable with table hook */}
+      {/* 2. Universal Notion/Sheets CineDataTable with table hook */}
       <CineDataTable<AdminUserDTO>
         table={table}
         bulkActions={bulkActions}

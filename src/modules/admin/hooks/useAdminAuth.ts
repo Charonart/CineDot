@@ -19,9 +19,18 @@ export const useAdminAuth = () => {
   const meQuery = useQuery({
     queryKey: adminAuthKeys.me(),
     queryFn: async () => {
-      const res = await adminAuthService.me();
-      setSession(res.adminUser, res.permissions, token || '');
-      return res;
+      try {
+        const res = await adminAuthService.me();
+        if (res.adminUser) {
+          setSession(res.adminUser, res.permissions, token || '');
+        } else {
+          clearSession();
+        }
+        return res;
+      } catch (err) {
+        clearSession();
+        throw err;
+      }
     },
     enabled: Boolean(token && isInitialized),
     staleTime: 5 * 60 * 1000,

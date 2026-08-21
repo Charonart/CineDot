@@ -5,7 +5,7 @@ import {
   CreateBannerPayload,
   UpdateBannerPayload,
 } from '../dto/adminCampaign.dto';
-import { BannerFilterParams } from '../types/adminCampaign.types';
+import { AdminBanner, BannerFilterParams } from '../types/adminCampaign.types';
 
 export const ADMIN_BANNER_KEYS = {
   all: ['admin', 'banners'] as const,
@@ -67,12 +67,28 @@ export function useAdminBanners(initialFilters: BannerFilterParams = {}) {
     },
   });
 
+  const rawList = (bannersData as any)?.results || (bannersData as any)?.data || [];
+  const normalizedBanners: AdminBanner[] = (
+    Array.isArray(rawList) ? rawList : []
+  ).map((b: any) => ({
+    id: Number(b.id || b.banner_id) || 1,
+    campaignId: b.campaignId || b.campaign_id || null,
+    campaignName: b.campaignName || b.campaign_name || b.campaign?.name || null,
+    title: b.title || '',
+    imageUrl: b.imageUrl || b.image_url || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&auto=format&fit=crop&q=80',
+    linkUrl: b.linkUrl || b.link_url || '',
+    order: Number(b.order) || 0,
+    isActive: Boolean(b.isActive ?? b.is_active),
+    createdAt: b.createdAt || b.created_at || '',
+    updatedAt: b.updatedAt || b.updated_at || '',
+  }));
+
   return {
-    banners: bannersData?.results || [],
+    banners: normalizedBanners,
     pagination: {
       page: bannersData?.page || 1,
       totalPages: bannersData?.totalPages || 1,
-      totalResults: bannersData?.totalResults || 0,
+      totalResults: bannersData?.totalResults || normalizedBanners.length,
     },
     filters,
     setFilters,

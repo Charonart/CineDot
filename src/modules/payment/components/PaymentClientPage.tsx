@@ -57,6 +57,8 @@ export function PaymentClientPage({
     showTime,
     seatSummaryText,
     ticketPrice,
+    appliedPricingRules,
+    ticketPriceComposition,
     selectedFoodList,
     totalFoodPrice,
     tierDiscountAmount,
@@ -98,25 +100,36 @@ export function PaymentClientPage({
           );
         }
       } else {
-        alert('Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại.');
+        alert((res as any)?.message || 'Thanh toán thất bại, vui lòng thử lại.');
       }
+    } catch {
+      alert('Đã có lỗi xảy ra trong quá trình xử lý thanh toán.');
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white">
-      {/* 1. Step Wizard Bar (Step 4: Thanh toán ACTIVE, 80% progress) */}
-      <BookingStepWizard currentStep={4} />
+    <div className="min-h-screen bg-[#F8F9FC] text-[#131413] flex flex-col justify-between">
+      {/* 1. Header & Step Wizard Bar */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-2xs">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-3 flex items-center justify-between">
+          <Link href={`/movies/${movieInfo.slug}`} className="flex items-center gap-2 text-slate-700 hover:text-[#7C6FE8] transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-xs font-bold hidden sm:inline">Quay lại thông tin phim</span>
+          </Link>
+          <BookingStepWizard currentStep={4} />
+          <div className="w-8" />
+        </div>
+      </header>
 
-      {/* 2. Main Content 2-Column Container */}
-      <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8">
+      {/* 2. Main Payment Workflow Content Layout */}
+      <main className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8 w-full flex-1">
+        <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: 68% Width (lg:col-span-8 - Voucher & Payment Method Cards) */}
+            {/* Left Column: 68% Width (lg:col-span-8 - Payment Options) */}
             <div className="lg:col-span-8 flex flex-col gap-6">
-              {/* Back to Food Booking Link */}
+              {/* Back navigation button */}
               <div className="flex items-center justify-between pb-1">
                 <Link href={backToFoodHref}>
                   <button className="text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] flex items-center gap-1.5 transition-colors cursor-pointer">
@@ -157,6 +170,8 @@ export function PaymentClientPage({
                 showDate={formattedShowDate}
                 seatSummaryText={seatSummaryText}
                 ticketPrice={ticketPrice}
+                appliedPricingRules={appliedPricingRules}
+                ticketPriceComposition={ticketPriceComposition}
                 selectedFoodList={selectedFoodList}
                 totalFoodPrice={totalFoodPrice}
                 tierDiscountAmount={tierDiscountAmount}
