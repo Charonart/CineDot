@@ -195,14 +195,27 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
             }
 
             if (isBooked) {
-              dynamicBg = '#E2E8F0';
-              dynamicBorder = '#CBD5E1';
-              dynamicText = '#94A3B8';
+              if (seat.status === 'HOLDING') {
+                dynamicBg = '#FEF3C7'; // Amber-100
+                dynamicBorder = '#F59E0B'; // Amber-500
+                dynamicText = '#B45309'; // Amber-700
+              } else {
+                dynamicBg = '#E2E8F0';
+                dynamicBorder = '#CBD5E1';
+                dynamicText = '#94A3B8';
+              }
             } else if (isSelected) {
               dynamicBg = '#7C6FE8';
               dynamicBorder = '#7C6FE8';
               dynamicText = '#FFFFFF';
             }
+
+            const tooltipText =
+              seat.status === 'HOLDING'
+                ? `Ghế ${seat.label} (Đang có người giữ)`
+                : isBooked
+                ? `Ghế ${seat.label} (Đã được đặt)`
+                : `Ghế ${seat.label} (${seat.typeName || seat.type}) - ${seat.price.toLocaleString('vi-VN')}đ`;
 
             return (
               <motion.button
@@ -211,7 +224,7 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
                 whileTap={!isBooked ? { scale: 0.95 } : {}}
                 onClick={() => handleToggle(seat.seatIds)}
                 disabled={isBooked}
-                title={`Ghế ${seat.label} (${seat.typeName || seat.type}) - ${seat.price.toLocaleString('vi-VN')}đ`}
+                title={tooltipText}
                 style={{
                   left: seat.canvas.cx,
                   top: seat.canvas.cy,
