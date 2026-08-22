@@ -70,6 +70,12 @@ export const SeatLegend: React.FC<SeatLegendProps> = ({
           <span>Ghế Đang Chọn</span>
         </div>
 
+        {/* Holding Seat Indicator */}
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-amber-100 border border-amber-400 shadow-2xs" />
+          <span>Đang Giữ Chỗ</span>
+        </div>
+
         {/* Booked Seat Indicator */}
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-md bg-gray-200 border border-gray-300 shadow-2xs" />

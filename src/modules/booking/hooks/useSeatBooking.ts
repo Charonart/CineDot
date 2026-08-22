@@ -1,10 +1,10 @@
-'use client';
-
 import { useState, useEffect, useMemo } from 'react';
-import { SeatItem, SeatRowGroup, ShowtimeBookingInfo, SeatTypeInfo } from '../types/seat-booking.types';
+import { SeatItem, SeatRowGroup, ShowtimeBookingInfo, SeatTypeInfo, SeatStatus, SeatStatusUpdatedEvent } from '../types/seat-booking.types';
 import { seatBookingService } from '../services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '../services/bookingTimerService';
 import { saveBookingSession, updateBookingSession } from '../services/bookingSessionService';
+import { getEcho } from '@/shared/lib/echo';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
 export function useSeatBooking(
   showtimeId: string = '1726',
@@ -24,6 +24,7 @@ export function useSeatBooking(
   const [isTimeout, setIsTimeout] = useState(false);
   const [holdError, setHoldError] = useState<string | null>(null);
   const [isHolding, setIsHolding] = useState(false);
+
 
   useEffect(() => {
     let isMounted = true;
@@ -73,6 +74,54 @@ export function useSeatBooking(
     };
   }, [showtimeId, movieParam, initialSeatsParam, dateParam, timeParam, cinemaParam]);
 
+  // Realtime Seat Status via WebSocket (Pusher / Laravel Echo)
+  useEffect(() => {
+    if (!showtimeId) return;
+
+    const echo = getEcho();
+    if (!echo) return;
+
+    const channelName = `showtimes.${showtimeId}`;
+
+    echo.channel(channelName).listen('.seat.updated', (event: SeatStatusUpdatedEvent) => {
+      const { seat_ids, status, user_id } = event;
+      if (!seat_ids || !Array.isArray(seat_ids) || seat_ids.length === 0) return;
+
+      const upperStatus = (status || '').toUpperCase() as SeatStatus;
+      const currentUserId = useAuthStore.getState().user?.id;
+      const isOtherUser = !currentUserId || String(user_id) !== String(currentUserId);
+
+      // Cập nhật danh sách ghế
+      setSeats((prevSeats) => {
+        if (upperStatus !== 'AVAILABLE' && isOtherUser) {
+          const lockedSeatCodeIds = prevSeats
+            .filter((s) => seat_ids.includes(s.showtime_seat_id))
+            .map((s) => s.id);
+
+          if (lockedSeatCodeIds.length > 0) {
+            setSelectedSeatIds((prevSelected) =>
+              prevSelected.filter((id) => !lockedSeatCodeIds.includes(id))
+            );
+          }
+        }
+
+        return prevSeats.map((seat) => {
+          if (seat_ids.includes(seat.showtime_seat_id)) {
+            return {
+              ...seat,
+              status: upperStatus,
+            };
+          }
+          return seat;
+        });
+      });
+    });
+
+    return () => {
+      echo.leaveChannel(channelName);
+    };
+  }, [showtimeId]);
+
   // Countdown timer
   useEffect(() => {
     const updateCountdown = () => {
@@ -94,6 +143,7 @@ export function useSeatBooking(
     const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
   }, [showtimeId, selectedSeatIds, seats]);
+
 
   const formattedCountdown = useMemo(() => {
     return formatSecondsToMMSS(timeLeft);
