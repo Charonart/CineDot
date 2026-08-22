@@ -104,12 +104,16 @@ export const ENDPOINTS = {
   ADMIN: {
     MOVIES_SYNC: '/admin/movies/sync',
     MOVIES: '/admin/movies',
+    MOVIES_BULK: '/admin/movies/bulk',
     MOVIE_DETAIL: (id: number | string) => `/admin/movies/${id}`,
+    MOVIE_CELL: (id: number | string) => `/admin/movies/${id}/cell`,
     MOVIE_CREDITS: (movieId: number | string) => `/admin/movies/${movieId}/credits`,
     MOVIE_CREDIT_DELETE: (movieId: number | string, creditId: number | string) => `/admin/movies/${movieId}/credits/${creditId}`,
     
     CINEMAS: '/admin/cinemas',
+    CINEMAS_BULK: '/admin/cinemas/bulk',
     CINEMA_DETAIL: (id: number | string) => `/admin/cinemas/${id}`,
+    CINEMA_CELL: (id: number | string) => `/admin/cinemas/${id}/cell`,
     CINEMA_ROOMS: (cinemaId: number | string) => `/admin/cinemas/${cinemaId}/rooms`,
     ROOM_DETAIL: (roomId: number | string) => `/admin/rooms/${roomId}`,
 
@@ -122,7 +126,9 @@ export const ENDPOINTS = {
 
     CAMPAIGNS: '/admin/campaigns',
     CAMPAIGNS_STATS: '/admin/campaigns/stats',
+    CAMPAIGNS_BULK: '/admin/campaigns/bulk',
     CAMPAIGN_DETAIL: (id: number | string) => `/admin/campaigns/${id}`,
+    CAMPAIGN_CELL: (id: number | string) => `/admin/campaigns/${id}/cell`,
     CAMPAIGN_TOGGLE: (id: number | string) => `/admin/campaigns/${id}/toggle-status`,
     CAMPAIGN_VOUCHERS: (id: number | string) => `/admin/campaigns/${id}/vouchers`,
     CAMPAIGN_BANNERS: (id: number | string) => `/admin/campaigns/${id}/banners`,
@@ -130,11 +136,15 @@ export const ENDPOINTS = {
 
     VOUCHERS: '/admin/vouchers',
     VOUCHERS_STATS: '/admin/vouchers/stats',
+    VOUCHERS_BULK: '/admin/vouchers/bulk',
     VOUCHER_DETAIL: (id: number | string) => `/admin/vouchers/${id}`,
+    VOUCHER_CELL: (id: number | string) => `/admin/vouchers/${id}/cell`,
     VOUCHER_TOGGLE: (id: number | string) => `/admin/vouchers/${id}/toggle-status`,
 
     BANNERS: '/admin/banners',
+    BANNERS_BULK: '/admin/banners/bulk',
     BANNER_DETAIL: (id: number | string) => `/admin/banners/${id}`,
+    BANNER_CELL: (id: number | string) => `/admin/banners/${id}/cell`,
     BANNER_TOGGLE: (id: number | string) => `/admin/banners/${id}/toggle-status`,
 
     COMBOS: '/admin/combos',
@@ -159,6 +169,7 @@ export const ENDPOINTS = {
     // Bookings & Transactions
     BOOKINGS: '/admin/bookings',
     BOOKINGS_STATS: '/admin/bookings/stats',
+    BOOKINGS_BULK: '/admin/bookings/bulk',
     BOOKING_DETAIL: (id: number | string) => `/admin/bookings/${id}`,
     BOOKING_REFUND: (id: number | string) => `/admin/bookings/${id}/refund`,
 
@@ -166,12 +177,23 @@ export const ENDPOINTS = {
     REVIEW_DELETE: (id: number | string) => `/admin/reviews/${id}`,
 
     USERS: '/admin/users',
+    USERS_STATS: '/admin/users/stats',
+    USERS_BULK: '/admin/users/bulk',
     USER_DETAIL: (id: number | string) => `/admin/users/${id}`,
+    USER_CELL: (id: number | string) => `/admin/users/${id}/cell`,
     USER_UPDATE_ROLE: (id: number | string) => `/admin/users/${id}/role`,
     USER_TOGGLE_STATUS: (id: number | string) => `/admin/users/${id}/toggle-status`,
+    USER_ADJUST_POINTS: (id: number | string) => `/admin/users/${id}/adjust-points`,
     USER_ROLES: (userId: number | string) => `/admin/users/${userId}/roles`,
     USER_ROLE_REVOKE: (userId: number | string, id: number | string) => `/admin/users/${userId}/roles/${id}`,
+    
     ROLES: '/admin/roles',
+    ROLE_DETAIL: (id: number | string) => `/admin/roles/${id}`,
+    ROLE_PERMISSIONS: (id: number | string) => `/admin/roles/${id}/permissions`,
+    PERMISSIONS: '/admin/permissions',
+
+    USER_TIERS: '/admin/user-tiers',
+    USER_TIER_DETAIL: (id: number | string) => `/admin/user-tiers/${id}`,
 
     REVENUE_REPORT: '/admin/reports/revenue',
 

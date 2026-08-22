@@ -150,17 +150,15 @@ export function AdminMovieGenresView() {
     <div className="flex flex-col gap-6 font-sans">
       {/* 1. Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="w-4 h-4" />
-            <span>QUẢN LÝ THỂ LOẠI PHIM</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Danh Mục Thể Loại Phim
-          </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Quản lý các thể loại và phân loại phim trong hệ thống CineDot
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Tag className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Danh Mục Thể Loại Phim
+            </h1>
+          </div>
         </div>
 
         <button

@@ -66,17 +66,15 @@ export function ShowtimesToolbar({
     <div className="flex flex-col gap-4 text-slate-900">
       {/* Top Bar: Title & Action Buttons */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
-            <span>HỆ THỐNG PHÂN BỔ & QUẢN TRỊ LỊCH CHIẾU PHIM</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Lập Lịch Chiếu & Quản Lý Phòng
-          </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Giao diện Gantt Timeline trực quan: Thu phóng linh hoạt, đường gióng căn giờ chuẩn xác, tự động tính buffer dọn phòng.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Quản Lý Suất Chiếu & Lịch Phòng
+            </h1>
+          </div>
         </div>
 
         {/* Top Actions */}

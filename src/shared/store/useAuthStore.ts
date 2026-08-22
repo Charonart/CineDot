@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import { User } from '../types/auth.types';
 import { authService, ResetPasswordPayload } from '@/modules/auth/services/auth.service';
+import { clearAllAuthSession } from '../utils/authStorage';
 
 export type AuthModalTab = 'login' | 'register' | 'forgot';
 
@@ -226,15 +227,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     logout: async () => {
-      // 1. Clear state locally first to avoid UI blocking and infinite loop 401s
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('cinedot_token');
-        localStorage.removeItem('cine_token');
-        localStorage.removeItem('cinedot_current_user');
-        localStorage.removeItem('cinedot_permissions');
-        Cookies.remove('cinedot_token', { path: '/' });
-        Cookies.remove('cine_token', { path: '/' });
-      }
+      // 1. Clear state locally and all cookies/storage first to avoid UI blocking and infinite loop 401s
+      clearAllAuthSession();
       
       set({
         user: null,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAdminAuthStore } from '../store/useAdminAuthStore';
 import { useAdminStaff } from '../hooks/useAdminStaff';
 import { AdminRole, AdminStaffItem, ROLE_NAME_MAP, ROLE_DEFINITIONS } from '../types/admin.types';
@@ -11,51 +11,48 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
-  Search,
-  Filter,
   Shield,
   Trash2,
   Lock,
   Unlock,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
   Building2,
   Mail,
   Phone,
-  User,
   Edit3,
   Eye,
   Key,
   Calendar,
+  Loader2,
 } from 'lucide-react';
-import { Skeleton } from '@/shared/ui/Skeleton';
+
+import { useAdminRoles } from '../hooks/useAdminRoles';
+import { adminStaffService } from '../services/adminStaff.service';
+import { CineDataTable, useServerTable } from '@/shared/components/table';
+import { CineColumnDef, BulkAction } from '@/shared/types/dataTable.types';
+import { StaffContextRolesModal } from './modals/StaffContextRolesModal';
 
 export function AdminStaffManagementView() {
   const { adminUser } = useAdminAuthStore();
+  const { roles = [] } = useAdminRoles();
 
-  // Search & Filter States
-  const [searchInput, setSearchInput] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('ALL');
-  const [selectedCinemaId, setSelectedCinemaId] = useState<string>('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
+  const availableRoles = useMemo(() => {
+    return roles.length > 0
+      ? roles.filter((r) => r.name !== 'customer')
+      : [
+          { id: 1, name: 'admin', description: 'Tổng Quản Trị Hệ Thống (Super Admin)' },
+          { id: 4, name: 'cinema_manager', description: 'Quản Lý Cụm Rạp' },
+          { id: 5, name: 'ticket_staff', description: 'Nhân Viên Soát Vé Cổng' },
+          { id: 6, name: 'fnb_staff', description: 'Nhân Viên Quầy Bắp Nước' },
+          { id: 7, name: 'marketing', description: 'Chuyên Viên Marketing' },
+          { id: 8, name: 'accountant', description: 'Kế Toán & Doanh Thu' },
+        ];
+  }, [roles]);
 
-  // Debounce search term
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchTerm(searchInput.trim());
-      setCurrentPage(1);
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+  const isSystemRole = (roleStr?: string | null) =>
+    ['admin', 'super_admin', 'super admin', 'marketing', 'accountant'].includes((roleStr || '').toLowerCase());
 
   // Hook 100% Real API
   const {
-    staffList,
-    pagination,
-    isLoading,
-    isFetching,
     cinemas,
     createStaff,
     isCreating,
@@ -64,28 +61,21 @@ export function AdminStaffManagementView() {
     isUpdating,
     isUpdatingRole,
     toggleStaffStatus,
-    isTogglingStatus,
     deleteStaff,
-    isDeleting,
-  } = useAdminStaff({
-    search: searchTerm || undefined,
-    role: selectedRole !== 'ALL' ? selectedRole : undefined,
-    cinema_id: selectedCinemaId !== 'ALL' ? selectedCinemaId : undefined,
-    page: currentPage,
-    per_page: 10,
-  });
+  } = useAdminStaff();
 
   // Modal States
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<AdminStaffItem | null>(null);
   const [viewingStaff, setViewingStaff] = useState<AdminStaffItem | null>(null);
+  const [managingRolesStaff, setManagingRolesStaff] = useState<AdminStaffItem | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Form States for Create
   const [createName, setCreateName] = useState('');
   const [createEmail, setCreateEmail] = useState('');
   const [createPassword, setCreatePassword] = useState('');
-  const [createRole, setCreateRole] = useState<AdminRole>('TICKET_STAFF');
+  const [createRole, setCreateRole] = useState<string>('ticket_staff');
   const [createCinemaId, setCreateCinemaId] = useState<string>('');
   const [createPhone, setCreatePhone] = useState('');
   const [createError, setCreateError] = useState('');
@@ -94,7 +84,7 @@ export function AdminStaffManagementView() {
   // Form States for Edit
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
-  const [editRole, setEditRole] = useState<AdminRole>('TICKET_STAFF');
+  const [editRole, setEditRole] = useState<string>('ticket_staff');
   const [editCinemaId, setEditCinemaId] = useState<string>('');
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
@@ -122,8 +112,9 @@ export function AdminStaffManagementView() {
     setCreateError('');
     setCreateSuccess('');
 
+    const isSystemScope = isSystemRole(createRole);
     const targetCinema = cinemas.find((c) => c.id === createCinemaId);
-    const cinemaName = createRole === 'SUPER_ADMIN' ? 'Toàn Bộ Cụm Rạp' : (targetCinema?.name || 'Chưa phân công');
+    const cinemaName = isSystemScope ? 'Toàn Bộ Cụm Rạp' : (targetCinema?.name || 'Chưa phân công');
 
     const validationResult = createStaffSchema.safeParse({
       name: createName.trim(),
@@ -131,7 +122,7 @@ export function AdminStaffManagementView() {
       password: createPassword,
       role: createRole,
       cinemaName,
-      cinemaId: createRole === 'SUPER_ADMIN' ? null : createCinemaId,
+      cinemaId: isSystemScope ? null : createCinemaId,
       phone: createPhone.trim() || undefined,
     });
 
@@ -145,8 +136,8 @@ export function AdminStaffManagementView() {
         name: createName.trim(),
         email: createEmail.trim(),
         password: createPassword,
-        role: createRole,
-        cinema_id: createRole === 'SUPER_ADMIN' ? null : createCinemaId,
+        role: createRole as AdminRole,
+        cinema_id: isSystemScope ? null : createCinemaId,
         cinema_name: cinemaName,
         phone: createPhone.trim() || undefined,
       });
@@ -172,12 +163,13 @@ export function AdminStaffManagementView() {
     setEditError('');
     setEditSuccess('');
 
+    const isSystemScope = isSystemRole(editRole);
     const targetCinema = cinemas.find((c) => c.id === editCinemaId);
-    const cinemaName = editRole === 'SUPER_ADMIN' ? 'Toàn Bộ Cụm Rạp' : (targetCinema?.name || 'Chưa phân công');
+    const cinemaName = isSystemScope ? 'Toàn Bộ Cụm Rạp' : (targetCinema?.name || 'Chưa phân công');
 
     const roleValidation = updateStaffRoleSchema.safeParse({
       role: editRole,
-      cinemaId: editRole === 'SUPER_ADMIN' ? null : editCinemaId,
+      cinemaId: isSystemScope ? null : editCinemaId,
       cinemaName,
     });
 
@@ -193,7 +185,7 @@ export function AdminStaffManagementView() {
         payload: {
           name: editName.trim(),
           phone: editPhone.trim() || undefined,
-          cinema_id: editRole === 'SUPER_ADMIN' ? null : editCinemaId,
+          cinema_id: isSystemScope ? null : editCinemaId,
           cinema_name: cinemaName,
         },
       });
@@ -203,8 +195,8 @@ export function AdminStaffManagementView() {
         await updateStaffRole({
           id: editingStaff.id,
           payload: {
-            role: editRole,
-            cinema_id: editRole === 'SUPER_ADMIN' ? null : editCinemaId,
+            role: editRole as AdminRole,
+            cinema_id: isSystemScope ? null : editCinemaId,
             cinema_name: cinemaName,
           },
         });
@@ -222,11 +214,6 @@ export function AdminStaffManagementView() {
   };
 
   const handleToggleStatus = async (id: string, currentStatus: 'ACTIVE' | 'DISABLED') => {
-    const targetStaff = staffList.find((u) => u.id === id);
-    if (targetStaff?.role === 'SUPER_ADMIN') {
-      alert('Không thể khóa tài khoản Tổng Quản Trị Hệ Thống!');
-      return;
-    }
     const nextStatus = currentStatus === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
     try {
       await toggleStaffStatus({ id, status: nextStatus });
@@ -238,12 +225,6 @@ export function AdminStaffManagementView() {
 
   const handleDeleteStaff = async () => {
     if (!deletingId) return;
-    const targetStaff = staffList.find((u) => u.id === deletingId);
-    if (targetStaff?.role === 'SUPER_ADMIN') {
-      alert('Không thể xóa tài khoản Tổng Quản Trị Hệ Thống!');
-      setDeletingId(null);
-      return;
-    }
     try {
       await deleteStaff(deletingId);
       setDeletingId(null);
@@ -253,276 +234,317 @@ export function AdminStaffManagementView() {
     }
   };
 
+  // ── Universal CineDataTable Column Definitions ──
+  const columns: CineColumnDef<AdminStaffItem>[] = useMemo(
+    () => [
+      {
+        key: 'id',
+        title: 'ID',
+        dataType: 'text',
+        sortable: true,
+        filterable: true,
+        width: 70,
+        align: 'center',
+        sticky: 'left',
+        format: (val) => <span className="font-mono text-slate-400 font-bold">#{val}</span>,
+      },
+      {
+        key: 'name',
+        title: 'Họ Và Tên',
+        dataType: 'text',
+        sortable: true,
+        filterable: true,
+        editable: true,
+        format: (val, row) => (
+          <div className="flex items-center gap-2.5 font-bold text-slate-900">
+            <div className="w-7 h-7 rounded-xl bg-purple-100 text-[#7C6FE8] flex items-center justify-center font-black text-xs shrink-0">
+              {String(val || '').charAt(0).toUpperCase()}
+            </div>
+            <span
+              onClick={() => setViewingStaff(row)}
+              className="hover:text-[#7C6FE8] cursor-pointer"
+            >
+              {val}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: 'email',
+        title: 'Email Công Việc',
+        dataType: 'text',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: 'phone',
+        title: 'Số Điện Thoại',
+        dataType: 'text',
+        filterable: true,
+        editable: true,
+        format: (val) => (
+          <span className="font-mono text-slate-600 font-semibold">{val || '---'}</span>
+        ),
+      },
+      {
+        key: 'role',
+        title: 'Vai Trò Phân Quyền',
+        dataType: 'select',
+        sortable: true,
+        filterable: true,
+        options: availableRoles.map((r) => ({
+          label: `${r.name.toUpperCase()} - ${r.description || r.name}`,
+          value: r.name,
+        })),
+        cell: ({ row }) => {
+          const userRoles = row.userRoles || [];
+          if (userRoles.length > 0) {
+            return (
+              <div className="flex flex-wrap gap-1 max-w-[240px]">
+                {userRoles.map((ur) => {
+                  const isSuper = ur.roleName.toLowerCase().includes('admin');
+                  return (
+                    <span
+                      key={ur.id}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                        isSuper
+                          ? 'bg-purple-50 text-[#7C6FE8] border-purple-200'
+                          : ur.roleName.toLowerCase().includes('manager')
+                          ? 'bg-blue-50 text-blue-600 border-blue-200'
+                          : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                      }`}
+                    >
+                      <Shield className="w-2.5 h-2.5" />
+                      <span>{ur.roleName}</span>
+                      {ur.scopeType === 'cinema' && ur.scopeName && (
+                        <span className="text-[9px] font-medium text-slate-500 normal-case">
+                          ({ur.scopeName})
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          const isSuper = isSystemRole(row.role);
+          return (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                isSuper
+                  ? 'bg-purple-50 text-[#7C6FE8] border-purple-200'
+                  : String(row.role).toLowerCase().includes('manager')
+                  ? 'bg-blue-50 text-blue-600 border-blue-200'
+                  : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+              }`}
+            >
+              <Shield className="w-3 h-3" />
+              <span>{row.roleName}</span>
+            </span>
+          );
+        },
+      },
+      {
+        key: 'cinemaName',
+        title: 'Cụm Rạp Phụ Trách',
+        dataType: 'select',
+        filterable: true,
+        options: [
+          { label: 'Toàn Bộ Cụm Rạp', value: 'Toàn Bộ Cụm Rạp' },
+          ...cinemas.map((c) => ({ label: c.name, value: c.name })),
+        ],
+        format: (val) => <span className="font-semibold text-slate-700">{val || 'Toàn Bộ Cụm Rạp'}</span>,
+      },
+      {
+        key: 'status',
+        title: 'Trạng Thái',
+        dataType: 'boolean',
+        sortable: true,
+        filterable: true,
+        editable: true,
+        width: 120,
+        align: 'center',
+        format: (val, row) => (
+          <span
+            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+              row.status === 'ACTIVE'
+                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                : 'bg-rose-50 text-rose-600 border border-rose-200'
+            }`}
+          >
+            {row.status === 'ACTIVE' ? 'Đang Hoạt Động' : 'Đã Khóa'}
+          </span>
+        ),
+      },
+      {
+        key: 'actions',
+        title: 'Thao Tác',
+        dataType: 'custom',
+        width: 160,
+        align: 'right',
+        sticky: 'right',
+        filterable: false,
+        renderCell: (u) => {
+          const isCurrentUser = adminUser?.id === u.id;
+          const isSuper = u.role === 'SUPER_ADMIN';
+
+          return (
+            <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setManagingRolesStaff(u)}
+                className="p-1.5 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all cursor-pointer"
+                title="Phân quyền ngữ cảnh (Context Roles & Scope)"
+              >
+                <Shield className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => setViewingStaff(u)}
+                className="p-1.5 rounded-xl bg-purple-50 text-[#7C6FE8] hover:bg-purple-100 transition-all cursor-pointer"
+                title="Xem chi tiết phân quyền"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+
+              {adminUser?.role === 'SUPER_ADMIN' && (
+                <>
+                  <button
+                    onClick={() => handleOpenEdit(u)}
+                    className="p-1.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all cursor-pointer"
+                    title="Chỉnh sửa thông tin"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+
+                  {!isCurrentUser && !isSuper ? (
+                    <>
+                      <button
+                        onClick={() => handleToggleStatus(u.id, u.status)}
+                        className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                          u.status === 'ACTIVE'
+                            ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                        }`}
+                        title={u.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                      >
+                        {u.status === 'ACTIVE' ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                      </button>
+
+                      <button
+                        onClick={() => setDeletingId(u.id)}
+                        className="p-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all cursor-pointer"
+                        title="Xóa tài khoản nhân sự"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  ) : null}
+                </>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [availableRoles, cinemas, adminUser]
+  );
+
+  // ── Hook: Server-Side Table Controller (URL Sync + Query + Inline Edit + Bulk) ──
+  const table = useServerTable<AdminStaffItem>({
+    queryKey: ['admin', 'staff'],
+    fetcher: (params) => adminStaffService.getStaffList({ role: 'staff_all', ...params }),
+    updateCell: async (id: string | number, field: string, newValue: any): Promise<any> => {
+      if (field === 'name' || field === 'phone') {
+        return updateStaff({
+          id: String(id),
+          payload: {
+            [field]: newValue,
+          },
+        });
+      } else if (field === 'status') {
+        const nextStatus = newValue ? 'ACTIVE' : 'DISABLED';
+        return toggleStaffStatus({ id: String(id), status: nextStatus });
+      }
+    },
+    bulkAction: (action: string, ids: (string | number)[]) => adminStaffService.bulkAction(action as any, ids),
+    columns,
+    exportFileName: 'danh_sach_nhan_su_cinedot',
+    defaultPerPage: 10,
+  });
+
+  // ── Bulk Actions for Universal CineDataTable ──
+  const bulkActions: BulkAction<AdminStaffItem>[] = useMemo(
+    () => [
+      {
+        key: 'bulk_active_staff',
+        label: 'Mở Khóa Đã Chọn',
+        icon: <Unlock className="w-3.5 h-3.5" />,
+        variant: 'primary',
+        onClick: async (selectedRows, ids) => {
+          await table.handleBulkAction('set_active');
+        },
+      },
+      {
+        key: 'bulk_inactive_staff',
+        label: 'Khóa Đã Chọn',
+        icon: <Lock className="w-3.5 h-3.5" />,
+        variant: 'amber',
+        onClick: async (selectedRows, ids) => {
+          await table.handleBulkAction('set_inactive');
+        },
+      },
+    ],
+    [table]
+  );
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 w-full animate-fadeIn">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Users className="w-4 h-4" />
-            <span>QUẢN TRỊ QUYỀN HẠN & NHÂN SỰ</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Danh Sách Tài Khoản Nhân Sự
-          </h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Danh Sách Tài Khoản Nhân Sự
+            </h1>
+          </div>
         </div>
 
         {/* Create Staff Button (Visible to Super Admin) */}
         {adminUser?.role === 'SUPER_ADMIN' && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-5 py-3 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit"
+            className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
           >
             <UserPlus className="w-4 h-4" />
-            <span>+ THÊM NHÂN VIÊN MỚI</span>
+            <span>THÊM NHÂN VIÊN MỚI</span>
           </button>
         )}
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="p-4 rounded-3xl bg-white border border-gray-200/80 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xs">
-        {/* Search Input */}
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Tìm theo tên, email nhân sự..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-          <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-
-          {/* Role Filter */}
-          <select
-            value={selectedRole}
-            onChange={(e) => {
-              setSelectedRole(e.target.value);
-              setCurrentPage(1);
-            }}
-            aria-label="Lọc theo vai trò"
-            className="px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#7C6FE8] transition-all cursor-pointer"
-          >
-            <option value="ALL">Tất cả vai trò</option>
-            <option value="SUPER_ADMIN">Tổng Quản Trị Hệ Thống</option>
-            <option value="CINEMA_MANAGER">Quản Lý Cụm Rạp</option>
-            <option value="TICKET_STAFF">Nhân Viên Soát Vé</option>
-          </select>
-
-          {/* Cinema Filter */}
-          <select
-            value={selectedCinemaId}
-            onChange={(e) => {
-              setSelectedCinemaId(e.target.value);
-              setCurrentPage(1);
-            }}
-            aria-label="Lọc theo cụm rạp"
-            className="px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#7C6FE8] transition-all cursor-pointer max-w-[200px] truncate"
-          >
-            <option value="ALL">Tất cả cụm rạp</option>
-            {cinemas.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Staff Table */}
-      <div className="p-6 rounded-3xl bg-white border border-gray-200/80 flex flex-col gap-4 shadow-sm relative">
-        {isFetching && !isLoading && (
-          <div className="absolute top-4 right-6 flex items-center gap-1.5 text-xs font-bold text-[#7C6FE8] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 animate-pulse">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>Đang cập nhật...</span>
-          </div>
-        )}
-
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[780px]">
-            <thead>
-              <tr className="border-b border-gray-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50">
-                <th className="p-3.5 rounded-l-xl">Họ Và Tên</th>
-                <th className="p-3.5">Email Công Việc</th>
-                <th className="p-3.5">Vai Trò Phân Quyền</th>
-                <th className="p-3.5">Cụm Rạp Phụ Trách</th>
-                <th className="p-3.5">Trạng Thái</th>
-                <th className="p-3.5 rounded-r-xl text-right">Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-xs font-semibold text-slate-700">
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <tr key={idx} className="animate-pulse">
-                    <td className="p-3.5"><Skeleton variant="text" className="w-32 h-4" /></td>
-                    <td className="p-3.5"><Skeleton variant="text" className="w-40 h-4" /></td>
-                    <td className="p-3.5"><Skeleton variant="text" className="w-28 h-4" /></td>
-                    <td className="p-3.5"><Skeleton variant="text" className="w-36 h-4" /></td>
-                    <td className="p-3.5"><Skeleton variant="text" className="w-16 h-4" /></td>
-                    <td className="p-3.5 text-right"><Skeleton variant="text" className="w-20 h-4 ml-auto" /></td>
-                  </tr>
-                ))
-              ) : staffList.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400 font-medium">
-                    Không tìm thấy nhân viên nào phù hợp với điều kiện tìm kiếm.
-                  </td>
-                </tr>
-              ) : (
-                staffList.map((u) => {
-                  const isCurrentUser = adminUser?.id === u.id;
-                  const isSuper = u.role === 'SUPER_ADMIN';
-
-                  return (
-                    <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-3.5 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-purple-100 text-[#7C6FE8] flex items-center justify-center font-black text-xs shrink-0">
-                          {u.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-extrabold text-slate-900">{u.name}</span>
-                          <span className="text-[10px] text-slate-400 font-medium">ID: {u.id}</span>
-                        </div>
-                      </td>
-
-                      <td className="p-3.5 text-slate-600 font-medium">{u.email}</td>
-
-                      <td className="p-3.5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${
-                            u.role === 'SUPER_ADMIN'
-                              ? 'bg-purple-50 text-[#7C6FE8] border-purple-200'
-                              : u.role === 'CINEMA_MANAGER'
-                                ? 'bg-blue-50 text-blue-600 border-blue-200'
-                                : 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                          }`}
-                        >
-                          <Shield className="w-3 h-3" />
-                          <span>{ROLE_NAME_MAP[u.role] || u.roleName}</span>
-                        </span>
-                      </td>
-
-                      <td className="p-3.5 text-slate-600 font-medium">{u.cinemaName || 'Toàn Bộ Cụm Rạp'}</td>
-
-                      <td className="p-3.5">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            u.status === 'ACTIVE'
-                              ? 'bg-emerald-50 text-emerald-600'
-                              : 'bg-rose-50 text-rose-600'
-                          }`}
-                        >
-                          {u.status === 'ACTIVE' ? 'Đang Hoạt Động' : 'Đã Khóa'}
-                        </span>
-                      </td>
-
-                      <td className="p-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* View Detail Button */}
-                          <button
-                            onClick={() => setViewingStaff(u)}
-                            className="p-1.5 rounded-xl bg-slate-50 text-slate-600 border border-gray-200 hover:bg-slate-100 transition-all cursor-pointer"
-                            title="Xem chi tiết quyền hạn"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-
-                          {adminUser?.role === 'SUPER_ADMIN' && !isCurrentUser && (
-                            <>
-                              {/* Edit Staff Button (Only for non-Super Admin or profile edit) */}
-                              {!isSuper ? (
-                                <>
-                                  <button
-                                    onClick={() => handleOpenEdit(u)}
-                                    className="p-1.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all cursor-pointer"
-                                    title="Chỉnh sửa thông tin & vai trò"
-                                  >
-                                    <Edit3 className="w-3.5 h-3.5" />
-                                  </button>
-
-                                  {/* Toggle Lock Button (Protected: Cannot lock other Super Admins) */}
-                                  <button
-                                    onClick={() => handleToggleStatus(u.id, u.status)}
-                                    disabled={isTogglingStatus}
-                                    className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
-                                      u.status === 'ACTIVE'
-                                        ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
-                                        : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
-                                    }`}
-                                    title={u.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Kích hoạt tài khoản'}
-                                  >
-                                    {u.status === 'ACTIVE' ? (
-                                      <Lock className="w-3.5 h-3.5" />
-                                    ) : (
-                                      <Unlock className="w-3.5 h-3.5" />
-                                    )}
-                                  </button>
-
-                                  {/* Delete Button (Protected: Cannot delete other Super Admins) */}
-                                  <button
-                                    onClick={() => setDeletingId(u.id)}
-                                    className="p-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-all cursor-pointer"
-                                    title="Xóa tài khoản nhân viên"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </>
-                              ) : (
-                                <span className="text-[10px] font-extrabold text-purple-600 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-lg select-none">
-                                  Bảo Vệ Gốc
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Bar */}
-        {pagination.lastPage > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <span className="text-xs text-slate-500 font-medium">
-              Trang {pagination.currentPage} / {pagination.lastPage} ({pagination.total} nhân sự)
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={pagination.currentPage <= 1}
-                className="p-2 rounded-xl bg-slate-50 border border-gray-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(pagination.lastPage, p + 1))}
-                disabled={pagination.currentPage >= pagination.lastPage}
-                className="p-2 rounded-xl bg-slate-50 border border-gray-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all cursor-pointer"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Universal CineDataTable */}
+      <CineDataTable<AdminStaffItem>
+        table={table}
+        bulkActions={bulkActions}
+        exportFileName="danh_sach_nhan_su_cinedot"
+      />
 
       {/* Modal: Create Staff Account */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-purple-100 p-7 shadow-2xl flex flex-col gap-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-3xl border border-purple-100 p-7 shadow-2xl flex flex-col gap-6">
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-[#7C6FE8]/10 text-[#7C6FE8] flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-[#7C6FE8] flex items-center justify-center">
                   <UserPlus className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-extrabold text-slate-900">Thêm Tài Khoản Nhân Sự Mới</h3>
+                <div className="flex flex-col">
+                  <h3 className="text-base font-extrabold text-slate-900">Tạo Tài Khoản Nhân Viên Mới</h3>
+                  <span className="text-xs text-slate-500">Cấp tài khoản đăng nhập nội bộ cho nhân sự</span>
+                </div>
               </div>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
@@ -533,14 +555,14 @@ export function AdminStaffManagementView() {
             </div>
 
             {createError && (
-              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-600 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{createError}</span>
               </div>
             )}
 
             {createSuccess && (
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-600 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{createSuccess}</span>
               </div>
@@ -549,29 +571,26 @@ export function AdminStaffManagementView() {
             <form onSubmit={handleCreateStaff} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-slate-700">Họ Và Tên</label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                  <input
-                    type="text"
-                    value={createName}
-                    onChange={(e) => setCreateName(e.target.value)}
-                    placeholder="VD: Nguyễn Văn Anh"
-                    required
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={createName}
+                  onChange={(e) => setCreateName(e.target.value)}
+                  placeholder="Nguyễn Văn A"
+                  required
+                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-700">Email Công Việc</label>
+                  <label className="text-xs font-bold text-slate-700">Email Đăng Nhập</label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="email"
                       value={createEmail}
                       onChange={(e) => setCreateEmail(e.target.value)}
-                      placeholder="nhanvien@cinedot.vn"
+                      placeholder="staff@cinedot.vn"
                       required
                       className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8] focus:bg-white transition-all"
                     />
@@ -613,17 +632,19 @@ export function AdminStaffManagementView() {
                   <label className="text-xs font-bold text-slate-700">Vai Trò Phân Quyền</label>
                   <select
                     value={createRole}
-                    onChange={(e) => setCreateRole(e.target.value as AdminRole)}
+                    onChange={(e) => setCreateRole(e.target.value)}
                     aria-label="Vai trò phân quyền"
                     className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all cursor-pointer"
                   >
-                    <option value="SUPER_ADMIN">Tổng Quản Trị Hệ Thống</option>
-                    <option value="CINEMA_MANAGER">Quản Lý Cụm Rạp</option>
-                    <option value="TICKET_STAFF">Nhân Viên Soát Vé Cổng</option>
+                    {availableRoles.map((r) => (
+                      <option key={r.name} value={r.name}>
+                        {r.name.toUpperCase()} - {r.description || r.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
-                {createRole !== 'SUPER_ADMIN' && (
+                {!isSystemRole(createRole) && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-slate-700">Cụm Rạp Phụ Trách</label>
                     <div className="relative">
@@ -649,8 +670,7 @@ export function AdminStaffManagementView() {
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  disabled={isCreating}
-                  className="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 font-extrabold text-xs hover:bg-slate-200 transition-all cursor-pointer"
                 >
                   Hủy Bỏ
                 </button>
@@ -665,7 +685,7 @@ export function AdminStaffManagementView() {
                       <span>Đang khởi tạo...</span>
                     </>
                   ) : (
-                    <span>Xác Nhận Tạo Tài Khoản</span>
+                    <span>Tạo Tài Khoản</span>
                   )}
                 </button>
               </div>
@@ -674,16 +694,19 @@ export function AdminStaffManagementView() {
         </div>
       )}
 
-      {/* Modal: Edit Staff Account */}
+      {/* Modal: Edit Staff Account & Scope */}
       {editingStaff && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-blue-100 p-7 shadow-2xl flex flex-col gap-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-3xl border border-purple-100 p-7 shadow-2xl flex flex-col gap-6">
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
                   <Edit3 className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-extrabold text-slate-900">Chỉnh Sửa Nhân Sự</h3>
+                <div className="flex flex-col">
+                  <h3 className="text-base font-extrabold text-slate-900">Chỉnh Sửa Quyền Hạn Nhân Sự</h3>
+                  <span className="text-xs text-slate-500">Cập nhật thông tin và điều phối cụm rạp quản lý</span>
+                </div>
               </div>
               <button
                 onClick={() => setEditingStaff(null)}
@@ -694,14 +717,14 @@ export function AdminStaffManagementView() {
             </div>
 
             {editError && (
-              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-600 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{editError}</span>
               </div>
             )}
 
             {editSuccess && (
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-600 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{editSuccess}</span>
               </div>
@@ -710,16 +733,14 @@ export function AdminStaffManagementView() {
             <form onSubmit={handleUpdateStaff} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-slate-700">Họ Và Tên</label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Nguyễn Văn A"
+                  required
+                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -753,17 +774,19 @@ export function AdminStaffManagementView() {
                   <label className="text-xs font-bold text-slate-700">Vai Trò Phân Quyền</label>
                   <select
                     value={editRole}
-                    onChange={(e) => setEditRole(e.target.value as AdminRole)}
+                    onChange={(e) => setEditRole(e.target.value)}
                     aria-label="Vai trò phân quyền"
                     className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                   >
-                    <option value="SUPER_ADMIN">Tổng Quản Trị Hệ Thống</option>
-                    <option value="CINEMA_MANAGER">Quản Lý Cụm Rạp</option>
-                    <option value="TICKET_STAFF">Nhân Viên Soát Vé Cổng</option>
+                    {availableRoles.map((r) => (
+                      <option key={r.name} value={r.name}>
+                        {r.name.toUpperCase()} - {r.description || r.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
-                {editRole !== 'SUPER_ADMIN' && (
+                {!isSystemRole(editRole) && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-slate-700">Cụm Rạp Phụ Trách</label>
                     <div className="relative">
@@ -789,10 +812,9 @@ export function AdminStaffManagementView() {
                 <button
                   type="button"
                   onClick={() => setEditingStaff(null)}
-                  disabled={isUpdating || isUpdatingRole}
-                  className="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 font-extrabold text-xs hover:bg-slate-200 transition-all cursor-pointer"
                 >
-                  Hủy
+                  Hủy Bỏ
                 </button>
                 <button
                   type="submit"
@@ -841,18 +863,33 @@ export function AdminStaffManagementView() {
               <div className="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500">Vai trò:</span>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${
-                      viewingStaff.role === 'SUPER_ADMIN'
-                        ? 'bg-purple-50 text-[#7C6FE8] border-purple-200'
-                        : viewingStaff.role === 'CINEMA_MANAGER'
-                          ? 'bg-blue-50 text-blue-600 border-blue-200'
-                          : 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                    }`}
-                  >
-                    <Shield className="w-3 h-3" />
-                    <span>{ROLE_NAME_MAP[viewingStaff.role]}</span>
-                  </span>
+                  {(() => {
+                    const roleStr = String(viewingStaff.role || '');
+                    const matched = availableRoles.find(
+                      (r) => String(r.name || '').toLowerCase() === roleStr.toLowerCase()
+                    );
+                    const isSuper = isSystemRole(roleStr);
+                    const title = matched
+                      ? matched.name.toUpperCase()
+                      : ROLE_NAME_MAP[viewingStaff.role as AdminRole] ||
+                        viewingStaff.roleName ||
+                        roleStr.toUpperCase();
+
+                    return (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${
+                          isSuper
+                            ? 'bg-purple-50 text-[#7C6FE8] border-purple-200'
+                            : roleStr.toLowerCase().includes('manager')
+                              ? 'bg-blue-50 text-blue-600 border-blue-200'
+                              : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                        }`}
+                      >
+                        <Shield className="w-3 h-3" />
+                        <span>{title}</span>
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -888,7 +925,7 @@ export function AdminStaffManagementView() {
                       ★ Toàn quyền hệ thống (*)
                     </span>
                   ) : (
-                    (viewingStaff.permissions || ROLE_DEFINITIONS[viewingStaff.role]?.defaultPermissions || []).map(
+                    (viewingStaff.permissions || ROLE_DEFINITIONS[viewingStaff.role as AdminRole]?.defaultPermissions || []).map(
                       (p) => (
                         <span
                           key={p}
@@ -902,13 +939,6 @@ export function AdminStaffManagementView() {
                 </div>
               </div>
             </div>
-
-            <button
-              onClick={() => setViewingStaff(null)}
-              className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer mt-2"
-            >
-              Đóng
-            </button>
           </div>
         </div>
       )}
@@ -916,38 +946,47 @@ export function AdminStaffManagementView() {
       {/* Modal: Confirm Delete Staff */}
       {deletingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-sm bg-white rounded-3xl border border-rose-100 p-6 shadow-2xl flex flex-col gap-4 text-center items-center">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+          <div className="w-full max-w-sm bg-white rounded-3xl border border-rose-100 p-6 shadow-2xl flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <h3 className="text-base font-extrabold text-slate-900">Xóa Tài Khoản Nhân Sự?</h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Hành động này sẽ xóa vĩnh viễn quyền truy cập của nhân viên này trên hệ thống CineDot.
+            <div className="text-center flex flex-col gap-1">
+              <h3 className="text-base font-extrabold text-slate-900">Xóa Tài Khoản Nhân Viên?</h3>
+              <p className="text-xs text-slate-500">
+                Hành động này không thể hoàn tác. Nhân viên sẽ không thể đăng nhập vào hệ thống nữa.
               </p>
             </div>
 
-            <div className="flex items-center gap-3 w-full mt-2">
+            <div className="flex items-center justify-center gap-3 mt-2">
               <button
-                type="button"
                 onClick={() => setDeletingId(null)}
-                disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-2xl bg-slate-100 text-slate-600 font-extrabold text-xs hover:bg-slate-200 transition-all cursor-pointer"
               >
-                Hủy
+                Hủy Bỏ
               </button>
               <button
-                type="button"
                 onClick={handleDeleteStaff}
-                disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30 transition-all cursor-pointer disabled:opacity-60"
+                className="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-md shadow-rose-600/30 transition-all cursor-pointer"
               >
-                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Xác Nhận Xóa</span>}
+                Xác Nhận Xóa
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal: Context-Aware RBAC Multi-Role Assignment */}
+      {managingRolesStaff && (
+        <StaffContextRolesModal
+          staff={managingRolesStaff}
+          availableRoles={availableRoles as any}
+          cinemas={cinemas}
+          onClose={() => setManagingRolesStaff(null)}
+          onSuccess={() => {
+            table.refetch();
+          }}
+        />
       )}
     </div>
   );

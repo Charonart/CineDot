@@ -6,7 +6,6 @@ import {
   Target,
   Plus,
   Search,
-  TrendingUp,
   DollarSign,
   Ticket,
   Image as ImageIcon,
@@ -18,7 +17,6 @@ import {
   Sparkles,
   ArrowUpRight,
 } from 'lucide-react';
-import { MarketingSubNavTabs } from './MarketingSubNavTabs';
 import { CampaignStudioModal } from './CampaignStudioModal';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
 import { AdminCampaign } from '../../types/adminCampaign.types';
@@ -73,84 +71,27 @@ export function AdminCampaignsView() {
     <div className="flex flex-col gap-6 w-full">
       {/* 1. Header & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-black text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Target className="w-4 h-4" />
-            <span>MARKETING & PROMOTIONS SUITE</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Quản Lý Chiến Dịch Tiếp Thị & Khuyến Mãi
-          </h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Target className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Chiến Dịch Tiếp Thị & Khuyến Mãi
+            </h1>
+          </div>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-3 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
+          className="px-5 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer w-fit shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>+ TẠO CHIẾN DỊCH MỚI</span>
+          <span>TẠO CHIẾN DỊCH MỚI</span>
         </button>
       </div>
 
-      {/* 2. Marketing Suite SubNav Tabs */}
-      <MarketingSubNavTabs />
-
-      {/* 3. Overview KPI Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Tổng Chiến Dịch */}
-        <div className="p-5 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
-            <Target className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Chiến Dịch</span>
-            <span className="text-2xl font-black text-slate-900 font-mono">
-              {isStatsLoading ? '...' : stats?.total_campaigns ?? campaigns.length}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 2: Đang Hoạt Động */}
-        <div className="p-5 rounded-3xl bg-white border border-emerald-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đang Chạy</span>
-            <span className="text-2xl font-black text-emerald-600 font-mono">
-              {isStatsLoading ? '...' : stats?.active_campaigns ?? 0}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 3: Tổng Ngân Sách */}
-        <div className="p-5 rounded-3xl bg-white border border-amber-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Ngân Sách</span>
-            <span className="text-xl font-black text-slate-900 font-mono">
-              {isStatsLoading ? '...' : `${(Number(stats?.total_budget ?? 0) / 1000000).toLocaleString('vi-VN')}M`}
-            </span>
-          </div>
-        </div>
-
-        {/* Card 4: Doanh Thu & ROI */}
-        <div className="p-5 rounded-3xl bg-white border border-indigo-100/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tỷ Suất ROI Hệ Thống</span>
-            <span className="text-2xl font-black text-indigo-600 font-mono">
-              {isStatsLoading ? '...' : `+${stats?.overall_roi_percentage ?? 0}%`}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Search & Filters Bar */}
+      {/* 2. Search & Filters Bar */}
       <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -272,7 +213,7 @@ export function AdminCampaignsView() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-500 font-bold">Ngân Sách:</span>
                     <span className="font-mono font-black text-slate-900">
-                      {camp.budget > 0 ? `${camp.budget.toLocaleString('vi-VN')} đ` : 'Chưa định mức'}
+                      {(camp.budget ?? 0) > 0 ? `${(Number(camp.budget) || 0).toLocaleString('vi-VN')} đ` : 'Chưa định mức'}
                     </span>
                   </div>
 
@@ -285,7 +226,7 @@ export function AdminCampaignsView() {
                       />
                     </div>
                     <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold">
-                      <span>Đã dùng: {camp.usedBudget.toLocaleString('vi-VN')} đ</span>
+                      <span>Đã dùng: {(Number(camp.usedBudget) || 0).toLocaleString('vi-VN')} đ</span>
                       <span>{budgetUsedPercent}%</span>
                     </div>
                   </div>
@@ -294,7 +235,7 @@ export function AdminCampaignsView() {
                   <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
                     <span className="text-slate-500 font-bold">Doanh Thu Thu Về:</span>
                     <span className="font-mono font-black text-emerald-600">
-                      +{camp.revenueGenerated.toLocaleString('vi-VN')} đ
+                      +{(Number(camp.revenueGenerated) || 0).toLocaleString('vi-VN')} đ
                     </span>
                   </div>
                 </div>
@@ -307,7 +248,7 @@ export function AdminCampaignsView() {
                   >
                     <div className="flex items-center gap-1.5">
                       <Ticket className="w-3.5 h-3.5" />
-                      <span>{camp.vouchersCount} Vouchers</span>
+                      <span>{camp.vouchersCount ?? 0} Vouchers</span>
                     </div>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </Link>
@@ -318,7 +259,7 @@ export function AdminCampaignsView() {
                   >
                     <div className="flex items-center gap-1.5">
                       <ImageIcon className="w-3.5 h-3.5" />
-                      <span>{camp.bannersCount} Banners</span>
+                      <span>{camp.bannersCount ?? 0} Banners</span>
                     </div>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </Link>

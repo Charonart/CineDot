@@ -20,33 +20,38 @@ export const adminBookingService = {
    * Lấy danh sách đơn đặt vé phân trang & tìm kiếm & lọc
    */
   async getBookings(
-    params?: GetAdminBookingsParams
+    params?: GetAdminBookingsParams & { sort_by?: string; sort_dir?: 'asc' | 'desc'; filters?: Record<string, any>; [key: string]: any }
   ): Promise<{ items: AdminBookingItem[]; pagination: AdminBookingPagination }> {
-    const queryParams: Record<string, any> = {};
-    if (params?.page) queryParams.page = params.page;
-    if (params?.limit) queryParams.limit = params.limit;
-    if (params?.per_page) queryParams.limit = params.per_page;
-    if (params?.status && params.status !== 'ALL') queryParams.status = params.status;
-    if (params?.search) queryParams.search = params.search;
-    if (params?.cinema_id) queryParams.cinema_id = params.cinema_id;
-
-    const res = await apiClient.get<ApiResponse<AdminBookingListResponseDTO>>(
+    const res = await apiClient.get<any>(
       ENDPOINTS.ADMIN.BOOKINGS,
-      { params: queryParams }
+      { params }
     );
 
     const rawData = res.data?.data;
-    const rawList = Array.isArray(rawData?.data) ? rawData.data : [];
+    const rawMeta = res.data?.meta;
+
+    const rawList = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.data) ? rawData.data : []);
 
     const items = rawList.map((dto: AdminBookingItemDTO) => adminBookingMapper.toDomain(dto));
     const pagination: AdminBookingPagination = {
-      currentPage: Number(rawData?.current_page || 1),
-      totalPages: Number(rawData?.last_page || 1),
-      totalResults: Number(rawData?.total || items.length),
-      perPage: Number(rawData?.per_page || 15),
+      currentPage: Number(rawMeta?.current_page || rawData?.current_page || 1),
+      totalPages: Number(rawMeta?.last_page || rawData?.last_page || 1),
+      totalResults: Number(rawMeta?.total || rawData?.total || items.length),
+      perPage: Number(rawMeta?.per_page || rawData?.per_page || 15),
     };
 
     return { items, pagination };
+  },
+
+  async bulkAction(
+    action: 'cancel' | 'check_in',
+    ids: (string | number)[]
+  ): Promise<{ success: boolean; message: string }> {
+    const res = await apiClient.post<{ success: boolean; message: string }>(
+      '/api/v1/admin/bookings/bulk',
+      { action, ids }
+    );
+    return res.data;
   },
 
   /**

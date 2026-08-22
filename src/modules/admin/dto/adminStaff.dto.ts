@@ -1,7 +1,19 @@
-/**
- * Admin Staff & RBAC DTOs (Data Transfer Objects)
- * Matching Laravel Backend API specs for /api/v1/admin/users/* and /api/v1/admin/roles/*
- */
+export interface UserRoleDTO {
+  id: string | number;
+  user_id?: string | number;
+  role_id: string | number;
+  role_name?: string;
+  scope_type: 'system' | 'region' | 'cinema';
+  scope_id?: string | number | null;
+  scope_name?: string;
+  created_at?: string;
+}
+
+export interface AssignUserRoleRequestDTO {
+  role_id: string | number;
+  scope_type: 'system' | 'region' | 'cinema';
+  scope_id?: string | number | null;
+}
 
 export interface AdminStaffItemDTO {
   id: string | number;
@@ -9,6 +21,7 @@ export interface AdminStaffItemDTO {
   email: string;
   phone?: string | null;
   role: string;
+  roles?: string[];
   role_name?: string;
   roleName?: string;
   cinema_id?: string | number | null;
@@ -18,6 +31,7 @@ export interface AdminStaffItemDTO {
   status: 'ACTIVE' | 'DISABLED' | 'active' | 'disabled';
   created_at: string;
   permissions?: string[];
+  user_roles?: UserRoleDTO[];
 }
 
 export interface AdminStaffListRequestDTO {
@@ -25,8 +39,12 @@ export interface AdminStaffListRequestDTO {
   role?: string;
   cinema_id?: string | number;
   status?: string;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+  filters?: Record<string, any>;
   page?: number;
   per_page?: number;
+  [key: string]: any;
 }
 
 export interface CreateStaffRequestDTO {
@@ -57,5 +75,8 @@ export interface RoleDefinitionDTO {
   id: string;
   name: string;
   description?: string;
-  default_permissions: string[];
+  default_permissions?: string[];
+  permissions_count?: number;
+  permission_ids?: number[];
+  permission_names?: string[];
 }

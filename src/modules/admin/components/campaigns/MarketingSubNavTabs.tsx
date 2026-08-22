@@ -31,6 +31,12 @@ const TABS: TabItem[] = [
     icon: ImageIcon,
     description: 'Slider & Poster sự kiện',
   },
+  {
+    name: 'Quy Tắc Định Giá (Pricing Rules)',
+    href: '/admin/pricing-rules',
+    icon: Sparkles,
+    description: 'Phụ thu & Giảm giá tự động',
+  },
 ];
 
 export const MarketingSubNavTabs: React.FC = () => {
@@ -68,12 +74,6 @@ export const MarketingSubNavTabs: React.FC = () => {
             </Link>
           );
         })}
-      </div>
-
-      {/* Mini badge */}
-      <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-[11px] font-extrabold text-[#7C6FE8] tracking-wider uppercase">
-        <Sparkles className="w-3.5 h-3.5" />
-        <span>CineDot Marketing Suite</span>
       </div>
     </div>
   );

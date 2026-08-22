@@ -5,7 +5,7 @@ import {
   CreateCampaignPayload,
   UpdateCampaignPayload,
 } from '../dto/adminCampaign.dto';
-import { CampaignFilterParams } from '../types/adminCampaign.types';
+import { AdminCampaign, CampaignFilterParams } from '../types/adminCampaign.types';
 
 export const ADMIN_CAMPAIGN_KEYS = {
   all: ['admin', 'campaigns'] as const,
@@ -75,12 +75,32 @@ export function useAdminCampaigns(initialFilters: CampaignFilterParams = {}) {
     },
   });
 
+  const rawList = (campaignsData as any)?.results || (campaignsData as any)?.data || [];
+  const normalizedCampaigns: AdminCampaign[] = (
+    Array.isArray(rawList) ? rawList : []
+  ).map((c: any) => ({
+    id: Number(c.id || c.campaign_id) || 1,
+    name: c.name || '',
+    description: c.description || '',
+    budget: Number(c.budget ?? c.budget_amount) || 0,
+    usedBudget: Number(c.usedBudget ?? c.used_budget) || 0,
+    revenueGenerated: Number(c.revenueGenerated ?? c.revenue_generated) || 0,
+    roiPercentage: Number(c.roiPercentage ?? c.roi_percentage) || 0,
+    startDate: c.startDate || c.start_date || null,
+    endDate: c.endDate || c.end_date || null,
+    isActive: Boolean(c.isActive ?? c.is_active),
+    vouchersCount: Number(c.vouchersCount ?? c.vouchers_count ?? c.vouchers?.length) || 0,
+    bannersCount: Number(c.bannersCount ?? c.banners_count ?? c.banners?.length) || 0,
+    createdAt: c.createdAt || c.created_at || '',
+    updatedAt: c.updatedAt || c.updated_at || '',
+  }));
+
   return {
-    campaigns: campaignsData?.results || [],
+    campaigns: normalizedCampaigns,
     pagination: {
       page: campaignsData?.page || 1,
       totalPages: campaignsData?.totalPages || 1,
-      totalResults: campaignsData?.totalResults || 0,
+      totalResults: campaignsData?.totalResults || normalizedCampaigns.length,
     },
     stats: statsData,
     filters,

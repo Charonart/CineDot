@@ -12,6 +12,23 @@ import { getRemainingBookingSeconds, formatSecondsToMMSS } from '@/modules/booki
 import { getBookingSession, updateBookingSession } from '@/modules/booking/services/bookingSessionService';
 import { useAuthStore } from '@/shared/store/useAuthStore';
 
+export interface AppliedPricingRuleSummary {
+  ruleId: number;
+  name: string;
+  modifierType: string;
+  modifierValue: number;
+  ticketCount: number;
+  totalAdjustment: number;
+  isDiscount: boolean;
+}
+
+export interface TicketPriceComposition {
+  totalBasePrice: number;
+  totalSurcharge: number;
+  totalRuleAdjustment: number;
+  appliedRules: AppliedPricingRuleSummary[];
+}
+
 export function usePayment(
   showtimeId: string = 'showtime-101',
   movieParam?: string,
@@ -40,6 +57,8 @@ export function usePayment(
   const [serverVoucherDiscount, setServerVoucherDiscount] = useState<number>(0);
   const [serverFoodList, setServerFoodList] = useState<{ id: string; name: string; quantity: number; price: number }[] | null>(null);
   const [serverFinalAmount, setServerFinalAmount] = useState<number | null>(null);
+  const [appliedPricingRules, setAppliedPricingRules] = useState<AppliedPricingRuleSummary[]>([]);
+  const [ticketPriceComposition, setTicketPriceComposition] = useState<TicketPriceComposition | null>(null);
   const [serverVatBreakdown, setServerVatBreakdown] = useState<{
     ticket_vat_rate: number;
     ticket_vat_amount: number;
@@ -316,6 +335,58 @@ export function usePayment(
         setServerVatBreakdown(fb.vat_breakdown);
       }
 
+      // Parse itemized tickets for pricing rule breakdown
+      if (result.items?.tickets && result.items.tickets.length > 0) {
+        let totalBase = 0;
+        let totalSurch = 0;
+        let totalRuleAdj = 0;
+        const ruleMap: Record<number, AppliedPricingRuleSummary> = {};
+
+        result.items.tickets.forEach((t) => {
+          totalBase += t.base_price || 0;
+          totalSurch += t.surcharge || 0;
+
+          if (t.applied_rule) {
+            const r = t.applied_rule;
+            const ruleId = r.rule_id;
+            const modType = r.modifier_type;
+            const modVal = Number(r.modifier_value) || 0;
+            const isDiscount = modVal < 0;
+
+            let adjPerTicket = 0;
+            if (modType === 'PERCENT') {
+              adjPerTicket = ((t.base_price || 0) + (t.surcharge || 0)) * (modVal / 100);
+            } else {
+              adjPerTicket = modVal;
+            }
+            totalRuleAdj += adjPerTicket;
+
+            if (!ruleMap[ruleId]) {
+              ruleMap[ruleId] = {
+                ruleId,
+                name: r.name,
+                modifierType: modType,
+                modifierValue: modVal,
+                ticketCount: 0,
+                totalAdjustment: 0,
+                isDiscount,
+              };
+            }
+            ruleMap[ruleId].ticketCount += 1;
+            ruleMap[ruleId].totalAdjustment += adjPerTicket;
+          }
+        });
+
+        const ruleList = Object.values(ruleMap);
+        setAppliedPricingRules(ruleList);
+        setTicketPriceComposition({
+          totalBasePrice: totalBase,
+          totalSurcharge: totalSurch,
+          totalRuleAdjustment: totalRuleAdj,
+          appliedRules: ruleList,
+        });
+      }
+
       // Update food combo names and real prices from server response
       if (result.items?.combos && result.items.combos.length > 0) {
         const mappedCombos = result.items.combos.map((c) => ({
@@ -348,30 +419,31 @@ export function usePayment(
         setAppliedVoucher(result);
         setVoucherError('');
         await fetchSummary(code);
+      } else {
+        setVoucherError('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
       }
-    } catch (err: any) {
-      setAppliedVoucher(null);
-      setVoucherError(err.message || 'Mã không hợp lệ hoặc đã hết hạn! Thử CINEDOT50K hoặc MOMODAY');
+    } catch {
+      setVoucherError('Không thể áp dụng mã voucher lúc này.');
     } finally {
       setIsApplyingVoucher(false);
     }
   };
 
+  // Remove Voucher
   const handleRemoveVoucher = async () => {
     setAppliedVoucher(null);
     setVoucherInput('');
     setVoucherError('');
-    setServerVoucherDiscount(0);
-    await fetchSummary();
+    await fetchSummary('');
   };
 
-  const handleProcessPayment = async (payload: Parameters<typeof processBookingPayment>[0]) => {
+  const handleProcessPayment = async (payload: any) => {
     const combosPayload = combosParam
       ? combosParam
           .split(',')
           .map((pair) => {
             const [id, qStr] = pair.split(':');
-            return { combo_id: Number(id), quantity: Number(qStr || 1) };
+            return { combo_id: parseInt(id, 10), quantity: parseInt(qStr, 10) || 0 };
           })
           .filter((c) => c.combo_id > 0 && c.quantity > 0)
       : [];
@@ -407,6 +479,8 @@ export function usePayment(
     showTime: timeParam || '18:00',
     seatSummaryText,
     ticketPrice,
+    appliedPricingRules,
+    ticketPriceComposition,
     selectedFoodList,
     totalFoodPrice,
     tierDiscountAmount,

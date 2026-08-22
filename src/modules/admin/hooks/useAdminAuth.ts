@@ -19,9 +19,19 @@ export const useAdminAuth = () => {
   const meQuery = useQuery({
     queryKey: adminAuthKeys.me(),
     queryFn: async () => {
-      const res = await adminAuthService.me();
-      setSession(res.adminUser, res.permissions, token || '');
-      return res;
+      try {
+        const res = await adminAuthService.me();
+        if (res.adminUser) {
+          setSession(res.adminUser, res.permissions, token || '');
+        }
+        return res;
+      } catch (err: any) {
+        // Chỉ xóa phiên đăng nhập khi backend trả về 401 Unauthenticated
+        if (err?.status === 401 || err?.response?.status === 401) {
+          clearSession();
+        }
+        throw err;
+      }
     },
     enabled: Boolean(token && isInitialized),
     staleTime: 5 * 60 * 1000,

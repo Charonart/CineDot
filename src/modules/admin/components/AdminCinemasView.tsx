@@ -385,17 +385,15 @@ export function AdminCinemasView() {
 
       {/* 1. Action Header & Toolbar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-extrabold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
-            <Building2 className="w-4 h-4" />
-            <span>HỆ THỐNG VẬN HÀNH RẠP CINEDOT</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Quản Lý Cụm Rạp & Sơ Đồ Ghế
-          </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Quản lý cụm rạp, phòng chiếu và thiết kế sơ đồ ghế Canvas đồng bộ thời gian thực.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+            <Building2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Quản Lý Cụm Rạp & Sơ Đồ Ghế
+            </h1>
+          </div>
         </div>
 
         {/* Header Right Controls (Search Bar + Province Filter + Cinema Dropdown + Add Cinema) */}
@@ -528,9 +526,9 @@ export function AdminCinemasView() {
 
       {/* 2. Main Content Split Layout (Collapsible Left / Expandable Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Panel: 30% Width (4 Cols) - Completely hidden when collapsed */}
+        {/* Left Panel: Compact 3 Cols - Completely hidden when collapsed */}
         {!isLeftPanelCollapsed && (
-          <div className="lg:col-span-4 flex flex-col gap-4 animate-in fade-in duration-200">
+          <div className="lg:col-span-3 flex flex-col gap-4 animate-in fade-in duration-200">
             <div className="p-5 rounded-3xl bg-white border border-gray-200/80 shadow-sm flex flex-col gap-4">
               {isLoadingCinemas || !currentCinema ? (
                 <div className="flex flex-col gap-3">
@@ -696,8 +694,8 @@ export function AdminCinemasView() {
           </div>
         )}
 
-        {/* Right Panel: Expands to 100% (12 Cols) when Left Panel is Collapsed */}
-        <div className={`${isLeftPanelCollapsed ? 'lg:col-span-12' : 'lg:col-span-8'} flex flex-col gap-6 transition-all duration-200`}>
+        {/* Right Panel: Expands to 9 Cols (or 12 Cols when Left Panel is Collapsed) */}
+        <div className={`${isLeftPanelCollapsed ? 'lg:col-span-12' : 'lg:col-span-9'} flex flex-col gap-6 transition-all duration-200`}>
           <div className="p-6 rounded-3xl bg-white border border-gray-200/80 shadow-sm flex flex-col gap-6 relative">
             {isLoadingDetail || !activeRoom ? (
               <div className="flex flex-col gap-4 py-8 items-center justify-center text-slate-400">

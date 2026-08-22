@@ -40,3 +40,20 @@ export interface ApiError {
   status?: number;
   errors?: Record<string, string[] | undefined>;
 }
+
+export interface AdminPaginatedResponse<T = any> {
+  success: boolean;
+  data: T[];
+  meta: ApiPaginationMeta;
+  message?: string;
+}
+
+export interface AdminQueryParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+  filters?: Record<string, any>;
+  [key: string]: any;
+}

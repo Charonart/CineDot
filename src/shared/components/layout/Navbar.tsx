@@ -40,7 +40,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { name: 'Phim', href: '/movies', dropdownType: 'movies' },
     { name: 'Star Shop', href: '/star-shop', dropdownType: 'starshop' },
-    { name: 'Góc Điện Ảnh', href: '/cinema-corner' },
+    // { name: 'Góc Điện Ảnh', href: '/cinema-corner' },
     { name: 'Sự Kiện', href: '/events' },
     { name: 'Rạp/Giá Vé', href: '/cinemas', dropdownType: 'cinemas' },
     { name: 'Rạp Đặc Biệt', href: '/special-theaters' },

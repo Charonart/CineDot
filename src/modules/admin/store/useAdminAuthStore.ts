@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import { AdminUser, AdminRole, PermissionSlug } from '../types/admin.types';
+import { clearAllAuthSession, getStoredAuthToken } from '@/shared/utils/authStorage';
 
 interface AdminAuthState {
   adminUser: AdminUser | null;
@@ -37,11 +38,7 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   initAdminStore: () => {
     if (typeof window === 'undefined') return;
 
-    const token =
-      Cookies.get(COOKIE_KEY_TOKEN) ||
-      Cookies.get('cinedot_token') ||
-      localStorage.getItem('cinedot_token') ||
-      localStorage.getItem('cinedot_admin_token');
+    const token = getStoredAuthToken();
 
     let adminUser: AdminUser | null = null;
     let permissions: string[] = [];
@@ -49,7 +46,24 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
     try {
       const storedUser = localStorage.getItem(LOCAL_KEY_ADMIN_USER);
       if (storedUser) {
-        adminUser = JSON.parse(storedUser);
+        const parsed = JSON.parse(storedUser);
+        // Xác thực vai trò: Bắt buộc phải là một trong các vai trò quản trị / nhân sự hợp lệ
+        const validRoles = [
+          'SUPER_ADMIN',
+          'CINEMA_MANAGER',
+          'TICKET_STAFF',
+          'FNB_STAFF',
+          'MARKETING',
+          'ACCOUNTANT',
+          'STAFF',
+        ];
+        if (parsed && validRoles.includes(parsed.role)) {
+          adminUser = parsed;
+        } else {
+          // Tài khoản không có vai trò quản trị -> Xóa bỏ
+          adminUser = null;
+          localStorage.removeItem(LOCAL_KEY_ADMIN_USER);
+        }
       }
     } catch {
       adminUser = null;
@@ -76,8 +90,12 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   setSession: (adminUser: AdminUser, permissions: string[], token: string) => {
     if (typeof window !== 'undefined') {
       if (token) {
-        Cookies.set(COOKIE_KEY_TOKEN, token, { expires: 7, path: '/' });
+        Cookies.set('cine_token', token, { expires: 7, path: '/' });
+        Cookies.set('cinedot_token', token, { expires: 7, path: '/' });
+        Cookies.set('cinedot_admin_token', token, { expires: 7, path: '/' });
         localStorage.setItem('cinedot_admin_token', token);
+        localStorage.setItem('cinedot_token', token);
+        localStorage.setItem('cine_token', token);
       }
       localStorage.setItem(LOCAL_KEY_ADMIN_USER, JSON.stringify(adminUser));
       localStorage.setItem(LOCAL_KEY_ADMIN_PERMS, JSON.stringify(permissions));
@@ -93,13 +111,7 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   },
 
   clearSession: () => {
-    if (typeof window !== 'undefined') {
-      Cookies.remove(COOKIE_KEY_TOKEN, { path: '/' });
-      Cookies.remove('cinedot_token', { path: '/' });
-      localStorage.removeItem('cinedot_admin_token');
-      localStorage.removeItem(LOCAL_KEY_ADMIN_USER);
-      localStorage.removeItem(LOCAL_KEY_ADMIN_PERMS);
-    }
+    clearAllAuthSession();
 
     set({
       adminUser: null,

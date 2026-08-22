@@ -5,7 +5,7 @@ import {
   CreateVoucherPayload,
   UpdateVoucherPayload,
 } from '../dto/adminCampaign.dto';
-import { VoucherFilterParams } from '../types/adminCampaign.types';
+import { AdminVoucher, VoucherFilterParams } from '../types/adminCampaign.types';
 
 export const ADMIN_VOUCHER_KEYS = {
   all: ['admin', 'vouchers'] as const,
@@ -74,12 +74,38 @@ export function useAdminVouchers(initialFilters: VoucherFilterParams = {}) {
     },
   });
 
+  const rawList = (vouchersData as any)?.results || (vouchersData as any)?.data || [];
+  const normalizedVouchers: AdminVoucher[] = (
+    Array.isArray(rawList) ? rawList : []
+  ).map((v: any) => ({
+    id: Number(v.id || v.voucher_id) || 1,
+    campaignId: v.campaignId || v.campaign_id || null,
+    campaignName: v.campaignName || v.campaign_name || v.campaign?.name || null,
+    code: v.code || '',
+    title: v.title || '',
+    description: v.description || '',
+    voucherType: v.voucherType || v.voucher_type || 'discount',
+    discountType: v.discountType || v.discount_type || 'percentage',
+    discountValue: Number(v.discountValue ?? v.discount_value) || 0,
+    minOrderValue: Number(v.minOrderValue ?? v.min_order_value) || 0,
+    maxDiscountValue: v.maxDiscountValue !== undefined ? v.maxDiscountValue : (v.max_discount_value ? Number(v.max_discount_value) : null),
+    validFrom: v.validFrom || v.valid_from || null,
+    validUntil: v.validUntil || v.valid_until || null,
+    systemLimit: v.systemLimit !== undefined ? v.systemLimit : (v.system_limit ? Number(v.system_limit) : null),
+    usageLimit: v.usageLimit !== undefined ? v.usageLimit : (v.usage_limit ? Number(v.usage_limit) : null),
+    limitPerUser: Number(v.limitPerUser ?? v.limit_per_user) || 1,
+    usedCount: Number(v.usedCount ?? v.used_count) || 0,
+    isActive: Boolean(v.isActive ?? v.is_active),
+    createdAt: v.createdAt || v.created_at || '',
+    updatedAt: v.updatedAt || v.updated_at || '',
+  }));
+
   return {
-    vouchers: vouchersData?.results || [],
+    vouchers: normalizedVouchers,
     pagination: {
       page: vouchersData?.page || 1,
       totalPages: vouchersData?.totalPages || 1,
-      totalResults: vouchersData?.totalResults || 0,
+      totalResults: vouchersData?.totalResults || normalizedVouchers.length,
     },
     stats: statsData,
     filters,

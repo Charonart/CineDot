@@ -25,14 +25,24 @@ export const adminStaffService = {
    * Lấy danh sách nhân sự (hỗ trợ phân trang, tìm kiếm và lọc vai trò)
    */
   async getStaffList(params?: AdminStaffListRequestDTO): Promise<PaginatedStaffResult> {
-    const res = await apiClient.get<ApiResponse<ApiPaginatedData<AdminStaffItemDTO> | AdminStaffItemDTO[]>>(
+    const res = await apiClient.get<any>(
       ENDPOINTS.ADMIN.USERS,
       { params }
     );
 
     const data = res.data?.data;
+    const meta = res.data?.meta;
 
-    // Chuẩn hóa phản hồi: hỗ trợ cả dạng mảng lẫn đối tượng phân trang PaginatedData
+    if (Array.isArray(data) && meta) {
+      return {
+        items: data.map(adminStaffMapper.toDomain),
+        currentPage: meta.current_page,
+        lastPage: meta.last_page,
+        perPage: meta.per_page,
+        total: meta.total,
+      };
+    }
+
     if (Array.isArray(data)) {
       return {
         items: data.map(adminStaffMapper.toDomain),
@@ -46,10 +56,10 @@ export const adminStaffService = {
     const rawList = data?.data || data?.items || [];
     return {
       items: rawList.map(adminStaffMapper.toDomain),
-      currentPage: data?.current_page || 1,
-      lastPage: data?.last_page || 1,
-      perPage: data?.per_page || 10,
-      total: data?.total || rawList.length,
+      currentPage: meta?.current_page || data?.current_page || 1,
+      lastPage: meta?.last_page || data?.last_page || 1,
+      perPage: meta?.per_page || data?.per_page || 10,
+      total: meta?.total || data?.total || rawList.length,
     };
   },
 
@@ -204,6 +214,49 @@ export const adminStaffService = {
   },
 
   /**
+   * Cập nhật ô dữ liệu đơn lẻ (Inline Cell Editing)
+   */
+  async updateCell(id: string | number, field: string, value: any): Promise<any> {
+    const res = await apiClient.patch(ENDPOINTS.ADMIN.USER_CELL(id), { field, value });
+    return res.data;
+  },
+
+  /**
+   * Thao tác hàng loạt (Bulk Action)
+   */
+  async bulkAction(action: 'set_active' | 'set_inactive' | 'delete', ids: (string | number)[]): Promise<any> {
+    const res = await apiClient.post(ENDPOINTS.ADMIN.USERS_BULK, { action, ids });
+    return res.data;
+  },
+
+  /**
+   * Lấy danh sách các vai trò ngữ cảnh của người dùng
+   */
+  async getUserRoles(userId: string | number): Promise<any[]> {
+    const res = await apiClient.get<ApiResponse<any[]>>(ENDPOINTS.ADMIN.USER_ROLES(userId));
+    return res.data?.data || [];
+  },
+
+  /**
+   * Gán vai trò theo ngữ cảnh cho người dùng
+   */
+  async assignUserRole(
+    userId: string | number,
+    payload: { role_id: string | number; scope_type: 'system' | 'region' | 'cinema'; scope_id?: string | number | null }
+  ): Promise<any> {
+    const res = await apiClient.post(ENDPOINTS.ADMIN.USER_ROLES(userId), payload);
+    return res.data;
+  },
+
+  /**
+   * Hủy vai trò ngữ cảnh của người dùng
+   */
+  async deleteUserRole(userId: string | number, id: string | number): Promise<any> {
+    const res = await apiClient.delete(ENDPOINTS.ADMIN.USER_ROLE_REVOKE(userId, id));
+    return res.data;
+  },
+
+  /**
    * Lấy danh sách các vai trò định nghĩa sẵn trên hệ thống
    */
   async getRoles(): Promise<RoleDefinitionDTO[]> {
@@ -242,3 +295,4 @@ export const adminStaffService = {
     }
   },
 };
+

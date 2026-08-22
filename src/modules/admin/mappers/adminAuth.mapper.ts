@@ -2,16 +2,54 @@ import { AdminUserDTO } from '../dto/adminAuth.dto';
 import { AdminUser, AdminRole, ROLE_NAME_MAP, ROLE_DEFINITIONS } from '../types/admin.types';
 
 export const adminAuthMapper = {
-  toDomain(dto: AdminUserDTO, customPermissions?: string[]): AdminUser {
-    const rawRole = (dto.role || dto.role_name || 'TICKET_STAFF').toUpperCase();
-    let role: AdminRole = 'TICKET_STAFF';
+  /**
+   * Chuyển đổi dữ liệu User DTO sang AdminUser domain entity.
+   * Trả về null nếu tài khoản không có vai trò Quản trị / Nhân sự (ví dụ: customer).
+   */
+  toDomain(dto?: AdminUserDTO | null, customPermissions?: string[]): AdminUser | null {
+    if (!dto) return null;
 
-    if (rawRole.includes('SUPER') || rawRole === 'ADMIN' || rawRole === 'SUPER_ADMIN') {
+    const rawRole = (
+      dto.role ||
+      dto.role_name ||
+      (typeof (dto as any).role === 'object' ? (dto as any).role?.name : '') ||
+      ''
+    ).toString().toUpperCase().trim();
+
+    // Phân loại vai trò Quản trị / Nhân sự hợp lệ
+    let role: AdminRole | null = null;
+
+    if (
+      rawRole === 'SUPER_ADMIN' ||
+      rawRole === 'SUPERADMIN' ||
+      rawRole === 'ADMIN' ||
+      rawRole === 'SYSTEM_ADMIN' ||
+      rawRole.includes('SUPER')
+    ) {
       role = 'SUPER_ADMIN';
-    } else if (rawRole.includes('MANAGER') || rawRole === 'CINEMA_MANAGER') {
+    } else if (
+      rawRole === 'CINEMA_MANAGER' ||
+      rawRole === 'MANAGER' ||
+      rawRole.includes('MANAGER')
+    ) {
       role = 'CINEMA_MANAGER';
-    } else {
+    } else if (rawRole === 'MARKETING') {
+      role = 'MARKETING';
+    } else if (rawRole === 'ACCOUNTANT') {
+      role = 'ACCOUNTANT';
+    } else if (rawRole === 'FNB_STAFF') {
+      role = 'FNB_STAFF';
+    } else if (
+      rawRole === 'TICKET_STAFF' ||
+      rawRole === 'SCANNER' ||
+      rawRole === 'CASHIER'
+    ) {
       role = 'TICKET_STAFF';
+    } else if (rawRole === 'STAFF') {
+      role = 'STAFF';
+    } else {
+      // Bất kỳ vai trò nào khác (CUSTOMER, USER, GUEST, rỗng) đều bị từ chối quyền Admin
+      return null;
     }
 
     const defaultPerms = ROLE_DEFINITIONS[role]?.defaultPermissions || [];
@@ -27,8 +65,8 @@ export const adminAuthMapper = {
 
     return {
       id: String(dto.id ?? dto.user_id ?? ''),
-      email: dto.email,
-      name: dto.name || dto.fullname || 'Nhân Viên CineDot',
+      email: dto.email || '',
+      name: dto.name || dto.fullname || 'Quản Trị Viên CineDot',
       phone: dto.phone || 'Chưa cập nhật',
       avatarUrl: dto.avatar || dto.avatar_url,
       role,

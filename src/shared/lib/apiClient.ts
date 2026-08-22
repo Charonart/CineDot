@@ -24,8 +24,11 @@ apiClient.interceptors.request.use(
     const token =
       Cookies.get('cine_token') ||
       Cookies.get('cinedot_token') ||
+      Cookies.get('cinedot_admin_token') ||
       (typeof window !== 'undefined'
-        ? localStorage.getItem('cinedot_token') || localStorage.getItem('cine_token')
+        ? localStorage.getItem('cinedot_admin_token') ||
+          localStorage.getItem('cinedot_token') ||
+          localStorage.getItem('cine_token')
         : null) ||
       useAuthStore.getState().token;
 
@@ -51,12 +54,15 @@ apiClient.interceptors.response.use(
       status === 401 &&
       !error.config?.url?.includes('/auth/login') &&
       !error.config?.url?.includes('/auth/register') &&
-      !error.config?.url?.includes('/auth/logout')
+      !error.config?.url?.includes('/auth/logout') &&
+      !error.config?.url?.includes('/auth/me')
     ) {
       // Sanctum Token Expired / Unauthenticated on protected route
-      useAuthStore.getState().logout().then(() => {
-        useAuthStore.getState().openAuthModal('login', 'Vui lòng đăng nhập để tiếp tục.');
-      });
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+        if (window.location.pathname !== '/admin/login') {
+          window.location.href = '/admin/login';
+        }
+      }
     } else if (status === 403) {
       console.warn('⚠️ [RBAC 403 Forbidden]: Bạn không có quyền thực hiện thao tác này.');
     }

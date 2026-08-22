@@ -32,6 +32,7 @@ export interface DateOption {
 
 export interface MovieCastMember {
   id: number | string;
+  personId?: number | string;
   name: string;
   character?: string;
   profileUrl?: string;
@@ -40,10 +41,21 @@ export interface MovieCastMember {
 
 export interface MovieCrewMember {
   id: number | string;
+  personId?: number | string;
   name: string;
   job: string;
   department?: string;
   profileUrl?: string;
+}
+
+export interface MovieVideoItem {
+  videoId: number | string;
+  name: string;
+  key: string;
+  site: string;
+  type: string;
+  official: boolean;
+  thumbnailUrl?: string;
 }
 
 export interface MovieReviewItem {
@@ -72,9 +84,11 @@ export interface MovieDetail {
   releaseDate: string;
   country: string;
   director: string;
+  directorId?: string | number | null;
   cast: string[];
   castMembers?: MovieCastMember[];
   crewMembers?: MovieCrewMember[];
+  videos?: MovieVideoItem[];
   synopsis: string;
   rating: number;
   voteCount: number;

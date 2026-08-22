@@ -5,11 +5,14 @@ import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
 import { useTrailerStore } from '@/shared/store/trailerStore';
 
+import { MovieVideoItem } from '../types/movie-detail.types';
+
 interface MovieDetailHeroProps {
   bannerUrl: string;
   posterUrl: string;
   title: string;
   trailerUrl: string;
+  videos?: MovieVideoItem[];
 }
 
 export const MovieDetailHero: React.FC<MovieDetailHeroProps> = ({
@@ -17,11 +20,20 @@ export const MovieDetailHero: React.FC<MovieDetailHeroProps> = ({
   posterUrl,
   title,
   trailerUrl,
+  videos = [],
 }) => {
   const openTrailer = useTrailerStore((state) => state.openTrailer);
 
   const handlePlayTrailer = () => {
-    openTrailer(trailerUrl, posterUrl, title);
+    const formattedVideos = videos.map((v) => ({
+      id: v.videoId,
+      name: v.name,
+      key: v.key,
+      type: v.type,
+      site: v.site,
+      thumbnailUrl: v.thumbnailUrl,
+    }));
+    openTrailer(trailerUrl, posterUrl, `${title} • Trailer`, formattedVideos);
   };
 
   return (

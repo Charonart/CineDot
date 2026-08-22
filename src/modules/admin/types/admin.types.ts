@@ -2,6 +2,15 @@ import { AdminRole, PermissionSlug } from './rbac.types';
 
 export * from './rbac.types';
 
+export interface UserRoleItem {
+  id: string | number;
+  roleId: string | number;
+  roleName: string;
+  scopeType: 'system' | 'region' | 'cinema';
+  scopeId?: string | number | null;
+  scopeName?: string;
+}
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -10,6 +19,8 @@ export interface AdminUser {
   avatarUrl?: string;
   role: AdminRole;
   roleName: string;
+  roles?: string[];
+  userRoles?: UserRoleItem[];
   cinemaId?: string | number | null;
   cinemaName?: string;
   permissions: PermissionSlug[] | string[];
@@ -24,6 +35,8 @@ export interface AdminStaffItem {
   phone?: string;
   role: AdminRole;
   roleName: string;
+  roles?: string[];
+  userRoles?: UserRoleItem[];
   cinemaId?: string | number | null;
   cinemaName?: string;
   status: 'ACTIVE' | 'DISABLED';
