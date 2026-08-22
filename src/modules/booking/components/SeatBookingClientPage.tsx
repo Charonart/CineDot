@@ -10,6 +10,7 @@ import { CinemaScreen } from './CinemaScreen';
 import { SeatGrid } from './SeatGrid';
 import { BookingSidebar } from './BookingSidebar';
 import { SeatTimeoutModal } from './SeatTimeoutModal';
+import { FnbUpsellModal } from './FnbUpsellModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
 import { seatBookingService } from '../services/seat-booking.service';
@@ -51,6 +52,7 @@ export function SeatBookingClientPage({
   const [isTimerActive, setIsTimerActive] = useState<boolean>(() => hasActiveBookingTimer(showtimeId));
   const [currentShowTime, setCurrentShowTime] = useState('19:30');
   const [siblingShowtimes, setSiblingShowtimes] = useState<SiblingShowtimeItem[]>([]);
+  const [isUpsellOpen, setIsUpsellOpen] = useState(false);
 
   useEffect(() => {
     if (bookingInfo) {
@@ -76,6 +78,26 @@ export function SeatBookingClientPage({
     if (item.id === showtimeId) return;
     const targetUrl = `/booking/seats?showtime_id=${item.id}&movie=${movieParam || bookingInfo?.movieSlug || ''}&date=${dateParam || bookingInfo?.showDate || ''}&time=${item.time}&cinema=${encodeURIComponent(cinemaParam || bookingInfo?.cinemaName || '')}`;
     router.push(targetUrl);
+  };
+
+  const selectedSeatIdsStr = selectedSeats.map((s) => s.id).join(',');
+
+  // Đi tới bước chọn bắp nước
+  const handleAcceptUpsell = () => {
+    setIsUpsellOpen(false);
+    const foodUrl = `/booking/food?showtime_id=${bookingInfo?.showtimeId || showtimeId}&movie=${bookingInfo?.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+      bookingInfo?.showDate || dateParam || ''
+    )}&time=${encodeURIComponent(currentShowTime || timeParam || '')}&cinema=${encodeURIComponent(bookingInfo?.cinemaName || cinemaParam || '')}`;
+    router.push(foodUrl);
+  };
+
+  // Bỏ qua bắp nước, đi thẳng tới trang thanh toán
+  const handleSkipUpsell = () => {
+    setIsUpsellOpen(false);
+    const paymentUrl = `/booking/payment?showtime_id=${bookingInfo?.showtimeId || showtimeId}&movie=${bookingInfo?.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+      bookingInfo?.showDate || dateParam || ''
+    )}&time=${encodeURIComponent(currentShowTime || timeParam || '')}&cinema=${encodeURIComponent(bookingInfo?.cinemaName || cinemaParam || '')}`;
+    router.push(paymentUrl);
   };
 
   if (loading || !bookingInfo) {
@@ -148,11 +170,20 @@ export function SeatBookingClientPage({
                 isHolding={isHolding}
                 holdError={holdError}
                 onHoldSeats={handleHoldSeats}
+                onOpenUpsellModal={() => setIsUpsellOpen(true)}
               />
             </div>
           </div>
         </div>
       </main>
+
+      {/* 3. Apple-Grade F&B Upsell Modal Popup */}
+      <FnbUpsellModal
+        isOpen={isUpsellOpen}
+        onAccept={handleAcceptUpsell}
+        onSkip={handleSkipUpsell}
+        onClose={() => setIsUpsellOpen(false)}
+      />
 
       {/* 4. Seat Timeout Expiration Modal Popup */}
       <SeatTimeoutModal

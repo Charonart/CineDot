@@ -18,6 +18,7 @@ interface BookingSidebarProps {
   isHolding: boolean;
   holdError: string | null;
   onHoldSeats: () => Promise<any>;
+  onOpenUpsellModal?: () => void;
 }
 
 export const BookingSidebar: React.FC<BookingSidebarProps> = ({
@@ -30,6 +31,7 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
   isHolding,
   holdError,
   onHoldSeats,
+  onOpenUpsellModal,
 }) => {
   const router = useRouter();
   const selectedCount = selectedSeats.length;
@@ -64,7 +66,7 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
   const handleContinueClick = async () => {
     if (!isSelected || isHolding) return;
 
-    // Call API to hold seats
+    // Call API to hold seats (Triggers Laravel broadcast)
     const res = await onHoldSeats();
     if (res?.success === false) {
       if (res.needsAuth) {
@@ -80,12 +82,15 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
     // Officially start the 10-minute hold countdown timer NOW!
     startBookingTimer(String(info.showtimeId));
 
-    const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
-      info.showDate
-    )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
-
-    // Direct navigation, bypassing the upsell modal
-    router.push(foodUrl);
+    // Open Apple-style Upsell Modal
+    if (onOpenUpsellModal) {
+      onOpenUpsellModal();
+    } else {
+      const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+        info.showDate
+      )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
+      router.push(foodUrl);
+    }
   };
 
   return (
