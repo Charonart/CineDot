@@ -24,8 +24,11 @@ apiClient.interceptors.request.use(
     const token =
       Cookies.get('cine_token') ||
       Cookies.get('cinedot_token') ||
+      Cookies.get('cinedot_admin_token') ||
       (typeof window !== 'undefined'
-        ? localStorage.getItem('cinedot_token') || localStorage.getItem('cine_token')
+        ? localStorage.getItem('cinedot_admin_token') ||
+          localStorage.getItem('cinedot_token') ||
+          localStorage.getItem('cine_token')
         : null) ||
       useAuthStore.getState().token;
 

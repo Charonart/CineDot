@@ -90,8 +90,12 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   setSession: (adminUser: AdminUser, permissions: string[], token: string) => {
     if (typeof window !== 'undefined') {
       if (token) {
-        Cookies.set(COOKIE_KEY_TOKEN, token, { expires: 7, path: '/' });
+        Cookies.set('cine_token', token, { expires: 7, path: '/' });
+        Cookies.set('cinedot_token', token, { expires: 7, path: '/' });
+        Cookies.set('cinedot_admin_token', token, { expires: 7, path: '/' });
         localStorage.setItem('cinedot_admin_token', token);
+        localStorage.setItem('cinedot_token', token);
+        localStorage.setItem('cine_token', token);
       }
       localStorage.setItem(LOCAL_KEY_ADMIN_USER, JSON.stringify(adminUser));
       localStorage.setItem(LOCAL_KEY_ADMIN_PERMS, JSON.stringify(permissions));

@@ -35,7 +35,9 @@ export function CineTablePagination({
             className="px-2 py-1 rounded-lg border border-gray-200 bg-white font-bold text-slate-800 text-xs focus:border-[#7C6FE8] cursor-pointer"
           >
             <option value={10}>10</option>
+            <option value={15}>15</option>
             <option value={20}>20</option>
+            <option value={25}>25</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>

@@ -39,7 +39,9 @@ export const AdminSidebar: React.FC = () => {
     closeMobileMenu,
   } = useAdminUiStore();
 
-  const [moviesMenuOpen, setMoviesMenuOpen] = useState(pathname.startsWith('/admin/movies'));
+  const [moviesMenuOpen, setMoviesMenuOpen] = useState(
+    pathname.startsWith('/admin/movies') || pathname.startsWith('/admin/persons')
+  );
   const [staffMenuOpen, setStaffMenuOpen] = useState(pathname.startsWith('/admin/users-staff'));
   const [campaignMenuOpen, setCampaignMenuOpen] = useState(
     pathname.startsWith('/admin/campaign') ||
@@ -49,7 +51,7 @@ export const AdminSidebar: React.FC = () => {
 
   // Auto-expand active submenus on navigation
   useEffect(() => {
-    if (pathname.startsWith('/admin/movies')) {
+    if (pathname.startsWith('/admin/movies') || pathname.startsWith('/admin/persons')) {
       setMoviesMenuOpen(true);
     }
     if (pathname.startsWith('/admin/users-staff')) {
@@ -66,7 +68,8 @@ export const AdminSidebar: React.FC = () => {
     closeMobileMenu();
   }, [pathname, closeMobileMenu]);
 
-  const isMoviesActive = pathname.startsWith('/admin/movies');
+  const isMoviesActive =
+    pathname.startsWith('/admin/movies') || pathname.startsWith('/admin/persons');
   const isStaffActive = pathname.startsWith('/admin/users-staff');
   const isCampaignActive =
     pathname.startsWith('/admin/campaign') ||
@@ -150,6 +153,19 @@ export const AdminSidebar: React.FC = () => {
                     <span>Thể Loại Phim</span>
                   </Link>
                 )}
+
+                <Link
+                  href="/admin/persons"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                    pathname === '/admin/persons'
+                      ? 'bg-[#7C6FE8] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5 shrink-0" />
+                  <span>Diễn Viên & Đạo Diễn</span>
+                </Link>
               </motion.div>
             )}
           </AnimatePresence>
