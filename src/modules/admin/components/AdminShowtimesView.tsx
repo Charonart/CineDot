@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useAdminShowtimes } from '../hooks/useAdminShowtimes';
 import { AdminShowtimeGridItem, AdminMovieOption } from '../types/adminShowtime.types';
@@ -122,6 +122,37 @@ export function AdminShowtimesView() {
     return minutesToTime(endM);
   }, [selectedAddMovie, addStartTime]);
 
+  // Compute the next available slot for a given room (snap to end of latest showtime + buffer)
+  const computeNextSlotForRoom = useCallback(
+    (roomId: number | undefined): string => {
+      const DEFAULT_OPENING = '08:00';
+      if (!roomId) return DEFAULT_OPENING;
+
+      const roomShowtimes = showtimes.filter((st) => st.roomId === roomId);
+      if (roomShowtimes.length === 0) return DEFAULT_OPENING;
+
+      const latestEnd = Math.max(...roomShowtimes.map((st) => st.endMinutes));
+      const nextStart = latestEnd + addBufferMinutes;
+
+      // Cap at 23:59 to avoid overflow
+      if (nextStart >= 1440) return '23:59';
+      return minutesToTime(nextStart);
+    },
+    [showtimes, addBufferMinutes]
+  );
+
+  // Suggested start time for the currently selected room (reactive)
+  const suggestedStartTime = useMemo(() => {
+    return computeNextSlotForRoom(addRoomId);
+  }, [computeNextSlotForRoom, addRoomId]);
+
+  // Auto re-snap start time when room or buffer changes while the modal is open
+  useEffect(() => {
+    if (isAddModalOpen && addRoomId) {
+      setAddStartTime(computeNextSlotForRoom(addRoomId));
+    }
+  }, [addRoomId, addBufferMinutes]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Staggering Conflicts Detection
   const staggeringConflicts = useMemo(() => {
     const list = [...showtimes].sort((a, b) => a.startMinutes - b.startMinutes);
@@ -140,7 +171,7 @@ export function AdminShowtimesView() {
     return conflicts;
   }, [showtimes]);
 
-  // Open Add Modal Helper
+  // Open Add Modal Helper — auto-snap to next available slot
   const handleOpenAddModal = (roomId?: number, defaultStartTime?: string, movie?: AdminMovieOption) => {
     if (movie) {
       setAddMovieId(movie.id);
@@ -148,14 +179,18 @@ export function AdminShowtimesView() {
       setAddMovieId(movies[0].id);
     }
 
+    const effectiveRoomId = roomId || addRoomId || (rooms.length > 0 ? rooms[0].id : undefined);
     if (roomId) {
       setAddRoomId(roomId);
     } else if (!addRoomId && rooms.length > 0) {
       setAddRoomId(rooms[0].id);
     }
 
+    // Auto-snap: use explicit defaultStartTime if provided, otherwise compute from room schedule
     if (defaultStartTime) {
       setAddStartTime(defaultStartTime);
+    } else {
+      setAddStartTime(computeNextSlotForRoom(effectiveRoomId));
     }
 
     setIsAddModalOpen(true);
@@ -382,6 +417,8 @@ export function AdminShowtimesView() {
         setAddPrice={setAddPrice}
         addBufferMinutes={addBufferMinutes}
         setAddBufferMinutes={setAddBufferMinutes}
+        showtimes={showtimes}
+        suggestedStartTime={suggestedStartTime}
 
         isEditModalOpen={isEditModalOpen}
         onCloseEditModal={() => setIsEditModalOpen(false)}

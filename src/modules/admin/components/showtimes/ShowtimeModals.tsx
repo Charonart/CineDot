@@ -11,6 +11,8 @@ import {
   Check,
   Loader2,
   Lock,
+  Clock,
+  Zap,
 } from 'lucide-react';
 import {
   AdminMovieOption,
@@ -37,6 +39,8 @@ interface ShowtimeModalsProps {
   setAddPrice: (price: number) => void;
   addBufferMinutes: number;
   setAddBufferMinutes: (buffer: number) => void;
+  showtimes: AdminShowtimeGridItem[];
+  suggestedStartTime: string;
 
   // Edit Modal
   isEditModalOpen: boolean;
@@ -90,6 +94,8 @@ export function ShowtimeModals({
   setAddPrice,
   addBufferMinutes,
   setAddBufferMinutes,
+  showtimes,
+  suggestedStartTime,
 
   isEditModalOpen,
   onCloseEditModal,
@@ -123,6 +129,11 @@ export function ShowtimeModals({
   const formatVND = (num: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
   };
+
+  // Filter showtimes for the currently selected room, sorted by startMinutes
+  const roomSchedule = showtimes
+    .filter((st) => st.roomId === addRoomId)
+    .sort((a, b) => a.startMinutes - b.startMinutes);
 
   return (
     <>
@@ -181,6 +192,51 @@ export function ShowtimeModals({
                   ))}
                 </select>
               </div>
+
+              {/* Room Schedule Preview Card */}
+              {addRoomId && (
+                <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-100">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-slate-700 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#7C6FE8]" />
+                      Lịch Phòng Hiện Tại
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setAddStartTime(suggestedStartTime)}
+                      className="px-2.5 py-1 rounded-xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-[10px] flex items-center gap-1 cursor-pointer shadow-sm shadow-[#7C6FE8]/20 transition-colors"
+                    >
+                      <Zap className="w-3 h-3" />
+                      Snap tới {suggestedStartTime}
+                    </button>
+                  </div>
+
+                  {roomSchedule.length === 0 ? (
+                    <p className="text-[11px] text-slate-500 italic">Chưa có suất chiếu nào trong phòng này.</p>
+                  ) : (
+                    <div className="flex flex-col gap-1 max-h-[120px] overflow-y-auto pr-0.5">
+                      {roomSchedule.map((st) => (
+                        <div
+                          key={st.id}
+                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/80 border border-indigo-100/60 text-[11px]"
+                        >
+                          <span className="font-mono font-bold text-[#7C6FE8] shrink-0">
+                            {st.startTime}–{st.endTime}
+                          </span>
+                          <span className="text-slate-700 truncate font-medium">{st.movieTitle}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-bold text-emerald-700">
+                      Khung giờ gợi ý: {suggestedStartTime}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Giờ Bắt Đầu & Giờ Kết Thúc */}
               <div className="grid grid-cols-2 gap-3">
