@@ -81,21 +81,40 @@ export function useSeatBooking(
     const echo = getEcho();
     if (!echo) return;
 
-    const channelName = `showtimes.${showtimeId}`;
+    const cleanShowtimeId = String(showtimeId).replace('showtime-', '');
+    const channelName = `showtimes.${cleanShowtimeId}`;
 
-    echo.channel(channelName).listen('.seat.updated', (event: SeatStatusUpdatedEvent) => {
-      const { seat_ids, status, user_id } = event;
-      if (!seat_ids || !Array.isArray(seat_ids) || seat_ids.length === 0) return;
+    const handleSeatStatusUpdated = (event: any) => {
+      console.log('📡 [Pusher Realtime Event]', event);
+
+      // Trích xuất danh sách ID ghế từ các biến thể payload có thể có
+      const rawSeatIds = event.seat_ids || event.showtime_seat_ids || (event.seat_id ? [event.seat_id] : []);
+      const status = event.status || 'holding';
+      const userId = event.user_id;
+
+      if (!rawSeatIds || !Array.isArray(rawSeatIds) || rawSeatIds.length === 0) {
+        console.warn('⚠️ [Pusher Realtime] Invalid or empty seat_ids payload:', event);
+        return;
+      }
 
       const upperStatus = (status || '').toUpperCase() as SeatStatus;
       const currentUserId = useAuthStore.getState().user?.id;
-      const isOtherUser = !currentUserId || String(user_id) !== String(currentUserId);
+      const isOtherUser = !currentUserId || String(userId) !== String(currentUserId);
 
       // Cập nhật danh sách ghế
       setSeats((prevSeats) => {
         if (upperStatus !== 'AVAILABLE' && isOtherUser) {
           const lockedSeatCodeIds = prevSeats
-            .filter((s) => seat_ids.includes(s.showtime_seat_id))
+            .filter((s) =>
+              rawSeatIds.some((id: any) => {
+                const sId = String(id).toLowerCase().trim();
+                return (
+                  sId === String(s.showtime_seat_id).toLowerCase().trim() ||
+                  sId === String(s.id).toLowerCase().trim() ||
+                  sId === `${s.row}${s.number}`.toLowerCase().trim()
+                );
+              })
+            )
             .map((s) => s.id);
 
           if (lockedSeatCodeIds.length > 0) {
@@ -106,7 +125,16 @@ export function useSeatBooking(
         }
 
         return prevSeats.map((seat) => {
-          if (seat_ids.includes(seat.showtime_seat_id)) {
+          const isMatch = rawSeatIds.some((id: any) => {
+            const sId = String(id).toLowerCase().trim();
+            return (
+              sId === String(seat.showtime_seat_id).toLowerCase().trim() ||
+              sId === String(seat.id).toLowerCase().trim() ||
+              sId === `${seat.row}${seat.number}`.toLowerCase().trim()
+            );
+          });
+
+          if (isMatch) {
             return {
               ...seat,
               status: upperStatus,
@@ -115,7 +143,27 @@ export function useSeatBooking(
           return seat;
         });
       });
-    });
+    };
+
+    // Lắng nghe qua Echo Channel
+    const channel = echo.channel(channelName);
+    channel.listen('.seat.updated', handleSeatStatusUpdated);
+    channel.listen('seat.updated', handleSeatStatusUpdated);
+    channel.listen('.SeatStatusUpdated', handleSeatStatusUpdated);
+    channel.listen('SeatStatusUpdated', handleSeatStatusUpdated);
+
+    // Lắng nghe trực tiếp qua Pusher instance dự phòng
+    try {
+      const pusherInstance = (echo.connector as any)?.pusher;
+      const pusherChan = pusherInstance?.channel(channelName);
+      if (pusherChan) {
+        pusherChan.bind('seat.updated', handleSeatStatusUpdated);
+        pusherChan.bind('SeatStatusUpdated', handleSeatStatusUpdated);
+        pusherChan.bind('App\\Events\\SeatStatusUpdated', handleSeatStatusUpdated);
+      }
+    } catch {
+      // Ignored
+    }
 
     return () => {
       echo.leaveChannel(channelName);

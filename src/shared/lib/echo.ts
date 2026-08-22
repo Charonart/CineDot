@@ -15,9 +15,12 @@ export const getEcho = (): Echo<'pusher'> | null => {
 
   if (!echoInstance) {
     window.Pusher = Pusher;
+    if (process.env.NODE_ENV !== 'production') {
+      Pusher.logToConsole = true;
+    }
 
-    const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY || 'cinedot_key';
-    const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER || 'ap1';
+    const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY || '2749e24d6fa468eeb986';
+    const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER || 'mt1';
     const wsHost = process.env.NEXT_PUBLIC_PUSHER_HOST;
     const wsPort = process.env.NEXT_PUBLIC_PUSHER_PORT ? Number(process.env.NEXT_PUBLIC_PUSHER_PORT) : undefined;
     const scheme = process.env.NEXT_PUBLIC_PUSHER_SCHEME || 'https';
