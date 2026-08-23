@@ -38,6 +38,7 @@ export function SeatBookingClientPage({
     seats,
     seatTypes,
     selectedSeatIds,
+    otherSelectingSeatIds,
     toggleSelectSeat,
     selectedSeats,
     totalPrice,
@@ -146,6 +147,7 @@ export function SeatBookingClientPage({
                 <SeatGrid
                   seats={seats}
                   selectedSeatIds={selectedSeatIds}
+                  otherSelectingSeatIds={otherSelectingSeatIds}
                   onToggleSeat={toggleSelectSeat}
                 />
 

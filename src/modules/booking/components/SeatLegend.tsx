@@ -64,6 +64,12 @@ export const SeatLegend: React.FC<SeatLegendProps> = ({
           );
         })}
 
+        {/* Other User Selecting Indicator */}
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-amber-50 border-2 border-amber-400 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+          <span>Có Người Đang Nhắm</span>
+        </div>
+
         {/* Selected Seat Indicator */}
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-md bg-[#7C6FE8] shadow-[0_2px_8px_rgba(124,111,232,0.6)]" />
@@ -73,7 +79,7 @@ export const SeatLegend: React.FC<SeatLegendProps> = ({
         {/* Holding Seat Indicator */}
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-md bg-amber-100 border border-amber-400 shadow-2xs" />
-          <span>Đang Giữ Chỗ</span>
+          <span>Đang Giữ Chỗ (10p)</span>
         </div>
 
         {/* Booked Seat Indicator */}

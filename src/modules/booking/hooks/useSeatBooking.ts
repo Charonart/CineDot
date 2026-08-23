@@ -26,6 +26,8 @@ export function useSeatBooking(
   const [isHolding, setIsHolding] = useState(false);
 
 
+  const [otherSelectingSeatIds, setOtherSelectingSeatIds] = useState<string[]>([]);
+
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
@@ -89,7 +91,7 @@ export function useSeatBooking(
 
       // Trích xuất danh sách ID ghế từ các biến thể payload có thể có
       const rawSeatIds = event.seat_ids || event.showtime_seat_ids || (event.seat_id ? [event.seat_id] : []);
-      const status = event.status || 'holding';
+      const rawStatus = String(event.status || 'holding').toLowerCase();
       const userId = event.user_id;
 
       if (!rawSeatIds || !Array.isArray(rawSeatIds) || rawSeatIds.length === 0) {
@@ -97,44 +99,71 @@ export function useSeatBooking(
         return;
       }
 
-      const upperStatus = (status || '').toUpperCase() as SeatStatus;
       const currentUserId = useAuthStore.getState().user?.id;
       const isOtherUser = !currentUserId || String(userId) !== String(currentUserId);
 
-      // Cập nhật danh sách ghế
-      setSeats((prevSeats) => {
-        if (upperStatus !== 'AVAILABLE' && isOtherUser) {
-          const lockedSeatCodeIds = prevSeats
-            .filter((s) =>
-              rawSeatIds.some((id: any) => {
-                const sId = String(id).toLowerCase().trim();
-                return (
-                  sId === String(s.showtime_seat_id).toLowerCase().trim() ||
-                  sId === String(s.id).toLowerCase().trim() ||
-                  sId === `${s.row}${s.number}`.toLowerCase().trim()
-                );
-              })
-            )
-            .map((s) => s.id);
+      // Helper map matching IDs with local seat codes / DB IDs
+      const matchSeatIds = (seat: SeatItem) => {
+        return rawSeatIds.some((id: any) => {
+          const sId = String(id).toLowerCase().trim();
+          return (
+            sId === String(seat.showtime_seat_id).toLowerCase().trim() ||
+            sId === String(seat.id).toLowerCase().trim() ||
+            sId === `${seat.row}${seat.number}`.toLowerCase().trim()
+          );
+        });
+      };
 
-          if (lockedSeatCodeIds.length > 0) {
+      // 1. Nếu có người đang chọn ghế (selecting)
+      if (rawStatus === 'selecting') {
+        if (isOtherUser) {
+          // Lấy danh sách ID mã ghế (A1, B2) tương ứng để kích hoạt viền nhấp nháy
+          setSeats((prevSeats) => {
+            const matchedSeatCodes = prevSeats.filter(matchSeatIds).map((s) => s.id);
+            setOtherSelectingSeatIds((prevOther) => {
+              const combined = new Set([...prevOther, ...matchedSeatCodes]);
+              return Array.from(combined);
+            });
+            return prevSeats;
+          });
+        }
+        return;
+      }
+
+      // 2. Với các trạng thái khác (available, holding, booked, unselect):
+      // Xóa khỏi danh sách người khác đang nhắm
+      setSeats((prevSeats) => {
+        const matchedSeatCodes = prevSeats.filter(matchSeatIds).map((s) => s.id);
+        if (matchedSeatCodes.length > 0) {
+          setOtherSelectingSeatIds((prevOther) =>
+            prevOther.filter((id) => !matchedSeatCodes.includes(id))
+          );
+        }
+
+        // Trạng thái AVAILABLE
+        if (rawStatus === 'available' || rawStatus === 'unselect') {
+          return prevSeats.map((seat) => {
+            if (matchSeatIds(seat)) {
+              return { ...seat, status: 'AVAILABLE' as SeatStatus };
+            }
+            return seat;
+          });
+        }
+
+        // Trạng thái HOLDING hoặc BOOKED
+        const upperStatus: SeatStatus = rawStatus === 'booked' ? 'BOOKED' : 'HOLDING';
+
+        // Nếu là người khác giữ/mua -> tự động bỏ chọn ở máy mình
+        if (isOtherUser) {
+          if (matchedSeatCodes.length > 0) {
             setSelectedSeatIds((prevSelected) =>
-              prevSelected.filter((id) => !lockedSeatCodeIds.includes(id))
+              prevSelected.filter((id) => !matchedSeatCodes.includes(id))
             );
           }
         }
 
         return prevSeats.map((seat) => {
-          const isMatch = rawSeatIds.some((id: any) => {
-            const sId = String(id).toLowerCase().trim();
-            return (
-              sId === String(seat.showtime_seat_id).toLowerCase().trim() ||
-              sId === String(seat.id).toLowerCase().trim() ||
-              sId === `${seat.row}${seat.number}`.toLowerCase().trim()
-            );
-          });
-
-          if (isMatch) {
+          if (matchSeatIds(seat)) {
             return {
               ...seat,
               status: upperStatus,
@@ -200,28 +229,52 @@ export function useSeatBooking(
   // Toggle Seat Selection
   const toggleSelectSeat = (seatIdOrIds: string | string[]) => {
     const ids = Array.isArray(seatIdOrIds) ? seatIdOrIds : [seatIdOrIds];
-    
-    // Validate all target seats
-    const validIds = ids.filter(id => {
-      const targetSeat = seats.find((s) => s.id === id);
-      return targetSeat && targetSeat.status !== 'BOOKED' && targetSeat.status !== 'HOLDING' && targetSeat.status !== 'BLOCKED';
-    });
+    const cleanShowtimeId = String(showtimeId).replace('showtime-', '');
 
-    if (validIds.length === 0) return;
+    // Validate all target seats
+    const targetSeatItems = seats.filter((s) => ids.includes(s.id));
+    const validSeats = targetSeatItems.filter(
+      (targetSeat) =>
+        targetSeat.status !== 'BOOKED' &&
+        targetSeat.status !== 'HOLDING' &&
+        targetSeat.status !== 'BLOCKED'
+    );
+
+    if (validSeats.length === 0) return;
+    const validIds = validSeats.map((s) => s.id);
 
     setSelectedSeatIds((prev) => {
       let next = [...prev];
-      for (const id of validIds) {
+      const seatsToSelectDbIds: number[] = [];
+      const seatsToUnselectDbIds: number[] = [];
+
+      for (const validSeat of validSeats) {
+        const id = validSeat.id;
         if (next.includes(id)) {
           next = next.filter((s) => s !== id);
+          if (validSeat.showtime_seat_id) {
+            seatsToUnselectDbIds.push(validSeat.showtime_seat_id);
+          }
         } else {
           if (next.length >= 8) {
             alert('Bạn chỉ có thể chọn tối đa 8 ghế cho mỗi lần đặt vé.');
             return prev; // abort further additions
           }
           next.push(id);
+          if (validSeat.showtime_seat_id) {
+            seatsToSelectDbIds.push(validSeat.showtime_seat_id);
+          }
         }
       }
+
+      // Gửi API thông báo trạng thái selecting / unselect lên Backend
+      if (seatsToSelectDbIds.length > 0) {
+        seatBookingService.selectingSeats(cleanShowtimeId, seatsToSelectDbIds);
+      }
+      if (seatsToUnselectDbIds.length > 0) {
+        seatBookingService.unselectSeats(cleanShowtimeId, seatsToUnselectDbIds);
+      }
+
       return next;
     });
   };
@@ -285,6 +338,7 @@ export function useSeatBooking(
     seatTypes,
     seatRowGroups,
     selectedSeatIds,
+    otherSelectingSeatIds,
     toggleSelectSeat,
     selectedSeats,
     totalPrice,

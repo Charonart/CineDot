@@ -8,6 +8,7 @@ import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 interface SeatGridProps {
   seats: SeatItem[];
   selectedSeatIds: string[];
+  otherSelectingSeatIds?: string[];
   onToggleSeat: (seatIdOrIds: string | string[]) => void;
 }
 
@@ -28,6 +29,7 @@ interface ProcessedSeat {
 export const SeatGrid: React.FC<SeatGridProps> = ({
   seats,
   selectedSeatIds,
+  otherSelectingSeatIds = [],
   onToggleSeat,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -179,6 +181,7 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
         >
           {processedSeats.map((seat) => {
             const isSelected = seat.seatIds.every((id) => selectedSeatIds.includes(id));
+            const isOtherSelecting = !isSelected && seat.seatIds.some((id) => otherSelectingSeatIds.includes(id));
             const isBooked = seat.status !== 'AVAILABLE';
             const normType = (seat.type || 'standard').toLowerCase();
             const isStandard = normType === 'standard' || normType === 'regular';
@@ -208,13 +211,19 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
               dynamicBg = '#7C6FE8';
               dynamicBorder = '#7C6FE8';
               dynamicText = '#FFFFFF';
+            } else if (isOtherSelecting) {
+              dynamicBg = '#FFFBEB'; // Amber-50
+              dynamicBorder = '#F59E0B'; // Amber-500
+              dynamicText = '#D97706'; // Amber-600
             }
 
             const tooltipText =
               seat.status === 'HOLDING'
-                ? `Ghế ${seat.label} (Đang có người giữ)`
+                ? `Ghế ${seat.label} (Đang có người giữ chỗ)`
                 : isBooked
                 ? `Ghế ${seat.label} (Đã được đặt)`
+                : isOtherSelecting
+                ? `Ghế ${seat.label} (Có người đang nhắm ghế này - Hãy nhanh tay chọn!)`
                 : `Ghế ${seat.label} (${seat.typeName || seat.type}) - ${seat.price.toLocaleString('vi-VN')}đ`;
 
             return (
@@ -240,6 +249,8 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
                     ? 'cursor-not-allowed shadow-none'
                     : isSelected
                     ? 'shadow-[0_4px_12px_rgba(124,111,232,0.5)] z-20'
+                    : isOtherSelecting
+                    ? 'ring-2 ring-amber-400 ring-offset-1 animate-pulse z-15 shadow-[0_0_12px_rgba(245,158,11,0.5)] hover:brightness-95'
                     : 'hover:brightness-95'
                 }`}
               >

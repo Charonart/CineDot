@@ -72,6 +72,8 @@ export const ENDPOINTS = {
   BOOKINGS: {
     HOLD_SEATS: '/bookings/hold-seats',
     RELEASE_SEATS: '/bookings/release-seats',
+    SELECTING_SEATS: '/bookings/selecting-seats',
+    UNSELECT_SEATS: '/bookings/unselect-seats',
     CALCULATE_SUMMARY: '/bookings/calculate-summary',
     DETAIL: (id: number | string) => `/bookings/${id}`,
     APPLY_VOUCHER: (id: number | string) => `/bookings/${id}/apply-voucher`,
