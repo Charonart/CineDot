@@ -30,6 +30,8 @@ export function useAdminTicketScanner() {
     mutationFn: (codeOrQr: string) => adminTicketScannerService.checkInTicket(codeOrQr),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTicketScannerKeys.recentScans() });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'reports'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
     },
   });
 
@@ -38,6 +40,8 @@ export function useAdminTicketScanner() {
     mutationFn: (bookingComboId: number) => adminTicketScannerService.claimFnb(bookingComboId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTicketScannerKeys.recentScans() });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'reports'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
     },
   });
 

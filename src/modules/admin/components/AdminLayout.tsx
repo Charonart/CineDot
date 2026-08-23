@@ -15,6 +15,16 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+const VALID_ADMIN_ROLES = [
+  'SUPER_ADMIN',
+  'CINEMA_MANAGER',
+  'TICKET_STAFF',
+  'FNB_STAFF',
+  'MARKETING',
+  'ACCOUNTANT',
+  'STAFF',
+];
+
 export function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -26,16 +36,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     initAdminStore();
   }, [initAdminStore]);
-
-  const VALID_ADMIN_ROLES = [
-    'SUPER_ADMIN',
-    'CINEMA_MANAGER',
-    'TICKET_STAFF',
-    'FNB_STAFF',
-    'MARKETING',
-    'ACCOUNTANT',
-    'STAFF',
-  ];
 
   // Hook 2: Auth Redirect Enforcement
   useEffect(() => {
@@ -50,7 +50,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         if (adminUser?.role === 'TICKET_STAFF') {
           router.replace('/admin/ticket-scanner');
         } else {
-          router.replace('/admin/movies');
+          router.replace('/admin');
         }
       }
     }
@@ -99,7 +99,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Brand Pill */}
         <Link
-          href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin/movies'}
+          href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin'}
           className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/60 active:scale-95 transition-transform"
         >
           <div className="w-5 h-5 rounded-lg bg-[#7C6FE8] text-white flex items-center justify-center font-black text-[10px] shadow-2xs">
