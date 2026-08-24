@@ -74,6 +74,10 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   };
 
   const handleShowtimeClick = (targetUrl: string) => {
+    if (!isAuthenticated) {
+      openAuthModal('login', 'Vui lòng đăng nhập tài khoản để chọn ghế và đặt vé trực tuyến.', targetUrl);
+      return;
+    }
     router.push(targetUrl);
   };
 
@@ -126,21 +130,21 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
         </div>
       ) : (
         <>
-          {/* Top Toolbar Bar */}
-          <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 relative z-30">
+          {/* Top Toolbar Bar - Compact & Clean Layout */}
+          <div className="w-full sm:w-auto inline-flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-3 p-2 sm:p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/80 relative z-30 shadow-2xs max-w-fit">
             {/* Left: Date Selector Carousel */}
-            <div className="flex items-center gap-1.5 shrink-0 max-w-full">
+            <div className="flex items-center gap-1 shrink-0 max-w-full">
               <button
                 onClick={handleScrollLeft}
-                className="w-8 h-8 rounded-lg border border-gray-200 hover:border-[#7C6FE8] text-slate-500 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 bg-white shadow-2xs"
+                className="w-7 h-7 rounded-lg border border-gray-200 hover:border-[#7C6FE8] text-slate-500 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 bg-white shadow-2xs"
                 title="Ngày trước"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
 
               <div
                 ref={scrollRef}
-                className="overflow-x-auto scrollbar-none py-1 flex items-center gap-2 max-w-[270px] sm:max-w-[340px] md:max-w-[380px] scroll-smooth"
+                className="overflow-x-auto scrollbar-none py-0.5 flex items-center gap-1.5 max-w-[240px] sm:max-w-[300px] md:max-w-[340px] scroll-smooth"
               >
                 {dateOptions.map((d) => {
                   const isActive = d.dateStr === selectedDateStr;
@@ -148,14 +152,14 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
                     <button
                       key={d.dateStr}
                       onClick={() => setSelectedDateStr(d.dateStr)}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 transition-all shrink-0 cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 transition-all shrink-0 cursor-pointer ${
                         isActive
                           ? 'bg-[#7C6FE8] text-white shadow-sm'
                           : 'bg-white hover:bg-slate-100 text-slate-700 border border-gray-200'
                       }`}
                     >
                       <span>{d.displayDay}</span>
-                      <span className="text-[11px] font-semibold">{d.displayDate}</span>
+                      <span className="text-[10px] font-semibold">{d.displayDate}</span>
                     </button>
                   );
                 })}
@@ -163,19 +167,22 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
 
               <button
                 onClick={handleScrollRight}
-                className="w-8 h-8 rounded-lg border border-gray-200 hover:border-[#7C6FE8] text-slate-500 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 bg-white shadow-2xs"
+                className="w-7 h-7 rounded-lg border border-gray-200 hover:border-[#7C6FE8] text-slate-500 hover:text-[#7C6FE8] flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 bg-white shadow-2xs"
                 title="Ngày tiếp theo"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
+            {/* Separator Divider */}
+            <div className="hidden sm:block w-[1px] h-6 bg-slate-200 self-center mx-0.5" />
+
             {/* Right: Region & Cinema Dropdowns */}
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="relative w-36 sm:w-40">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="relative w-32 sm:w-36">
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'region' ? null : 'region')}
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 hover:border-[#7C6FE8] text-slate-700 font-semibold text-xs flex items-center justify-between transition-colors cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-700 font-semibold text-xs flex items-center justify-between transition-colors cursor-pointer shadow-2xs"
                 >
                   <span className="truncate">{selectedRegion}</span>
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -206,10 +213,10 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
                 </AnimatePresence>
               </div>
 
-              <div className="relative w-40 sm:w-44">
+              <div className="relative w-36 sm:w-40">
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'cinema' ? null : 'cinema')}
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 hover:border-[#7C6FE8] text-slate-700 font-semibold text-xs flex items-center justify-between transition-colors cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-700 font-semibold text-xs flex items-center justify-between transition-colors cursor-pointer shadow-2xs"
                 >
                   <span className="truncate">{selectedCinemaFilter}</span>
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />

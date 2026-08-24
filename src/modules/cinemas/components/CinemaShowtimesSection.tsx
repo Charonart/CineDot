@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Film, Calendar, Clock, Sparkles } from 'lucide-react';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 import { CinemaMovieShowtime } from '../types/cinemas.types';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
@@ -23,6 +24,7 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
   loading,
 }) => {
   const router = useRouter();
+  const { isAuthenticated, openAuthModal } = useAuthStore();
 
   // Generate dynamic 7-day options
   const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
@@ -42,7 +44,12 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
   });
 
   const handleSelectSlot = (showtimeId: string | number) => {
-    router.push(`/booking/seats?showtime_id=${encodeURIComponent(String(showtimeId))}`);
+    const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(String(showtimeId))}`;
+    if (!isAuthenticated) {
+      openAuthModal('login', 'Vui lòng đăng nhập tài khoản để chọn ghế và đặt vé trực tuyến.', targetUrl);
+      return;
+    }
+    router.push(targetUrl);
   };
 
   return (

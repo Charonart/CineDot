@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Image as ImageIcon, X, CheckCircle2, AlertCircle, Layers, Link as LinkIcon, Hash } from 'lucide-react';
+import { Image as ImageIcon, X, CheckCircle2, AlertCircle, Layers, Link as LinkIcon, Hash, ExternalLink, Sparkles, AlertTriangle } from 'lucide-react';
 import { AdminBanner } from '../../types/adminCampaign.types';
 import { CreateBannerPayload, UpdateBannerPayload } from '../../dto/adminCampaign.dto';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
+import { imageHelper } from '@/shared/utils/imageHelper';
 
 interface BannerStudioModalProps {
   isOpen: boolean;
@@ -32,13 +33,14 @@ export const BannerStudioModal: React.FC<BannerStudioModalProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [imageLoadedSuccessfully, setImageLoadedSuccessfully] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (bannerToEdit) {
       setTitle(bannerToEdit.title || '');
-      setImageUrl(bannerToEdit.imageUrl || '');
-      setLinkUrl(bannerToEdit.linkUrl || '');
-      setCampaignId(bannerToEdit.campaignId || '');
+      setImageUrl(bannerToEdit.imageUrl || (bannerToEdit as any).image_url || '');
+      setLinkUrl(bannerToEdit.linkUrl || (bannerToEdit as any).link_url || '');
+      setCampaignId(bannerToEdit.campaignId || (bannerToEdit as any).campaign_id || '');
       setOrder(bannerToEdit.order ?? 1);
       setIsActive(bannerToEdit.isActive ?? true);
     } else {
@@ -50,9 +52,12 @@ export const BannerStudioModal: React.FC<BannerStudioModalProps> = ({
       setIsActive(true);
     }
     setStatusMsg(null);
+    setImageLoadedSuccessfully(null);
   }, [bannerToEdit, defaultCampaignId, isOpen]);
 
   if (!isOpen) return null;
+
+  const postImagesInfo = imageHelper.resolvePostImagesUrl(imageUrl);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,33 +159,81 @@ export const BannerStudioModal: React.FC<BannerStudioModalProps> = ({
           </div>
 
           {/* Image URL & Live Preview */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">
-              URL Hình Ảnh Banner <span className="text-rose-500">*</span>
-            </label>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                URL Hình Ảnh Banner <span className="text-rose-500">*</span>
+              </label>
+              <span className="text-[11px] font-bold text-[#7C6FE8] flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                <span>Hỗ trợ URL PostImages / Cloud CDN</span>
+              </span>
+            </div>
+
             <input
               type="text"
               required
-              placeholder="https://images.unsplash.com/... hoặc /banners/summer.jpg"
+              placeholder="https://i.postimg.cc/nL9qzXHb/Gemini-Generated-Image.png hoặc https://images.unsplash.com/..."
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              onChange={(e) => {
+                setImageUrl(e.target.value);
+                setImageLoadedSuccessfully(null);
+              }}
               className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 focus:border-[#7C6FE8] text-xs font-semibold text-slate-900 font-mono"
             />
 
-            {/* Live Image Preview */}
+            {/* PostImages Page URL Warning */}
+            {postImagesInfo.isPostImagesPage && (
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  <span>
+                    Bạn vừa dán <strong>Liên kết xem trang PostImages</strong> (`postimg.cc/xxx`). Để hình ảnh hiển thị trực tiếp chuẩn nhất, vui lòng sao chép dòng <strong>Liên kết trực tiếp</strong> (Ví dụ: `https://i.postimg.cc/nL9qzXHb/filename.png`).
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageUrl('https://i.postimg.cc/nL9qzXHb/Gemini-Generated-Image-dy8l09dy8l09dy8l-(1).png');
+                      setImageLoadedSuccessfully(null);
+                    }}
+                    className="text-[#7C6FE8] hover:underline font-bold w-fit text-[11px] cursor-pointer"
+                  >
+                    👉 Thử bằng link mẫu PostImages trực tiếp của bạn
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Live Image Preview 16:9 HD */}
             {imageUrl && (
-              <div className="mt-2 w-full h-36 rounded-2xl overflow-hidden border border-purple-100 relative bg-slate-100">
+              <div className="mt-2 w-full h-44 rounded-2xl overflow-hidden border border-purple-100 relative bg-slate-900 group">
                 <img
                   src={imageUrl}
                   alt="Preview banner"
                   className="w-full h-full object-cover"
+                  onLoad={() => setImageLoadedSuccessfully(true)}
                   onError={(e) => {
-                    (e.target as any).src = 'https://placehold.co/800x400/png?text=Invalid+Image+URL';
+                    setImageLoadedSuccessfully(false);
+                    (e.target as any).src = 'https://placehold.co/1200x600/1e1b4b/7c6fe8?text=Loi+Link+Anh+PostImages';
                   }}
                 />
-                <span className="absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[10px] font-bold backdrop-blur-xs">
-                  Xem trước Banner (16:9)
-                </span>
+                <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+                  <span className="px-2.5 py-1 rounded-lg bg-black/70 text-white text-[10px] font-bold backdrop-blur-xs flex items-center gap-1">
+                    <span>Banner Preview (16:9 HD)</span>
+                  </span>
+                  {imageLoadedSuccessfully === true && (
+                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/90 text-white text-[10px] font-black backdrop-blur-xs flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>URL Ảnh Hợp Lệ</span>
+                    </span>
+                  )}
+                  {imageLoadedSuccessfully === false && (
+                    <span className="px-2.5 py-1 rounded-lg bg-rose-500/90 text-white text-[10px] font-black backdrop-blur-xs flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Link Ảnh Không Tải Được</span>
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>

@@ -10,6 +10,8 @@ import { AdminSidebar } from './AdminSidebar';
 import { AdminRouteGuard } from './guards/AdminRouteGuard';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Menu, Settings } from 'lucide-react';
+import { CineToastProvider } from '@/shared/components/toast/CineToastProvider';
+import { CineConfirmProvider } from '@/shared/components/modal/CineConfirmModal';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -67,7 +69,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // If on login page, render login form without sidebar/header
   if (pathname === '/admin/login') {
-    return <>{children}</>;
+    return (
+      <CineToastProvider>
+        <CineConfirmProvider>{children}</CineConfirmProvider>
+      </CineToastProvider>
+    );
   }
 
   // If unauthenticated on protected routes, show loading while redirecting
@@ -83,47 +89,51 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // Main Admin Layout with Responsive Structure
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col lg:flex-row font-sans selection:bg-[#7C6FE8] selection:text-white">
-      {/* Left Navigation Sidebar (Desktop permanent + Mobile slide-over drawer) */}
-      <AdminSidebar />
+    <CineToastProvider>
+      <CineConfirmProvider>
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col lg:flex-row font-sans selection:bg-[#7C6FE8] selection:text-white">
+          {/* Left Navigation Sidebar (Desktop permanent + Mobile slide-over drawer) */}
+          <AdminSidebar />
 
-      {/* Mobile/Tablet Apple-Style Top Navigation Bar (Hidden on Desktop) */}
-      <header className="lg:hidden sticky top-0 z-30 w-full px-4 py-2.5 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 flex items-center justify-between shadow-2xs select-none">
-        <button
-          onClick={openMobileMenu}
-          className="p-2 rounded-2xl bg-slate-100/90 active:scale-95 text-slate-700 hover:text-[#7C6FE8] hover:bg-purple-50 transition-all cursor-pointer shadow-2xs border border-slate-200/50"
-          title="Mở menu điều hướng"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+          {/* Mobile/Tablet Apple-Style Top Navigation Bar (Hidden on Desktop) */}
+          <header className="lg:hidden sticky top-0 z-30 w-full px-4 py-2.5 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 flex items-center justify-between shadow-2xs select-none">
+            <button
+              onClick={openMobileMenu}
+              className="p-2 rounded-2xl bg-slate-100/90 active:scale-95 text-slate-700 hover:text-[#7C6FE8] hover:bg-purple-50 transition-all cursor-pointer shadow-2xs border border-slate-200/50"
+              title="Mở menu điều hướng"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-        {/* Brand Pill */}
-        <Link
-          href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin/movies'}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/60 active:scale-95 transition-transform"
-        >
-          <div className="w-5 h-5 rounded-lg bg-[#7C6FE8] text-white flex items-center justify-center font-black text-[10px] shadow-2xs">
-            C
-          </div>
-          <span className="font-extrabold text-xs text-slate-900 tracking-tight">
-            Cine<span className="text-[#7C6FE8]">Dot</span> Admin
-          </span>
-        </Link>
+            {/* Brand Pill */}
+            <Link
+              href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin/movies'}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/60 active:scale-95 transition-transform"
+            >
+              <div className="w-5 h-5 rounded-lg bg-[#7C6FE8] text-white flex items-center justify-center font-black text-[10px] shadow-2xs">
+                C
+              </div>
+              <span className="font-extrabold text-xs text-slate-900 tracking-tight">
+                Cine<span className="text-[#7C6FE8]">Dot</span> Admin
+              </span>
+            </Link>
 
-        {/* Settings Button */}
-        <Link
-          href="/admin/settings"
-          className="p-2 rounded-2xl bg-slate-100/90 active:scale-95 text-slate-600 hover:text-[#7C6FE8] hover:bg-purple-50 transition-all cursor-pointer shadow-2xs border border-slate-200/50"
-          title="Cài Đặt Hệ Thống"
-        >
-          <Settings className="w-5 h-5" />
-        </Link>
-      </header>
+            {/* Settings Button */}
+            <Link
+              href="/admin/settings"
+              className="p-2 rounded-2xl bg-slate-100/90 active:scale-95 text-slate-600 hover:text-[#7C6FE8] hover:bg-purple-50 transition-all cursor-pointer shadow-2xs border border-slate-200/50"
+              title="Cài Đặt Hệ Thống"
+            >
+              <Settings className="w-5 h-5" />
+            </Link>
+          </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        <AdminRouteGuard>{children}</AdminRouteGuard>
-      </main>
-    </div>
+          {/* Main Content Area */}
+          <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <AdminRouteGuard>{children}</AdminRouteGuard>
+          </main>
+        </div>
+      </CineConfirmProvider>
+    </CineToastProvider>
   );
 }
