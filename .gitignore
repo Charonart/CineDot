@@ -50,3 +50,4 @@ next-env.d.ts
 ai_design_prompts/
 *.local.md
 implementation_plan*.md
+.agents/
