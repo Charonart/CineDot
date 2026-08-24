@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 import {
   fetchQuickBookingMovies,
   fetchMovieShowtimesTree,
@@ -25,6 +26,7 @@ interface BookingStripProps {
 
 export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const router = useRouter();
+  const { isAuthenticated, openAuthModal } = useAuthStore();
   const [moviesList, setMoviesList] = useState<QuickMovieOption[]>([]);
   const [cinemasList, setCinemasList] = useState<QuickCinemaOption[]>([]);
   const [datesList, setDatesList] = useState<DynamicDateOption[]>([]);
@@ -164,10 +166,16 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
     e.preventDefault();
     if (!movieId || !cinemaId || !date || !time) return;
 
+    const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(time)}`;
+    if (!isAuthenticated) {
+      openAuthModal('login', 'Vui lòng đăng nhập tài khoản để chọn ghế và đặt vé trực tuyến.', targetUrl);
+      return;
+    }
+
     if (onQuickBook) {
       onQuickBook({ movieId, cinemaId, date, time });
     } else {
-      router.push(`/booking/seats?showtime_id=${encodeURIComponent(time)}`);
+      router.push(targetUrl);
     }
   };
 

@@ -17,10 +17,15 @@ import { BannerStudioModal } from './BannerStudioModal';
 import { useAdminBanners } from '../../hooks/useAdminBanners';
 import { useAdminCampaigns } from '../../hooks/useAdminCampaigns';
 import { AdminBanner } from '../../types/adminCampaign.types';
+import { imageHelper } from '@/shared/utils/imageHelper';
+import { useCineConfirm } from '@/shared/components/modal/CineConfirmModal';
+import { useCineToast } from '@/shared/hooks/useCineToast';
 
 export function AdminCampaignBannersView() {
   const searchParams = useSearchParams();
   const initialCampaignId = searchParams.get('campaign_id') || undefined;
+  const confirmAction = useCineConfirm();
+  const toast = useCineToast();
 
   const {
     banners,
@@ -51,19 +56,30 @@ export function AdminCampaignBannersView() {
   const handleSave = async (payload: any) => {
     if (bannerToEdit) {
       await updateBanner({ id: bannerToEdit.id, payload });
+      toast.success('Đã cập nhật banner quảng cáo thành công!');
     } else {
       await createBanner(payload);
+      toast.success('Đã tạo banner quảng cáo mới thành công!');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa banner quảng cáo này không?')) {
+    const isConfirmed = await confirmAction({
+      title: 'Xóa Banner Quảng Cáo',
+      message: 'Bạn có chắc chắn muốn xóa banner quảng cáo này khỏi hệ thống không? Thao tác này không thể hoàn tác.',
+      confirmText: 'XÓA BANNER',
+      variant: 'danger',
+    });
+
+    if (isConfirmed) {
       await deleteBanner(id);
+      toast.success('Đã xóa banner quảng cáo thành công!');
     }
   };
 
   const handleToggle = async (id: number) => {
     await toggleBannerStatus(id);
+    toast.info('Đã cập nhật trạng thái hiển thị banner!');
   };
 
   const activeCount = banners.filter((b: AdminBanner) => b.isActive).length;
@@ -161,7 +177,7 @@ export function AdminCampaignBannersView() {
               {/* Banner Image Preview Container */}
               <div className="w-full h-48 bg-slate-100 relative overflow-hidden">
                 <img
-                  src={b.imageUrl || (b as any).image_url || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&auto=format&fit=crop&q=80'}
+                  src={imageHelper.getBannerUrl(b.imageUrl || (b as any).image_url)}
                   alt={b.title || 'Banner quảng cáo'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {

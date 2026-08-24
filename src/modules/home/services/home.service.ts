@@ -53,6 +53,13 @@ export function mapMovieToCardItem(m: any, defaultStatus: 'now-showing' | 'comin
     ? `${m.duration} phút`
     : m.duration || '120 phút';
 
+  const trailerUrl =
+    m.trailerUrl ||
+    m.trailer_url ||
+    (Array.isArray(m.videos) && m.videos.length > 0
+      ? `https://www.youtube.com/watch?v=${m.videos[0].key || m.videos[0].key_value}`
+      : 'https://www.youtube.com/watch?v=cqGjhVJWtEg');
+
   return {
     id: String(m.id || m.movie_id),
     title: m.title || m.originalTitle || m.original_title || 'Tên Phim',
@@ -65,7 +72,7 @@ export function mapMovieToCardItem(m: any, defaultStatus: 'now-showing' | 'comin
     status,
     isHot: Boolean(m.is_hot || m.isHot || true),
     formatBadge: m.formatBadge || m.format_badge || 'IMAX 2D',
-    trailerUrl: m.trailerUrl || m.trailer_url || 'https://www.youtube.com/watch?v=cqGjhVJWtEg',
+    trailerUrl,
   };
 }
 

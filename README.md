@@ -162,7 +162,7 @@ Hệ thống đã tích hợp sẵn tài khoản đăng nhập mẫu cho các va
 - **Mật Khẩu**: `user123`
 - **Quyền Hạn**: Xem thông tin phim, đặt vé trực tuyến, chọn ghế, tích điểm thành viên CineMember và quản lý ví vé cá nhân.
 
----
+--- 
 
 ## 🗺️ SƠ ĐỒ ĐƯỜNG DẪN ROUTING MAP
 
