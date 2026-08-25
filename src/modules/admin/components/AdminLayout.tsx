@@ -10,6 +10,8 @@ import { AdminSidebar } from './AdminSidebar';
 import { AdminRouteGuard } from './guards/AdminRouteGuard';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Menu, Settings } from 'lucide-react';
+import { CineToastProvider } from '@/shared/components/toast/CineToastProvider';
+import { CineConfirmProvider } from '@/shared/components/modal/CineConfirmModal';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -67,7 +69,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // If on login page, render login form without sidebar/header
   if (pathname === '/admin/login') {
-    return <>{children}</>;
+    return (
+      <CineToastProvider>
+        <CineConfirmProvider>{children}</CineConfirmProvider>
+      </CineToastProvider>
+    );
   }
 
   // If unauthenticated on protected routes, show loading while redirecting

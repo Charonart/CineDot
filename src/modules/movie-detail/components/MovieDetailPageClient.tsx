@@ -51,6 +51,7 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
         posterUrl={movie.posterUrl}
         title={movie.title}
         trailerUrl={movie.trailerUrl}
+        videos={movie.videos}
       />
 
       {/* 2. Main Content Container (max-w-[1240px] strictly) */}

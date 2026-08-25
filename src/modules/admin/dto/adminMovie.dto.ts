@@ -55,6 +55,10 @@ export interface AdminMovieListRequestDTO {
   genre_id?: string | number;
   page?: number;
   per_page?: number;
+  limit?: number;
+  sort_by?: string;
+  sort_dir?: string;
+  filters?: Record<string, any>;
 }
 
 export interface CreateMovieRequestDTO {

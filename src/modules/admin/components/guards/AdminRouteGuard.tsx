@@ -21,6 +21,7 @@ const ROUTE_PERMISSIONS: RoutePermissionConfig[] = [
   { pathPrefix: '/admin/settings', requiredPermission: 'settings.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/movies/genres', requiredPermission: 'movies.genres.manage', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/movies/reviews', requiredPermission: 'reviews.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
+  { pathPrefix: '/admin/persons', requiredPermission: 'movies.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/movies', requiredPermission: 'movies.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/cinemas', requiredPermission: 'cinemas.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/showtimes', requiredPermission: 'showtimes.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER', 'TICKET_STAFF', 'STAFF'] },

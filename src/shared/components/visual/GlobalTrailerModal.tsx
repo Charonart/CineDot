@@ -10,7 +10,16 @@ const DynamicTrailerModal = dynamic(
 );
 
 export const GlobalTrailerModal: React.FC = () => {
-  const { isOpen, videoSrc, poster, title, closeTrailer } = useTrailerStore();
+  const {
+    isOpen,
+    videoSrc,
+    poster,
+    title,
+    videos,
+    currentVideoIndex,
+    setVideo,
+    closeTrailer,
+  } = useTrailerStore();
 
   if (!isOpen) return null;
 
@@ -21,6 +30,12 @@ export const GlobalTrailerModal: React.FC = () => {
       videoSrc={videoSrc || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"}
       poster={poster}
       title={title}
+      videos={videos}
+      currentVideoIndex={currentVideoIndex}
+      onSelectVideo={(vid, idx) => {
+        const youtubeUrl = `https://www.youtube.com/watch?v=${vid.key}`;
+        setVideo(youtubeUrl, `${vid.name}`, idx);
+      }}
     />
   );
 };

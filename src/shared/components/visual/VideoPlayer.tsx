@@ -34,6 +34,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [isLoading, setIsLoading] = useState(!!src);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const isYouTube = src ? (src.includes('youtube.com') || src.includes('youtu.be') || src.includes('youtube/embed')) : false;
@@ -41,11 +42,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // Reset state when src changes
   useEffect(() => {
     setIsPlaying(autoPlay);
+    setIsReady(false);
     setHasError(false);
-    setIsLoading(!!src && !isYouTube);
+    setIsLoading(!!src);
     setCurrentTime(0);
     setBufferedProgress(0);
-  }, [src, autoPlay, isYouTube]);
+  }, [src, autoPlay]);
 
   // Sync state if autoPlay changes for HTML5 video
   useEffect(() => {
@@ -232,7 +234,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   if (!src || hasError) {
     return (
       <div 
-        className={`cine-video-player movies-empty-state ${className}`} 
+        className={`cine-video-player w-full aspect-video movies-empty-state ${className}`} 
         style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -306,7 +308,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`cine-video-player ${isLoading ? 'is-loading' : ''} ${showControls ? 'show-controls' : ''} ${className}`}
+      className={`cine-video-player w-full aspect-video ${isLoading ? 'is-loading' : ''} ${showControls ? 'show-controls' : ''} ${className}`}
       style={{
         position: 'relative',
         borderRadius: '20px',
@@ -315,57 +317,64 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ...style
       }}
     >
-      {/* Spinner - Only active during HTML5 load or when isLoading is true */}
-      {isLoading && !hasError && (
-        <div className="cine-video-spinner" style={{ opacity: 1, pointerEvents: 'auto' }}>
-          <div className="cine-spinner-icon"></div>
-        </div>
-      )}
-
-      {/* Poster / Center Play Overlay */}
+      {/* Smart Poster Backdrop Loading Cover (Fades out smoothly in 500ms when isReady && isPlaying) */}
       <div 
-        className={`cine-poster-overlay ${isPlaying ? 'is-hidden' : ''}`} 
+        className={`absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950 bg-cover bg-center transition-opacity duration-500 ${
+          isReady && isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`} 
         style={{ 
-          backgroundImage: poster ? `url('${poster}')` : undefined,
-          zIndex: 6
+          backgroundImage: poster ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${poster}')` : undefined,
         }}
         onClick={togglePlay}
+        data-coccoc-element="false"
       >
-        <button 
-          type="button" 
-          className="cine-center-play-btn" 
-          aria-label="Play"
-          onClick={(e) => {
-            e.stopPropagation();
-            togglePlay();
-          }}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5,3 19,12 5,21" />
-          </svg>
-        </button>
+        {/* Loading Spinner or Play Button */}
+        {isPlaying && !isReady ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-[#7C6FE8] animate-spin shadow-2xl" />
+            <span className="text-xs font-mono font-bold text-white/90 uppercase tracking-widest bg-black/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+              Đang tải Trailer...
+            </span>
+          </div>
+        ) : (
+          <button 
+            type="button" 
+            className="w-16 h-16 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white flex items-center justify-center shadow-2xl transition-transform hover:scale-110 cursor-pointer" 
+            aria-label="Play"
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 ml-1">
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+          </button>
+        )}
       </div>
+
+      {/* Protective Top Guard (Prevents browser extensions like Cốc Cốc / IDM from rendering top-left download bar) */}
+      <div className="absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none" data-coccoc-element="false" />
 
       {/* DUAL MODE ENGINE: YouTube IFrame or HTML5 Video */}
       {isYouTube ? (
-        isPlaying ? (
-          <iframe
-            className="cine-video-element"
-            src={`${finalYouTubeSrc}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1`}
-            title={title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            style={{ width: '100%', height: '100%', border: 'none', background: '#000', zIndex: 1 }}
-            onLoad={() => setIsLoading(false)}
-          />
-        ) : (
-          <div className="cine-video-element" style={{ background: '#000' }}></div>
-        )
+        <iframe
+          className="cine-video-element w-full h-full border-0 bg-black relative z-1"
+          src={`${finalYouTubeSrc}?autoplay=${isPlaying ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1`}
+          title={title}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ width: '100%', height: '100%', border: 'none', background: '#000', zIndex: 1 }}
+          onLoad={() => {
+            setIsLoading(false);
+            setTimeout(() => setIsReady(true), 300);
+          }}
+        />
       ) : (
         <video
           ref={videoRef}
-          className="cine-video-element"
+          className="cine-video-element w-full h-full object-cover relative z-1"
           src={src}
           playsInline
           muted={isMuted}
@@ -373,7 +382,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           onProgress={handleProgress}
           onLoadedMetadata={handleLoadedMetadata}
           onWaiting={() => setIsLoading(true)}
-          onPlaying={() => setIsLoading(false)}
+          onPlaying={() => {
+            setIsLoading(false);
+            setIsReady(true);
+          }}
           onError={handleVideoError}
           onClick={togglePlay}
           title={title}

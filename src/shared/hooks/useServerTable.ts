@@ -258,22 +258,58 @@ export function useServerTable<T extends Record<string, any>>({
         items = raw.data;
       } else if (Array.isArray(raw.items)) {
         items = raw.items;
+      } else if (Array.isArray(raw.results)) {
+        items = raw.results;
       } else if (Array.isArray(raw)) {
         items = raw;
       }
 
-      const meta = raw.meta || raw.pagination;
-      if (meta) {
-        pag = {
-          page: meta.current_page || meta.currentPage || page,
-          perPage: meta.per_page || meta.perPage || perPage,
-          total: meta.total || meta.totalResults || items.length,
-          lastPage: meta.last_page || meta.totalPages || 1,
-          totalPages: meta.last_page || meta.totalPages || 1,
-        };
-      } else {
-        pag.total = raw.total || items.length;
-      }
+      // Check all possible meta sources
+      const meta = raw.meta || raw.pagination || raw.data?.meta || raw.data?.pagination || raw;
+      
+      const total = Number(
+        meta?.total ??
+        meta?.totalResults ??
+        raw?.total ??
+        raw?.totalResults ??
+        items.length
+      );
+
+      const perPageVal = Number(
+        meta?.per_page ??
+        meta?.perPage ??
+        raw?.per_page ??
+        raw?.perPage ??
+        perPage
+      );
+
+      const lastPageVal = Number(
+        meta?.last_page ??
+        meta?.lastPage ??
+        meta?.totalPages ??
+        raw?.last_page ??
+        raw?.lastPage ??
+        raw?.totalPages ??
+        (perPageVal > 0 ? Math.ceil(total / perPageVal) : 1)
+      );
+
+      const currentPageVal = Number(
+        meta?.current_page ??
+        meta?.currentPage ??
+        meta?.page ??
+        raw?.current_page ??
+        raw?.currentPage ??
+        raw?.page ??
+        page
+      );
+
+      pag = {
+        page: currentPageVal > 0 ? currentPageVal : 1,
+        perPage: perPageVal > 0 ? perPageVal : perPage,
+        total: total >= 0 ? total : 0,
+        lastPage: lastPageVal > 0 ? lastPageVal : 1,
+        totalPages: lastPageVal > 0 ? lastPageVal : 1,
+      };
     }
 
     return { data: items, pagination: pag };

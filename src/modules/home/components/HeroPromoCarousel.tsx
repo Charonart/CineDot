@@ -374,23 +374,23 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   return (
     <section className="w-full bg-[var(--bg2)] pb-12 pt-28">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-6">
-        {/* Top: Auto Promo Carousel Slider */}
-        <div className="relative w-full aspect-[21/9] sm:aspect-[24/8] max-h-[380px] rounded-3xl overflow-hidden shadow-2xl bg-slate-900 group">
+        {/* Top: Auto Promo Carousel Slider (Full-Bleed 100% Fit) */}
+        <div className="relative w-full aspect-[16/7] sm:aspect-[2.4/1] max-h-[360px] rounded-3xl overflow-hidden shadow-2xl bg-slate-900 group">
           {currentBanner && (
             <>
               <img
                 src={currentBanner.imageUrl}
                 alt={currentBanner.title}
-                className="w-full h-full object-cover transition-opacity duration-700"
+                className="w-full h-full object-cover object-center transition-opacity duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6 sm:p-8">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex items-end p-5 sm:p-8">
                 <div className="flex flex-col gap-2 max-w-xl text-white">
                   {currentBanner.badgeText && (
                     <span className="self-start px-3 py-1 rounded-full bg-[#7C6FE8] text-white text-xs font-bold uppercase tracking-wider shadow-sm">
                       {currentBanner.badgeText}
                     </span>
                   )}
-                  <h2 className="text-xl sm:text-3xl font-bold tracking-tight leading-tight">
+                  <h2 className="text-xl sm:text-3xl font-bold tracking-tight leading-tight drop-shadow-md">
                     {currentBanner.title}
                   </h2>
                 </div>

@@ -14,6 +14,7 @@ import {
   PanelLeftOpen,
   Settings,
 } from 'lucide-react';
+import { AdminNotificationCenter } from './notifications/AdminNotificationCenter';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Bảng Điều Hành (Dashboard)',
@@ -102,14 +103,8 @@ export const AdminHeader: React.FC = () => {
           <Settings className="w-4 h-4" />
         </Link>
 
-        {/* Notifications Icon Button */}
-        <button
-          className="p-2 rounded-xl bg-slate-100/80 hover:bg-purple-50 text-slate-600 hover:text-[#7C6FE8] transition-colors relative cursor-pointer border border-transparent hover:border-purple-100"
-          title="Thông Báo Hệ Thống"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="w-2 h-2 rounded-full bg-[#7C6FE8] absolute top-1.5 right-1.5 ring-2 ring-white" />
-        </button>
+        {/* Notifications Dropdown Center */}
+        <AdminNotificationCenter />
 
         <div className="h-4 w-px bg-slate-200 hidden sm:block" />
 

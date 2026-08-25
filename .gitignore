@@ -46,7 +46,7 @@ yarn-error.log*
 next-env.d.ts
 *.local.html
 
-# local design prompts & local implementation plans (do not push to git)
+# local design prompts & local implementation plans & local report docs (do not push to git)
 ai_design_prompts/
 *.local.md
 implementation_plan*.md

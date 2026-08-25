@@ -23,12 +23,13 @@ export const useAdminAuth = () => {
         const res = await adminAuthService.me();
         if (res.adminUser) {
           setSession(res.adminUser, res.permissions, token || '');
-        } else {
-          clearSession();
         }
         return res;
-      } catch (err) {
-        clearSession();
+      } catch (err: any) {
+        // Chỉ xóa phiên đăng nhập khi backend trả về 401 Unauthenticated
+        if (err?.status === 401 || err?.response?.status === 401) {
+          clearSession();
+        }
         throw err;
       }
     },

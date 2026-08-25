@@ -15,10 +15,25 @@ import { AdminMovieItem, AdminMovieCredit, GenreItem } from '../types/adminMovie
 
 export interface PaginatedMovieResult {
   items: AdminMovieItem[];
+  data: AdminMovieItem[];
   currentPage: number;
   lastPage: number;
   perPage: number;
   total: number;
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+  pagination: {
+    page: number;
+    currentPage: number;
+    perPage: number;
+    total: number;
+    totalPages: number;
+    lastPage: number;
+  };
 }
 
 export const adminMovieService = {
@@ -56,23 +71,35 @@ export const adminMovieService = {
     const data = res.data?.data;
     const meta = res.data?.meta;
 
-    if (Array.isArray(data) && meta) {
-      return {
-        items: data.map(adminMovieMapper.toDomain),
-        currentPage: meta.current_page,
-        lastPage: meta.last_page,
-        perPage: meta.per_page,
-        total: meta.total,
-      };
-    }
-
     const rawList = Array.isArray(data) ? data : (data?.data || data?.items || []);
+    const items = rawList.map(adminMovieMapper.toDomain);
+
+    const currentPage = Number(meta?.current_page || data?.current_page || params?.page || 1);
+    const perPage = Number(meta?.per_page || data?.per_page || params?.per_page || params?.limit || 15);
+    const total = Number(meta?.total || data?.total || rawList.length);
+    const lastPage = Number(meta?.last_page || data?.last_page || (perPage > 0 ? Math.ceil(total / perPage) : 1));
+
     return {
-      items: rawList.map(adminMovieMapper.toDomain),
-      currentPage: meta?.current_page || data?.current_page || 1,
-      lastPage: meta?.last_page || data?.last_page || 1,
-      perPage: meta?.per_page || data?.per_page || 15,
-      total: meta?.total || data?.total || rawList.length,
+      items,
+      data: items,
+      currentPage,
+      lastPage,
+      perPage,
+      total,
+      meta: {
+        current_page: currentPage,
+        last_page: lastPage,
+        per_page: perPage,
+        total,
+      },
+      pagination: {
+        page: currentPage,
+        currentPage,
+        perPage,
+        total,
+        totalPages: lastPage,
+        lastPage,
+      },
     };
   },
 

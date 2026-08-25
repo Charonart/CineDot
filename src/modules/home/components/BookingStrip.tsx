@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 import {
   fetchQuickBookingMovies,
   fetchHomeCinemas,
@@ -24,14 +25,9 @@ interface BookingStripProps {
 
 export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const router = useRouter();
-
-  // Master lists
-  const [allMovies, setAllMovies] = useState<QuickMovieOption[]>([]);
-  const [allCinemas, setAllCinemas] = useState<HomeCinemaOption[]>([]);
-
-  // Filtered dropdown lists (Bidirectional support)
-  const [availableMovies, setAvailableMovies] = useState<QuickMovieOption[]>([]);
-  const [availableCinemas, setAvailableCinemas] = useState<HomeCinemaOption[]>([]);
+  const { isAuthenticated, openAuthModal } = useAuthStore();
+  const [moviesList, setMoviesList] = useState<QuickMovieOption[]>([]);
+  const [cinemasList, setCinemasList] = useState<QuickCinemaOption[]>([]);
   const [datesList, setDatesList] = useState<DynamicDateOption[]>([]);
   const [timesList, setTimesList] = useState<QuickShowtimeOption[]>([]);
 
@@ -329,6 +325,12 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!movieId || !cinemaId || !date || !time) return;
+
+    const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(time)}`;
+    if (!isAuthenticated) {
+      openAuthModal('login', 'Vui lòng đăng nhập tài khoản để chọn ghế và đặt vé trực tuyến.', targetUrl);
+      return;
+    }
 
     if (onQuickBook) {
       onQuickBook({ movieId, cinemaId, date, time });

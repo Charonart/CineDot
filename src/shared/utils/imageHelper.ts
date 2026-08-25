@@ -71,9 +71,37 @@ export const imageHelper = {
   getAvatarUrl: (path: string | null | undefined): string => {
     if (!path || path === '') return DEFAULT_PROFILE;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || 'https://cinedot_be.test';
+    const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || 'http://localhost:8000';
     const formattedPath = path.startsWith('/') ? path : `/${path}`;
     if (formattedPath.startsWith('/storage')) return `${backendOrigin}${formattedPath}`;
     return `${backendOrigin}/storage${formattedPath}`;
+  },
+
+  getBannerUrl: (path: string | null | undefined): string => {
+    if (!path || path === '') return DEFAULT_BACKDROP;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('/posters/') || path.startsWith('/backdrops/') || path.startsWith('/banners/')) {
+      const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || 'http://localhost:8000';
+      return `${backendOrigin}${path}`;
+    }
+    const tmdbBase = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
+    const formattedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${tmdbBase}/w1280${formattedPath}`;
+  },
+
+  resolvePostImagesUrl: (url: string): { isDirect: boolean; formattedUrl: string; isPostImagesPage: boolean } => {
+    if (!url) return { isDirect: false, formattedUrl: '', isPostImagesPage: false };
+    const trimmed = url.trim();
+    if (trimmed.includes('postimg.cc/')) {
+      if (trimmed.includes('i.postimg.cc/')) {
+        return { isDirect: true, formattedUrl: trimmed, isPostImagesPage: false };
+      }
+      return {
+        isDirect: false,
+        formattedUrl: trimmed,
+        isPostImagesPage: true,
+      };
+    }
+    return { isDirect: true, formattedUrl: trimmed, isPostImagesPage: false };
   },
 };
