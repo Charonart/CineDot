@@ -17,6 +17,7 @@ import {
 import { AdminNotificationCenter } from './notifications/AdminNotificationCenter';
 
 const PAGE_TITLES: Record<string, string> = {
+  '/admin': 'Bảng Điều Hành (Dashboard)',
   '/admin/movies': 'Quản Lý Phim',
   '/admin/movies/genres': 'Thể Loại Phim',
   '/admin/cinemas': 'Quản Lý Rạp & Phòng',

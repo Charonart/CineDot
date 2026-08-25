@@ -240,12 +240,45 @@ export const seatBookingService = {
   },
 
   /**
+   * Báo cáo ghế đang được click chọn tạm thời để phát realtime cho người dùng khác
+   */
+  async selectingSeats(showtimeId: number | string, seatIds: number[]): Promise<boolean> {
+    try {
+      const cleanId = String(showtimeId).replace('showtime-', '');
+      await apiClient.post(ENDPOINTS.BOOKINGS.SELECTING_SEATS, {
+        showtime_id: Number(cleanId) || cleanId,
+        seat_ids: seatIds,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * Báo cáo ghế vừa bị bỏ chọn để phát realtime hủy viền nhấp nháy cho người dùng khác
+   */
+  async unselectSeats(showtimeId: number | string, seatIds: number[]): Promise<boolean> {
+    try {
+      const cleanId = String(showtimeId).replace('showtime-', '');
+      await apiClient.post(ENDPOINTS.BOOKINGS.UNSELECT_SEATS, {
+        showtime_id: Number(cleanId) || cleanId,
+        seat_ids: seatIds,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  /**
    * Hủy giữ ghế khi người dùng hủy bỏ hoặc thoát trang
    */
   async releaseSeats(showtimeId: number | string, seatIds: number[]): Promise<boolean> {
     try {
+      const cleanId = String(showtimeId).replace('showtime-', '');
       await apiClient.post(ENDPOINTS.BOOKINGS.RELEASE_SEATS, {
-        showtime_id: Number(showtimeId),
+        showtime_id: Number(cleanId) || cleanId,
         showtime_seat_ids: seatIds,
       });
       return true;

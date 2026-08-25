@@ -1,23 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/shared/store/useAuthStore';
 import {
   fetchQuickBookingMovies,
+  fetchHomeCinemas,
   fetchMovieShowtimesTree,
+  fetchCinemaShowtimesTree,
+  HomeCinemaOption,
+  DynamicDateOption,
+  QuickShowtimeOption,
 } from '../services/home.service';
-import { DynamicDateOption, QuickShowtimeOption } from '../types/home.types';
 
 interface QuickMovieOption {
   id: string;
   slug: string;
   title: string;
-}
-
-interface QuickCinemaOption {
-  id: string;
-  name: string;
 }
 
 interface BookingStripProps {
@@ -31,70 +30,45 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const [cinemasList, setCinemasList] = useState<QuickCinemaOption[]>([]);
   const [datesList, setDatesList] = useState<DynamicDateOption[]>([]);
   const [timesList, setTimesList] = useState<QuickShowtimeOption[]>([]);
-  const [showtimesTree, setShowtimesTree] = useState<any[]>([]);
 
+  // Cached showtime trees
+  const [movieShowtimesTree, setMovieShowtimesTree] = useState<any[]>([]);
+  const [cinemaShowtimesData, setCinemaShowtimesData] = useState<any[]>([]);
+
+  // Selected values
   const [movieId, setMovieId] = useState('');
   const [cinemaId, setCinemaId] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
 
+  // 1. Initial Load: Fetch both All Movies & All Cinemas
   useEffect(() => {
     let isMounted = true;
-    async function loadMovies() {
-      const list = await fetchQuickBookingMovies();
-      if (isMounted && list.length > 0) {
-        setMoviesList(list);
+    async function initData() {
+      const [movies, cinemas] = await Promise.all([
+        fetchQuickBookingMovies(),
+        fetchHomeCinemas(),
+      ]);
+
+      if (isMounted) {
+        if (movies && movies.length > 0) {
+          setAllMovies(movies);
+          setAvailableMovies(movies);
+        }
+        if (cinemas && cinemas.length > 0) {
+          setAllCinemas(cinemas);
+          setAvailableCinemas(cinemas);
+        }
       }
     }
-    loadMovies();
+    initData();
     return () => {
       isMounted = false;
     };
   }, []);
 
-  const handleMovieChange = async (newMovieId: string) => {
-    setMovieId(newMovieId);
-    setCinemaId('');
-    setDate('');
-    setTime('');
-    setCinemasList([]);
-    setDatesList([]);
-    setTimesList([]);
-    setShowtimesTree([]);
-
-    if (!newMovieId) return;
-    const movie = moviesList.find((m) => m.id === newMovieId);
-    if (movie) {
-      const tree = await fetchMovieShowtimesTree(movie.slug);
-      setShowtimesTree(tree);
-
-      const cinemaMap = new Map<string, string>();
-      tree.forEach((day: any) => {
-        if (Array.isArray(day.cinemas)) {
-          day.cinemas.forEach((c: any) => {
-            const cObj = c.cinema || {};
-            const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-            const cName = cObj.cinema_name || cObj.name || c.cinema_name || '';
-            const hasTimes = Array.isArray(c.times) && c.times.length > 0;
-            if (cId && cName && hasTimes && !cinemaMap.has(cId)) {
-              cinemaMap.set(cId, cName);
-            }
-          });
-        }
-      });
-      setCinemasList(Array.from(cinemaMap.entries()).map(([cId, name]) => ({ id: cId, name })));
-    }
-  };
-
-  const handleCinemaChange = (newCinemaId: string) => {
-    setCinemaId(newCinemaId);
-    setDate('');
-    setTime('');
-    setDatesList([]);
-    setTimesList([]);
-
-    if (!newCinemaId) return;
-
+  // Helper: Build dynamic date options from a showtime tree for a specific cinema
+  const buildDatesFromMovieTree = useCallback((tree: any[], targetCinemaId: string) => {
     const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     const validDates: DynamicDateOption[] = [];
     const todayStr = new Date().toISOString().split('T')[0];
@@ -102,11 +76,11 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-    showtimesTree.forEach((day: any) => {
+    tree.forEach((day: any) => {
       const hasShowtimesForCinema = Array.isArray(day.cinemas) && day.cinemas.some((c: any) => {
         const cObj = c.cinema || {};
         const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-        return cId === String(newCinemaId) && Array.isArray(c.times) && c.times.length > 0;
+        return cId === String(targetCinemaId) && Array.isArray(c.times) && c.times.length > 0;
       });
 
       if (hasShowtimesForCinema && day.date) {
@@ -124,37 +98,223 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
       }
     });
 
-    setDatesList(validDates);
+    return validDates;
+  }, []);
+
+  // Helper: Build dynamic date options from cinema showtimes data
+  const buildDatesFromCinemaData = useCallback((cinemaData: any[], targetMovieIdOrSlug: string) => {
+    const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const validDates: DynamicDateOption[] = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // If cinemaData is an array of dates or movies
+    cinemaData.forEach((item: any) => {
+      const dayDate = item.date || item.showDate || todayStr;
+      const d = new Date(dayDate);
+      const isToday = dayDate === todayStr;
+      const isTomorrow = dayDate === tomorrowStr;
+      const dayLabel = isToday ? 'Hôm nay' : isTomorrow ? 'Ngày mai' : (daysOfWeek[d.getDay()] || 'Ngày chiếu');
+      const dateFormatted = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+      if (!validDates.some((v) => v.id === dayDate)) {
+        validDates.push({
+          id: dayDate,
+          dateStr: dateFormatted,
+          label: `${dayLabel} (${dateFormatted})`,
+        });
+      }
+    });
+
+    return validDates;
+  }, []);
+
+  // 2. Handle Movie Selection
+  const handleMovieChange = async (newMovieId: string) => {
+    setMovieId(newMovieId);
+    setDate('');
+    setTime('');
+    setDatesList([]);
+    setTimesList([]);
+
+    if (!newMovieId) {
+      // User cleared movie selection
+      setMovieShowtimesTree([]);
+      if (cinemaId) {
+        // Cinema is still selected -> Keep availableMovies filtered for that cinema
+        setAvailableCinemas(allCinemas);
+      } else {
+        // Reset everything to all
+        setAvailableMovies(allMovies);
+        setAvailableCinemas(allCinemas);
+      }
+      return;
+    }
+
+    const movie = allMovies.find((m) => m.id === newMovieId);
+    if (!movie) return;
+
+    // Fetch showtime tree for this movie
+    const tree = await fetchMovieShowtimesTree(movie.slug);
+    setMovieShowtimesTree(tree);
+
+    // Extract all cinemas that have showtimes for this movie
+    const cinemaMap = new Map<string, string>();
+    tree.forEach((day: any) => {
+      if (Array.isArray(day.cinemas)) {
+        day.cinemas.forEach((c: any) => {
+          const cObj = c.cinema || {};
+          const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+          const cName = cObj.cinema_name || cObj.name || c.cinema_name || '';
+          const hasTimes = Array.isArray(c.times) && c.times.length > 0;
+          if (cId && cName && hasTimes && !cinemaMap.has(cId)) {
+            cinemaMap.set(cId, cName);
+          }
+        });
+      }
+    });
+
+    const matchingCinemas: HomeCinemaOption[] = allCinemas.filter((c) => cinemaMap.has(c.id));
+    // If not found in allCinemas, construct from map
+    if (matchingCinemas.length === 0 && cinemaMap.size > 0) {
+      cinemaMap.forEach((name, id) => {
+        matchingCinemas.push({ id, name });
+      });
+    }
+    setAvailableCinemas(matchingCinemas.length > 0 ? matchingCinemas : allCinemas);
+
+    // Check if current cinemaId is valid for this movie
+    if (cinemaId && cinemaMap.has(cinemaId)) {
+      const dates = buildDatesFromMovieTree(tree, cinemaId);
+      setDatesList(dates);
+    } else if (cinemaId && !cinemaMap.has(cinemaId)) {
+      setCinemaId('');
+    }
   };
 
+  // 3. Handle Cinema Selection
+  const handleCinemaChange = async (newCinemaId: string) => {
+    setCinemaId(newCinemaId);
+    setDate('');
+    setTime('');
+    setDatesList([]);
+    setTimesList([]);
+
+    if (!newCinemaId) {
+      // User cleared cinema selection
+      setCinemaShowtimesData([]);
+      if (movieId) {
+        // Movie is still selected -> Keep availableCinemas filtered for that movie
+        setAvailableMovies(allMovies);
+      } else {
+        // Reset everything to all
+        setAvailableMovies(allMovies);
+        setAvailableCinemas(allCinemas);
+      }
+      return;
+    }
+
+    const cinema = allCinemas.find((c) => c.id === newCinemaId);
+
+    // Case A: Movie is ALREADY selected
+    if (movieId && movieShowtimesTree.length > 0) {
+      const dates = buildDatesFromMovieTree(movieShowtimesTree, newCinemaId);
+      setDatesList(dates);
+      return;
+    }
+
+    // Case B: Movie is NOT selected yet -> Fetch cinema's showtimes to filter available movies
+    const cinemaTree = await fetchCinemaShowtimesTree(cinema?.slug || newCinemaId);
+    setCinemaShowtimesData(cinemaTree);
+
+    const movieMap = new Map<string, { id: string; slug: string; title: string }>();
+
+    cinemaTree.forEach((item: any) => {
+      const mObj = item.movie || item;
+      const mId = String(mObj.movie_id || mObj.id || '');
+      const mSlug = mObj.slug || '';
+      const mTitle = mObj.title || mObj.name || '';
+      const hasTimes = (Array.isArray(item.slots) && item.slots.length > 0) || (Array.isArray(item.times) && item.times.length > 0);
+
+      if ((mId || mSlug) && mTitle && hasTimes) {
+        const key = mId || mSlug;
+        if (!movieMap.has(key)) {
+          movieMap.set(key, {
+            id: mId || key,
+            slug: mSlug || 'movie-detail',
+            title: mTitle,
+          });
+        }
+      }
+    });
+
+    const matchingMovies: QuickMovieOption[] = allMovies.filter((m) =>
+      movieMap.has(m.id) || movieMap.has(m.slug)
+    );
+
+    if (matchingMovies.length > 0) {
+      setAvailableMovies(matchingMovies);
+    } else if (movieMap.size > 0) {
+      setAvailableMovies(Array.from(movieMap.values()));
+    } else {
+      setAvailableMovies(allMovies);
+    }
+  };
+
+  // 4. Handle Date Selection
   const handleDateChange = (newDate: string) => {
     setDate(newDate);
     setTime('');
     setTimesList([]);
 
-    if (!newDate || !cinemaId) return;
-
-    const dayEntry = showtimesTree.find((d: any) => d.date === newDate);
-    const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
-      const cObj = c.cinema || {};
-      const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-      return cId === String(cinemaId);
-    });
+    if (!newDate || !cinemaId || !movieId) return;
 
     const slots: QuickShowtimeOption[] = [];
-    if (cinemaEntry && Array.isArray(cinemaEntry.times)) {
-      cinemaEntry.times.forEach((st: any) => {
-        const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
-        const room = st.room || {};
-        const format = room.room_type || st.format || '2D';
-        const roomName = room.room_name ? ` (${room.room_name})` : '';
 
+    // Prioritize movieShowtimesTree
+    if (movieShowtimesTree.length > 0) {
+      const dayEntry = movieShowtimesTree.find((d: any) => d.date === newDate);
+      const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
+        const cObj = c.cinema || {};
+        const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+        return cId === String(cinemaId);
+      });
+
+      if (cinemaEntry && Array.isArray(cinemaEntry.times)) {
+        cinemaEntry.times.forEach((st: any) => {
+          const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
+          const room = st.room || {};
+          const format = room.room_type || st.format || '2D';
+          const roomName = room.room_name ? ` (${room.room_name})` : '';
+
+          slots.push({
+            id: String(st.showtime_id || st.id),
+            showtimeId: st.showtime_id || st.id || '',
+            time: startTime,
+            format,
+            label: `${startTime} - ${format}${roomName}`,
+          });
+        });
+      }
+    } else if (cinemaShowtimesData.length > 0) {
+      // Fallback to cinemaShowtimesData
+      const movieEntry = cinemaShowtimesData.find((item: any) => {
+        const m = item.movie || item;
+        return String(m.movie_id || m.id) === String(movieId) || m.slug === movieId;
+      });
+
+      const rawSlots = movieEntry?.slots || movieEntry?.times || [];
+      rawSlots.forEach((st: any) => {
+        const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
+        const format = st.format || st.roomName || '2D';
         slots.push({
-          id: String(st.showtime_id || st.id),
-          showtimeId: st.showtime_id || st.id || '',
+          id: String(st.showtimeId || st.id),
+          showtimeId: st.showtimeId || st.id || '',
           time: startTime,
           format,
-          label: `${startTime} - ${format}${roomName}`,
+          label: `${startTime} - ${format}`,
         });
       });
     }
@@ -175,6 +335,11 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
     if (onQuickBook) {
       onQuickBook({ movieId, cinemaId, date, time });
     } else {
+      const selectedMovie = allMovies.find((m) => m.id === movieId);
+      const selectedCinema = allCinemas.find((c) => c.id === cinemaId);
+      const selectedTimeSlot = timesList.find((t) => t.id === time);
+
+      const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(time)}&movie=${encodeURIComponent(selectedMovie?.slug || '')}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(selectedTimeSlot?.time || '')}&cinema=${encodeURIComponent(selectedCinema?.name || '')}`;
       router.push(targetUrl);
     }
   };
@@ -196,7 +361,7 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
               className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
             >
               <option value="">-- Chọn Phim --</option>
-              {moviesList.map((m) => (
+              {availableMovies.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.title}
                 </option>
@@ -214,12 +379,11 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             </span>
             <select
               value={cinemaId}
-              disabled={!movieId}
               onChange={(e) => handleCinemaChange(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
+              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
             >
               <option value="">-- Chọn Rạp --</option>
-              {cinemasList.map((c) => (
+              {availableCinemas.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -237,7 +401,7 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             </span>
             <select
               value={date}
-              disabled={!cinemaId}
+              disabled={!movieId || !cinemaId}
               onChange={(e) => handleDateChange(e.target.value)}
               className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
             >

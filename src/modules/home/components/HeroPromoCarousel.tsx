@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Film, MapPin, Calendar, Clock, Loader2 } from 'lucide-react';
 import { PromoBanner, DynamicDateOption, QuickShowtimeOption } from '../types/home.types';
 import {
   fetchQuickBookingMovies,
+  fetchHomeCinemas,
   fetchMovieShowtimesTree,
+  fetchCinemaShowtimesTree,
+  HomeCinemaOption,
 } from '../services/home.service';
 import { Button } from '@/shared/ui/Button';
 
@@ -15,11 +18,6 @@ interface QuickMovieOption {
   id: string;
   slug: string;
   title: string;
-}
-
-interface QuickCinemaOption {
-  id: string;
-  name: string;
 }
 
 interface HeroPromoCarouselProps {
@@ -31,14 +29,19 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Dynamic Data Lists
+  // Master lists
+  const [allMoviesList, setAllMoviesList] = useState<QuickMovieOption[]>([]);
+  const [allCinemasList, setAllCinemasList] = useState<HomeCinemaOption[]>([]);
+
+  // Filtered Dynamic Data Lists
   const [moviesList, setMoviesList] = useState<QuickMovieOption[]>([]);
-  const [cinemasList, setCinemasList] = useState<QuickCinemaOption[]>([]);
+  const [cinemasList, setCinemasList] = useState<HomeCinemaOption[]>([]);
   const [datesList, setDatesList] = useState<DynamicDateOption[]>([]);
   const [timesList, setTimesList] = useState<QuickShowtimeOption[]>([]);
 
-  // Tree cache for currently selected movie
+  // Tree cache for currently selected movie / cinema
   const [showtimesTree, setShowtimesTree] = useState<any[]>([]);
+  const [cinemaShowtimesData, setCinemaShowtimesData] = useState<any[]>([]);
 
   // Selection States
   const [movieId, setMovieId] = useState('');
@@ -46,49 +49,103 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
 
-  // Loading indicator for async fetch
+  // Loading indicators for async fetch
+  const [loadingMovies, setLoadingMovies] = useState(false);
   const [loadingCinemas, setLoadingCinemas] = useState(false);
+  const [loadingDates, setLoadingDates] = useState(false);
   const [loadingTimes, setLoadingTimes] = useState(false);
 
   // Active dropdown state
   const [openDropdown, setOpenDropdown] = useState<'movie' | 'cinema' | 'date' | 'time' | null>(null);
 
-  // 1. Initial Load: Fetch Movies
+  // 1. Initial Load: Fetch Both Movies and Cinemas
   useEffect(() => {
     let isMounted = true;
-    async function loadMovies() {
-      const list = await fetchQuickBookingMovies();
-      if (isMounted && list.length > 0) {
-        setMoviesList(list);
+    async function initData() {
+      const [movies, cinemas] = await Promise.all([
+        fetchQuickBookingMovies(),
+        fetchHomeCinemas(),
+      ]);
+
+      if (isMounted) {
+        if (movies && movies.length > 0) {
+          setAllMoviesList(movies);
+          setMoviesList(movies);
+        }
+        if (cinemas && cinemas.length > 0) {
+          setAllCinemasList(cinemas);
+          setCinemasList(cinemas);
+        }
       }
     }
-    loadMovies();
+    initData();
     return () => {
       isMounted = false;
     };
   }, []);
 
   const selectedMovie = useMemo(() => {
-    return moviesList.find((m) => m.id === movieId);
-  }, [moviesList, movieId]);
+    return allMoviesList.find((m) => m.id === movieId) || moviesList.find((m) => m.id === movieId);
+  }, [allMoviesList, moviesList, movieId]);
+
+  const selectedCinema = useMemo(() => {
+    return allCinemasList.find((c) => c.id === cinemaId) || cinemasList.find((c) => c.id === cinemaId);
+  }, [allCinemasList, cinemasList, cinemaId]);
+
+  // Helper: Build dynamic date options from a showtime tree for a specific cinema
+  const buildDatesFromMovieTree = useCallback((tree: any[], targetCinemaId: string) => {
+    const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const validDates: DynamicDateOption[] = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    tree.forEach((day: any) => {
+      const hasShowtimesForCinema = Array.isArray(day.cinemas) && day.cinemas.some((c: any) => {
+        const cObj = c.cinema || {};
+        const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+        return cId === String(targetCinemaId) && Array.isArray(c.times) && c.times.length > 0;
+      });
+
+      if (hasShowtimesForCinema && day.date) {
+        const d = new Date(day.date);
+        const isToday = day.date === todayStr;
+        const isTomorrow = day.date === tomorrowStr;
+        const dayLabel = isToday ? 'Hôm nay' : isTomorrow ? 'Ngày mai' : (daysOfWeek[d.getDay()] || 'Ngày chiếu');
+        const dateFormatted = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+        validDates.push({
+          id: day.date,
+          dateStr: dateFormatted,
+          label: `${dayLabel} (${dateFormatted})`,
+        });
+      }
+    });
+
+    return validDates;
+  }, []);
 
   // 2. Movie selection handler -> Load Cinemas that ACTUALLY have showtimes for this movie
   const handleSelectMovie = async (id: string) => {
     setMovieId(id);
-    setCinemaId('');
     setDate('');
     setTime('');
-    setCinemasList([]);
     setDatesList([]);
     setTimesList([]);
-    setShowtimesTree([]);
 
     if (!id) {
       setOpenDropdown(null);
+      if (cinemaId) {
+        setCinemasList(allCinemasList);
+      } else {
+        setMoviesList(allMoviesList);
+        setCinemasList(allCinemasList);
+      }
       return;
     }
 
-    const movie = moviesList.find((m) => m.id === id);
+    const movie = allMoviesList.find((m) => m.id === id) || moviesList.find((m) => m.id === id);
     if (movie) {
       setLoadingCinemas(true);
       try {
@@ -111,8 +168,24 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
           }
         });
 
-        const validCinemas = Array.from(cinemaMap.entries()).map(([cId, name]) => ({ id: cId, name }));
-        setCinemasList(validCinemas);
+        const matchingCinemas: HomeCinemaOption[] = allCinemasList.filter((c) => cinemaMap.has(c.id));
+        if (matchingCinemas.length === 0 && cinemaMap.size > 0) {
+          cinemaMap.forEach((name, cId) => {
+            matchingCinemas.push({ id: cId, name });
+          });
+        }
+
+        setCinemasList(matchingCinemas.length > 0 ? matchingCinemas : allCinemasList);
+
+        // If cinema is already selected and is in matching cinemas, calculate dates
+        if (cinemaId && cinemaMap.has(cinemaId)) {
+          const dates = buildDatesFromMovieTree(tree, cinemaId);
+          setDatesList(dates);
+          setTimeout(() => setOpenDropdown('date'), 120);
+          return;
+        } else if (cinemaId && !cinemaMap.has(cinemaId)) {
+          setCinemaId('');
+        }
       } finally {
         setLoadingCinemas(false);
       }
@@ -121,8 +194,8 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
     setTimeout(() => setOpenDropdown('cinema'), 120);
   };
 
-  // 3. Cinema selection handler -> Load ONLY dates that have showtimes at this cinema
-  const handleSelectCinema = (selectedCinemaId: string) => {
+  // 3. Cinema selection handler -> Filter Movies or Load Dates
+  const handleSelectCinema = async (selectedCinemaId: string) => {
     setCinemaId(selectedCinemaId);
     setDate('');
     setTime('');
@@ -131,40 +204,67 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
     if (!selectedCinemaId) {
       setOpenDropdown(null);
+      if (movieId) {
+        setMoviesList(allMoviesList);
+      } else {
+        setMoviesList(allMoviesList);
+        setCinemasList(allCinemasList);
+      }
       return;
     }
 
-    const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    const validDates: DynamicDateOption[] = [];
-    const todayStr = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const cinema = allCinemasList.find((c) => c.id === selectedCinemaId) || cinemasList.find((c) => c.id === selectedCinemaId);
 
-    showtimesTree.forEach((day: any) => {
-      const hasShowtimesForCinema = Array.isArray(day.cinemas) && day.cinemas.some((c: any) => {
-        const cObj = c.cinema || {};
-        const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-        return cId === String(selectedCinemaId) && Array.isArray(c.times) && c.times.length > 0;
+    // Case A: Movie is ALREADY selected -> Calculate dates from existing showtimesTree
+    if (movieId && showtimesTree.length > 0) {
+      const dates = buildDatesFromMovieTree(showtimesTree, selectedCinemaId);
+      setDatesList(dates);
+      setTimeout(() => setOpenDropdown('date'), 120);
+      return;
+    }
+
+    // Case B: Movie is NOT selected yet -> Fetch cinema's showtimes to filter available movies
+    setLoadingMovies(true);
+    try {
+      const cinemaTree = await fetchCinemaShowtimesTree(cinema?.slug || selectedCinemaId);
+      setCinemaShowtimesData(cinemaTree);
+
+      const movieMap = new Map<string, { id: string; slug: string; title: string }>();
+      cinemaTree.forEach((item: any) => {
+        const mObj = item.movie || item;
+        const mId = String(mObj.movie_id || mObj.id || '');
+        const mSlug = mObj.slug || '';
+        const mTitle = mObj.title || mObj.name || '';
+        const hasTimes = (Array.isArray(item.slots) && item.slots.length > 0) || (Array.isArray(item.times) && item.times.length > 0);
+
+        if ((mId || mSlug) && mTitle && hasTimes) {
+          const key = mId || mSlug;
+          if (!movieMap.has(key)) {
+            movieMap.set(key, {
+              id: mId || key,
+              slug: mSlug || 'movie-detail',
+              title: mTitle,
+            });
+          }
+        }
       });
 
-      if (hasShowtimesForCinema && day.date) {
-        const d = new Date(day.date);
-        const isToday = day.date === todayStr;
-        const isTomorrow = day.date === tomorrowStr;
-        const dayLabel = isToday ? 'Hôm nay' : isTomorrow ? 'Ngày mai' : (daysOfWeek[d.getDay()] || 'Ngày chiếu');
-        const dateFormatted = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const matchingMovies: QuickMovieOption[] = allMoviesList.filter((m) =>
+        movieMap.has(m.id) || movieMap.has(m.slug)
+      );
 
-        validDates.push({
-          id: day.date,
-          dateStr: dateFormatted,
-          label: `${dayLabel} (${dateFormatted})`,
-        });
+      if (matchingMovies.length > 0) {
+        setMoviesList(matchingMovies);
+      } else if (movieMap.size > 0) {
+        setMoviesList(Array.from(movieMap.values()));
+      } else {
+        setMoviesList(allMoviesList);
       }
-    });
+    } finally {
+      setLoadingMovies(false);
+    }
 
-    setDatesList(validDates);
-    setTimeout(() => setOpenDropdown('date'), 120);
+    setTimeout(() => setOpenDropdown('movie'), 120);
   };
 
   // 4. Date selection handler -> Load Showtimes for (Movie, Cinema, Date)
@@ -173,32 +273,55 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
     setTime('');
     setTimesList([]);
 
-    if (!selectedDateId || !cinemaId) {
+    if (!selectedDateId || !cinemaId || !movieId) {
       setOpenDropdown(null);
       return;
     }
 
-    const dayEntry = showtimesTree.find((d: any) => d.date === selectedDateId);
-    const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
-      const cObj = c.cinema || {};
-      const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-      return cId === String(cinemaId);
-    });
-
     const slots: QuickShowtimeOption[] = [];
-    if (cinemaEntry && Array.isArray(cinemaEntry.times)) {
-      cinemaEntry.times.forEach((st: any) => {
-        const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
-        const room = st.room || {};
-        const format = room.room_type || st.format || '2D';
-        const roomName = room.room_name ? ` (${room.room_name})` : '';
 
+    // Prioritize showtimesTree (from movie)
+    if (showtimesTree.length > 0) {
+      const dayEntry = showtimesTree.find((d: any) => d.date === selectedDateId);
+      const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
+        const cObj = c.cinema || {};
+        const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+        return cId === String(cinemaId);
+      });
+
+      if (cinemaEntry && Array.isArray(cinemaEntry.times)) {
+        cinemaEntry.times.forEach((st: any) => {
+          const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
+          const room = st.room || {};
+          const format = room.room_type || st.format || '2D';
+          const roomName = room.room_name ? ` (${room.room_name})` : '';
+
+          slots.push({
+            id: String(st.showtime_id || st.id),
+            showtimeId: st.showtime_id || st.id || '',
+            time: startTime,
+            format,
+            label: `${startTime} - ${format}${roomName}`,
+          });
+        });
+      }
+    } else if (cinemaShowtimesData.length > 0) {
+      // Fallback from cinemaShowtimesData
+      const movieEntry = cinemaShowtimesData.find((item: any) => {
+        const m = item.movie || item;
+        return String(m.movie_id || m.id) === String(movieId) || m.slug === movieId;
+      });
+
+      const rawSlots = movieEntry?.slots || movieEntry?.times || [];
+      rawSlots.forEach((st: any) => {
+        const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
+        const format = st.format || st.roomName || '2D';
         slots.push({
-          id: String(st.showtime_id || st.id),
-          showtimeId: st.showtime_id || st.id || '',
+          id: String(st.showtimeId || st.id),
+          showtimeId: st.showtimeId || st.id || '',
           time: startTime,
           format,
-          label: `${startTime} - ${format}${roomName}`,
+          label: `${startTime} - ${format}`,
         });
       });
     }
@@ -213,8 +336,8 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
     setOpenDropdown(null);
   };
 
-  // Sequential unlock conditions
-  const isCinemaDisabled = !movieId;
+  // Conditions
+  const isCinemaDisabled = false; // Never disabled: user can choose Cinema first!
   const isDateDisabled = !movieId || !cinemaId;
   const isTimeDisabled = !movieId || !cinemaId || !date;
   const isSubmitDisabled = !movieId || !cinemaId || !date || !time;
@@ -235,15 +358,17 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
     if (onQuickBook) {
       onQuickBook({ movieId, cinemaId, date, time });
     } else {
-      router.push(`/booking/seats?showtime_id=${encodeURIComponent(time)}`);
+      const selectedTimeSlot = timesList.find((t) => t.id === time);
+      const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(time)}&movie=${encodeURIComponent(selectedMovie?.slug || '')}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(selectedTimeSlot?.time || '')}&cinema=${encodeURIComponent(selectedCinema?.name || '')}`;
+      router.push(targetUrl);
     }
   };
 
   const currentBanner = banners[currentIndex] || banners[0];
 
-  const getSelectedMovieLabel = () => selectedMovie?.title || '-- Chọn Phim --';
-  const getSelectedCinemaLabel = () => cinemasList.find((c) => c.id === cinemaId)?.name || (loadingCinemas ? 'Đang tải rạp...' : '-- Chọn Rạp --');
-  const getSelectedDateLabel = () => datesList.find((d) => d.id === date)?.label || '-- Chọn Ngày --';
+  const getSelectedMovieLabel = () => selectedMovie?.title || (loadingMovies ? 'Đang lọc phim...' : '-- Chọn Phim --');
+  const getSelectedCinemaLabel = () => selectedCinema?.name || (loadingCinemas ? 'Đang tìm rạp...' : '-- Chọn Rạp --');
+  const getSelectedDateLabel = () => datesList.find((d) => d.id === date)?.label || (loadingDates ? 'Đang tải ngày...' : '-- Chọn Ngày --');
   const getSelectedTimeLabel = () => timesList.find((t) => t.id === time || String(t.showtimeId) === time)?.label || (loadingTimes ? 'Đang tải suất...' : '-- Chọn Giờ --');
 
   return (
@@ -318,8 +443,13 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
                     transition={{ duration: 0.18 }}
                     className="absolute left-0 top-full mt-3 w-64 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
                   >
-                    {moviesList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Đang tải danh sách phim...</div>
+                    {loadingMovies ? (
+                      <div className="px-3 py-2 text-xs text-slate-400 italic flex items-center gap-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin text-[#7C6FE8]" />
+                        <span>Đang lọc danh sách phim...</span>
+                      </div>
+                    ) : moviesList.length === 0 ? (
+                      <div className="px-3 py-2 text-xs text-slate-400 italic">Không có phim đang chiếu tại rạp này</div>
                     ) : (
                       moviesList.map((m) => (
                         <button
@@ -342,14 +472,13 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
             </div>
 
             {/* Step 2: CHỌN RẠP */}
-            <div className={`relative px-4 sm:px-6 py-1 transition-all duration-300 ${isCinemaDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+            <div className="relative px-4 sm:px-6 py-1 transition-all duration-300 opacity-100">
               <label className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider block mb-1 flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-[#7C6FE8]" />
                 <span>CHỌN RẠP</span>
               </label>
               <button
                 type="button"
-                disabled={isCinemaDisabled}
                 onClick={() => setOpenDropdown(openDropdown === 'cinema' ? null : 'cinema')}
                 className="w-full text-left font-bold text-xs sm:text-sm text-[#131413] flex items-center justify-between gap-1 group py-0.5 transition-all cursor-pointer"
               >
@@ -367,7 +496,10 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
                     className="absolute left-0 top-full mt-3 w-64 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
                   >
                     {loadingCinemas ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Đang tìm rạp chiếu...</div>
+                      <div className="px-3 py-2 text-xs text-slate-400 italic flex items-center gap-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin text-[#7C6FE8]" />
+                        <span>Đang tìm rạp chiếu...</span>
+                      </div>
                     ) : cinemasList.length === 0 ? (
                       <div className="px-3 py-2 text-xs text-slate-400 italic">Chưa có rạp chiếu phim này</div>
                     ) : (
@@ -417,7 +549,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
                     className="absolute left-0 top-full mt-3 w-56 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
                   >
                     {datesList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Không có ngày chiếu khả dụng</div>
+                      <div className="px-3 py-2 text-xs text-slate-400 italic">Không có suất chiếu phù hợp</div>
                     ) : (
                       datesList.map((d) => (
                         <button
@@ -462,10 +594,12 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-0 top-full mt-3 w-56 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
+                    className="absolute left-0 top-full mt-3 w-64 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
                   >
-                    {timesList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Không có suất chiếu phù hợp</div>
+                    {loadingTimes ? (
+                      <div className="px-3 py-2 text-xs text-slate-400 italic">Đang tải suất chiếu...</div>
+                    ) : timesList.length === 0 ? (
+                      <div className="px-3 py-2 text-xs text-slate-400 italic">Hết suất chiếu trong ngày</div>
                     ) : (
                       timesList.map((t) => (
                         <button
@@ -488,15 +622,14 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
             </div>
           </div>
 
+          {/* Action Button */}
           <Button
             type="submit"
-            variant="primary"
-            size="lg"
             disabled={isSubmitDisabled}
-            className={`w-full md:w-auto px-8 shrink-0 transition-all ${
+            className={`w-full md:w-auto px-8 py-3.5 rounded-full font-bold text-xs sm:text-sm shrink-0 shadow-lg transition-all cursor-pointer ${
               isSubmitDisabled
-                ? 'opacity-50 cursor-not-allowed shadow-none'
-                : 'shadow-[0_8px_24px_rgba(124,111,232,0.4)] hover:scale-105 cursor-pointer'
+                ? 'bg-[#7C6FE8]/40 text-white cursor-not-allowed shadow-none'
+                : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-[#7C6FE8]/30 hover:scale-105'
             }`}
           >
             MUA VÉ

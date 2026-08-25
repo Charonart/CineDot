@@ -50,5 +50,4 @@ next-env.d.ts
 ai_design_prompts/
 *.local.md
 implementation_plan*.md
-BAO_CAO_DO_AN_CINEDOT.md
-MASTER_CANVA_PROMPT_CINE.md
+.agents/

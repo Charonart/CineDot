@@ -73,3 +73,12 @@ export interface HoldSeatsResult {
   expires_in_seconds?: number;
   expires_at?: string;
 }
+
+export interface SeatStatusUpdatedEvent {
+  showtime_id: number | string;
+  seat_ids: number[];
+  status: 'holding' | 'booked' | 'available' | string;
+  user_id?: number | string;
+  updated_at?: string;
+}
+

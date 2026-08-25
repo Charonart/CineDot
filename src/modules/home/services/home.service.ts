@@ -14,6 +14,7 @@ import { APP_CONFIG } from '@/shared/constants/config';
 
 export interface HomeCinemaOption {
   id: string;
+  slug?: string;
   name: string;
   city?: string;
 }
@@ -172,12 +173,30 @@ export async function fetchHomeCinemas(): Promise<HomeCinemaOption[]> {
     if (res.data?.success && Array.isArray(res.data?.data)) {
       return res.data.data.map((c: any) => ({
         id: String(c.id || c.cinema_id),
+        slug: c.slug || '',
         name: c.name || c.cinema_name || 'CineDot Cinema',
         city: c.city || c.province_name,
       }));
     }
   } catch (e) {
     console.error('Failed to fetch home cinemas', e);
+  }
+  return [];
+}
+
+export async function fetchCinemaShowtimesTree(cinemaSlugOrId: string): Promise<any[]> {
+  try {
+    const res = await apiClient.get(ENDPOINTS.CINEMAS.SHOWTIMES_BY_SLUG(cinemaSlugOrId)).catch(() => null);
+    if (res?.data?.success && Array.isArray(res.data?.data)) {
+      return res.data.data;
+    }
+    const fallbackRes = await apiClient.get(ENDPOINTS.SHOWTIMES.LIST, { params: { cinema_id: cinemaSlugOrId } }).catch(() => null);
+    if (fallbackRes?.data?.success && fallbackRes?.data?.data) {
+      const data = fallbackRes.data.data;
+      return Array.isArray(data) ? data : data.results || [];
+    }
+  } catch (e) {
+    console.error('Failed to fetch cinema showtimes tree', e);
   }
   return [];
 }

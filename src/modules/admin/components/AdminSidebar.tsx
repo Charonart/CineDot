@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  LayoutDashboard,
   Film,
   Building2,
   Calendar,
@@ -90,6 +91,22 @@ export const AdminSidebar: React.FC = () => {
   // Shared Navigation List Renderer
   const renderNavLinks = (isMobile = false) => (
     <nav className="flex flex-col gap-1.5">
+      {/* 0. Bảng Điều Hành (Dashboard) */}
+      <Link
+        href="/admin"
+        onClick={closeMobileMenu}
+        title={isSidebarCollapsed && !isMobile ? 'Bảng Điều Hành' : undefined}
+        className={`flex items-center ${
+          isSidebarCollapsed && !isMobile ? 'justify-center px-2 py-3' : 'gap-3 px-3.5 py-3'
+        } rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+          pathname === '/admin'
+            ? 'bg-[#7C6FE8] text-white shadow-md shadow-[#7C6FE8]/25'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+        }`}
+      >
+        <LayoutDashboard className="w-4 h-4 shrink-0" />
+        {(!isSidebarCollapsed || isMobile) && <span className="truncate">Bảng Điều Hành</span>}
+      </Link>
       {/* 1. Quản Lý Phim (Collapsible Submenu) */}
       {canViewMovies && (
         <div className="flex flex-col gap-0.5">
