@@ -52,6 +52,8 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const getTodayStr = () => new Date().toISOString().slice(0, 10);
+
   useEffect(() => {
     if (voucherToEdit) {
       setCode(voucherToEdit.code || '');
@@ -63,7 +65,7 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
       setDiscountValue(voucherToEdit.discountValue || 0);
       setMinOrderValue(voucherToEdit.minOrderValue || 0);
       setMaxDiscountValue(voucherToEdit.maxDiscountValue || '');
-      setValidFrom(voucherToEdit.validFrom ? voucherToEdit.validFrom.slice(0, 10) : '');
+      setValidFrom(voucherToEdit.validFrom ? voucherToEdit.validFrom.slice(0, 10) : getTodayStr());
       setValidUntil(voucherToEdit.validUntil ? voucherToEdit.validUntil.slice(0, 10) : '');
       setSystemLimit(voucherToEdit.systemLimit || '');
       setLimitPerUser(voucherToEdit.limitPerUser || 1);
@@ -78,7 +80,7 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
       setDiscountValue(50000);
       setMinOrderValue(150000);
       setMaxDiscountValue('');
-      setValidFrom('');
+      setValidFrom(getTodayStr());
       setValidUntil('');
       setSystemLimit(1000);
       setLimitPerUser(1);
@@ -89,17 +91,44 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleSmartGenerate = (prefix: string) => {
+    let suffix = '';
+    const val = Number(discountValue) || 0;
+    if (discountType === 'percentage') {
+      suffix = val > 0 ? `${val}PCT` : 'OFF';
+    } else {
+      suffix = val >= 1000 ? `${Math.round(val / 1000)}K` : '50K';
+    }
+    setCode(`${prefix}${suffix}`);
+  };
+
   const generateRandomCode = () => {
-    const prefixes = ['DOT', 'CINEMA', 'VIP', 'HOT', 'SUMMER', 'SPECIAL'];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    setCode(`${prefix}${randomNum}`);
+    const prefixes = ['CINEDOT', 'VIP', 'HOT', 'SUMMER', 'SPECIAL'];
+    const p = prefixes[Math.floor(Math.random() * prefixes.length)];
+    handleSmartGenerate(p);
+  };
+
+  const setExpiryDays = (days: number) => {
+    const baseDate = validFrom ? new Date(validFrom) : new Date();
+    baseDate.setDate(baseDate.getDate() + days);
+    setValidUntil(baseDate.toISOString().slice(0, 10));
+  };
+
+  const setExpiryEndOfMonth = () => {
+    const now = validFrom ? new Date(validFrom) : new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    setValidUntil(lastDay.toISOString().slice(0, 10));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) {
       setStatusMsg({ type: 'error', text: 'Vui lòng nhập hoặc sinh mã Voucher.' });
+      return;
+    }
+
+    if (validFrom && validUntil && new Date(validUntil) < new Date(validFrom)) {
+      setStatusMsg({ type: 'error', text: 'Ngày hết hạn phải sau hoặc bằng Ngày bắt đầu hiệu lực.' });
       return;
     }
 
@@ -143,35 +172,35 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn overflow-y-auto">
-      <div className="w-full max-w-2xl bg-white border border-purple-100 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-2xl relative text-slate-900 my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn overflow-hidden">
+      <div className="w-full max-w-2xl bg-white border border-purple-100 rounded-3xl p-5 sm:p-6 flex flex-col gap-4 shadow-2xl relative text-slate-900 my-auto max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center">
-              <Ticket className="w-5 h-5" />
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center">
+              <Ticket className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">
+              <h3 className="text-base font-black text-slate-900 tracking-tight">
                 {voucherToEdit ? 'Chỉnh Sửa Mã Giảm Giá' : 'Tạo Mã Giảm Giá / Voucher Mới'}
               </h3>
-              <span className="text-xs text-slate-500 font-medium">
-                Cấu hình mã coupon, hình thức giảm giá và giới hạn sử dụng
+              <span className="text-[11px] text-slate-500 font-medium">
+                Cấu hình mã coupon, hình thức giảm giá và thời gian hiệu lực
               </span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Feedback Alert */}
         {statusMsg && (
           <div
-            className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center gap-2.5 ${
+            className={`p-3 rounded-2xl border text-xs font-bold flex items-center gap-2 ${
               statusMsg.type === 'success'
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 : 'bg-rose-50 border-rose-200 text-rose-700'
@@ -201,7 +230,7 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
                   required
                   placeholder="VD: CINEDOT50K, SUMMER20"
                   value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                   className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 focus:border-[#7C6FE8] font-mono font-black text-sm text-[#7C6FE8] uppercase"
                 />
                 <button
@@ -213,6 +242,21 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Random</span>
                 </button>
+              </div>
+
+              {/* Gợi ý Tiền Tố Có Ý Nghĩa */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Tạo nhanh:</span>
+                {['NEWUSER', 'BDAY', 'VIP', 'SUMMER', 'COMBO', 'CINEDOT'].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => handleSmartGenerate(p)}
+                    className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-[#7C6FE8] text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                  >
+                    +{p}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -378,10 +422,13 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Thời gian */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>Thời Hạn Hiệu Lực</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Thời Hạn Hiệu Lực</span>
+                </label>
+              </div>
+
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="date"
@@ -397,6 +444,39 @@ export const VoucherStudioModal: React.FC<VoucherStudioModalProps> = ({
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs font-semibold"
                   placeholder="Đến ngày"
                 />
+              </div>
+
+              {/* Nút Chọn Nhanh Hạn Sử Dụng */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Hạn dùng:</span>
+                <button
+                  type="button"
+                  onClick={() => setExpiryDays(7)}
+                  className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold transition-colors cursor-pointer"
+                >
+                  +7 Ngày
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExpiryDays(30)}
+                  className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold transition-colors cursor-pointer"
+                >
+                  +30 Ngày
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExpiryDays(90)}
+                  className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold transition-colors cursor-pointer"
+                >
+                  +90 Ngày
+                </button>
+                <button
+                  type="button"
+                  onClick={setExpiryEndOfMonth}
+                  className="px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-[#7C6FE8] text-[10px] font-bold transition-colors cursor-pointer"
+                >
+                  Hết Tháng Này
+                </button>
               </div>
             </div>
 

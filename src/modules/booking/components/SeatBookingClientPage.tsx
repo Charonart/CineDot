@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSeatBooking } from '../hooks/useSeatBooking';
+import { ShowtimeBookingInfo } from '../types/seat-booking.types';
 import { BookingStepWizard } from './BookingStepWizard';
 import { SeatBookingHeader, SiblingShowtimeItem } from './SeatBookingHeader';
 import { SeatLegend } from './SeatLegend';
@@ -78,27 +79,26 @@ export function SeatBookingClientPage({
     router.push(targetUrl);
   };
 
-  if (loading || !bookingInfo) {
-    return (
-      <div className="w-full pt-28 pb-20 bg-[#FEFEFE] min-h-screen">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-8">
-          <Skeleton variant="card" className="w-full h-14 rounded-2xl" />
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 flex flex-col gap-6">
-              <Skeleton variant="card" className="w-full h-[450px] rounded-3xl" />
-            </div>
-            <div className="lg:col-span-4">
-              <Skeleton variant="card" className="w-full h-96 rounded-3xl" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Construct fallback bookingInfo if API loading takes time, ensuring instant shell rendering
+  const fallbackInfo: ShowtimeBookingInfo = bookingInfo || {
+    showtimeId,
+    movieSlug: movieParam || 'movie',
+    movieTitle: movieParam ? movieParam.replace(/-/g, ' ') : 'Phim Chiếu Rạp',
+    movieFormat: '2D Digital',
+    posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80',
+    ageRating: 'P',
+    duration: '120 phút',
+    cinemaName: cinemaParam ? decodeURIComponent(cinemaParam) : 'CineDot Cinema',
+    roomName: 'Phòng chiếu',
+    showTime: timeParam || currentShowTime || '19:30',
+    showDate: dateParam || 'Hôm nay',
+    basePrice: 110000,
+    countdownSeconds: 600,
+  };
 
   return (
     <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white relative">
-      {/* 1. Step Progress Wizard Bar */}
+      {/* 1. Step Progress Wizard Bar - Renders Instantly */}
       <BookingStepWizard currentStep={2} />
 
       {/* 2. Main 2-Column Container */}
@@ -115,31 +115,37 @@ export function SeatBookingClientPage({
                 onSelectShowTime={handleSelectSiblingShowtime}
               />
 
-              {/* Main Seat Map White Card */}
-              <div className="w-full bg-[#FFFFFF] rounded-3xl p-6 sm:p-8 shadow-[0_16px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-6 items-center">
-                {/* Cinema Screen Curved LED */}
-                <CinemaScreen />
+              {/* Main Seat Map Area: Render local Skeleton ONLY when loading data */}
+              {loading ? (
+                <div className="w-full bg-[#FFFFFF] rounded-3xl p-6 sm:p-8 shadow-[0_16px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-6 items-center">
+                  <Skeleton variant="card" className="w-full h-[450px] rounded-3xl" />
+                </div>
+              ) : (
+                <div className="w-full bg-[#FFFFFF] rounded-3xl p-6 sm:p-8 shadow-[0_16px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-6 items-center">
+                  {/* Cinema Screen Curved LED */}
+                  <CinemaScreen />
 
-                {/* Seat Grid A1-J12 */}
-                <SeatGrid
-                  seats={seats}
-                  selectedSeatIds={selectedSeatIds}
-                  onToggleSeat={toggleSelectSeat}
-                />
+                  {/* Seat Grid A1-J12 */}
+                  <SeatGrid
+                    seats={seats}
+                    selectedSeatIds={selectedSeatIds}
+                    onToggleSeat={toggleSelectSeat}
+                  />
 
-                {/* Seat Legend & Dynamic Price Tariff Bar */}
-                <SeatLegend
-                  seatTypes={seatTypes}
-                  seats={seats}
-                  basePrice={bookingInfo?.basePrice || 110000}
-                />
-              </div>
+                  {/* Seat Legend & Dynamic Price Tariff Bar */}
+                  <SeatLegend
+                    seatTypes={seatTypes}
+                    seats={seats}
+                    basePrice={fallbackInfo.basePrice || 110000}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Right Column: 32% Width (lg:col-span-4 - Booking Summary Sidebar) */}
             <div className="lg:col-span-4">
               <BookingSidebar
-                info={bookingInfo}
+                info={fallbackInfo}
                 currentShowTime={currentShowTime}
                 selectedSeats={selectedSeats}
                 totalPrice={totalPrice}
@@ -157,7 +163,7 @@ export function SeatBookingClientPage({
       {/* 4. Seat Timeout Expiration Modal Popup */}
       <SeatTimeoutModal
         isOpen={isTimeout}
-        movieSlug={bookingInfo.movieSlug}
+        movieSlug={fallbackInfo.movieSlug}
         onReset={() => resetBookingTimer(showtimeId)}
       />
     </div>

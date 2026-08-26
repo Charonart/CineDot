@@ -9,6 +9,7 @@ import { useAdminUiStore } from '../store/useAdminUiStore';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminRouteGuard } from './guards/AdminRouteGuard';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { Logo } from '@/shared/components/layout/Logo';
 import { Menu, Settings } from 'lucide-react';
 import { CineToastProvider } from '@/shared/components/toast/CineToastProvider';
 import { CineConfirmProvider } from '@/shared/components/modal/CineConfirmModal';
@@ -58,16 +59,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [isInitialized, isAuthenticated, pathname, router, adminUser]);
 
-  // If store is not initialized yet or validating session token
-  if (!isInitialized || (token && !adminUser && isLoadingSession)) {
-    return (
-      <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
-        <Skeleton variant="card" className="w-96 h-64 rounded-3xl" />
-      </div>
-    );
-  }
-
-  // If on login page, render login form without sidebar/header
+  // 1. If on login page, ALWAYS render login form immediately without any delay or skeleton
   if (pathname === '/admin/login') {
     return (
       <CineToastProvider>
@@ -76,13 +68,34 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // If unauthenticated on protected routes, show loading while redirecting
+  // 2. If store is not initialized yet or validating session token
+  if (!isInitialized || (token && !adminUser && isLoadingSession)) {
+    return (
+      <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
+        <Skeleton variant="card" className="w-96 h-64 rounded-3xl" />
+      </div>
+    );
+  }
+
+  // If unauthenticated on protected routes, show loading & clear redirect UI
   const hasValidAdminRole = Boolean(adminUser && VALID_ADMIN_ROLES.includes(adminUser.role));
 
   if (!isAuthenticated || !hasValidAdminRole) {
     return (
-      <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
-        <Skeleton variant="card" className="w-96 h-64 rounded-3xl" />
+      <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#7C6FE8] to-indigo-600 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-[#7C6FE8]/30 mb-4 animate-bounce">
+          C
+        </div>
+        <h3 className="text-lg font-bold text-slate-800">Đang chuyển hướng đến Đăng Nhập Admin...</h3>
+        <p className="text-xs text-slate-500 mt-1 max-w-sm">
+          Phiên làm việc yêu cầu quyền Quản trị viên. Đang tự động chuyển hướng...
+        </p>
+        <a
+          href="/admin/login"
+          className="mt-4 px-6 py-2.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-bold text-xs shadow-md transition-all"
+        >
+          Đến Trang Đăng Nhập Quản Trị
+        </a>
       </div>
     );
   }
@@ -110,11 +123,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin/movies'}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/60 active:scale-95 transition-transform"
             >
-              <div className="w-5 h-5 rounded-lg bg-[#7C6FE8] text-white flex items-center justify-center font-black text-[10px] shadow-2xs">
-                C
-              </div>
-              <span className="font-extrabold text-xs text-slate-900 tracking-tight">
-                Cine<span className="text-[#7C6FE8]">Dot</span> Admin
+              <Logo height={24} href="" />
+              <span className="font-extrabold text-xs text-[#7C6FE8] tracking-tight">
+                Admin
               </span>
             </Link>
 

@@ -148,6 +148,7 @@ export function PaymentClientPage({
                 isApplying={isApplyingVoucher}
                 onApply={handleApplyVoucher}
                 onRemove={handleRemoveVoucher}
+                orderAmount={grandTotal}
               />
 
               {/* Payment Method Selector */}

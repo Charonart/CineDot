@@ -26,6 +26,7 @@ import {
   Sparkles,
   Image as ImageIcon,
 } from 'lucide-react';
+import { Logo } from '@/shared/components/layout/Logo';
 import { useAdminAuthStore } from '../store/useAdminAuthStore';
 import { useAdminUiStore } from '../store/useAdminUiStore';
 
@@ -524,21 +525,14 @@ export const AdminSidebar: React.FC = () => {
           <div className="flex items-center justify-between">
             <Link
               href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin/movies'}
-              className="flex items-center gap-2.5 overflow-hidden"
+              className="flex items-center gap-2 overflow-hidden"
               title="CineDot Admin"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#7C6FE8] text-white flex items-center justify-center font-black text-sm shadow-md shadow-[#7C6FE8]/25 shrink-0">
-                C
-              </div>
+              <Logo height={32} href="" />
               {!isSidebarCollapsed && (
-                <div className="flex flex-col truncate">
-                  <span className="font-extrabold text-base text-slate-900 tracking-tight leading-none truncate">
-                    Cine<span className="text-[#7C6FE8]">Dot</span>
-                  </span>
-                  <span className="text-[10px] font-extrabold text-[#7C6FE8] tracking-widest uppercase mt-1 truncate">
-                    ADMIN PORTAL
-                  </span>
-                </div>
+                <span className="text-[10px] font-extrabold text-[#7C6FE8] tracking-widest uppercase truncate ml-1">
+                  ADMIN
+                </span>
               )}
             </Link>
 
@@ -604,19 +598,12 @@ export const AdminSidebar: React.FC = () => {
                   <Link
                     href={adminUser?.role === 'TICKET_STAFF' ? '/admin/ticket-scanner' : '/admin/movies'}
                     onClick={closeMobileMenu}
-                    className="flex items-center gap-2.5"
+                    className="flex items-center gap-2"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-[#7C6FE8] text-white flex items-center justify-center font-black text-sm shadow-md shadow-[#7C6FE8]/25 shrink-0">
-                      C
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-extrabold text-base text-slate-900 tracking-tight leading-none">
-                        Cine<span className="text-[#7C6FE8]">Dot</span>
-                      </span>
-                      <span className="text-[10px] font-extrabold text-[#7C6FE8] tracking-widest uppercase mt-1">
-                        ADMIN PORTAL
-                      </span>
-                    </div>
+                    <Logo height={32} href="" />
+                    <span className="text-[10px] font-extrabold text-[#7C6FE8] tracking-widest uppercase ml-1">
+                      ADMIN
+                    </span>
                   </Link>
 
                   <button

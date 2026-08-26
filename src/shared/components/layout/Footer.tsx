@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Logo } from './Logo';
 
 export const Footer: React.FC = () => {
   return (
@@ -11,9 +12,7 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Col 1: Brand Info */}
           <div className="lg:col-span-1 flex flex-col gap-4">
-            <Link href="/" className="text-2xl font-bold tracking-tight text-white">
-              Cine<span className="text-[#7C6FE8]">Dot</span>
-            </Link>
+            <Logo height={52} className="brightness-125" />
             <p className="text-xs text-gray-400 leading-relaxed">
               Hệ thống rạp chiếu phim hiện đại hàng đầu Việt Nam, mang đến trải nghiệm điện ảnh tuyệt vời nhất.
             </p>

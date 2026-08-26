@@ -33,6 +33,11 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
     { id: 'SECURITY' as ProfileDashboardTab, label: 'Bảo Mật Tài Khoản', icon: Shield },
   ];
 
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/';
+  };
+
   return (
     <div className="w-full bg-white rounded-3xl p-6 shadow-[0_16px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-6 sticky top-28">
       {/* 1. User Info Header */}
@@ -112,7 +117,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 
         {/* Logout Action */}
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="w-full px-4 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4 text-rose-500" />

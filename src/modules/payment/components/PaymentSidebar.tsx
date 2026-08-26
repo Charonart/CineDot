@@ -75,27 +75,40 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
   onSubmitPayment,
   isProcessing,
 }) => {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="w-full bg-white rounded-3xl p-6 shadow-[0_16px_50px_rgba(124,111,232,0.12),0_4px_16px_rgba(0,0,0,0.02)] border border-gray-100 flex flex-col gap-5 sticky top-28">
       {/* 1. TOPMOST SECTION INSIDE SIDEBAR: Active Countdown Timer */}
-      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
-        <div className="flex items-center gap-2 font-bold">
-          <Timer className="w-4 h-4 text-amber-600 animate-pulse" />
-          <span>Thời gian giữ ghế:</span>
+      {mounted && (
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+          <div className="flex items-center gap-2 font-bold">
+            <Timer className="w-4 h-4 text-amber-600 animate-pulse" />
+            <span>Thời gian giữ ghế:</span>
+          </div>
+          <span className="font-extrabold text-sm text-amber-600 tracking-tight">
+            {formattedCountdown}
+          </span>
         </div>
-        <span className="font-extrabold text-sm text-amber-600 tracking-tight">
-          {formattedCountdown}
-        </span>
-      </div>
+      )}
 
       {/* 2. Movie Thumbnail & Title Info */}
       <div className="flex gap-4 items-start border-b border-gray-100 pb-4">
         <div className="w-20 aspect-[2/3] rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-md">
-          <img
-            src={posterUrl}
-            alt={movieTitle}
-            className="w-full h-full object-cover"
-          />
+          {posterUrl ? (
+            <img
+              src={posterUrl}
+              alt={movieTitle}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-400 font-bold text-[10px] p-2 text-center">
+              CineDot
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5 flex-1">

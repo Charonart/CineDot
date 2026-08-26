@@ -68,7 +68,7 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
           seatIds: [seat.id, nextSeat.id],
           row: seat.row,
           type: seat.type,
-          status: seat.status === 'AVAILABLE' && nextSeat.status === 'AVAILABLE' ? 'AVAILABLE' : 'BOOKED',
+          status: (seat.status === 'AVAILABLE' || seat.status === 'HOLDING') && (nextSeat.status === 'AVAILABLE' || nextSeat.status === 'HOLDING') ? 'AVAILABLE' : 'BOOKED',
           canvas: {
             cx: seat.canvas?.cx || 0,
             cy: seat.canvas?.cy || 0,
@@ -178,8 +178,8 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
           }}
         >
           {processedSeats.map((seat) => {
-            const isSelected = seat.seatIds.every((id) => selectedSeatIds.includes(id));
-            const isBooked = seat.status !== 'AVAILABLE';
+            const isSelected = seat.seatIds.length > 0 && seat.seatIds.every((id) => selectedSeatIds.includes(id));
+            const isBooked = !isSelected && (seat.status === 'BOOKED' || seat.status === 'BLOCKED');
             const normType = (seat.type || 'standard').toLowerCase();
             const isStandard = normType === 'standard' || normType === 'regular';
             const seatColor = seat.color || '#64748B';
@@ -194,14 +194,14 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
               dynamicText = '#334155';
             }
 
-            if (isBooked) {
-              dynamicBg = '#E2E8F0';
-              dynamicBorder = '#CBD5E1';
-              dynamicText = '#94A3B8';
-            } else if (isSelected) {
+            if (isSelected) {
               dynamicBg = '#7C6FE8';
               dynamicBorder = '#7C6FE8';
               dynamicText = '#FFFFFF';
+            } else if (isBooked) {
+              dynamicBg = '#E2E8F0';
+              dynamicBorder = '#CBD5E1';
+              dynamicText = '#94A3B8';
             }
 
             return (

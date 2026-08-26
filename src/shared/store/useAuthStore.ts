@@ -283,13 +283,17 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     hasPermission: (permission) => {
-      const { permissions } = get();
-      return permissions.includes(permission) || permissions.includes('*') || get().user?.role_name === 'admin';
+      const { permissions, user } = get();
+      const roleStr = ((user as any)?.role || (user as any)?.role_name || '').toString().toLowerCase();
+      const isAdminRole = ['admin', 'super_admin', 'superadmin', 'cinema_manager', 'marketing', 'accountant', 'ticket_staff', 'staff'].includes(roleStr);
+      return permissions.includes(permission) || permissions.includes('*') || isAdminRole;
     },
 
     hasAnyPermission: (permList) => {
-      const { permissions } = get();
-      return permList.some((p) => permissions.includes(p)) || permissions.includes('*') || get().user?.role_name === 'admin';
+      const { permissions, user } = get();
+      const roleStr = ((user as any)?.role || (user as any)?.role_name || '').toString().toLowerCase();
+      const isAdminRole = ['admin', 'super_admin', 'superadmin', 'cinema_manager', 'marketing', 'accountant', 'ticket_staff', 'staff'].includes(roleStr);
+      return permList.some((p) => permissions.includes(p)) || permissions.includes('*') || isAdminRole;
     },
 
     openAuthModal: (tab = 'login', notice = '', redirectUrl) => {

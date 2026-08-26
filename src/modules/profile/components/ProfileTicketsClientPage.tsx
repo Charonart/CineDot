@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 import { useProfileDashboard } from '../hooks/useProfileDashboard';
 import { ProfileSidebar } from './ProfileSidebar';
 import { UserTicketCard } from './UserTicketCard';
@@ -13,8 +14,10 @@ import { TabSecurity } from './TabSecurity';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function ProfileTicketsClientPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
+  const { isAuthenticated } = useAuthStore();
 
   const {
     profile,
@@ -54,6 +57,12 @@ export function ProfileTicketsClientPage() {
       setActiveNavTab('TICKETS');
     }
   }, [tabParam, setActiveNavTab]);
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [loading, isAuthenticated, router]);
 
   if (loading || !profile) {
     return (

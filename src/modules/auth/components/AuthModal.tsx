@@ -48,8 +48,10 @@ export const AuthModal: React.FC = () => {
     closeAuthModal();
     if (postLoginRedirectUrl) {
       router.push(postLoginRedirectUrl);
+      router.refresh();
+    } else {
+      router.refresh();
     }
-    // Staying on the exact same page! NO router.push('/profile')
   };
 
   const handleDemoClick = () => {

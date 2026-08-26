@@ -12,6 +12,8 @@ import { CinemasMegaDropdown } from './CinemasMegaDropdown';
 import { StarShopMegaDropdown } from './StarShopMegaDropdown';
 import { User, LogOut, Ticket, ChevronDown, ShoppingBag } from 'lucide-react';
 
+import { Logo } from './Logo';
+
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, openAuthModal } = useAuthStore();
 
@@ -46,14 +48,17 @@ export const Navbar: React.FC = () => {
     { name: 'Rạp Đặc Biệt', href: '/special-theaters' },
   ];
 
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/';
+  };
+
   return (
     <>
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[min(1480px,calc(100vw-48px))]">
         <div className="glass-nav rounded-full px-8 py-4 flex items-center justify-between shadow-sm border border-white/20 bg-white/80 backdrop-blur-md relative">
           {/* Logo */}
-          <Link className="font-sans font-bold text-2xl tracking-tight text-[var(--text)] flex items-center gap-1" href="/">
-            Cine<span className="text-[#7C6FE8]">Dot</span>
-          </Link>
+          <Logo height={44} />
 
           {/* Center Links */}
           <ul className="hidden xl:flex items-center space-x-7 text-sm font-medium text-slate-700">
@@ -166,7 +171,7 @@ export const Navbar: React.FC = () => {
                 </Link>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors p-1 cursor-pointer"
                   title="Đăng xuất"
                 >

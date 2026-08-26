@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { SeatItem, SeatRowGroup, ShowtimeBookingInfo, SeatTypeInfo } from '../types/seat-booking.types';
 import { seatBookingService } from '../services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '../services/bookingTimerService';
-import { saveBookingSession, updateBookingSession } from '../services/bookingSessionService';
+import { saveBookingSession, updateBookingSession, getBookingSession } from '../services/bookingSessionService';
 
 export function useSeatBooking(
   showtimeId: string = '1726',
@@ -56,11 +56,19 @@ export function useSeatBooking(
             basePrice: data.showtimeInfo.basePrice,
           });
 
-          // Restore initial seats from searchParams if any
-          if (initialSeatsParam) {
-            const rawIds = initialSeatsParam.split(',').filter(Boolean);
-            const restored = data.seats.filter((s) => rawIds.includes(s.id) && s.status === 'AVAILABLE');
-            setSelectedSeatIds(restored.map((s) => s.id));
+          // Restore initial seats from searchParams or bookingSession if returning from downstream steps
+          const session = getBookingSession(showtimeId);
+          const rawParamSeats = initialSeatsParam ? initialSeatsParam.split(',').filter(Boolean) : [];
+          const sessionSeatCodes = session?.selectedSeatCodes || [];
+          const targetSeatCodes = Array.from(new Set([...rawParamSeats, ...sessionSeatCodes]));
+
+          if (targetSeatCodes.length > 0) {
+            const restored = data.seats.filter(
+              (s) => targetSeatCodes.includes(s.id) && (s.status === 'AVAILABLE' || s.status === 'HOLDING')
+            );
+            if (restored.length > 0) {
+              setSelectedSeatIds(restored.map((s) => s.id));
+            }
           }
         }
       } finally {
@@ -99,33 +107,57 @@ export function useSeatBooking(
     return formatSecondsToMMSS(timeLeft);
   }, [timeLeft]);
 
-  // Toggle Seat Selection
+  // Toggle Seat Selection (allowing user to select AVAILABLE seats or deselect their own held seats)
   const toggleSelectSeat = (seatIdOrIds: string | string[]) => {
     const ids = Array.isArray(seatIdOrIds) ? seatIdOrIds : [seatIdOrIds];
-    
-    // Validate all target seats
-    const validIds = ids.filter(id => {
-      const targetSeat = seats.find((s) => s.id === id);
-      return targetSeat && targetSeat.status !== 'BOOKED' && targetSeat.status !== 'HOLDING' && targetSeat.status !== 'BLOCKED';
-    });
-
-    if (validIds.length === 0) return;
+    const unselectedIds: string[] = [];
 
     setSelectedSeatIds((prev) => {
+      // Validate target seats: allow ALL seats except BOOKED or BLOCKED
+      const validIds = ids.filter((id) => {
+        const targetSeat = seats.find((s) => s.id === id);
+        if (!targetSeat || targetSeat.status === 'BOOKED' || targetSeat.status === 'BLOCKED') {
+          return false;
+        }
+        return true;
+      });
+
+      if (validIds.length === 0) return prev;
+
       let next = [...prev];
       for (const id of validIds) {
         if (next.includes(id)) {
           next = next.filter((s) => s !== id);
+          unselectedIds.push(id);
         } else {
           if (next.length >= 8) {
             alert('Bạn chỉ có thể chọn tối đa 8 ghế cho mỗi lần đặt vé.');
-            return prev; // abort further additions
+            return prev;
           }
           next.push(id);
         }
       }
       return next;
     });
+
+    // If any seats were unselected, update seats status locally to AVAILABLE & release them on backend ngầm
+    if (unselectedIds.length > 0) {
+      const releaseDbIds: number[] = [];
+
+      setSeats((prevSeats) =>
+        prevSeats.map((s) => {
+          if (unselectedIds.includes(s.id)) {
+            if (s.showtime_seat_id) releaseDbIds.push(s.showtime_seat_id);
+            return { ...s, status: 'AVAILABLE' };
+          }
+          return s;
+        })
+      );
+
+      if (releaseDbIds.length > 0) {
+        seatBookingService.releaseSeats(showtimeId, releaseDbIds).catch(() => {});
+      }
+    }
   };
 
   // Selected Seats Info
