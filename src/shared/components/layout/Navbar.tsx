@@ -48,15 +48,15 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[min(1480px,calc(100vw-48px))]">
-        <div className="glass-nav rounded-full px-8 py-4 flex items-center justify-between shadow-sm border border-white/20 bg-white/80 backdrop-blur-md relative">
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[min(1480px,calc(100vw-32px))]">
+        <div className="glass-nav rounded-full px-6 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-200/80 bg-white/90 backdrop-blur-xl relative text-gray-900">
           {/* Logo */}
-          <Link className="font-sans font-bold text-2xl tracking-tight text-[var(--text)] flex items-center gap-1" href="/">
+          <Link className="font-sans font-extrabold text-2xl tracking-tight text-gray-900 flex items-center gap-1" href="/">
             Cine<span className="text-[#7C6FE8]">Dot</span>
           </Link>
 
           {/* Center Links */}
-          <ul className="hidden xl:flex items-center space-x-7 text-sm font-medium text-slate-700">
+          <ul className="hidden lg:flex items-center space-x-6 xl:space-x-7 text-sm font-semibold text-gray-700">
             {navLinks.map((link) => {
               const isMovies = link.dropdownType === 'movies';
               const isCinemas = link.dropdownType === 'cinemas';
@@ -88,18 +88,18 @@ export const Navbar: React.FC = () => {
                   {isDropdown ? (
                     <Link
                       href={link.href}
-                      className="hover:text-[#7C6FE8] transition-colors flex items-center gap-1 font-semibold cursor-pointer"
+                      className="hover:text-[#7C6FE8] transition-colors flex items-center gap-1 font-semibold cursor-pointer text-gray-700"
                     >
                       <span>{link.name}</span>
                       <ChevronDown
-                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                        className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${
                           isOpen ? 'rotate-180 text-[#7C6FE8]' : ''
                         }`}
                       />
                     </Link>
                   ) : (
                     <Link
-                      className="hover:text-[#7C6FE8] transition-colors flex items-center gap-1 font-semibold"
+                      className="hover:text-[#7C6FE8] transition-colors flex items-center gap-1 font-semibold text-gray-700"
                       href={link.href}
                     >
                       <span>{link.name}</span>
@@ -132,16 +132,16 @@ export const Navbar: React.FC = () => {
           </ul>
 
           {/* Right Actions */}
-          <div className="flex items-center space-x-4 sm:space-x-6">
+          <div className="flex items-center space-x-3 sm:space-x-5">
             {/* Navbar Cart Icon Badge ONLY VISIBLE when (mounted && isAuthenticated && totalCartCount > 0) */}
             {mounted && isAuthenticated && totalCartCount > 0 && (
               <Link href="/star-shop/cart">
                 <button
-                  className="relative p-2.5 text-[#7C6FE8] hover:bg-[#7C6FE8]/10 rounded-full transition-all cursor-pointer flex items-center justify-center border border-[#7C6FE8]/20 bg-purple-50/50"
+                  className="relative p-2.5 text-[#7C6FE8] hover:bg-[#7C6FE8]/10 rounded-full transition-all cursor-pointer flex items-center justify-center border border-[#7C6FE8]/20 bg-purple-50"
                   title="Xem trang Giỏ Hàng Star Shop"
                 >
-                  <ShoppingBag className="w-5 h-5 text-[#7C6FE8]" />
-                  <span className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-md animate-bounce">
+                  <ShoppingBag className="w-4 h-4 text-[#7C6FE8]" />
+                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white font-extrabold text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
                     {totalCartCount}
                   </span>
                 </button>
@@ -149,25 +149,25 @@ export const Navbar: React.FC = () => {
             )}
 
             {mounted && isAuthenticated && user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <PermissionGuard permissions={['admin', 'manage:cinemas', 'manage:movies', 'view:reports']}>
-                  <Link href="/admin" className="text-xs font-bold text-[#7C6FE8] hover:text-[#5848c9] bg-purple-50 hover:bg-purple-100 transition-colors px-3 py-1.5 rounded-full border border-purple-200 shadow-sm hidden md:block">
-                    Quản Trị Hệ Thống
+                  <Link href="/admin" className="text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] bg-purple-50 hover:bg-purple-100 transition-colors px-3 py-1.5 rounded-full border border-purple-200 shadow-sm hidden md:block">
+                    Quản Trị
                   </Link>
                 </PermissionGuard>
                 
-                <Link href="/profile" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-slate-100/80 px-3 py-1.5 rounded-full border border-gray-200">
-                  <div className="w-7 h-7 rounded-full bg-[#7C6FE8] text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
+                <Link href="/profile" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-gray-100/90 px-3 py-1.5 rounded-full border border-gray-200">
+                  <div className="w-6 h-6 rounded-full bg-[#7C6FE8] text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
                     {user.name ? user.name.charAt(0) : 'U'}
                   </div>
-                  <span className="text-xs font-extrabold text-slate-800 hidden md:block">
+                  <span className="text-xs font-bold text-gray-800 hidden md:block">
                     {user.name || user.username}
                   </span>
                 </Link>
 
                 <button
                   onClick={logout}
-                  className="text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors p-1 cursor-pointer"
+                  className="text-xs font-bold text-gray-400 hover:text-rose-600 transition-colors p-1 cursor-pointer"
                   title="Đăng xuất"
                 >
                   <LogOut className="w-4 h-4" />
@@ -176,7 +176,7 @@ export const Navbar: React.FC = () => {
             ) : (
               <button
                 onClick={() => openAuthModal('login')}
-                className="text-[#131413] hover:text-[#7C6FE8] transition-colors hidden md:flex items-center gap-1.5 cursor-pointer font-bold text-xs"
+                className="text-gray-700 hover:text-[#7C6FE8] transition-colors hidden md:flex items-center gap-1.5 cursor-pointer font-bold text-xs"
               >
                 <User className="w-4 h-4 text-[#7C6FE8]" />
                 <span>Đăng nhập</span>
@@ -184,7 +184,7 @@ export const Navbar: React.FC = () => {
             )}
 
             <Link
-              className="bg-[#7C6FE8] text-white px-6 py-2.5 rounded-full text-xs font-extrabold uppercase tracking-wider hover:bg-[#685bc7] shadow-md shadow-[#7C6FE8]/30 transition-all inline-flex items-center justify-center cursor-pointer"
+              className="bg-[#7C6FE8] text-white px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs font-extrabold uppercase tracking-wider hover:bg-[#685bc7] shadow-sm shadow-[#7C6FE8]/25 transition-all inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95"
               href="/movies"
             >
               Đặt vé
@@ -192,7 +192,7 @@ export const Navbar: React.FC = () => {
 
             {/* Mobile hamburger */}
             <button
-              className="xl:hidden text-[#131413] focus:outline-none p-1"
+              className="lg:hidden text-gray-700 hover:text-gray-900 focus:outline-none p-1 cursor-pointer"
               onClick={() => setIsMobileOpen(!isMobileOpen)}
               aria-label="Toggle navigation"
             >

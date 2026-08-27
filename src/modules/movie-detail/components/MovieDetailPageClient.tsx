@@ -7,8 +7,6 @@ import { MovieMetadataHeader } from './MovieMetadataHeader';
 import { MovieOverviewSection } from './MovieOverviewSection';
 import { ShowtimeScheduleSection } from './ShowtimeScheduleSection';
 import { RecommendedSidebar } from './RecommendedSidebar';
-import { MOCK_RECOMMENDED_MOVIES } from '../mocks/mockMovieDetailData';
-import { Skeleton } from '@/shared/ui/Skeleton';
 
 interface MovieDetailPageClientProps {
   slug: string;
@@ -26,16 +24,16 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
 
   if (loading || !movie) {
     return (
-      <div className="w-full pt-28 pb-20 bg-[#FEFEFE] min-h-screen">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-8">
-          <Skeleton variant="card" className="w-full h-[400px] rounded-3xl" />
+      <div className="w-full pt-28 pb-20 bg-[#FAFAFB] min-h-screen">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 flex flex-col gap-8">
+          <div className="w-full h-[360px] rounded-3xl bg-gray-200 animate-pulse" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 flex flex-col gap-6">
-              <Skeleton variant="text" className="w-2/3 h-10" />
-              <Skeleton variant="card" className="w-full h-48 rounded-2xl" />
+              <div className="w-2/3 h-10 rounded-xl bg-gray-200 animate-pulse" />
+              <div className="w-full h-48 rounded-2xl bg-gray-200 animate-pulse" />
             </div>
             <div className="lg:col-span-4">
-              <Skeleton variant="card" className="w-full h-80 rounded-2xl" />
+              <div className="w-full h-80 rounded-2xl bg-gray-200 animate-pulse" />
             </div>
           </div>
         </div>
@@ -44,8 +42,8 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
   }
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] selection:bg-[#7C6FE8] selection:text-white">
-      {/* 1. Hero Backdrop Image */}
+    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen selection:bg-[#7C6FE8] selection:text-white">
+      {/* 1. Hero Backdrop Stage */}
       <MovieDetailHero
         bannerUrl={movie.bannerUrl}
         posterUrl={movie.posterUrl}
@@ -54,14 +52,13 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
         videos={movie.videos}
       />
 
-      {/* 2. Main Content Container (max-w-[1240px] strictly) */}
+      {/* 2. Main Content Container */}
       <main className="w-full pb-20">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 pt-4">
-          {/* 2-Column Content Layout starting from top: 68% Left / 32% Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: 68% Width (lg:col-span-8 - Metadata, Synopsis & Showtimes) */}
-            <div className="lg:col-span-8 flex flex-col gap-10">
-              {/* 1. Movie Metadata Header (Poster overlaps Hero + Title & Spec details) */}
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 pt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+            {/* Left Column: 68% Width (lg:col-span-8) */}
+            <div className="lg:col-span-8 flex flex-col gap-8">
+              {/* 1. Movie Metadata Header */}
               <MovieMetadataHeader movie={movie} onBookClick={scrollToSchedule} />
 
               {/* 2. Movie Overview / Synopsis */}
@@ -74,8 +71,8 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
               />
             </div>
 
-            {/* Right Column: 32% Width (lg:col-span-4 - Hot Recommended Movies Sidebar aligned alongside Title) */}
-            <div className="lg:col-span-4 pt-4 lg:pt-6">
+            {/* Right Column: 32% Width (lg:col-span-4) */}
+            <div className="lg:col-span-4 pt-4 lg:pt-0">
               <RecommendedSidebar movies={recommended} />
             </div>
           </div>

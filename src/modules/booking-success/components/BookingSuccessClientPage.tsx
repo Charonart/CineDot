@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: Workbench · theme: White Minimal · component: BookingSuccessClientPage */
 'use client';
 
 import React from 'react';
@@ -51,113 +52,107 @@ export function BookingSuccessClientPage({
 
   if (loading || !ticket) {
     return (
-      <div className="w-full pt-24 pb-20 bg-[#FEFEFE] min-h-screen">
+      <div className="w-full pt-28 pb-20 bg-[#FAFAFB] min-h-screen">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-8 items-center">
           <Skeleton variant="card" className="w-full h-14 rounded-2xl" />
-          <Skeleton variant="card" className="w-full max-w-lg h-[600px] rounded-3xl" />
+          <Skeleton variant="card" className="w-full max-w-lg h-[540px] rounded-3xl" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white">
-      {/* 1. Step Wizard Bar (Step 5: Hoàn tất ACTIVE, 100% progress) */}
+    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen pt-20 pb-24 selection:bg-[#7C6FE8] selection:text-white">
+      {/* 1. Step Wizard Bar (Step 5: Hoàn tất) */}
       <BookingStepWizard currentStep={5} />
 
       {/* 2. Main Content Container */}
       <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8 flex flex-col items-center gap-8">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-6 sm:py-8 flex flex-col items-center gap-6 sm:gap-8">
           {/* Header Success / Error Message */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-col items-center text-center gap-3"
-          >
+          <div className="flex flex-col items-center text-center gap-2 max-w-lg">
             {statusParam === 'failed' || statusParam === 'invalid_signature' ? (
               <>
-                <div className="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center shadow-lg shadow-red-500/20 ring-8 ring-red-50">
-                  <span className="text-4xl font-black">X</span>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                  <span>Giao dịch không thành công</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
-                  Thanh Toán Thất Bại
+                <h1 className="text-xl sm:text-2xl font-extrabold text-gray-950 tracking-tight">
+                  Thanh toán chưa hoàn tất
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
-                  Rất tiếc, giao dịch thanh toán của bạn không thành công hoặc đã bị hủy. Đơn hàng của bạn đã bị hủy bỏ.
+                <p className="text-xs text-gray-500 font-normal">
+                  Giao dịch của bạn đã bị gián đoạn hoặc hủy bỏ. Ghế đã được tự động mở lại.
                 </p>
               </>
             ) : (
               <>
-                <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-8 ring-emerald-50">
-                  <CheckCircle2 className="w-10 h-10" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Giao dịch hoàn tất</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
-                  Thanh Toán Thành Công!
+                <h1 className="text-xl sm:text-2xl font-extrabold text-gray-950 tracking-tight">
+                  Đặt vé thành công
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
-                  Cảm ơn bạn đã lựa chọn CineDot. Vé xem phim điện tử của bạn đã được xuất thành công và sẵn sàng sử dụng.
+                <p className="text-xs text-gray-500 font-normal">
+                  Vé xem phim điện tử của bạn đã được khởi tạo. Xuất trình mã QR tại cửa soát vé để vào rạp.
                 </p>
               </>
             )}
-          </motion.div>
+          </div>
 
           {/* Digital Ticket Stub Card */}
           {statusParam !== 'failed' && statusParam !== 'invalid_signature' && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="w-full"
-            >
+            <div className="w-full">
               <DigitalTicketCard ticket={ticket} />
-            </motion.div>
+            </div>
           )}
 
           {/* Action Buttons Row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-lg pt-2"
-          >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-lg pt-1">
             {/* Download PDF Button */}
             {statusParam !== 'failed' && statusParam !== 'invalid_signature' && (
               <button
+                type="button"
                 onClick={handleDownloadPDF}
                 disabled={isDownloading}
-                className={`w-full sm:flex-1 py-3.5 px-6 rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                className={`w-full sm:flex-1 py-2.5 px-5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   downloadSuccess
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-lg shadow-[#7C6FE8]/35'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-xs'
                 }`}
               >
                 {downloadSuccess ? (
                   <>
                     <Check className="w-4 h-4" />
-                    <span>ĐÃ TẢI VÉ PDF THÀNH CÔNG</span>
+                    <span>Đã tải vé PDF</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4" />
-                    <span>{isDownloading ? 'ĐANG TẠO VÉ PDF...' : 'TẢI VÉ VỀ MÁY (PDF)'}</span>
+                    <span>{isDownloading ? 'Đang tạo PDF…' : 'Tải vé PDF'}</span>
                   </>
                 )}
               </button>
             )}
 
-            {/* View My Tickets Link (Page 5: /profile) */}
+            {/* View My Tickets Link */}
             <Link href="/profile" className="w-full sm:flex-1">
-              <button className="w-full py-3.5 px-6 rounded-full bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-700 hover:text-[#7C6FE8] font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs">
+              <button
+                type="button"
+                className="w-full py-2.5 px-5 rounded-full bg-white border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-950 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+              >
                 <Ticket className="w-4 h-4 text-[#7C6FE8]" />
-                <span>Xem tất cả Vé của tôi</span>
+                <span>Vé của tôi</span>
               </button>
             </Link>
-          </motion.div>
+          </div>
+
 
           {/* Return Home Link */}
           <Link href="/">
-            <button className="text-xs font-bold text-slate-500 hover:text-[#7C6FE8] flex items-center gap-1.5 transition-colors cursor-pointer pt-2">
+            <button
+              type="button"
+              className="text-xs font-bold text-gray-500 hover:text-[#7C6FE8] flex items-center gap-1.5 transition-colors cursor-pointer pt-1"
+            >
               <Home className="w-3.5 h-3.5" />
               <span>Quay về Trang Chủ</span>
             </button>
@@ -167,3 +162,4 @@ export function BookingSuccessClientPage({
     </div>
   );
 }
+

@@ -180,9 +180,67 @@ export async function fetchUserOrders(): Promise<StarShopOrderItem[]> {
 
 export async function fetchUserVouchers(): Promise<RewardVoucherItem[]> {
   try {
-    const res = await apiClient.get<ApiResponse<RewardVoucherItem[]>>(ENDPOINTS.VOUCHERS.LIST);
+    const res = await apiClient.get<ApiResponse<any[]>>(ENDPOINTS.VOUCHERS.LIST);
     if (res.data?.success && Array.isArray(res.data?.data)) {
-      return res.data.data;
+      return res.data.data.map((v: any) => {
+        const rawType = String(v.voucher_type || v.voucherType || v.category || 'all').toLowerCase();
+        let cat: 'TICKET' | 'FNB' | 'ALL' = 'ALL';
+        if (rawType.includes('ticket') || rawType.includes('vé') || rawType.includes('ve')) {
+          cat = 'TICKET';
+        } else if (
+          rawType.includes('fnb') ||
+          rawType.includes('combo') ||
+          rawType.includes('bắp') ||
+          rawType.includes('bap') ||
+          rawType.includes('food')
+        ) {
+          cat = 'FNB';
+        }
+
+        const discountType: 'percentage' | 'fixed_amount' = String(
+          v.discount_type || v.discountType || 'percentage'
+        )
+          .toLowerCase()
+          .includes('fixed')
+          ? 'fixed_amount'
+          : 'percentage';
+
+        const discountVal = Number(
+          v.discount_value ?? v.discountValue ?? (discountType === 'percentage' ? 10 : 20000)
+        );
+
+        let formattedDate = '31/12/2026';
+        if (v.valid_until || v.validUntil) {
+          try {
+            const d = new Date(v.valid_until || v.validUntil);
+            if (!isNaN(d.getTime())) {
+              formattedDate = d.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              });
+            } else {
+              formattedDate = String(v.valid_until || v.validUntil);
+            }
+          } catch {
+            formattedDate = String(v.valid_until || v.validUntil);
+          }
+        }
+
+        return {
+          id: v.id || v.voucher_id || v.code || `v-${Math.random()}`,
+          code: v.code || 'CINEDOT',
+          title: v.title || v.name || 'Voucher Khuyến Mãi CineDot',
+          description: v.description || 'Áp dụng cho tất cả dịch vụ tại rạp CineDot',
+          discountType,
+          discountValue: isNaN(discountVal) ? 0 : discountVal,
+          minOrderValue: Number(v.min_order_value || v.minOrderValue || 0),
+          maxDiscountValue: Number(v.max_discount_value || v.maxDiscountValue || 0),
+          validUntil: formattedDate,
+          isActive: v.is_active ?? v.isActive ?? true,
+          category: cat,
+        };
+      });
     }
     return [];
   } catch (error) {

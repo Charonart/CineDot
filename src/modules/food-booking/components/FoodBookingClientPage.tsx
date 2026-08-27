@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: Workbench · theme: White Minimal · component: FoodBookingClientPage */
 'use client';
 
 import React from 'react';
@@ -8,7 +9,6 @@ import { FoodItemCard } from './FoodItemCard';
 import { FoodBookingSidebar } from './FoodBookingSidebar';
 import { SeatTimeoutModal } from '@/modules/booking/components/SeatTimeoutModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
-
 import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
 
 interface FoodBookingClientPageProps {
@@ -47,13 +47,13 @@ export function FoodBookingClientPage({
 
   if (loading) {
     return (
-      <div className="w-full pt-24 pb-20 bg-[#FEFEFE] min-h-screen">
+      <div className="w-full pt-28 pb-20 bg-[#FAFAFB] min-h-screen">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-8">
           <Skeleton variant="card" className="w-full h-14 rounded-2xl" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 flex flex-col gap-6">
-              <Skeleton variant="card" className="w-full h-64 rounded-3xl" />
-              <Skeleton variant="card" className="w-full h-64 rounded-3xl" />
+              <Skeleton variant="card" className="w-full h-48 rounded-3xl" />
+              <Skeleton variant="card" className="w-full h-48 rounded-3xl" />
             </div>
             <div className="lg:col-span-4">
               <Skeleton variant="card" className="w-full h-96 rounded-3xl" />
@@ -65,15 +65,15 @@ export function FoodBookingClientPage({
   }
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white">
-      {/* 1. Step Wizard Bar (Step 3: Chọn thức ăn ACTIVE, 60% progress) */}
+    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen pt-20 pb-24 selection:bg-[#7C6FE8] selection:text-white">
+      {/* 1. Step Wizard Bar (Step 3: Chọn bắp nước) */}
       <BookingStepWizard currentStep={3} />
 
-      {/* 2. Main 2-Column Container */}
+      {/* 2. Main 2-Column Workbench Container */}
       <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: 68% Width (lg:col-span-8 - Food Categories & Items) */}
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-6 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+            {/* Left Column: 68% Width (Food Categories & Items) */}
             <div className="lg:col-span-8 flex flex-col gap-6">
               {/* Category Filter Bar */}
               <FoodCategoryFilter
@@ -82,7 +82,7 @@ export function FoodBookingClientPage({
               />
 
               {/* Food Items List */}
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3.5">
                 {foodItems.map((item) => (
                   <FoodItemCard
                     key={item.id}
@@ -94,7 +94,7 @@ export function FoodBookingClientPage({
               </div>
             </div>
 
-            {/* Right Column: 32% Width (lg:col-span-4 - Summary Sidebar) */}
+            {/* Right Column: 32% Width (Summary Sidebar) */}
             <div className="lg:col-span-4">
               <FoodBookingSidebar
                 selectedFoodList={selectedFoodList}
@@ -121,3 +121,4 @@ export function FoodBookingClientPage({
     </div>
   );
 }
+

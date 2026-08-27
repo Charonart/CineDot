@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, Ticket, Star, ArrowUpRight } from 'lucide-react';
-import Link from 'next/link';
+import { Play, Ticket, Star, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MovieListingItem } from '../types/movies-listing.types';
 import { useTrailerStore } from '@/shared/store/trailerStore';
@@ -34,71 +33,83 @@ export const MovieGridCard: React.FC<MovieGridCardProps> = ({ movie }) => {
     openTrailer(movie.trailerUrl, movie.posterUrl, movie.title);
   };
 
+  const genreText = Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      variants={{
+        hidden: { opacity: 0, y: 15 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+      }}
       whileHover={{ y: -6 }}
-      transition={{ duration: 0.3 }}
-      className="w-full flex flex-col gap-3 group cursor-pointer"
+      className="group relative flex flex-col gap-3 rounded-2xl p-2.5 bg-white border border-gray-200/80 hover:border-[#7C6FE8]/50 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
       onClick={() => router.push(detailUrl)}
     >
-      {/* Poster Image Container */}
-      <div className="relative w-full aspect-[2/3] rounded-3xl overflow-hidden bg-slate-900 shadow-md group-hover:shadow-2xl transition-all">
+      {/* Poster Frame */}
+      <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-gray-100">
         <img
           src={movie.posterUrl}
           alt={movie.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
         {/* Top Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
-          <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-bold uppercase shadow-sm">
-            {movie.formatBadge}
+        <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center z-10 pointer-events-none">
+          <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-extrabold uppercase shadow-sm">
+            {movie.formatBadge || '2D'}
           </span>
-          <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold shadow-sm">
-            {movie.ageRating}
+          <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-black shadow-sm">
+            {movie.ageRating || 'P'}
           </span>
         </div>
 
         {/* Rating Score Badge */}
         {movie.rating > 0 && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-amber-400 text-[11px] font-extrabold border border-white/10 z-10">
-            <Star className="w-3.5 h-3.5 fill-amber-400" />
-            <span>{movie.rating}</span>
+          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-amber-300 text-[11px] font-bold border border-white/10 z-10">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span>{movie.rating.toFixed(1)}</span>
           </div>
         )}
 
-        {/* Hover Overlay Action Buttons (Sleek, Balanced Proportions) */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-5 z-20">
+        {/* Hover Overlay with Rapid Action Buttons */}
+        <div className="absolute inset-0 bg-black/65 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center p-4 gap-2.5 z-20">
           <button
+            type="button"
             onClick={handleBookClick}
-            className="w-[82%] max-w-[170px] py-2.5 px-4 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/40 transition-all cursor-pointer transform hover:scale-105"
+            className="w-full max-w-[140px] py-2 px-4 bg-[#7C6FE8] hover:bg-[#685bc7] text-white rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
           >
-            <Ticket className="w-4 h-4 fill-white shrink-0" />
-            <span className="truncate">{isNowShowing ? 'MUA VÉ' : 'CHI TIẾT'}</span>
+            <Ticket className="w-3.5 h-3.5 fill-white shrink-0" />
+            <span>{isNowShowing ? 'ĐẶT VÉ' : 'CHI TIẾT'}</span>
           </button>
 
           <button
+            type="button"
             onClick={handleTrailerClick}
-            className="w-[82%] max-w-[170px] py-2.5 px-4 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer border border-white/30"
+            className="w-full max-w-[140px] py-2 px-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full font-semibold text-xs backdrop-blur-md transition-all flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-white shrink-0" />
-            <span className="truncate">Xem Trailer</span>
+            <span>Xem Trailer</span>
           </button>
         </div>
       </div>
 
-      {/* Info below poster */}
-      <div className="flex flex-col gap-1 px-1">
-        <Link href={detailUrl}>
-          <h3 className="font-extrabold text-base text-[#131413] group-hover:text-[#7C6FE8] transition-colors leading-snug line-clamp-1">
-            {movie.title}
-          </h3>
-        </Link>
-        <span className="text-xs text-slate-500 font-semibold">
-          {movie.genre.join(', ')} • {movie.duration}
-        </span>
+      {/* Meta Info */}
+      <div className="flex flex-col gap-1 px-1 pb-1">
+        <h3 className="font-bold text-sm sm:text-base text-gray-900 group-hover:text-[#7C6FE8] transition-colors line-clamp-1 leading-snug">
+          {movie.title}
+        </h3>
+        <p className="text-xs text-gray-500 font-medium truncate">
+          {genreText}
+        </p>
+        <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium pt-0.5">
+          <span>{movie.duration}</span>
+          {movie.releaseDate && (
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              <span>{movie.releaseDate}</span>
+            </span>
+          )}
+        </div>
       </div>
     </motion.div>
   );

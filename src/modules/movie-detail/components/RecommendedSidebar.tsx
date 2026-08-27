@@ -12,25 +12,25 @@ interface RecommendedSidebarProps {
 
 export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ movies }) => {
   return (
-    <div className="flex flex-col gap-6 p-6 rounded-3xl bg-white shadow-[0_16px_50px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.02)] border border-gray-100">
+    <div className="flex flex-col gap-5 p-5 sm:p-6 rounded-3xl bg-white shadow-sm border border-gray-200/80 sticky top-28">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
-        <div className="w-1.5 h-6 bg-[#7C6FE8] rounded-full shadow-[0_0_10px_rgba(124,111,232,0.6)]" />
-        <h3 className="text-base font-bold text-[#131413] uppercase tracking-wider">
-          Phim Cùng Thể Loại
+      <div className="flex items-center gap-2.5 border-b border-gray-100 pb-3">
+        <div className="w-1.5 h-5 bg-[#7C6FE8] rounded-full" />
+        <h3 className="text-sm sm:text-base font-extrabold text-gray-950 uppercase tracking-wide">
+          Phim Đang Hot
         </h3>
       </div>
 
       {/* Recommended Movies List */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {movies.map((movie) => (
           <Link key={movie.id} href={`/movies/${movie.slug}`}>
             <motion.div
-              whileHover={{ y: -4, x: 2 }}
-              className="group flex items-center gap-3.5 p-2 rounded-2xl transition-all duration-300 hover:bg-slate-50 hover:shadow-[0_8px_24px_rgba(124,111,232,0.12)] cursor-pointer"
+              whileHover={{ y: -3 }}
+              className="group flex items-center gap-3 p-2 rounded-2xl transition-all duration-200 hover:bg-purple-50/50 border border-transparent hover:border-purple-100 cursor-pointer"
             >
               {/* Thumbnail */}
-              <div className="relative w-16 aspect-[2/3] rounded-xl overflow-hidden bg-slate-900 shrink-0 shadow-md">
+              <div className="relative w-14 aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 shrink-0 shadow-xs">
                 <img
                   src={movie.posterUrl}
                   alt={movie.title}
@@ -39,17 +39,17 @@ export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ movies }
               </div>
 
               {/* Info */}
-              <div className="flex flex-col gap-1 flex-1">
-                <h4 className="font-bold text-xs sm:text-sm text-[#131413] group-hover:text-[#7C6FE8] transition-colors line-clamp-1">
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#7C6FE8] transition-colors truncate">
                   {movie.title}
                 </h4>
-                <p className="text-[11px] text-slate-500 line-clamp-1">{movie.genre}</p>
-                <div className="flex items-center justify-between text-[11px] pt-0.5">
+                <p className="text-[11px] text-gray-500 truncate">{movie.genre}</p>
+                <div className="flex items-center justify-between text-[11px] pt-1">
                   <span className="flex items-center gap-1 text-amber-500 font-bold">
-                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    <span>{movie.rating}</span>
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span>{movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'}</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-[#7C6FE8]/15 text-[#7C6FE8] text-[9px] font-bold uppercase">
+                  <span className="px-2 py-0.2 rounded-full bg-[#7C6FE8]/15 text-[#7C6FE8] text-[9px] font-extrabold uppercase">
                     {movie.formatBadge || '2D'}
                   </span>
                 </div>

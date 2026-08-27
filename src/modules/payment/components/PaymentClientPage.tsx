@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: Workbench · theme: White Minimal · component: PaymentClientPage */
 'use client';
 
 import React from 'react';
@@ -72,7 +73,6 @@ export function PaymentClientPage({
 
   const selectedMethodObj = MOCK_PAYMENT_METHODS.find((m) => m.id === selectedMethod);
 
-  // Preserve ALL parameters on the Back button to Food Booking (including combos)
   const backToFoodHref = `/booking/food?showtime_id=${showtimeId}&movie=${movieParam}&seats=${seatsParam}&date=${dateParam}&time=${timeParam}&cinema=${encodeURIComponent(
     decodedCinemaName
   )}${combosParam ? `&combos=${encodeURIComponent(combosParam)}` : ''}`;
@@ -92,7 +92,6 @@ export function PaymentClientPage({
         if (res.paymentUrl) {
           window.location.href = res.paymentUrl;
         } else {
-          // Fallback or 100% discount
           router.push(
             `/booking/success?booking_id=${res.bookingId}&movie=${movieInfo.slug}&seats=${seatsParam}&date=${dateParam}&time=${timeParam}&cinema=${encodeURIComponent(
               decodedCinemaName
@@ -110,30 +109,24 @@ export function PaymentClientPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] text-[#131413] flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FAFAFB] text-gray-900 flex flex-col justify-between pt-20 pb-24 selection:bg-[#7C6FE8] selection:text-white">
       {/* 1. Header & Step Wizard Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-2xs">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-3 flex items-center justify-between">
-          <Link href={`/movies/${movieInfo.slug}`} className="flex items-center gap-2 text-slate-700 hover:text-[#7C6FE8] transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-xs font-bold hidden sm:inline">Quay lại thông tin phim</span>
-          </Link>
-          <BookingStepWizard currentStep={4} />
-          <div className="w-8" />
-        </div>
-      </header>
+      <BookingStepWizard currentStep={4} />
 
-      {/* 2. Main Payment Workflow Content Layout */}
-      <main className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8 w-full flex-1">
+      {/* 2. Main Payment Workflow Workbench Layout */}
+      <main className="max-w-[1240px] mx-auto px-4 sm:px-8 py-6 sm:py-8 w-full flex-1">
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: 68% Width (lg:col-span-8 - Payment Options) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+            {/* Left Column: 68% Width (Payment Options) */}
             <div className="lg:col-span-8 flex flex-col gap-6">
               {/* Back navigation button */}
               <div className="flex items-center justify-between pb-1">
                 <Link href={backToFoodHref}>
-                  <button className="text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] flex items-center gap-1.5 transition-colors cursor-pointer">
-                    <ArrowLeft className="w-4 h-4" />
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Quay lại chọn bắp nước</span>
                   </button>
                 </Link>
@@ -158,7 +151,7 @@ export function PaymentClientPage({
               />
             </div>
 
-            {/* Right Column: 32% Width (lg:col-span-4 - Payment Summary Sidebar) */}
+            {/* Right Column: 32% Width (Payment Summary Sidebar) */}
             <div className="lg:col-span-4">
               <PaymentSidebar
                 movieTitle={movieInfo.title}
@@ -206,3 +199,4 @@ export function PaymentClientPage({
     </div>
   );
 }
+

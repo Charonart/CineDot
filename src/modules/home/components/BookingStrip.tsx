@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/shared/store/useAuthStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Film, MapPin, Calendar, Clock, Loader2 } from 'lucide-react';
+import { DynamicDateOption, QuickShowtimeOption } from '../types/home.types';
 import {
   fetchQuickBookingMovies,
   fetchHomeCinemas,
   fetchMovieShowtimesTree,
   fetchCinemaShowtimesTree,
   HomeCinemaOption,
-  DynamicDateOption,
-  QuickShowtimeOption,
 } from '../services/home.service';
 
 interface QuickMovieOption {
@@ -25,23 +25,29 @@ interface BookingStripProps {
 
 export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const router = useRouter();
-  const { isAuthenticated, openAuthModal } = useAuthStore();
+  const [allMoviesList, setAllMoviesList] = useState<QuickMovieOption[]>([]);
+  const [allCinemasList, setAllCinemasList] = useState<HomeCinemaOption[]>([]);
+
   const [moviesList, setMoviesList] = useState<QuickMovieOption[]>([]);
-  const [cinemasList, setCinemasList] = useState<QuickCinemaOption[]>([]);
+  const [cinemasList, setCinemasList] = useState<HomeCinemaOption[]>([]);
   const [datesList, setDatesList] = useState<DynamicDateOption[]>([]);
   const [timesList, setTimesList] = useState<QuickShowtimeOption[]>([]);
 
-  // Cached showtime trees
-  const [movieShowtimesTree, setMovieShowtimesTree] = useState<any[]>([]);
+  const [showtimesTree, setShowtimesTree] = useState<any[]>([]);
   const [cinemaShowtimesData, setCinemaShowtimesData] = useState<any[]>([]);
 
-  // Selected values
   const [movieId, setMovieId] = useState('');
   const [cinemaId, setCinemaId] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
 
-  // 1. Initial Load: Fetch both All Movies & All Cinemas
+  const [loadingMovies, setLoadingMovies] = useState(false);
+  const [loadingCinemas, setLoadingCinemas] = useState(false);
+  const [loadingDates, setLoadingDates] = useState(false);
+  const [loadingTimes, setLoadingTimes] = useState(false);
+
+  const [openDropdown, setOpenDropdown] = useState<'movie' | 'cinema' | 'date' | 'time' | null>(null);
+
   useEffect(() => {
     let isMounted = true;
     async function initData() {
@@ -52,12 +58,12 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
 
       if (isMounted) {
         if (movies && movies.length > 0) {
-          setAllMovies(movies);
-          setAvailableMovies(movies);
+          setAllMoviesList(movies);
+          setMoviesList(movies);
         }
         if (cinemas && cinemas.length > 0) {
-          setAllCinemas(cinemas);
-          setAvailableCinemas(cinemas);
+          setAllCinemasList(cinemas);
+          setCinemasList(cinemas);
         }
       }
     }
@@ -67,7 +73,14 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
     };
   }, []);
 
-  // Helper: Build dynamic date options from a showtime tree for a specific cinema
+  const selectedMovie = useMemo(() => {
+    return allMoviesList.find((m) => m.id === movieId) || moviesList.find((m) => m.id === movieId);
+  }, [allMoviesList, moviesList, movieId]);
+
+  const selectedCinema = useMemo(() => {
+    return allCinemasList.find((c) => c.id === cinemaId) || cinemasList.find((c) => c.id === cinemaId);
+  }, [allCinemasList, cinemasList, cinemaId]);
+
   const buildDatesFromMovieTree = useCallback((tree: any[], targetCinemaId: string) => {
     const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     const validDates: DynamicDateOption[] = [];
@@ -101,181 +114,155 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
     return validDates;
   }, []);
 
-  // Helper: Build dynamic date options from cinema showtimes data
-  const buildDatesFromCinemaData = useCallback((cinemaData: any[], targetMovieIdOrSlug: string) => {
-    const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    const validDates: DynamicDateOption[] = [];
-    const todayStr = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-    // If cinemaData is an array of dates or movies
-    cinemaData.forEach((item: any) => {
-      const dayDate = item.date || item.showDate || todayStr;
-      const d = new Date(dayDate);
-      const isToday = dayDate === todayStr;
-      const isTomorrow = dayDate === tomorrowStr;
-      const dayLabel = isToday ? 'Hôm nay' : isTomorrow ? 'Ngày mai' : (daysOfWeek[d.getDay()] || 'Ngày chiếu');
-      const dateFormatted = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-
-      if (!validDates.some((v) => v.id === dayDate)) {
-        validDates.push({
-          id: dayDate,
-          dateStr: dateFormatted,
-          label: `${dayLabel} (${dateFormatted})`,
-        });
-      }
-    });
-
-    return validDates;
-  }, []);
-
-  // 2. Handle Movie Selection
-  const handleMovieChange = async (newMovieId: string) => {
-    setMovieId(newMovieId);
+  const handleSelectMovie = async (id: string) => {
+    setMovieId(id);
     setDate('');
     setTime('');
     setDatesList([]);
     setTimesList([]);
 
-    if (!newMovieId) {
-      // User cleared movie selection
-      setMovieShowtimesTree([]);
+    if (!id) {
+      setOpenDropdown(null);
       if (cinemaId) {
-        // Cinema is still selected -> Keep availableMovies filtered for that cinema
-        setAvailableCinemas(allCinemas);
+        setCinemasList(allCinemasList);
       } else {
-        // Reset everything to all
-        setAvailableMovies(allMovies);
-        setAvailableCinemas(allCinemas);
+        setMoviesList(allMoviesList);
+        setCinemasList(allCinemasList);
       }
       return;
     }
 
-    const movie = allMovies.find((m) => m.id === newMovieId);
-    if (!movie) return;
+    const movie = allMoviesList.find((m) => m.id === id) || moviesList.find((m) => m.id === id);
+    if (movie) {
+      setLoadingCinemas(true);
+      try {
+        const tree = await fetchMovieShowtimesTree(movie.slug);
+        setShowtimesTree(tree);
 
-    // Fetch showtime tree for this movie
-    const tree = await fetchMovieShowtimesTree(movie.slug);
-    setMovieShowtimesTree(tree);
-
-    // Extract all cinemas that have showtimes for this movie
-    const cinemaMap = new Map<string, string>();
-    tree.forEach((day: any) => {
-      if (Array.isArray(day.cinemas)) {
-        day.cinemas.forEach((c: any) => {
-          const cObj = c.cinema || {};
-          const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-          const cName = cObj.cinema_name || cObj.name || c.cinema_name || '';
-          const hasTimes = Array.isArray(c.times) && c.times.length > 0;
-          if (cId && cName && hasTimes && !cinemaMap.has(cId)) {
-            cinemaMap.set(cId, cName);
+        const cinemaMap = new Map<string, string>();
+        tree.forEach((day: any) => {
+          if (Array.isArray(day.cinemas)) {
+            day.cinemas.forEach((c: any) => {
+              const cObj = c.cinema || {};
+              const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
+              const cName = cObj.cinema_name || cObj.name || c.cinema_name || '';
+              const hasTimes = Array.isArray(c.times) && c.times.length > 0;
+              if (cId && cName && hasTimes && !cinemaMap.has(cId)) {
+                cinemaMap.set(cId, cName);
+              }
+            });
           }
         });
+
+        const matchingCinemas: HomeCinemaOption[] = allCinemasList.filter((c) => cinemaMap.has(c.id));
+        if (matchingCinemas.length === 0 && cinemaMap.size > 0) {
+          cinemaMap.forEach((name, cId) => {
+            matchingCinemas.push({ id: cId, name });
+          });
+        }
+
+        setCinemasList(matchingCinemas.length > 0 ? matchingCinemas : allCinemasList);
+
+        if (cinemaId && cinemaMap.has(cinemaId)) {
+          const dates = buildDatesFromMovieTree(tree, cinemaId);
+          setDatesList(dates);
+          setTimeout(() => setOpenDropdown('date'), 120);
+          return;
+        } else if (cinemaId && !cinemaMap.has(cinemaId)) {
+          setCinemaId('');
+        }
+      } finally {
+        setLoadingCinemas(false);
       }
-    });
-
-    const matchingCinemas: HomeCinemaOption[] = allCinemas.filter((c) => cinemaMap.has(c.id));
-    // If not found in allCinemas, construct from map
-    if (matchingCinemas.length === 0 && cinemaMap.size > 0) {
-      cinemaMap.forEach((name, id) => {
-        matchingCinemas.push({ id, name });
-      });
     }
-    setAvailableCinemas(matchingCinemas.length > 0 ? matchingCinemas : allCinemas);
 
-    // Check if current cinemaId is valid for this movie
-    if (cinemaId && cinemaMap.has(cinemaId)) {
-      const dates = buildDatesFromMovieTree(tree, cinemaId);
-      setDatesList(dates);
-    } else if (cinemaId && !cinemaMap.has(cinemaId)) {
-      setCinemaId('');
-    }
+    setTimeout(() => setOpenDropdown('cinema'), 120);
   };
 
-  // 3. Handle Cinema Selection
-  const handleCinemaChange = async (newCinemaId: string) => {
-    setCinemaId(newCinemaId);
+  const handleSelectCinema = async (selectedCinemaId: string) => {
+    setCinemaId(selectedCinemaId);
     setDate('');
     setTime('');
     setDatesList([]);
     setTimesList([]);
 
-    if (!newCinemaId) {
-      // User cleared cinema selection
-      setCinemaShowtimesData([]);
+    if (!selectedCinemaId) {
+      setOpenDropdown(null);
       if (movieId) {
-        // Movie is still selected -> Keep availableCinemas filtered for that movie
-        setAvailableMovies(allMovies);
+        setMoviesList(allMoviesList);
       } else {
-        // Reset everything to all
-        setAvailableMovies(allMovies);
-        setAvailableCinemas(allCinemas);
+        setMoviesList(allMoviesList);
+        setCinemasList(allCinemasList);
       }
       return;
     }
 
-    const cinema = allCinemas.find((c) => c.id === newCinemaId);
+    const cinema = allCinemasList.find((c) => c.id === selectedCinemaId) || cinemasList.find((c) => c.id === selectedCinemaId);
 
-    // Case A: Movie is ALREADY selected
-    if (movieId && movieShowtimesTree.length > 0) {
-      const dates = buildDatesFromMovieTree(movieShowtimesTree, newCinemaId);
+    if (movieId && showtimesTree.length > 0) {
+      const dates = buildDatesFromMovieTree(showtimesTree, selectedCinemaId);
       setDatesList(dates);
+      setTimeout(() => setOpenDropdown('date'), 120);
       return;
     }
 
-    // Case B: Movie is NOT selected yet -> Fetch cinema's showtimes to filter available movies
-    const cinemaTree = await fetchCinemaShowtimesTree(cinema?.slug || newCinemaId);
-    setCinemaShowtimesData(cinemaTree);
+    setLoadingMovies(true);
+    try {
+      const cinemaTree = await fetchCinemaShowtimesTree(cinema?.slug || selectedCinemaId);
+      setCinemaShowtimesData(cinemaTree);
 
-    const movieMap = new Map<string, { id: string; slug: string; title: string }>();
+      const movieMap = new Map<string, { id: string; slug: string; title: string }>();
+      cinemaTree.forEach((item: any) => {
+        const mObj = item.movie || item;
+        const mId = String(mObj.movie_id || mObj.id || '');
+        const mSlug = mObj.slug || '';
+        const mTitle = mObj.title || mObj.name || '';
+        const hasTimes = (Array.isArray(item.slots) && item.slots.length > 0) || (Array.isArray(item.times) && item.times.length > 0);
 
-    cinemaTree.forEach((item: any) => {
-      const mObj = item.movie || item;
-      const mId = String(mObj.movie_id || mObj.id || '');
-      const mSlug = mObj.slug || '';
-      const mTitle = mObj.title || mObj.name || '';
-      const hasTimes = (Array.isArray(item.slots) && item.slots.length > 0) || (Array.isArray(item.times) && item.times.length > 0);
-
-      if ((mId || mSlug) && mTitle && hasTimes) {
-        const key = mId || mSlug;
-        if (!movieMap.has(key)) {
-          movieMap.set(key, {
-            id: mId || key,
-            slug: mSlug || 'movie-detail',
-            title: mTitle,
-          });
+        if ((mId || mSlug) && mTitle && hasTimes) {
+          const key = mId || mSlug;
+          if (!movieMap.has(key)) {
+            movieMap.set(key, {
+              id: mId || key,
+              slug: mSlug || 'movie-detail',
+              title: mTitle,
+            });
+          }
         }
+      });
+
+      const matchingMovies: QuickMovieOption[] = allMoviesList.filter((m) =>
+        movieMap.has(m.id) || movieMap.has(m.slug)
+      );
+
+      if (matchingMovies.length > 0) {
+        setMoviesList(matchingMovies);
+      } else if (movieMap.size > 0) {
+        setMoviesList(Array.from(movieMap.values()));
+      } else {
+        setMoviesList(allMoviesList);
       }
-    });
-
-    const matchingMovies: QuickMovieOption[] = allMovies.filter((m) =>
-      movieMap.has(m.id) || movieMap.has(m.slug)
-    );
-
-    if (matchingMovies.length > 0) {
-      setAvailableMovies(matchingMovies);
-    } else if (movieMap.size > 0) {
-      setAvailableMovies(Array.from(movieMap.values()));
-    } else {
-      setAvailableMovies(allMovies);
+    } finally {
+      setLoadingMovies(false);
     }
+
+    setTimeout(() => setOpenDropdown('movie'), 120);
   };
 
-  // 4. Handle Date Selection
-  const handleDateChange = (newDate: string) => {
-    setDate(newDate);
+  const handleSelectDate = (selectedDateId: string) => {
+    setDate(selectedDateId);
     setTime('');
     setTimesList([]);
 
-    if (!newDate || !cinemaId || !movieId) return;
+    if (!selectedDateId || !cinemaId || !movieId) {
+      setOpenDropdown(null);
+      return;
+    }
 
     const slots: QuickShowtimeOption[] = [];
 
-    // Prioritize movieShowtimesTree
-    if (movieShowtimesTree.length > 0) {
-      const dayEntry = movieShowtimesTree.find((d: any) => d.date === newDate);
+    if (showtimesTree.length > 0) {
+      const dayEntry = showtimesTree.find((d: any) => d.date === selectedDateId);
       const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
         const cObj = c.cinema || {};
         const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
@@ -294,12 +281,11 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
             showtimeId: st.showtime_id || st.id || '',
             time: startTime,
             format,
-            label: `${startTime} - ${format}${roomName}`,
+            label: `${startTime} • ${format}${roomName}`,
           });
         });
       }
     } else if (cinemaShowtimesData.length > 0) {
-      // Fallback to cinemaShowtimesData
       const movieEntry = cinemaShowtimesData.find((item: any) => {
         const m = item.movie || item;
         return String(m.movie_id || m.id) === String(movieId) || m.slug === movieId;
@@ -314,138 +300,241 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
           showtimeId: st.showtimeId || st.id || '',
           time: startTime,
           format,
-          label: `${startTime} - ${format}`,
+          label: `${startTime} • ${format}`,
         });
       });
     }
 
     setTimesList(slots);
+    setTimeout(() => setOpenDropdown('time'), 120);
   };
+
+  const handleSelectTime = (selectedTimeId: string) => {
+    setTime(selectedTimeId);
+    setOpenDropdown(null);
+  };
+
+  const isDateDisabled = !movieId || !cinemaId;
+  const isTimeDisabled = !movieId || !cinemaId || !date;
+  const isSubmitDisabled = !movieId || !cinemaId || !date || !time;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!movieId || !cinemaId || !date || !time) return;
-
-    const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(time)}`;
-    if (!isAuthenticated) {
-      openAuthModal('login', 'Vui lòng đăng nhập tài khoản để chọn ghế và đặt vé trực tuyến.', targetUrl);
-      return;
-    }
+    if (isSubmitDisabled) return;
 
     if (onQuickBook) {
       onQuickBook({ movieId, cinemaId, date, time });
     } else {
-      const selectedMovie = allMovies.find((m) => m.id === movieId);
-      const selectedCinema = allCinemas.find((c) => c.id === cinemaId);
       const selectedTimeSlot = timesList.find((t) => t.id === time);
-
       const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(time)}&movie=${encodeURIComponent(selectedMovie?.slug || '')}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(selectedTimeSlot?.time || '')}&cinema=${encodeURIComponent(selectedCinema?.name || '')}`;
       router.push(targetUrl);
     }
   };
 
+  const getSelectedMovieLabel = () => selectedMovie?.title || (loadingMovies ? 'Đang lọc phim...' : 'Chọn Phim');
+  const getSelectedCinemaLabel = () => selectedCinema?.name || (loadingCinemas ? 'Đang tìm rạp...' : 'Chọn Cụm Rạp');
+  const getSelectedDateLabel = () => datesList.find((d) => d.id === date)?.label || (loadingDates ? 'Đang tải ngày...' : 'Chọn Ngày');
+  const getSelectedTimeLabel = () => timesList.find((t) => t.id === time || String(t.showtimeId) === time)?.label || (loadingTimes ? 'Đang tải suất...' : 'Chọn Suất Chiếu');
+
   return (
-    <section className="relative z-20 max-w-[1240px] mx-auto px-8 -mt-24 mb-24">
-      <form
-        onSubmit={handleSubmit}
-        className="glass-card rounded-full p-4 flex flex-col md:flex-row items-center justify-between shadow-glass border border-white/50 gap-4 md:gap-0"
+    <form
+      onSubmit={handleSubmit}
+      className="glass-dock rounded-2xl lg:rounded-full p-3 sm:p-4 flex flex-col lg:flex-row items-center justify-between gap-4 transition-all"
+    >
+      <div className="w-full flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-0 lg:divide-x lg:divide-white/10 items-center">
+        {/* 1. CHỌN PHIM */}
+        <div className="relative px-3 sm:px-5 py-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+              <Film className="w-3.5 h-3.5 text-[#7C6FE8]" />
+              <span>1. Chọn Phim</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenDropdown(openDropdown === 'movie' ? null : 'movie')}
+            className="w-full text-left font-bold text-xs sm:text-sm text-white flex items-center justify-between gap-2 group py-1 cursor-pointer"
+          >
+            <span className="truncate">{getSelectedMovieLabel()}</span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'movie' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {openDropdown === 'movie' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                className="absolute left-0 top-full mt-2 w-72 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-[#141320] border border-[#7C6FE8]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-[100] flex flex-col gap-1"
+              >
+                {loadingMovies ? (
+                  <div className="px-3 py-3 text-xs text-gray-400 flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+                    <span>Đang lọc danh sách phim...</span>
+                  </div>
+                ) : moviesList.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => handleSelectMovie(m.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
+                      movieId === m.id ? 'bg-[#7C6FE8] text-white' : 'text-gray-200 hover:bg-white/10'
+                    }`}
+                  >
+                    {m.title}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* 2. CHỌN RẠP */}
+        <div className="relative px-3 sm:px-5 py-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#7C6FE8]" />
+              <span>2. Chọn Rạp</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenDropdown(openDropdown === 'cinema' ? null : 'cinema')}
+            className="w-full text-left font-bold text-xs sm:text-sm text-white flex items-center justify-between gap-2 group py-1 cursor-pointer"
+          >
+            <span className="truncate">{getSelectedCinemaLabel()}</span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'cinema' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {openDropdown === 'cinema' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                className="absolute left-0 top-full mt-2 w-72 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-[#141320] border border-[#7C6FE8]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-[100] flex flex-col gap-1"
+              >
+                {loadingCinemas ? (
+                  <div className="px-3 py-3 text-xs text-gray-400 flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+                    <span>Đang tìm rạp chiếu...</span>
+                  </div>
+                ) : cinemasList.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => handleSelectCinema(c.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
+                      cinemaId === c.id ? 'bg-[#7C6FE8] text-white' : 'text-gray-200 hover:bg-white/10'
+                    }`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* 3. NGÀY XEM */}
+        <div className={`relative px-3 sm:px-5 py-2 ${isDateDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#7C6FE8]" />
+              <span>3. Ngày Xem</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            disabled={isDateDisabled}
+            onClick={() => setOpenDropdown(openDropdown === 'date' ? null : 'date')}
+            className="w-full text-left font-bold text-xs sm:text-sm text-white flex items-center justify-between gap-2 group py-1 cursor-pointer"
+          >
+            <span className="truncate">{getSelectedDateLabel()}</span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'date' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {openDropdown === 'date' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                className="absolute left-0 top-full mt-2 w-64 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-[#141320] border border-[#7C6FE8]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-[100] flex flex-col gap-1"
+              >
+                {datesList.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => handleSelectDate(d.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
+                      date === d.id ? 'bg-[#7C6FE8] text-white' : 'text-gray-200 hover:bg-white/10'
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* 4. SUẤT CHIẾU */}
+        <div className={`relative px-3 sm:px-5 py-2 ${isTimeDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#7C6FE8]" />
+              <span>4. Suất Chiếu</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            disabled={isTimeDisabled}
+            onClick={() => setOpenDropdown(openDropdown === 'time' ? null : 'time')}
+            className="w-full text-left font-bold text-xs sm:text-sm text-white flex items-center justify-between gap-2 group py-1 cursor-pointer"
+          >
+            <span className="truncate">{getSelectedTimeLabel()}</span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'time' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {openDropdown === 'time' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                className="absolute left-0 top-full mt-2 w-72 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-[#141320] border border-[#7C6FE8]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-[100] flex flex-col gap-1"
+              >
+                {timesList.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => handleSelectTime(t.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
+                      time === t.id ? 'bg-[#7C6FE8] text-white' : 'text-gray-200 hover:bg-white/10'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isSubmitDisabled}
+        className={`w-full lg:w-auto px-8 py-3.5 rounded-xl lg:rounded-full font-bold text-xs sm:text-sm shrink-0 transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          isSubmitDisabled
+            ? 'bg-white/10 text-gray-400 cursor-not-allowed border border-white/5'
+            : 'bg-[#7C6FE8] hover:bg-[#6d60df] text-white shadow-[0_0_25px_rgba(124,111,232,0.6)] hover:scale-105 active:scale-95'
+        }`}
       >
-        <div className="flex-1 flex items-center px-4 w-full">
-          <div className="flex flex-col w-full">
-            <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">
-              CHỌN PHIM
-            </span>
-            <select
-              value={movieId}
-              onChange={(e) => handleMovieChange(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
-            >
-              <option value="">-- Chọn Phim --</option>
-              {availableMovies.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="hidden md:block w-[1px] h-10 bg-slate-800/10 mx-2" />
-
-        <div className="flex-1 flex items-center px-4 w-full">
-          <div className="flex flex-col w-full">
-            <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">
-              CHỌN RẠP
-            </span>
-            <select
-              value={cinemaId}
-              onChange={(e) => handleCinemaChange(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full"
-            >
-              <option value="">-- Chọn Rạp --</option>
-              {availableCinemas.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="hidden md:block w-[1px] h-10 bg-slate-800/10 mx-2" />
-
-        <div className="flex-1 flex items-center px-4 w-full">
-          <div className="flex flex-col w-full">
-            <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">
-              NGÀY XEM
-            </span>
-            <select
-              value={date}
-              disabled={!movieId || !cinemaId}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
-            >
-              <option value="">-- Chọn Ngày --</option>
-              {datesList.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="hidden md:block w-[1px] h-10 bg-slate-800/10 mx-2" />
-
-        <div className="flex-1 flex items-center px-4 w-full">
-          <div className="flex flex-col w-full">
-            <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">
-              SUẤT CHIẾU
-            </span>
-            <select
-              value={time}
-              disabled={!date}
-              onChange={(e) => setTime(e.target.value)}
-              className="bg-transparent border-none p-0 text-sm font-medium text-[var(--text)] focus:ring-0 appearance-none cursor-pointer outline-none w-full disabled:opacity-50"
-            >
-              <option value="">-- Chọn Giờ --</option>
-              {timesList.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={!movieId || !cinemaId || !date || !time}
-          className="w-full md:w-auto ml-0 md:ml-4 bg-[#7C6FE8] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:bg-[#685bc7] transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          MUA VÉ
-        </button>
-      </form>
-    </section>
+        <span>CHỌN GHẾ NGAY</span>
+        <span className="text-xs">→</span>
+      </button>
+    </form>
   );
 };

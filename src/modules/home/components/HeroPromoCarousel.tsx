@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Film, MapPin, Calendar, Clock, Loader2 } from 'lucide-react';
+import { ChevronDown, Film, MapPin, Calendar, Clock, Loader2, Play, Ticket, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PromoBanner, DynamicDateOption, QuickShowtimeOption } from '../types/home.types';
 import {
   fetchQuickBookingMovies,
@@ -12,7 +12,8 @@ import {
   fetchCinemaShowtimesTree,
   HomeCinemaOption,
 } from '../services/home.service';
-import { Button } from '@/shared/ui/Button';
+import { MOCK_PROMO_BANNERS } from '../mocks/mockHomeData';
+import { useTrailerStore } from '@/shared/store/trailerStore';
 
 interface QuickMovieOption {
   id: string;
@@ -27,6 +28,7 @@ interface HeroPromoCarouselProps {
 
 export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, onQuickBook }) => {
   const router = useRouter();
+  const openTrailer = useTrailerStore((state) => state.openTrailer);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Master lists
@@ -177,7 +179,6 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
         setCinemasList(matchingCinemas.length > 0 ? matchingCinemas : allCinemasList);
 
-        // If cinema is already selected and is in matching cinemas, calculate dates
         if (cinemaId && cinemaMap.has(cinemaId)) {
           const dates = buildDatesFromMovieTree(tree, cinemaId);
           setDatesList(dates);
@@ -215,7 +216,6 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
     const cinema = allCinemasList.find((c) => c.id === selectedCinemaId) || cinemasList.find((c) => c.id === selectedCinemaId);
 
-    // Case A: Movie is ALREADY selected -> Calculate dates from existing showtimesTree
     if (movieId && showtimesTree.length > 0) {
       const dates = buildDatesFromMovieTree(showtimesTree, selectedCinemaId);
       setDatesList(dates);
@@ -223,7 +223,6 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
       return;
     }
 
-    // Case B: Movie is NOT selected yet -> Fetch cinema's showtimes to filter available movies
     setLoadingMovies(true);
     try {
       const cinemaTree = await fetchCinemaShowtimesTree(cinema?.slug || selectedCinemaId);
@@ -267,7 +266,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
     setTimeout(() => setOpenDropdown('movie'), 120);
   };
 
-  // 4. Date selection handler -> Load Showtimes for (Movie, Cinema, Date)
+  // 4. Date selection handler -> Load Showtimes
   const handleSelectDate = (selectedDateId: string) => {
     setDate(selectedDateId);
     setTime('');
@@ -280,7 +279,6 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
     const slots: QuickShowtimeOption[] = [];
 
-    // Prioritize showtimesTree (from movie)
     if (showtimesTree.length > 0) {
       const dayEntry = showtimesTree.find((d: any) => d.date === selectedDateId);
       const cinemaEntry = dayEntry?.cinemas?.find((c: any) => {
@@ -301,12 +299,11 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
             showtimeId: st.showtime_id || st.id || '',
             time: startTime,
             format,
-            label: `${startTime} - ${format}${roomName}`,
+            label: `${startTime} • ${format}${roomName}`,
           });
         });
       }
     } else if (cinemaShowtimesData.length > 0) {
-      // Fallback from cinemaShowtimesData
       const movieEntry = cinemaShowtimesData.find((item: any) => {
         const m = item.movie || item;
         return String(m.movie_id || m.id) === String(movieId) || m.slug === movieId;
@@ -321,7 +318,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
           showtimeId: st.showtimeId || st.id || '',
           time: startTime,
           format,
-          label: `${startTime} - ${format}`,
+          label: `${startTime} • ${format}`,
         });
       });
     }
@@ -337,19 +334,22 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   };
 
   // Conditions
-  const isCinemaDisabled = false; // Never disabled: user can choose Cinema first!
   const isDateDisabled = !movieId || !cinemaId;
   const isTimeDisabled = !movieId || !cinemaId || !date;
   const isSubmitDisabled = !movieId || !cinemaId || !date || !time;
 
-  // Auto-slide every 5s
+  const activeBanners = useMemo(() => {
+    return banners && banners.length > 0 ? banners : MOCK_PROMO_BANNERS;
+  }, [banners]);
+
+  // Auto-slide every 6s
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (activeBanners.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, 5000);
+      setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 6000);
     return () => clearInterval(timer);
-  }, [banners.length]);
+  }, [activeBanners.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -364,277 +364,381 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
     }
   };
 
-  const currentBanner = banners[currentIndex] || banners[0];
+  const currentBanner = activeBanners[currentIndex % activeBanners.length] || activeBanners[0];
 
-  const getSelectedMovieLabel = () => selectedMovie?.title || (loadingMovies ? 'Đang lọc phim...' : '-- Chọn Phim --');
-  const getSelectedCinemaLabel = () => selectedCinema?.name || (loadingCinemas ? 'Đang tìm rạp...' : '-- Chọn Rạp --');
-  const getSelectedDateLabel = () => datesList.find((d) => d.id === date)?.label || (loadingDates ? 'Đang tải ngày...' : '-- Chọn Ngày --');
-  const getSelectedTimeLabel = () => timesList.find((t) => t.id === time || String(t.showtimeId) === time)?.label || (loadingTimes ? 'Đang tải suất...' : '-- Chọn Giờ --');
+  const getSelectedMovieLabel = () => selectedMovie?.title || (loadingMovies ? 'Đang lọc phim...' : 'Chọn Phim');
+  const getSelectedCinemaLabel = () => selectedCinema?.name || (loadingCinemas ? 'Đang tìm rạp...' : 'Chọn Cụm Rạp');
+  const getSelectedDateLabel = () => datesList.find((d) => d.id === date)?.label || (loadingDates ? 'Đang tải ngày...' : 'Chọn Ngày');
+  const getSelectedTimeLabel = () => timesList.find((t) => t.id === time || String(t.showtimeId) === time)?.label || (loadingTimes ? 'Đang tải suất...' : 'Chọn Suất Chiếu');
+
+  const handlePrevSlide = () => {
+    setCurrentIndex((prev) => (prev === 0 ? activeBanners.length - 1 : prev - 1));
+  };
+
+  const handleNextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+  };
 
   return (
-    <section className="w-full bg-[var(--bg2)] pb-12 pt-28">
-      <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-6">
-        {/* Top: Auto Promo Carousel Slider (Full-Bleed 100% Fit) */}
-        <div className="relative w-full aspect-[16/7] sm:aspect-[2.4/1] max-h-[360px] rounded-3xl overflow-hidden shadow-2xl bg-slate-900 group">
-          {currentBanner && (
-            <>
-              <img
-                src={currentBanner.imageUrl}
-                alt={currentBanner.title}
-                className="w-full h-full object-cover object-center transition-opacity duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex items-end p-5 sm:p-8">
-                <div className="flex flex-col gap-2 max-w-xl text-white">
-                  {currentBanner.badgeText && (
-                    <span className="self-start px-3 py-1 rounded-full bg-[#7C6FE8] text-white text-xs font-bold uppercase tracking-wider shadow-sm">
-                      {currentBanner.badgeText}
-                    </span>
-                  )}
-                  <h2 className="text-xl sm:text-3xl font-bold tracking-tight leading-tight drop-shadow-md">
-                    {currentBanner.title}
-                  </h2>
-                </div>
-              </div>
-            </>
-          )}
+    <section className="relative w-full overflow-hidden pt-24 pb-12 sm:pt-28 sm:pb-16 bg-[#FAFAFB]">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-8 flex flex-col gap-6 lg:gap-8">
+        {/* TOP: Cinematic Marquee Banner */}
+        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[2.4/1] max-h-[480px] rounded-3xl overflow-hidden shadow-[0_16px_45px_rgba(0,0,0,0.18)] border border-gray-200/50 group bg-slate-950">
+          <AnimatePresence mode="wait">
+            {currentBanner && (
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, scale: 1.04 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0"
+              >
+                <img
+                  src={currentBanner.imageUrl}
+                  alt={currentBanner.title}
+                  className="w-full h-full object-cover object-center animate-drift"
+                />
 
-          {/* Dots Indicator */}
-          <div className="absolute bottom-4 right-6 flex items-center gap-2 z-10">
-            {banners.map((_, idx) => (
+                {/* Atmospheric Vignette and Gradients */}
+                <div className="absolute inset-0 hero-overlay" />
+                <div className="absolute inset-0 hero-side-fade hidden md:block" />
+
+                {/* Banner Content */}
+                <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 lg:p-14 text-white z-10">
+                  <div className="flex flex-col gap-3 max-w-2xl">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-3 py-1 rounded-full bg-[#7C6FE8] text-white text-[11px] font-bold tracking-wide uppercase shadow-sm">
+                        {currentBanner.badgeText || 'ĐANG CHIẾU'}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-[11px] font-semibold text-white border border-white/20">
+                        IMAX 3D Laser • Dolby Atmos
+                      </span>
+                    </div>
+
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-md">
+                      {currentBanner.title}
+                    </h1>
+
+                    <p className="text-xs sm:text-sm text-gray-200 line-clamp-2 max-w-xl leading-relaxed">
+                      Trải nghiệm siêu phẩm điện ảnh với hình ảnh sắc nét gấp 4 lần và âm thanh sống động đến từng chi tiết tại hệ thống rạp CineDot.
+                    </p>
+
+                    {/* Quick CTA Actions */}
+                    <div className="flex items-center gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => openTrailer('https://www.youtube.com/watch?v=cqGjhVJWtEg', currentBanner.imageUrl, currentBanner.title)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs sm:text-sm font-bold backdrop-blur-md transition-all cursor-pointer shadow-sm"
+                      >
+                        <Play className="w-3.5 h-3.5 text-white fill-white" />
+                        <span>Xem Trailer</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const dock = document.getElementById('quick-booking-dock');
+                          dock?.scrollIntoView({ behavior: 'smooth' });
+                          setOpenDropdown('movie');
+                        }}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer"
+                      >
+                        <Ticket className="w-4 h-4" />
+                        <span>Đặt Vé Nhanh</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={handlePrevSlide}
+            aria-label="Previous Slide"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-[#7C6FE8] text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-20 cursor-pointer"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={handleNextSlide}
+            aria-label="Next Slide"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-[#7C6FE8] text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-20 cursor-pointer"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* Carousel Progress Dots */}
+          <div className="absolute bottom-5 right-6 flex items-center gap-2 z-20">
+            {activeBanners.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  currentIndex === idx ? 'w-8 bg-[#7C6FE8]' : 'bg-white/50 hover:bg-white'
+                aria-label={`Slide ${idx + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  currentIndex % activeBanners.length === idx
+                    ? 'w-8 bg-[#7C6FE8] shadow-sm'
+                    : 'w-2 bg-white/40 hover:bg-white/70'
                 }`}
               />
             ))}
           </div>
         </div>
 
-        {/* Bottom: Quick Booking Strip (CRISP BOLD BLACK TEXT FOR OPENED STEPS) */}
-        <form
-          onSubmit={handleSubmit}
-          className="relative z-40 w-full bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-full p-3 sm:p-4 flex flex-col md:flex-row items-center justify-between shadow-[0_20px_50px_rgba(124,111,232,0.16),0_4px_16px_rgba(0,0,0,0.04)] ring-1 ring-white/80 gap-3"
-        >
-          <div className="w-full flex-1 grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-slate-200/80 items-center">
-            {/* Step 1: CHỌN PHIM */}
-            <div className="relative px-4 sm:px-6 py-1">
-              <label className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                <Film className="w-3 h-3 text-[#7C6FE8]" />
-                <span>CHỌN PHIM</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setOpenDropdown(openDropdown === 'movie' ? null : 'movie')}
-                className="w-full text-left font-bold text-xs sm:text-sm text-[#131413] flex items-center justify-between gap-1 group py-0.5 transition-all cursor-pointer"
-              >
-                <span className="truncate">{getSelectedMovieLabel()}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-500 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'movie' ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {openDropdown === 'movie' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute left-0 top-full mt-3 w-64 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
-                  >
-                    {loadingMovies ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic flex items-center gap-1.5">
-                        <Loader2 className="w-3 h-3 animate-spin text-[#7C6FE8]" />
-                        <span>Đang lọc danh sách phim...</span>
-                      </div>
-                    ) : moviesList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Không có phim đang chiếu tại rạp này</div>
-                    ) : (
-                      moviesList.map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => handleSelectMovie(m.id)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                            movieId === m.id
-                              ? 'bg-[#7C6FE8]/15 text-[#7C6FE8] font-bold'
-                              : 'text-slate-800 font-semibold hover:bg-slate-100 hover:text-[#7C6FE8]'
-                          }`}
-                        >
-                          {m.title}
-                        </button>
-                      ))
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Step 2: CHỌN RẠP */}
-            <div className="relative px-4 sm:px-6 py-1 transition-all duration-300 opacity-100">
-              <label className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-[#7C6FE8]" />
-                <span>CHỌN RẠP</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setOpenDropdown(openDropdown === 'cinema' ? null : 'cinema')}
-                className="w-full text-left font-bold text-xs sm:text-sm text-[#131413] flex items-center justify-between gap-1 group py-0.5 transition-all cursor-pointer"
-              >
-                <span className="truncate">{getSelectedCinemaLabel()}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-500 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'cinema' ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {openDropdown === 'cinema' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute left-0 top-full mt-3 w-64 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
-                  >
-                    {loadingCinemas ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic flex items-center gap-1.5">
-                        <Loader2 className="w-3 h-3 animate-spin text-[#7C6FE8]" />
-                        <span>Đang tìm rạp chiếu...</span>
-                      </div>
-                    ) : cinemasList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Chưa có rạp chiếu phim này</div>
-                    ) : (
-                      cinemasList.map((c) => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => handleSelectCinema(c.id)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                            cinemaId === c.id
-                              ? 'bg-[#7C6FE8]/15 text-[#7C6FE8] font-bold'
-                              : 'text-slate-800 font-semibold hover:bg-slate-100 hover:text-[#7C6FE8]'
-                          }`}
-                        >
-                          {c.name}
-                        </button>
-                      ))
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Step 3: NGÀY XEM */}
-            <div className={`relative px-4 sm:px-6 py-1 transition-all duration-300 ${isDateDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-              <label className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-[#7C6FE8]" />
-                <span>NGÀY XEM</span>
-              </label>
-              <button
-                type="button"
-                disabled={isDateDisabled}
-                onClick={() => setOpenDropdown(openDropdown === 'date' ? null : 'date')}
-                className="w-full text-left font-bold text-xs sm:text-sm text-[#131413] flex items-center justify-between gap-1 group py-0.5 transition-all cursor-pointer"
-              >
-                <span className="truncate">{getSelectedDateLabel()}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-500 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'date' ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {openDropdown === 'date' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute left-0 top-full mt-3 w-56 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
-                  >
-                    {datesList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Không có suất chiếu phù hợp</div>
-                    ) : (
-                      datesList.map((d) => (
-                        <button
-                          key={d.id}
-                          type="button"
-                          onClick={() => handleSelectDate(d.id)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                            date === d.id
-                              ? 'bg-[#7C6FE8]/15 text-[#7C6FE8] font-bold'
-                              : 'text-slate-800 font-semibold hover:bg-slate-100 hover:text-[#7C6FE8]'
-                          }`}
-                        >
-                          {d.label}
-                        </button>
-                      ))
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Step 4: SUẤT CHIẾU */}
-            <div className={`relative px-4 sm:px-6 py-1 transition-all duration-300 ${isTimeDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-              <label className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-[#7C6FE8]" />
-                <span>SUẤT CHIẾU</span>
-              </label>
-              <button
-                type="button"
-                disabled={isTimeDisabled}
-                onClick={() => setOpenDropdown(openDropdown === 'time' ? null : 'time')}
-                className="w-full text-left font-bold text-xs sm:text-sm text-[#131413] flex items-center justify-between gap-1 group py-0.5 transition-all cursor-pointer"
-              >
-                <span className="truncate">{getSelectedTimeLabel()}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-500 group-hover:text-[#7C6FE8] transition-transform ${openDropdown === 'time' ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {openDropdown === 'time' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute left-0 top-full mt-3 w-64 max-h-[260px] overflow-y-auto scrollbar-none rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-gray-100 p-2 z-[100] flex flex-col gap-1"
-                  >
-                    {loadingTimes ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Đang tải suất chiếu...</div>
-                    ) : timesList.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-slate-400 italic">Hết suất chiếu trong ngày</div>
-                    ) : (
-                      timesList.map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => handleSelectTime(t.id)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                            time === t.id
-                              ? 'bg-[#7C6FE8]/15 text-[#7C6FE8] font-bold'
-                              : 'text-slate-800 font-semibold hover:bg-slate-100 hover:text-[#7C6FE8]'
-                          }`}
-                        >
-                          {t.label}
-                        </button>
-                      ))
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <Button
-            type="submit"
-            disabled={isSubmitDisabled}
-            className={`w-full md:w-auto px-8 py-3.5 rounded-full font-bold text-xs sm:text-sm shrink-0 shadow-lg transition-all cursor-pointer ${
-              isSubmitDisabled
-                ? 'bg-[#7C6FE8]/40 text-white cursor-not-allowed shadow-none'
-                : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-[#7C6FE8]/30 hover:scale-105'
-            }`}
+        {/* BOTTOM: 1-Click Floating Quick Booking Dock */}
+        <div id="quick-booking-dock" className="relative z-30 w-full">
+          <form
+            onSubmit={handleSubmit}
+            className="glass-dock rounded-2xl lg:rounded-full p-2.5 sm:p-3 flex flex-col lg:flex-row items-center justify-between gap-3 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-gray-200/90 bg-white/95 backdrop-blur-xl"
           >
-            MUA VÉ
-          </Button>
-        </form>
+            <div className="w-full flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-0 lg:divide-x lg:divide-gray-200 items-center">
+              {/* 1. CHỌN PHIM */}
+              <div className="relative px-3 sm:px-5 py-1.5">
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+                    <Film className="w-3.5 h-3.5 text-[#7C6FE8]" />
+                    <span>1. Chọn Phim</span>
+                  </span>
+                  {movieId && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(openDropdown === 'movie' ? null : 'movie')}
+                  className="w-full text-left font-bold text-xs sm:text-sm text-gray-900 flex items-center justify-between gap-2 group py-1 transition-all cursor-pointer"
+                >
+                  <span className="truncate">{getSelectedMovieLabel()}</span>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform duration-200 shrink-0 ${openDropdown === 'movie' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === 'movie' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 top-full mt-2 w-72 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-white border border-gray-200 shadow-[0_16px_45px_rgba(0,0,0,0.12)] p-2 z-[100] flex flex-col gap-1 text-gray-800"
+                    >
+                      {loadingMovies ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 flex items-center gap-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+                          <span>Đang lọc danh sách phim...</span>
+                        </div>
+                      ) : moviesList.length === 0 ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 italic">Không có phim đang chiếu tại rạp này</div>
+                      ) : (
+                        moviesList.map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => handleSelectMovie(m.id)}
+                            className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                              movieId === m.id
+                                ? 'bg-[#7C6FE8] text-white shadow-sm'
+                                : 'text-gray-700 hover:bg-purple-50 hover:text-[#7C6FE8]'
+                            }`}
+                          >
+                            <span className="truncate">{m.title}</span>
+                            {movieId === m.id && <span className="text-[10px]">✓</span>}
+                          </button>
+                        ))
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* 2. CHỌN RẠP */}
+              <div className="relative px-3 sm:px-5 py-1.5">
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#7C6FE8]" />
+                    <span>2. Chọn Rạp</span>
+                  </span>
+                  {cinemaId && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(openDropdown === 'cinema' ? null : 'cinema')}
+                  className="w-full text-left font-bold text-xs sm:text-sm text-gray-900 flex items-center justify-between gap-2 group py-1 transition-all cursor-pointer"
+                >
+                  <span className="truncate">{getSelectedCinemaLabel()}</span>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform duration-200 shrink-0 ${openDropdown === 'cinema' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === 'cinema' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 top-full mt-2 w-72 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-white border border-gray-200 shadow-[0_16px_45px_rgba(0,0,0,0.12)] p-2 z-[100] flex flex-col gap-1 text-gray-800"
+                    >
+                      {loadingCinemas ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 flex items-center gap-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+                          <span>Đang tìm rạp chiếu...</span>
+                        </div>
+                      ) : cinemasList.length === 0 ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 italic">Chưa có rạp chiếu phim này</div>
+                      ) : (
+                        cinemasList.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => handleSelectCinema(c.id)}
+                            className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                              cinemaId === c.id
+                                ? 'bg-[#7C6FE8] text-white shadow-sm'
+                                : 'text-gray-700 hover:bg-purple-50 hover:text-[#7C6FE8]'
+                            }`}
+                          >
+                            <span className="truncate">{c.name}</span>
+                            {cinemaId === c.id && <span className="text-[10px]">✓</span>}
+                          </button>
+                        ))
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* 3. NGÀY XEM */}
+              <div className={`relative px-3 sm:px-5 py-1.5 transition-all ${isDateDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#7C6FE8]" />
+                    <span>3. Ngày Xem</span>
+                  </span>
+                  {date && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  disabled={isDateDisabled}
+                  onClick={() => setOpenDropdown(openDropdown === 'date' ? null : 'date')}
+                  className="w-full text-left font-bold text-xs sm:text-sm text-gray-900 flex items-center justify-between gap-2 group py-1 transition-all cursor-pointer"
+                >
+                  <span className="truncate">{getSelectedDateLabel()}</span>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform duration-200 shrink-0 ${openDropdown === 'date' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === 'date' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 top-full mt-2 w-64 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-white border border-gray-200 shadow-[0_16px_45px_rgba(0,0,0,0.12)] p-2 z-[100] flex flex-col gap-1 text-gray-800"
+                    >
+                      {datesList.length === 0 ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 italic">Không có ngày chiếu khả dụng</div>
+                      ) : (
+                        datesList.map((d) => (
+                          <button
+                            key={d.id}
+                            type="button"
+                            onClick={() => handleSelectDate(d.id)}
+                            className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                              date === d.id
+                                ? 'bg-[#7C6FE8] text-white shadow-sm'
+                                : 'text-gray-700 hover:bg-purple-50 hover:text-[#7C6FE8]'
+                            }`}
+                          >
+                            <span>{d.label}</span>
+                            {date === d.id && <span className="text-[10px]">✓</span>}
+                          </button>
+                        ))
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* 4. SUẤT CHIẾU */}
+              <div className={`relative px-3 sm:px-5 py-1.5 transition-all ${isTimeDisabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[10px] font-bold text-[#7C6FE8] uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#7C6FE8]" />
+                    <span>4. Suất Chiếu</span>
+                  </span>
+                  {time && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  disabled={isTimeDisabled}
+                  onClick={() => setOpenDropdown(openDropdown === 'time' ? null : 'time')}
+                  className="w-full text-left font-bold text-xs sm:text-sm text-gray-900 flex items-center justify-between gap-2 group py-1 transition-all cursor-pointer"
+                >
+                  <span className="truncate">{getSelectedTimeLabel()}</span>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-[#7C6FE8] transition-transform duration-200 shrink-0 ${openDropdown === 'time' ? 'rotate-180 text-[#7C6FE8]' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === 'time' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 top-full mt-2 w-72 max-h-[300px] overflow-y-auto scrollbar-thin rounded-2xl bg-white border border-gray-200 shadow-[0_16px_45px_rgba(0,0,0,0.12)] p-2 z-[100] flex flex-col gap-1 text-gray-800"
+                    >
+                      {loadingTimes ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 flex items-center gap-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+                          <span>Đang tải suất chiếu...</span>
+                        </div>
+                      ) : timesList.length === 0 ? (
+                        <div className="px-3 py-3 text-xs text-gray-500 italic">Hết suất chiếu trong ngày này</div>
+                      ) : (
+                        timesList.map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => handleSelectTime(t.id)}
+                            className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                              time === t.id
+                                ? 'bg-[#7C6FE8] text-white shadow-sm'
+                                : 'text-gray-700 hover:bg-purple-50 hover:text-[#7C6FE8]'
+                            }`}
+                          >
+                            <span>{t.label}</span>
+                            {time === t.id && <span className="text-[10px]">✓</span>}
+                          </button>
+                        ))
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* 1-Click Fast Book Button */}
+            <button
+              type="submit"
+              disabled={isSubmitDisabled}
+              className={`w-full lg:w-auto px-8 py-3.5 rounded-xl lg:rounded-full font-extrabold text-xs uppercase tracking-wider shrink-0 transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                isSubmitDisabled
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                  : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-sm shadow-[#7C6FE8]/30 hover:scale-[1.02] active:scale-[0.98]'
+              }`}
+            >
+              <span>CHỌN GHẾ NGAY</span>
+              <span className="text-xs">→</span>
+            </button>
+          </form>
+        </div>
       </div>
     </section>
   );

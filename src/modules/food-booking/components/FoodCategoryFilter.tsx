@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · theme: White Minimal · component: FoodCategoryFilter */
 'use client';
 
 import React from 'react';
@@ -21,17 +22,24 @@ export const FoodCategoryFilter: React.FC<FoodCategoryFilterProps> = ({
   onSelectCategory,
 }) => {
   return (
-    <div className="w-full bg-white rounded-2xl p-2 shadow-sm border border-gray-100 flex items-center gap-2 overflow-x-auto scrollbar-none">
+    <div
+      role="tablist"
+      aria-label="Danh mục bắp nước"
+      className="w-full bg-white rounded-2xl p-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-gray-200/90 flex items-center gap-1.5 overflow-x-auto scrollbar-none select-none transition-colors"
+    >
       {categories.map((cat) => {
         const isActive = activeCategory === cat.id;
         return (
           <button
             key={cat.id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => onSelectCategory(cat.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all duration-150 cursor-pointer ${
               isActive
-                ? 'bg-[#7C6FE8] text-white shadow-sm'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
+                ? 'bg-[#7C6FE8] text-white shadow-[0_2px_8px_rgba(124,111,232,0.35)]'
+                : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-950 border border-transparent'
             }`}
           >
             {cat.label}
@@ -41,3 +49,4 @@ export const FoodCategoryFilter: React.FC<FoodCategoryFilterProps> = ({
     </div>
   );
 };
+

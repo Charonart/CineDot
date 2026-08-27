@@ -45,7 +45,15 @@ export const MovieVideosGallerySection: React.FC<MovieVideosGallerySectionProps>
 
   const handlePlayVideo = (video: MovieVideoItem) => {
     const youtubeUrl = `https://www.youtube.com/watch?v=${video.key}`;
-    openTrailer(youtubeUrl, posterUrl, `${movieTitle} • ${video.name}`);
+    const formattedVideos = displayVideos.map((v) => ({
+      id: v.videoId,
+      name: v.name,
+      key: v.key,
+      type: v.type,
+      site: v.site,
+      thumbnailUrl: v.thumbnailUrl,
+    }));
+    openTrailer(youtubeUrl, posterUrl, `${movieTitle} • ${video.name}`, formattedVideos, [posterUrl]);
   };
 
   return (
