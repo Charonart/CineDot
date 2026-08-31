@@ -29,6 +29,14 @@ export const TabAccountInfo: React.FC<TabAccountInfoProps> = ({
   const [city, setCity] = useState(profile.city);
   const [isSaving, setIsSaving] = useState(false);
 
+  React.useEffect(() => {
+    setFullName(profile.fullName || '');
+    setPhone(profile.phone || '');
+    setBirthDate(profile.birthDate || '');
+    setGender(profile.gender || 'male');
+    setCity(profile.city || '');
+  }, [profile]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);

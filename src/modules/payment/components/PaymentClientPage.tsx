@@ -1,13 +1,14 @@
 /* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: Workbench · theme: White Minimal · component: PaymentClientPage */
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { usePayment } from '../hooks/usePayment';
 import { BookingStepWizard } from '@/modules/booking/components/BookingStepWizard';
 import { VoucherInputBar } from './VoucherInputBar';
+import { UserVoucherSelectorModal } from './UserVoucherSelectorModal';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { PaymentSidebar } from './PaymentSidebar';
 import { PaymentLoadingOverlay } from './PaymentLoadingOverlay';
@@ -15,7 +16,6 @@ import { SeatTimeoutModal } from '@/modules/booking/components/SeatTimeoutModal'
 import { MOCK_PAYMENT_METHODS } from '../mocks/mockPaymentData';
 import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
 import { updateBookingSession } from '@/modules/booking/services/bookingSessionService';
-
 
 interface PaymentClientPageProps {
   showtimeId?: string;
@@ -37,6 +37,7 @@ export function PaymentClientPage({
   cinemaParam,
 }: PaymentClientPageProps) {
   const router = useRouter();
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
   const {
     selectedMethod,
@@ -102,7 +103,7 @@ export function PaymentClientPage({
         if (res.paymentUrl) {
           window.location.href = res.paymentUrl;
         } else {
-          router.push(
+          router.replace(
             `/booking/success?booking_id=${res.bookingId}&movie=${movieInfo.slug}&seats=${seatsParam}&date=${dateParam}&time=${timeParam}&cinema=${encodeURIComponent(
               decodedCinemaName
             )}&total=${grandTotal}`
@@ -161,8 +162,9 @@ export function PaymentClientPage({
                 appliedVoucher={appliedVoucher}
                 voucherError={voucherError}
                 isApplying={isApplyingVoucher}
-                onApply={handleApplyVoucher}
+                onApply={() => handleApplyVoucher()}
                 onRemove={handleRemoveVoucher}
+                onOpenSelector={() => setIsVoucherModalOpen(true)}
               />
 
               {/* Payment Method Selector */}
@@ -207,14 +209,22 @@ export function PaymentClientPage({
         </div>
       </main>
 
+      {/* 3. User Voucher Selector Modal */}
+      <UserVoucherSelectorModal
+        isOpen={isVoucherModalOpen}
+        onClose={() => setIsVoucherModalOpen(false)}
+        orderAmount={ticketPrice + totalFoodPrice}
+        appliedVoucherCode={appliedVoucher?.code}
+        onApplyVoucher={(code) => handleApplyVoucher(code)}
+      />
 
-      {/* 3. Full-screen Loading Overlay on Payment Process */}
+      {/* 4. Full-screen Loading Overlay on Payment Process */}
       <PaymentLoadingOverlay
         isOpen={isProcessing}
         paymentMethodName={selectedMethodObj ? selectedMethodObj.name : 'Cổng Thanh Toán'}
       />
 
-      {/* 4. Seat Timeout Expiration Modal Popup */}
+      {/* 5. Seat Timeout Expiration Modal Popup */}
       <SeatTimeoutModal
         isOpen={isTimeout}
         movieSlug={movieInfo.slug}

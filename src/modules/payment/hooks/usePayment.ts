@@ -431,16 +431,17 @@ export function usePayment(
   }, [showtimeId, seatsParam, combosParam]);
 
   // Apply Voucher
-  const handleApplyVoucher = async () => {
-    if (!voucherInput.trim()) return;
+  const handleApplyVoucher = async (codeOverride?: string) => {
+    const code = (codeOverride || voucherInput).trim().toUpperCase();
+    if (!code) return;
     setIsApplyingVoucher(true);
     setVoucherError('');
 
     try {
-      const code = voucherInput.trim().toUpperCase();
       const result = await validateVoucherCode(code, subtotal);
       if (result) {
         setAppliedVoucher(result);
+        setVoucherInput(code);
         setVoucherError('');
         await fetchSummary(code);
       } else {

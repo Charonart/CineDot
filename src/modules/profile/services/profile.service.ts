@@ -8,6 +8,7 @@ import {
   RewardVoucherItem,
   TransactionItem,
   ChangePasswordPayload,
+  TicketFilterStatus,
 } from '../types/profile.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
 
@@ -27,17 +28,32 @@ export async function fetchUserProfile(): Promise<UserProfile> {
       const u = res.data.data;
       const tierData = u.tier_info || {};
 
+      const rawGender = String(u.gender || '').toLowerCase();
+      const normalizedGender =
+        rawGender === 'female' || rawGender === 'nữ' || rawGender === 'nu'
+          ? 'female'
+          : rawGender === 'other' || rawGender === 'khác' || rawGender === 'khac'
+          ? 'other'
+          : 'male';
+
       return {
         id: String(u.user_id || u.id || '1'),
         fullName: u.fullname || u.name || 'Khách Hàng CineDot',
         email: u.email || '',
         phone: u.phone || '',
         birthDate: u.birthday || '',
-        gender: u.gender || 'male',
+        gender: normalizedGender,
         city: u.province || 'Hồ Chí Minh',
         avatarUrl: imageHelper.getAvatarUrl(u.avatar),
         tierName: u.user_tier || 'Bronze',
-        tierBadge: u.user_tier === 'Gold' ? '🌟 Gold Member' : u.user_tier === 'Silver' ? '✨ Silver Member' : '🥉 Bronze Member',
+        tierBadge:
+          u.user_tier === 'Diamond'
+            ? '💎 Diamond Member'
+            : u.user_tier === 'Gold'
+            ? '🌟 Gold Member'
+            : u.user_tier === 'Silver'
+            ? '✨ Silver Member'
+            : '🥉 Bronze Member',
         cinePoints: Number(u.total_points || 0),
         nextTierPoints: Number(tierData.next_tier_min_points || 500),
         tierInfo: {
@@ -57,7 +73,9 @@ export async function fetchUserProfile(): Promise<UserProfile> {
   }
 }
 
-export async function updateUserProfile(payload: UpdateProfilePayload): Promise<{ success: boolean; message?: string }> {
+export async function updateUserProfile(
+  payload: UpdateProfilePayload
+): Promise<{ success: boolean; message?: string }> {
   try {
     const res = await apiClient.patch<ApiResponse<any>>(ENDPOINTS.USERS.UPDATE_PROFILE, payload);
     return {
@@ -72,7 +90,9 @@ export async function updateUserProfile(payload: UpdateProfilePayload): Promise<
   }
 }
 
-export async function changeUserPassword(payload: ChangePasswordPayload): Promise<{ success: boolean; message?: string }> {
+export async function changeUserPassword(
+  payload: ChangePasswordPayload
+): Promise<{ success: boolean; message?: string }> {
   try {
     const res = await apiClient.post<ApiResponse<any>>(ENDPOINTS.USERS.CHANGE_PASSWORD, payload);
     return {
@@ -87,7 +107,7 @@ export async function changeUserPassword(payload: ChangePasswordPayload): Promis
   }
 }
 
-export async function fetchUserTickets(tab: 'UPCOMING' | 'PAST'): Promise<UserTicketItem[]> {
+export async function fetchUserTickets(filterTab?: TicketFilterStatus): Promise<UserTicketItem[]> {
   try {
     const res = await apiClient.get<ApiResponse<any>>(ENDPOINTS.USERS.MY_BOOKINGS, {
       params: { per_page: 50 },
@@ -103,42 +123,82 @@ export async function fetchUserTickets(tab: 'UPCOMING' | 'PAST'): Promise<UserTi
           const cinema = b.cinema || {};
           const room = b.room || {};
 
-          const showtimeDateObj = showtime.showtime_start ? new Date(showtime.showtime_start) : new Date();
+          let showtimeDateObj = new Date();
+          if (showtime.showtime_start) {
+            const parsed = new Date(showtime.showtime_start);
+            if (!isNaN(parsed.getTime())) {
+              showtimeDateObj = parsed;
+            }
+          }
 
           let statusTab: 'UPCOMING' | 'PAST' | 'CANCELLED' = 'PAST';
           let canCancel = false;
 
+          const isPast = showtimeDateObj < now;
+
           if (b.booking_status === 'cancelled') {
             statusTab = 'CANCELLED';
           } else if (b.booking_status === 'completed' || b.booking_status === 'paid') {
-            const isPast = showtimeDateObj < now;
             statusTab = isPast ? 'PAST' : 'UPCOMING';
 
-            // Check cancellation condition: must be upcoming and at least 2 hours prior
+            // Cancellation condition: upcoming and at least 2 hours prior
             const hoursDiff = (showtimeDateObj.getTime() - now.getTime()) / (1000 * 60 * 60);
             canCancel = !isPast && hoursDiff >= 2;
+          } else if (b.booking_status === 'pending') {
+            statusTab = isPast ? 'PAST' : 'UPCOMING';
+            canCancel = false;
           }
+
+          const formattedTime = showtime.showtime_start
+            ? showtimeDateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+            : '19:30';
+
+          const formattedDate = showtime.showtime_start
+            ? showtimeDateObj.toLocaleDateString('vi-VN', {
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })
+            : '20/08/2026';
 
           return {
             bookingId: b.booking_code || String(b.booking_id || b.id),
-            movieTitle: movie.title || 'Phim Điện Ảnh',
+            rawBookingId: b.booking_id ? Number(b.booking_id) : undefined,
+            bookingCode: b.booking_code || String(b.booking_id || b.id),
+            movieTitle: movie.title || 'Phim Điện Ảnh CineDot',
             movieSlug: movie.slug || 'movie-detail',
-            posterUrl: imageHelper.getPosterUrl(movie.poster_url),
+            posterUrl: imageHelper.getPosterUrl(movie.poster_url || movie.poster_path),
             movieFormat: b.price_breakdown?.metadata?.format || room.room_type || '2D Phụ Đề',
-            ageRating: movie.age_rating || 'P',
+            ageRating: movie.age_rating || (movie.adult ? 'T18' : 'P'),
+            duration: movie.duration ? Number(movie.duration) : undefined,
             cinemaName: cinema.cinema_name || 'CineDot Landmark 81',
             roomName: room.room_name || 'Phòng 01',
-            showTime: showtime.showtime_start ? showtimeDateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30',
-            showDate: showtime.showtime_start ? showtimeDateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '20/08/2026',
+            showTime: formattedTime,
+            showDate: formattedDate,
+            showtimeStartIso: showtime.showtime_start || undefined,
             seatLabels: b.seats_summary || 'Đang cập nhật',
+            totalSeats: Number(b.total_seats || (b.seats_summary ? b.seats_summary.split(',').length : 1)),
+            combosSummary: b.combos_summary || undefined,
+            totalCombos: Number(b.total_combos || 0),
             totalPaid: Number(b.final_amount || b.final_total || 0),
-            qrCodeUrl: b.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=CINE-${b.booking_code || b.booking_id}`,
+            discountAmount: Number(b.discount_amount || 0),
+            qrCodeUrl:
+              b.qr_code_url ||
+              `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                b.booking_code || b.booking_id
+              )}`,
             status: statusTab,
             canCancel,
+            createdAt: b.created_at,
           };
         });
 
-        return mapped.filter((t) => (tab === 'UPCOMING' ? t.status === 'UPCOMING' : t.status !== 'UPCOMING'));
+        if (filterTab && filterTab !== 'ALL') {
+          return mapped.filter((t) => t.status === filterTab);
+        }
+
+        return mapped;
       }
       return [];
     }
@@ -275,18 +335,30 @@ export async function fetchUserTransactions(): Promise<TransactionItem[]> {
   }
 }
 
-export async function cancelBooking(bookingId: number | string): Promise<{ success: boolean; message?: string }> {
+export async function cancelBooking(
+  bookingId: number | string
+): Promise<{ success: boolean; message: string }> {
   try {
     const res = await apiClient.post<ApiResponse<any>>(ENDPOINTS.BOOKINGS.CANCEL(bookingId));
+    if (res.data?.success) {
+      return {
+        success: true,
+        message: res.data.message || 'Hủy vé thành công! Yêu cầu hoàn tiền đã được tiếp nhận.',
+      };
+    }
     return {
-      success: res.data?.success ?? true,
-      message: res.data?.message || 'Hủy vé thành công',
+      success: false,
+      message: res.data?.message || 'Không thể hủy vé. Vui lòng thử lại sau.',
     };
   } catch (err: any) {
     return {
       success: false,
-      message: err.response?.data?.message || err.message || 'Không thể hủy vé. Vui lòng liên hệ hotline để được hỗ trợ.',
+      message:
+        err.response?.data?.message ||
+        err.message ||
+        'Không thể hủy vé. Vui lòng liên hệ hotline để được hỗ trợ.',
     };
   }
 }
+
 

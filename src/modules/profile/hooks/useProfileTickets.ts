@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserProfile, UserTicketItem } from '../types/profile.types';
+import { UserProfile, UserTicketItem, TicketFilterStatus } from '../types/profile.types';
 import { fetchUserProfile, fetchUserTickets } from '../services/profile.service';
 
 export function useProfileTickets() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
+  const [activeTab, setActiveTab] = useState<TicketFilterStatus>('UPCOMING');
   const [tickets, setTickets] = useState<UserTicketItem[]>([]);
   const [loading, setLoading] = useState(true);
 

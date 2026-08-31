@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Logo } from './Logo';
 import {
   Film,
   Sparkles,
@@ -37,13 +38,7 @@ export const Footer: React.FC = () => {
         {/* 1. Hallmark Ft5 Statement Header + VIP Newsletter */}
         <div className="pb-12 border-b border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
           <div className="lg:col-span-7 flex flex-col gap-4">
-            <Link
-              href="/"
-              className="font-sans font-black text-2xl tracking-tight text-white flex items-center w-fit group"
-            >
-              <span>Cine</span>
-              <span className="text-[#7C6FE8]">Dot</span>
-            </Link>
+            <Logo height={52} variant="light" />
 
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-2xl font-sans">
               Điện ảnh chạm cảm xúc — Từng khoảnh khắc thăng hoa tại CineDot.

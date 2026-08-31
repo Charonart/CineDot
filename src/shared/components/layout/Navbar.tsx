@@ -11,6 +11,7 @@ import { CinemasMegaDropdown } from './CinemasMegaDropdown';
 import { StarShopMegaDropdown } from './StarShopMegaDropdown';
 import { UserNavMenu } from './UserNavMenu';
 import { ExpandableSearchBar } from '@/shared/ui/ExpandableSearchBar';
+import { Logo } from './Logo';
 import {
   User,
   Ticket,
@@ -23,18 +24,30 @@ import {
   Menu,
   X,
   Search,
+  Shield,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
-  const { user, isAuthenticated, openAuthModal } = useAuthStore();
+  const { user, isAuthenticated, openAuthModal, hasPermission } = useAuthStore();
   const items = useCartStore((state) => state.items);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'movies' | 'cinemas' | 'starshop' | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const isAdmin = Boolean(
+    user &&
+      (user.role_name === 'admin' ||
+        user.role_name === 'super_admin' ||
+        user.role_name === 'SUPER_ADMIN' ||
+        user.role_name === 'ADMIN' ||
+        (user as any).role === 'SUPER_ADMIN' ||
+        (user as any).role === 'ADMIN' ||
+        hasPermission('*'))
+  );
 
   // Prevent SSR Hydration Mismatch & initialize session check
   useEffect(() => {
@@ -107,19 +120,12 @@ export const Navbar: React.FC = () => {
         <div
           className={`rounded-full px-4 sm:px-6 flex items-center justify-between border transition-all duration-300 relative text-slate-900 ${
             isScrolled
-              ? 'py-2.5 sm:py-3 bg-white/95 backdrop-blur-2xl border-gray-200/90 shadow-[0_12px_36px_-6px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.8)]'
-              : 'py-3 sm:py-3.5 bg-white/90 backdrop-blur-xl border-gray-200/70 shadow-[0_6px_24px_-4px_rgba(15,23,42,0.06)]'
+              ? 'py-2 sm:py-2.5 bg-white/95 backdrop-blur-2xl border-gray-200/90 shadow-[0_12px_36px_-6px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.8)]'
+              : 'py-2.5 sm:py-3 bg-white/90 backdrop-blur-xl border-gray-200/70 shadow-[0_6px_24px_-4px_rgba(15,23,42,0.06)]'
           }`}
         >
-          {/* Left Brand Identity */}
-          <Link
-            className="font-sans font-black text-xl sm:text-2xl tracking-tight text-slate-900 flex items-center group shrink-0"
-            href="/"
-            onClick={() => setActiveDropdown(null)}
-          >
-            <span>Cine</span>
-            <span className="text-[#7C6FE8]">Dot</span>
-          </Link>
+          {/* Left Brand Identity: Logo 44px */}
+          <Logo height={44} onClick={() => setActiveDropdown(null)} />
 
           {/* Center Navigation Links */}
           <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 text-xs font-bold text-slate-700">
@@ -190,6 +196,20 @@ export const Navbar: React.FC = () => {
                 onSubmit={handleSearchSubmit}
               />
             </div>
+
+            {/* Admin Portal Quick Access Button */}
+            {mounted && isAuthenticated && isAdmin && (
+              <Link href="/admin">
+                <button
+                  type="button"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#7C6FE8] to-indigo-600 hover:from-[#685bc7] hover:to-indigo-700 text-white text-xs font-black shadow-xs shadow-[#7C6FE8]/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                  title="Truy cập Bảng Quản Trị Hệ Thống"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Quản Trị</span>
+                </button>
+              </Link>
+            )}
 
             {/* StarShop Cart Button */}
             {mounted && isAuthenticated && totalCartCount > 0 && (

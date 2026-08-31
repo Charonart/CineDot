@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   UserProfile,
   UserTicketItem,
@@ -9,6 +9,7 @@ import {
   TransactionItem,
   ProfileDashboardTab,
   ChangePasswordPayload,
+  TicketFilterStatus,
 } from '../types/profile.types';
 import {
   fetchUserProfile,
@@ -28,12 +29,14 @@ import {
   MOCK_TRANSACTIONS,
 } from '../mocks/mockProfileData';
 import { masterDataService, ProvinceItem } from '@/shared/services/masterData.service';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
 export function useProfileDashboard() {
+  const { user, isAuthenticated } = useAuthStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activeNavTab, setActiveNavTab] = useState<ProfileDashboardTab>('TICKETS');
-  const [ticketFilterTab, setTicketFilterTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
-  const [tickets, setTickets] = useState<UserTicketItem[]>([]);
+  const [ticketFilterTab, setTicketFilterTab] = useState<TicketFilterStatus>('UPCOMING');
+  const [allTickets, setAllTickets] = useState<UserTicketItem[]>([]);
   const [orders, setOrders] = useState<StarShopOrderItem[]>([]);
   const [vouchers, setVouchers] = useState<RewardVoucherItem[]>([]);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
@@ -51,7 +54,7 @@ export function useProfileDashboard() {
       const [profData, ticketsData, ordersData, vouchersData, transData, provincesData] =
         await Promise.all([
           fetchUserProfile().catch(() => null),
-          fetchUserTickets(ticketFilterTab).catch(() => []),
+          fetchUserTickets('ALL').catch(() => []),
           fetchUserOrders().catch(() => []),
           fetchUserVouchers().catch(() => []),
           fetchUserTransactions().catch(() => []),
@@ -61,19 +64,47 @@ export function useProfileDashboard() {
       if (profData) {
         // Authenticated user: Always respect genuine API data even if empty (0 items)
         setProfile(profData);
-        setTickets(ticketsData || []);
+        setAllTickets(ticketsData || []);
+        setOrders(ordersData || []);
+        setVouchers(vouchersData || []);
+        setTransactions(transData || []);
+      } else if (user) {
+        // Auth store user fallback
+        setProfile({
+          id: String(user.user_id || user.id || '1'),
+          fullName: user.fullname || user.name || 'Khách Hàng CineDot',
+          email: user.email || '',
+          phone: user.phone || '',
+          birthDate: (user as any).birthday || '',
+          gender: (user as any).gender || 'male',
+          city: (user as any).city || 'Hồ Chí Minh',
+          avatarUrl:
+            user.avatar ||
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+          tierName: (user as any).user_tier || 'Gold',
+          tierBadge: '🌟 Gold Member',
+          cinePoints: Number((user as any).total_points || 1250),
+          nextTierPoints: 2000,
+          tierInfo: {
+            currentTier: (user as any).user_tier || 'Gold',
+            currentPoints: Number((user as any).total_points || 1250),
+            discountPercent: 10,
+            nextTier: 'Diamond',
+            nextTierMinPoints: 2000,
+            pointsNeeded: 750,
+          },
+        });
+        setAllTickets(ticketsData || []);
         setOrders(ordersData || []);
         setVouchers(vouchersData || []);
         setTransactions(transData || []);
       } else {
         // Unauthenticated guest preview / offline fallback mode
         setProfile(MOCK_USER_PROFILE);
-        setTickets(
+        setAllTickets(
           ticketsData !== null && ticketsData !== undefined && ticketsData.length > 0
             ? ticketsData
-            : MOCK_USER_TICKETS.filter((t) =>
-                ticketFilterTab === 'UPCOMING' ? t.status === 'UPCOMING' : t.status !== 'UPCOMING'
-              )
+            : MOCK_USER_TICKETS
         );
         setOrders(
           ordersData !== null && ordersData !== undefined && ordersData.length > 0
@@ -106,11 +137,34 @@ export function useProfileDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [ticketFilterTab]);
+  }, [user]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Stable Computed Sub-lists and Counts
+  const upcomingTickets = useMemo(
+    () => allTickets.filter((t) => t.status === 'UPCOMING'),
+    [allTickets]
+  );
+  const pastTickets = useMemo(
+    () => allTickets.filter((t) => t.status === 'PAST'),
+    [allTickets]
+  );
+  const cancelledTickets = useMemo(
+    () => allTickets.filter((t) => t.status === 'CANCELLED'),
+    [allTickets]
+  );
+
+  // Tickets displayed based on current filter tab
+  const displayedTickets = useMemo(() => {
+    if (ticketFilterTab === 'ALL') return allTickets;
+    if (ticketFilterTab === 'UPCOMING') return upcomingTickets;
+    if (ticketFilterTab === 'PAST') return pastTickets;
+    if (ticketFilterTab === 'CANCELLED') return cancelledTickets;
+    return allTickets;
+  }, [ticketFilterTab, allTickets, upcomingTickets, pastTickets, cancelledTickets]);
 
   const handleUpdateAccountInfo = async (updatedProfile: Partial<UserProfile>) => {
     try {
@@ -133,13 +187,11 @@ export function useProfileDashboard() {
         setAccountUpdateSuccess(true);
         setTimeout(() => setAccountUpdateSuccess(false), 3000);
       } else {
-        // In demo/mock fallback mode, update local state
         setProfile((prev) => (prev ? { ...prev, ...updatedProfile } : null));
         setAccountUpdateSuccess(true);
         setTimeout(() => setAccountUpdateSuccess(false), 3000);
       }
     } catch {
-      // Fallback local update
       setProfile((prev) => (prev ? { ...prev, ...updatedProfile } : null));
       setAccountUpdateSuccess(true);
       setTimeout(() => setAccountUpdateSuccess(false), 3000);
@@ -155,17 +207,16 @@ export function useProfileDashboard() {
       if (res.success) {
         setSecurityUpdateSuccess(true);
         setTimeout(() => setSecurityUpdateSuccess(false), 4000);
-        return res;
+        return { success: true };
       } else {
-        // If API is unmocked in dev, treat as simulated success
-        setSecurityUpdateSuccess(true);
-        setTimeout(() => setSecurityUpdateSuccess(false), 4000);
-        return { success: true, message: 'Đổi mật khẩu thành công (Mô phỏng)' };
+        const msg = res.message || 'Mật khẩu hiện tại không chính xác.';
+        setSecurityErrorMsg(msg);
+        return { success: false, message: msg };
       }
-    } catch {
-      setSecurityUpdateSuccess(true);
-      setTimeout(() => setSecurityUpdateSuccess(false), 4000);
-      return { success: true, message: 'Đổi mật khẩu thành công (Mô phỏng)' };
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.';
+      setSecurityErrorMsg(msg);
+      return { success: false, message: msg };
     }
   };
 
@@ -174,24 +225,31 @@ export function useProfileDashboard() {
     try {
       const res = await cancelBooking(ticketId);
       if (res.success) {
-        alert('Hủy vé thành công! Yêu cầu hoàn tiền đã được tiếp nhận.');
-        await loadData();
-      } else {
-        // Update local ticket list for demo
-        setTickets((prev) =>
+        setAllTickets((prev) =>
           prev.map((t) =>
-            t.bookingId === ticketId ? { ...t, status: 'CANCELLED', canCancel: false } : t
+            t.bookingId === ticketId
+              ? {
+                  ...t,
+                  status: 'CANCELLED' as const,
+                  canCancel: false,
+                }
+              : t
           )
         );
-        alert('Hủy vé thành công! Yêu cầu hoàn tiền đã được tiếp nhận.');
       }
     } catch {
-      setTickets((prev) =>
+      // Optimistic update for demo/fallback
+      setAllTickets((prev) =>
         prev.map((t) =>
-          t.bookingId === ticketId ? { ...t, status: 'CANCELLED', canCancel: false } : t
+          t.bookingId === ticketId
+            ? {
+                ...t,
+                status: 'CANCELLED' as const,
+                canCancel: false,
+              }
+            : t
         )
       );
-      alert('Hủy vé thành công! Yêu cầu hoàn tiền đã được tiếp nhận.');
     } finally {
       setCancellingTicketId(null);
     }
@@ -203,12 +261,17 @@ export function useProfileDashboard() {
     setActiveNavTab,
     ticketFilterTab,
     setTicketFilterTab,
-    tickets,
+    allTickets,
+    tickets: displayedTickets,
+    upcomingTickets,
+    pastTickets,
+    cancelledTickets,
     orders,
     vouchers,
     transactions,
     provinces,
     loading,
+    isAuthenticated,
     accountUpdateSuccess,
     securityUpdateSuccess,
     securityErrorMsg,
@@ -216,6 +279,6 @@ export function useProfileDashboard() {
     handleUpdateAccountInfo,
     handleUpdateSecurityPassword,
     handleCancelTicket,
-    refreshDashboard: loadData,
+    refreshData: loadData,
   };
 }

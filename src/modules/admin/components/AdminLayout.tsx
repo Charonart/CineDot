@@ -58,6 +58,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [isInitialized, isAuthenticated, pathname, router, adminUser]);
 
+  // If on login page, render login form cleanly without shell
+  if (pathname === '/admin/login') {
+    return (
+      <CineToastProvider>
+        <CineConfirmProvider>{children}</CineConfirmProvider>
+      </CineToastProvider>
+    );
+  }
+
   // Loading state during auth validation
   if (!isInitialized || (token && !adminUser && isLoadingSession)) {
     return (
@@ -69,15 +78,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <Skeleton variant="text" className="w-40 h-3 rounded-full" />
         </div>
       </div>
-    );
-  }
-
-  // If on login page, render login form cleanly without shell
-  if (pathname === '/admin/login') {
-    return (
-      <CineToastProvider>
-        <CineConfirmProvider>{children}</CineConfirmProvider>
-      </CineToastProvider>
     );
   }
 

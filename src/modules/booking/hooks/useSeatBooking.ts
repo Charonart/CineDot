@@ -122,7 +122,9 @@ export function useSeatBooking(
           setSeats((prevSeats) => {
             const matchedSeatCodes = prevSeats.filter(matchSeatIds).map((s) => s.id);
             setOtherSelectingSeatIds((prevOther) => {
-              const combined = new Set([...prevOther, ...matchedSeatCodes]);
+              // Exclude seats that current user has selected locally
+              const filteredMatches = matchedSeatCodes.filter((id) => !selectedSeatIds.includes(id));
+              const combined = new Set([...prevOther, ...filteredMatches]);
               return Array.from(combined);
             });
             return prevSeats;
@@ -151,18 +153,38 @@ export function useSeatBooking(
           });
         }
 
-        // Trạng thái HOLDING hoặc BOOKED
-        const upperStatus: SeatStatus = rawStatus === 'booked' ? 'BOOKED' : 'HOLDING';
-
-        // Nếu là người khác giữ/mua -> tự động bỏ chọn ở máy mình
-        if (isOtherUser) {
-          if (matchedSeatCodes.length > 0) {
-            setSelectedSeatIds((prevSelected) =>
-              prevSelected.filter((id) => !matchedSeatCodes.includes(id))
-            );
-          }
+        // Trạng thái HOLDING
+        if (rawStatus === 'holding') {
+          return prevSeats.map((seat) => {
+            if (matchSeatIds(seat)) {
+              return { ...seat, status: 'HOLDING' as SeatStatus };
+            }
+            return seat;
+          });
         }
 
+        // Trạng thái BOOKED / SOLD / COMPLETED
+        if (rawStatus === 'booked' || rawStatus === 'sold' || rawStatus === 'completed') {
+          const upperStatus: SeatStatus = 'BOOKED';
+
+          // Nếu là người khác giữ/mua -> tự động bỏ chọn ở máy mình
+          if (isOtherUser) {
+            if (matchedSeatCodes.length > 0) {
+              setSelectedSeatIds((prevSelected) =>
+                prevSelected.filter((id) => !matchedSeatCodes.includes(id))
+              );
+            }
+          }
+
+          return prevSeats.map((seat) => {
+            if (matchSeatIds(seat)) {
+              return { ...seat, status: upperStatus };
+            }
+            return seat;
+          });
+        }
+
+        const upperStatus = rawStatus.toUpperCase() as SeatStatus;
         return prevSeats.map((seat) => {
           if (matchSeatIds(seat)) {
             return {
@@ -198,7 +220,7 @@ export function useSeatBooking(
     return () => {
       echo.leaveChannel(channelName);
     };
-  }, [showtimeId]);
+  }, [showtimeId, selectedSeatIds]);
 
   // Countdown timer
   useEffect(() => {
@@ -243,6 +265,9 @@ export function useSeatBooking(
 
     if (validSeats.length === 0) return;
     const validIds = validSeats.map((s) => s.id);
+
+    // Remove toggled seats from otherSelectingSeatIds immediately
+    setOtherSelectingSeatIds((prev) => prev.filter((id) => !validIds.includes(id)));
 
     setSelectedSeatIds((prev) => {
       let next = [...prev];

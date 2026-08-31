@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Tag, Check, X, Sparkles } from 'lucide-react';
+import { Tag, Check, X, Gift, ChevronRight } from 'lucide-react';
 import { VoucherInfo } from '../types/payment.types';
 
 interface VoucherInputBarProps {
@@ -13,6 +13,7 @@ interface VoucherInputBarProps {
   isApplying: boolean;
   onApply: () => void;
   onRemove: () => void;
+  onOpenSelector?: () => void;
 }
 
 export const VoucherInputBar: React.FC<VoucherInputBarProps> = ({
@@ -23,22 +24,32 @@ export const VoucherInputBar: React.FC<VoucherInputBarProps> = ({
   isApplying,
   onApply,
   onRemove,
+  onOpenSelector,
 }) => {
   return (
     <section
       aria-label="Nhập mã khuyến mãi"
       className="w-full bg-white rounded-3xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-gray-200/90 flex flex-col gap-4 select-none transition-colors"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="font-extrabold text-sm sm:text-base text-gray-950 flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-[#EEECFB] flex items-center justify-center text-[#7C6FE8] shrink-0">
             <Tag className="w-3.5 h-3.5" />
           </div>
           <span>Mã Giảm Giá / Voucher Khuyến Mãi</span>
         </h3>
-        <span className="text-[11px] text-[#7C6FE8] font-bold bg-[#EEECFB] px-2.5 py-1 rounded-full border border-[#7C6FE8]/20">
-          Gợi ý: CINEDOT50K
-        </span>
+
+        {onOpenSelector && (
+          <button
+            type="button"
+            onClick={onOpenSelector}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-[#7C6FE8] text-xs font-black transition-all cursor-pointer border border-[#7C6FE8]/20 hover:scale-105 active:scale-95 shadow-2xs"
+          >
+            <Gift className="w-3.5 h-3.5" />
+            <span>Chọn Mã Ưu Đãi Có Sẵn</span>
+            <ChevronRight className="w-3 h-3 text-[#7C6FE8]" />
+          </button>
+        )}
       </div>
 
       {appliedVoucher ? (
@@ -66,16 +77,15 @@ export const VoucherInputBar: React.FC<VoucherInputBarProps> = ({
           </button>
         </div>
       ) : (
-
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2.5">
             <input
               type="text"
               value={voucherInput}
-              onChange={(e) => onInputChange(e.target.value)}
+              onChange={(e) => onInputChange(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === 'Enter' && onApply()}
-              placeholder="Nhập mã khuyến mãi (VD: CINEDOT50K, MOMODAY)"
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200/90 focus:border-[#7C6FE8] focus:bg-white text-xs font-bold text-gray-950 placeholder-gray-400 outline-none transition-all"
+              placeholder="Nhập mã khuyến mãi (VD: CINEDOT50K, VIP20PCT)"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200/90 focus:border-[#7C6FE8] focus:bg-white text-xs font-mono font-bold text-gray-950 placeholder-gray-400 outline-none transition-all uppercase"
             />
 
             <button
@@ -100,4 +110,5 @@ export const VoucherInputBar: React.FC<VoucherInputBarProps> = ({
     </section>
   );
 };
+
 

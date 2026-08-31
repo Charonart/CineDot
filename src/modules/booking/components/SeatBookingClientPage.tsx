@@ -13,6 +13,7 @@ import { BookingSidebar } from './BookingSidebar';
 import { BookingSummaryBar } from './BookingSummaryBar';
 import { SeatTimeoutModal } from './SeatTimeoutModal';
 import { ExpiredShowtimeModal } from './ExpiredShowtimeModal';
+import { FoodComboSuggestModal } from './FoodComboSuggestModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
 import { seatBookingService } from '../services/seat-booking.service';
@@ -36,6 +37,7 @@ export function SeatBookingClientPage({
   cinemaParam,
 }: SeatBookingClientPageProps) {
   const router = useRouter();
+  const [isComboSuggestOpen, setIsComboSuggestOpen] = useState(false);
 
   const {
     bookingInfo,
@@ -61,6 +63,26 @@ export function SeatBookingClientPage({
   });
   const [currentShowTime, setCurrentShowTime] = useState('19:30');
   const [siblingShowtimes, setSiblingShowtimes] = useState<SiblingShowtimeItem[]>([]);
+
+  const selectedSeatIdsStr = selectedSeats.map((s) => s.id).join(',');
+
+  const handleAcceptCombo = () => {
+    setIsComboSuggestOpen(false);
+    if (!bookingInfo) return;
+    const foodUrl = `/booking/food?showtime_id=${showtimeId}&movie=${bookingInfo.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+      bookingInfo.showDate || dateParam || ''
+    )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(bookingInfo.cinemaName || cinemaParam || '')}`;
+    router.push(foodUrl);
+  };
+
+  const handleSkipCombo = () => {
+    setIsComboSuggestOpen(false);
+    if (!bookingInfo) return;
+    const paymentUrl = `/booking/payment?showtime_id=${showtimeId}&movie=${bookingInfo.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+      bookingInfo.showDate || dateParam || ''
+    )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(bookingInfo.cinemaName || cinemaParam || '')}`;
+    router.push(paymentUrl);
+  };
 
   useEffect(() => {
     const session = getBookingSession(showtimeId);
@@ -178,6 +200,7 @@ export function SeatBookingClientPage({
                 isHolding={isHolding}
                 holdError={holdError}
                 onHoldSeats={handleHoldSeats}
+                onOpenComboModal={() => setIsComboSuggestOpen(true)}
               />
             </div>
           </div>
@@ -194,14 +217,22 @@ export function SeatBookingClientPage({
         />
       </div>
 
-      {/* 3. Seat Timeout Expiration Alert Modal */}
+      {/* 3. Food & Drink Combo Upsell / Suggest Modal */}
+      <FoodComboSuggestModal
+        isOpen={isComboSuggestOpen}
+        onAccept={handleAcceptCombo}
+        onSkip={handleSkipCombo}
+        onClose={() => setIsComboSuggestOpen(false)}
+      />
+
+      {/* 4. Seat Timeout Expiration Alert Modal */}
       <SeatTimeoutModal
         isOpen={isTimeout}
         movieSlug={bookingInfo.movieSlug}
         onReset={() => resetBookingTimer(showtimeId)}
       />
 
-      {/* 4. Expired Showtime Guard Modal */}
+      {/* 5. Expired Showtime Guard Modal */}
       <ExpiredShowtimeModal
         isOpen={isExpiredShowtime}
         movieSlug={bookingInfo.movieSlug}

@@ -31,22 +31,33 @@ export interface UserProfile {
   tierInfo?: TierProgressionInfo;
 }
 
+export type TicketFilterStatus = 'ALL' | 'UPCOMING' | 'PAST' | 'CANCELLED';
+
 export interface UserTicketItem {
   bookingId: string;
+  rawBookingId?: number;
+  bookingCode?: string;
   movieTitle: string;
   movieSlug: string;
   posterUrl: string;
   movieFormat: string;
   ageRating: string;
+  duration?: number;
   cinemaName: string;
   roomName: string;
   showTime: string;
   showDate: string;
+  showtimeStartIso?: string;
   seatLabels: string;
+  totalSeats?: number;
+  combosSummary?: string;
+  totalCombos?: number;
   totalPaid: number;
+  discountAmount?: number;
   qrCodeUrl: string;
   status: 'UPCOMING' | 'PAST' | 'CANCELLED';
   canCancel?: boolean;
+  createdAt?: string;
 }
 
 export interface StarShopOrderItem {

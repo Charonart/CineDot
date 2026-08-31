@@ -1,4 +1,5 @@
-/* Hallmark · genre: modern-minimal · macrostructure: Bento Grid · theme: White Minimal · nav: N5 · footer: Ft5 */
+/* Hallmark · genre: modern-minimal · macrostructure: Bento Grid · theme: White Minimal / Iris Cinema · nav: N5 · footer: Ft5 */
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 */
 'use client';
 
 import React, { useEffect } from 'react';
@@ -14,6 +15,7 @@ import {
   Shield,
   ChevronRight,
   Sparkles,
+  Film,
 } from 'lucide-react';
 import { useProfileDashboard } from '../hooks/useProfileDashboard';
 import { ProfileSidebar } from './ProfileSidebar';
@@ -36,7 +38,11 @@ export function ProfileTicketsClientPage() {
     setActiveNavTab,
     ticketFilterTab,
     setTicketFilterTab,
+    allTickets,
     tickets,
+    upcomingTickets,
+    pastTickets,
+    cancelledTickets,
     orders,
     vouchers,
     transactions,
@@ -51,6 +57,7 @@ export function ProfileTicketsClientPage() {
     handleCancelTicket,
   } = useProfileDashboard();
 
+  // Sync state from URL query parameter on mount or when URL param changes
   useEffect(() => {
     if (!tabParam) return;
     const lower = tabParam.toLowerCase();
@@ -60,7 +67,7 @@ export function ProfileTicketsClientPage() {
       setActiveNavTab('REWARDS');
     } else if (lower === 'transactions' || lower === 'history') {
       setActiveNavTab('TRANSACTIONS');
-    } else if (lower === 'account' || lower === 'profile') {
+    } else if (lower === 'account' || lower === 'profile' || lower === 'overview') {
       setActiveNavTab('ACCOUNT');
     } else if (lower === 'security' || lower === 'password') {
       setActiveNavTab('SECURITY');
@@ -68,6 +75,25 @@ export function ProfileTicketsClientPage() {
       setActiveNavTab('TICKETS');
     }
   }, [tabParam, setActiveNavTab]);
+
+  // Synchronize Tab switch to URL search params
+  const handleSelectTabWithUrl = (tab: ProfileDashboardTab) => {
+    setActiveNavTab(tab);
+    const tabParamMap: Record<ProfileDashboardTab, string> = {
+      TICKETS: 'tickets',
+      ORDERS: 'orders',
+      REWARDS: 'rewards',
+      TRANSACTIONS: 'transactions',
+      ACCOUNT: 'account',
+      SECURITY: 'security',
+    };
+    const param = tabParamMap[tab];
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', param);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   const mobileTabs: {
     id: ProfileDashboardTab;
@@ -84,10 +110,10 @@ export function ProfileTicketsClientPage() {
 
   if (loading || !profile) {
     return (
-      <div className="w-full pt-28 pb-20 bg-[#FAFAFB] min-h-screen">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8">
+      <div className="w-full pt-28 pb-20 bg-[#F8F9FD] min-h-screen">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className="w-full lg:w-72 shrink-0">
+            <div className="w-full lg:w-72 xl:w-80 shrink-0">
               <Skeleton variant="card" className="w-full h-[480px] rounded-3xl" />
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-6">
@@ -101,13 +127,15 @@ export function ProfileTicketsClientPage() {
     );
   }
 
-  const upcomingTickets = tickets.filter((t) => t.status === 'UPCOMING');
   const waitingOrders = orders.filter((o) => o.status === 'WAITING_PICKUP');
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-[#111827] min-h-screen pt-24 sm:pt-28 pb-24 selection:bg-[#7C6FE8] selection:text-white">
+    <div className="w-full flex flex-col font-sans bg-[#F8F9FD] text-[#0F172A] min-h-screen pt-24 sm:pt-28 pb-24 selection:bg-[#7C6FE8] selection:text-white relative overflow-x-clip">
+      {/* Subtle Ambient Radial Glow */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[1200px] h-[400px] bg-gradient-to-b from-[#7C6FE8]/5 via-indigo-500/3 to-transparent blur-3xl pointer-events-none -z-10" />
+
       <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-8">
           {/* Breadcrumbs */}
           <nav
             aria-label="Breadcrumb"
@@ -117,12 +145,12 @@ export function ProfileTicketsClientPage() {
               Trang Chủ
             </Link>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-[#111827] font-black">Cá Nhân & Vé Của Tôi</span>
+            <span className="text-slate-900 font-black">Cá Nhân & Vé Của Tôi</span>
           </nav>
 
           {/* Mobile Horizontal Tab Strip (Hidden on Desktop) */}
           <div className="lg:hidden w-full overflow-x-auto scrollbar-none mb-6 -mx-4 px-4">
-            <div className="flex items-center gap-1.5 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-xs w-max">
+            <div className="flex items-center gap-1.5 p-1.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs w-max">
               {mobileTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeNavTab === tab.id;
@@ -130,10 +158,10 @@ export function ProfileTicketsClientPage() {
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setActiveNavTab(tab.id)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                    onClick={() => handleSelectTabWithUrl(tab.id)}
+                    className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#7C6FE8] text-white shadow-sm'
+                        ? 'bg-[#7C6FE8] text-white shadow-sm shadow-[#7C6FE8]/25'
                         : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -145,21 +173,21 @@ export function ProfileTicketsClientPage() {
             </div>
           </div>
 
-          {/* Master Layout: Compact Left Sidebar (280px) + Expansive Main Workspace */}
+          {/* Master Layout: Left Sidebar (280-320px) + Expansive Main Workspace */}
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Left Sidebar Column */}
             <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-28">
               <ProfileSidebar
                 profile={profile}
                 activeTab={activeNavTab}
-                onSelectTab={setActiveNavTab}
+                onSelectTab={handleSelectTabWithUrl}
                 ticketCount={upcomingTickets.length}
                 orderCount={waitingOrders.length}
                 voucherCount={vouchers.length}
               />
             </div>
 
-            {/* Right Main Content Area (Expansive 75% width) */}
+            {/* Right Main Content Area */}
             <div className="flex-1 min-w-0 w-full">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -172,61 +200,139 @@ export function ProfileTicketsClientPage() {
                   {/* TAB 1: VÉ CỦA TÔI */}
                   {activeNavTab === 'TICKETS' && (
                     <div className="flex flex-col gap-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                      {/* Header & Single-Row Segmented Filter Controls */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <Ticket className="w-6 h-6 text-[#7C6FE8]" />
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-9 h-9 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
+                              <Ticket className="w-5 h-5" />
+                            </div>
                             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                               Vé Của Tôi
                             </h1>
                           </div>
-                          <p className="text-xs text-slate-500 font-medium pt-0.5">
-                            Quản lý vé xem phim điện tử QR Code, tra cứu số ghế và phòng chiếu.
+                          <p className="text-xs text-slate-500 font-medium pt-1">
+                            Quản lý vé xem phim điện tử QR Code, tra cứu số ghế, combo bắp nước và phòng chiếu.
                           </p>
                         </div>
 
-                        {/* Filter Pills */}
-                        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl w-fit">
+                        {/* Single-Row Segmented Filter Switcher (No wrapping) */}
+                        <div className="flex items-center bg-slate-200/60 p-1.5 rounded-2xl w-fit shrink-0 overflow-x-auto scrollbar-none shadow-inner border border-slate-200/80">
                           <button
                             type="button"
                             onClick={() => setTicketFilterTab('UPCOMING')}
-                            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                               ticketFilterTab === 'UPCOMING'
-                                ? 'bg-white text-[#7C6FE8] shadow-2xs'
-                                : 'text-slate-600 hover:text-[#7C6FE8]'
+                                ? 'bg-white text-[#7C6FE8] shadow-sm font-extrabold'
+                                : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            Vé Sắp Chiếu ({upcomingTickets.length})
+                            <span>Sắp Chiếu</span>
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                                ticketFilterTab === 'UPCOMING'
+                                  ? 'bg-purple-100 text-[#7C6FE8]'
+                                  : 'bg-slate-300/80 text-slate-700'
+                              }`}
+                            >
+                              {upcomingTickets.length}
+                            </span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => setTicketFilterTab('PAST')}
-                            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                               ticketFilterTab === 'PAST'
-                                ? 'bg-white text-slate-900 shadow-2xs'
+                                ? 'bg-white text-slate-900 shadow-sm font-extrabold'
                                 : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            Vé Đã Xem
+                            <span>Đã Xem</span>
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                                ticketFilterTab === 'PAST'
+                                  ? 'bg-slate-100 text-slate-900'
+                                  : 'bg-slate-300/80 text-slate-700'
+                              }`}
+                            >
+                              {pastTickets.length}
+                            </span>
+                          </button>
+
+                          {cancelledTickets.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setTicketFilterTab('CANCELLED')}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                                ticketFilterTab === 'CANCELLED'
+                                  ? 'bg-white text-rose-600 shadow-sm font-extrabold'
+                                  : 'text-slate-600 hover:text-rose-600'
+                              }`}
+                            >
+                              <span>Đã Hủy</span>
+                              <span
+                                className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                                  ticketFilterTab === 'CANCELLED'
+                                    ? 'bg-rose-100 text-rose-700'
+                                    : 'bg-slate-300/80 text-slate-700'
+                                }`}
+                              >
+                                {cancelledTickets.length}
+                              </span>
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setTicketFilterTab('ALL')}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                              ticketFilterTab === 'ALL'
+                                ? 'bg-white text-slate-900 shadow-sm font-extrabold'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>Tất Cả</span>
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                                ticketFilterTab === 'ALL'
+                                  ? 'bg-slate-100 text-slate-900'
+                                  : 'bg-slate-300/80 text-slate-700'
+                              }`}
+                            >
+                              {allTickets.length}
+                            </span>
                           </button>
                         </div>
                       </div>
 
+                      {/* Tickets List or Empty State */}
                       {tickets.length === 0 ? (
-                        <div className="w-full bg-white rounded-3xl p-12 text-center border border-slate-200 flex flex-col items-center gap-3">
-                          <span className="text-5xl">🎟️</span>
-                          <h3 className="font-extrabold text-base text-slate-900">
-                            Không tìm thấy vé xem phim nào
-                          </h3>
-                          <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
-                            {ticketFilterTab === 'UPCOMING'
-                              ? 'Bạn chưa có vé phim sắp chiếu nào. Hãy đặt vé ngay để thưởng thức những bom tấn điện ảnh hấp dẫn!'
-                              : 'Bạn chưa có lịch sử vé đã xem nào.'}
-                          </p>
+                        <div className="w-full bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center text-3xl shadow-inner border border-purple-100">
+                            🎟️
+                          </div>
+                          <div className="flex flex-col gap-1 max-w-md">
+                            <h3 className="font-black text-lg text-slate-900">
+                              {ticketFilterTab === 'UPCOMING'
+                                ? 'Bạn chưa có vé xem phim sắp chiếu nào'
+                                : ticketFilterTab === 'CANCELLED'
+                                ? 'Bạn không có đơn vé xem phim nào bị hủy'
+                                : ticketFilterTab === 'PAST'
+                                ? 'Chưa có lịch sử vé đã xem nào'
+                                : 'Chưa có lịch sử đặt vé nào tại CineDot'}
+                            </h3>
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                              {ticketFilterTab === 'UPCOMING'
+                                ? 'Hãy chọn một bộ phim bom tấn yêu thích và tận hưởng trải nghiệm rạp chiếu chuẩn quốc tế tại CineDot!'
+                                : 'Các bộ phim bạn đã thưởng thức tại CineDot sẽ được lưu trữ tự động tại đây.'}
+                            </p>
+                          </div>
+
                           <Link href="/movies">
-                            <button className="mt-2 px-6 py-2.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs shadow-md shadow-[#7C6FE8]/25 transition-all cursor-pointer">
-                              Khám Phá Phim Đang Chiếu
+                            <button className="mt-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#7C6FE8] to-indigo-600 hover:from-[#685bc7] hover:to-indigo-700 text-white font-black text-xs shadow-md shadow-[#7C6FE8]/25 flex items-center gap-2 transition-all cursor-pointer active:scale-95">
+                              <Film className="w-4 h-4" />
+                              <span>Khám Phá Phim Đang Chiếu</span>
                             </button>
                           </Link>
                         </div>

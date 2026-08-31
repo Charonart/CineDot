@@ -19,6 +19,7 @@ interface BookingSidebarProps {
   isHolding: boolean;
   holdError: string | null;
   onHoldSeats: () => Promise<any>;
+  onOpenComboModal?: () => void;
 }
 
 export const BookingSidebar: React.FC<BookingSidebarProps> = ({
@@ -31,6 +32,7 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
   isHolding,
   holdError,
   onHoldSeats,
+  onOpenComboModal,
 }) => {
 
   const router = useRouter();
@@ -83,10 +85,14 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
 
     startBookingTimer(String(info.showtimeId));
 
-    const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
-      info.showDate
-    )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
-    router.push(foodUrl);
+    if (onOpenComboModal) {
+      onOpenComboModal();
+    } else {
+      const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+        info.showDate
+      )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
+      router.push(foodUrl);
+    }
   };
 
 

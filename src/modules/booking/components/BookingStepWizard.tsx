@@ -59,8 +59,13 @@ export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
   const router = useRouter();
   const [loadingStepId, setLoadingStepId] = useState<number | null>(null);
 
-  // Build rewind links for completed previous steps
+  // When on Step 5 (Booking Completed), all previous steps are locked to prevent data corruption
+  const isFinalCompletedStep = currentStep === 5;
+
+  // Build rewind links for completed previous steps (only active if not on Step 5)
   const getStepHref = (stepId: number): string | null => {
+    if (isFinalCompletedStep) return null;
+
     const encCinema = encodeURIComponent(cinemaParam || '');
     switch (stepId) {
       case 1:
@@ -84,7 +89,7 @@ export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
 
   // Handle click on completed step with API cancel & seat release when returning to Step 1 or 2
   const handleStepClick = async (stepId: number) => {
-    if (loadingStepId !== null) return;
+    if (isFinalCompletedStep || loadingStepId !== null) return;
     const targetHref = getStepHref(stepId);
     if (!targetHref) return;
 
@@ -111,26 +116,27 @@ export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
       aria-label="Tiến trình đặt vé"
       className={`w-full bg-white/95 backdrop-blur-xl border border-gray-200/90 rounded-2xl sm:rounded-full py-2.5 px-4 sm:px-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] select-none transition-all ${className}`}
     >
-      {/* 1. Desktop & Tablet: Slim Horizontal Segmented Capsule Ribbon (Height ~40px) */}
+      {/* 1. Desktop & Tablet: Slim Horizontal Segmented Capsule Ribbon */}
       <ol className="hidden md:flex items-center justify-between w-full list-none p-0 m-0 gap-1 lg:gap-2">
         {STEPS.map((step, idx) => {
           const isCompleted = step.id < currentStep;
           const isActive = step.id === currentStep;
-          const isUpcoming = step.id > currentStep;
-          const StepIcon = step.icon;
+          const isClickable = isCompleted && !isFinalCompletedStep && loadingStepId === null;
           const isLoadingThis = loadingStepId === step.id;
 
           const StepButtonContent = (
             <button
               type="button"
-              disabled={!isCompleted || loadingStepId !== null}
-              onClick={() => isCompleted && handleStepClick(step.id)}
-              className={`flex items-center gap-2 py-1 px-2.5 rounded-full transition-all duration-200 cursor-default ${
+              disabled={!isClickable}
+              onClick={() => isClickable && handleStepClick(step.id)}
+              className={`flex items-center gap-2 py-1 px-2.5 rounded-full transition-all duration-200 ${
                 isActive
-                  ? 'bg-[#7C6FE8] text-white shadow-[0_2px_10px_rgba(124,111,232,0.35)] font-bold text-xs'
+                  ? 'bg-gradient-to-r from-[#7C6FE8] to-indigo-600 text-white shadow-[0_2px_10px_rgba(124,111,232,0.35)] font-black text-xs cursor-default'
                   : isCompleted
-                  ? 'text-gray-700 hover:text-[#7C6FE8] hover:bg-[#EEECFB]/80 font-semibold text-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-[#7C6FE8] focus-visible:outline-offset-2'
-                  : 'text-gray-400 font-medium text-xs'
+                  ? isClickable
+                    ? 'text-gray-700 hover:text-[#7C6FE8] hover:bg-[#EEECFB]/80 font-bold text-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-[#7C6FE8]'
+                    : 'text-emerald-700 font-bold text-xs cursor-default'
+                  : 'text-gray-400 font-medium text-xs cursor-default'
               }`}
             >
               {/* Step Node Icon / Number / Checkmark */}
@@ -139,7 +145,7 @@ export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
                   isActive
                     ? 'bg-white text-[#7C6FE8]'
                     : isCompleted
-                    ? 'bg-[#EEECFB] text-[#7C6FE8]'
+                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                     : 'bg-gray-100 text-gray-400'
                 }`}
               >
@@ -170,7 +176,7 @@ export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
                 <div
                   aria-hidden="true"
                   className={`flex-1 h-0.5 max-w-[40px] lg:max-w-[60px] mx-1 rounded-full transition-colors ${
-                    step.id < currentStep ? 'bg-[#7C6FE8]/40' : 'bg-gray-200/80'
+                    step.id < currentStep ? 'bg-emerald-400/60' : 'bg-gray-200/80'
                   }`}
                 />
               )}
@@ -182,32 +188,40 @@ export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
       {/* 2. Mobile Compact 1-Line Status Ribbon */}
       <div className="flex md:hidden items-center justify-between w-full">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-[#EEECFB] text-[#7C6FE8] flex items-center justify-center shrink-0">
+          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+            isFinalCompletedStep ? 'bg-emerald-50 text-emerald-600' : 'bg-[#EEECFB] text-[#7C6FE8]'
+          }`}>
             {loadingStepId !== null ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+            ) : isFinalCompletedStep ? (
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
             ) : (
               <CurrentIcon className="w-3.5 h-3.5" />
             )}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-black text-gray-950">
-            <span className="text-[#7C6FE8]">Bước {currentStep}/5:</span>
+            <span className={isFinalCompletedStep ? 'text-emerald-600' : 'text-[#7C6FE8]'}>
+              Bước {currentStep}/5:
+            </span>
             <span>{currentStepConfig.label}</span>
           </div>
         </div>
 
-        {/* 5 Mini Progress Bar Segments (Clickable if completed) */}
+        {/* 5 Mini Progress Bar Segments */}
         <div className="flex items-center gap-1">
           {STEPS.map((s) => (
             <button
               key={s.id}
               type="button"
-              disabled={s.id >= currentStep || loadingStepId !== null}
-              onClick={() => s.id < currentStep && handleStepClick(s.id)}
+              disabled={s.id >= currentStep || isFinalCompletedStep || loadingStepId !== null}
+              onClick={() => s.id < currentStep && !isFinalCompletedStep && handleStepClick(s.id)}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 s.id === currentStep
                   ? 'w-4 bg-[#7C6FE8]'
                   : s.id < currentStep
-                  ? 'w-2 bg-[#7C6FE8]/50 hover:bg-[#7C6FE8] cursor-pointer'
+                  ? isFinalCompletedStep
+                    ? 'w-2 bg-emerald-500'
+                    : 'w-2 bg-[#7C6FE8]/50 hover:bg-[#7C6FE8] cursor-pointer'
                   : 'w-2 bg-gray-200'
               }`}
             />
