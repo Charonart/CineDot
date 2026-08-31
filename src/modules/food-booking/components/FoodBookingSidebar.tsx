@@ -1,13 +1,18 @@
-/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · theme: White Minimal · component: FoodBookingSidebar */
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · theme: White Minimal · component: FoodBookingSidebar */
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Timer, ArrowRight, ArrowLeft, Ticket, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { MapPin, Clock, Timer, ArrowRight, ArrowLeft, Ticket, ShoppingBag, Loader2 } from 'lucide-react';
 import { SelectedFoodItem } from '../types/food-booking.types';
-import { formatShowDate } from '@/modules/booking/services/seat-booking.service';
-import { getBookingSession } from '@/modules/booking/services/bookingSessionService';
+import { formatShowDate, seatBookingService } from '@/modules/booking/services/seat-booking.service';
+import { getBookingSession, clearBookingSession } from '@/modules/booking/services/bookingSessionService';
+import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
+import { apiClient } from '@/shared/lib/apiClient';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
+
 
 interface FoodBookingSidebarProps {
   selectedFoodList: SelectedFoodItem[];
@@ -32,6 +37,9 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
   timeParam,
   cinemaParam,
 }) => {
+  const router = useRouter();
+  const [isCancelling, setIsCancelling] = useState(false);
+
   // Movie details lookup from real booking session
   const movieInfo = useMemo(() => {
     const session = getBookingSession(showtimeId);
@@ -132,6 +140,21 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
   const paymentHref = `/booking/payment?showtime_id=${showtimeId}&movie=${movieParam}&seats=${seatsParam}&date=${dateParam}&time=${timeParam}&cinema=${encodeURIComponent(
     decodedCinemaName
   )}${combosQueryParam ? `&combos=${encodeURIComponent(combosQueryParam)}` : ''}`;
+
+  // Handle Return to Seat Select with Booking Cancel API call
+  const handleReturnToSeats = async () => {
+    if (isCancelling) return;
+    setIsCancelling(true);
+
+    try {
+      const { cancelBookingAndReleaseSeats } = await import('@/modules/booking/services/bookingSessionService');
+      await cancelBookingAndReleaseSeats(showtimeId);
+    } finally {
+      setIsCancelling(false);
+      router.push(backHref);
+    }
+  };
+
 
   return (
     <aside
@@ -257,15 +280,19 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
 
       {/* 7. Action Buttons */}
       <div className="grid grid-cols-2 gap-2.5 pt-1">
-        <Link href={backHref}>
-          <button
-            type="button"
-            className="w-full py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
+        <button
+          type="button"
+          onClick={handleReturnToSeats}
+          disabled={isCancelling}
+          className="w-full py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+        >
+          {isCancelling ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+          ) : (
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Quay lại</span>
-          </button>
-        </Link>
+          )}
+          <span>{isCancelling ? 'Đang hủy...' : 'Quay lại'}</span>
+        </button>
 
         <Link href={paymentHref}>
           <motion.button
@@ -282,4 +309,5 @@ export const FoodBookingSidebar: React.FC<FoodBookingSidebarProps> = ({
     </aside>
   );
 };
+
 

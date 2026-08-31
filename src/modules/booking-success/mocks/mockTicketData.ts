@@ -16,4 +16,6 @@ export const MOCK_DIGITAL_TICKET: DigitalTicketInfo = {
   totalPaid: 220000,
   paidAt: '21:15 - 30/07/2026',
   paymentMethodName: 'Ví MoMo',
+  status: 'PAID',
 };
+

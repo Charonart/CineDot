@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ChevronDown, Bell, Loader2, MapPin, Film, Bu
 import { useAuthStore } from '@/shared/store/useAuthStore';
 import { fetchShowtimeSchedule } from '../services/movie-detail.service';
 import { CinemaShowtimeGroup } from '../types/movie-detail.types';
+import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 
 interface ShowtimeScheduleSectionProps {
   movieSlug?: string;
@@ -89,9 +90,33 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   }, [schedule]);
 
   const filteredSchedule = useMemo(() => {
-    if (selectedCinemaFilter === 'Tất cả rạp') return schedule;
-    return schedule.filter(c => c.cinemaName === selectedCinemaFilter);
-  }, [schedule, selectedCinemaFilter]);
+    const list = selectedCinemaFilter === 'Tất cả rạp'
+      ? schedule
+      : schedule.filter(c => c.cinemaName === selectedCinemaFilter);
+
+    // Prune any past showtimes for the selected date
+    return list
+      .map((cinema) => {
+        const validGroups = cinema.formatGroups
+          .map((group) => ({
+            ...group,
+            showtimes: group.showtimes.filter(
+              (st) =>
+                !isShowtimePassed({
+                  dateStr: selectedDateStr,
+                  timeStr: st.time,
+                })
+            ),
+          }))
+          .filter((group) => group.showtimes.length > 0);
+
+        return {
+          ...cinema,
+          formatGroups: validGroups,
+        };
+      })
+      .filter((cinema) => cinema.formatGroups.length > 0);
+  }, [schedule, selectedCinemaFilter, selectedDateStr]);
 
   return (
     <div id="showtime-schedule" className="w-full flex flex-col gap-6 pt-4">

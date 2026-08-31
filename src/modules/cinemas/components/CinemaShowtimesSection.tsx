@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Film, Calendar, Clock, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/shared/store/useAuthStore';
 import { CinemaMovieShowtime } from '../types/cinemas.types';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 
 interface CinemaShowtimesSectionProps {
   cinemaName: string;
@@ -42,6 +43,21 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
       dateFormatted,
     };
   });
+
+  const filteredShowtimes = useMemo(() => {
+    return showtimes
+      .map((movie) => ({
+        ...movie,
+        slots: movie.slots.filter(
+          (slot) =>
+            !isShowtimePassed({
+              dateStr: selectedDate,
+              timeStr: slot.time,
+            })
+        ),
+      }))
+      .filter((movie) => movie.slots.length > 0);
+  }, [showtimes, selectedDate]);
 
   const handleSelectSlot = (showtimeId: string | number) => {
     const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(String(showtimeId))}`;
@@ -110,22 +126,22 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
               </div>
             ))}
           </div>
-        ) : showtimes.length === 0 ? (
+        ) : filteredShowtimes.length === 0 ? (
           <div className="w-full py-12 px-6 rounded-2xl bg-slate-50 border border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 text-center">
             <div className="w-12 h-12 rounded-2xl bg-slate-200/60 text-slate-400 flex items-center justify-center">
               <Film className="w-6 h-6" />
             </div>
             <div className="flex flex-col gap-1">
               <h4 className="text-sm font-extrabold text-slate-700">
-                Chưa có suất chiếu trong ngày đã chọn
+                Chưa có suất chiếu khả dụng trong ngày đã chọn
               </h4>
               <p className="text-xs text-slate-400">
-                Vui lòng chọn ngày chiếu khác hoặc kiểm tra lại sau bạn nhé!
+                Các suất chiếu của ngày này có thể đã kết thúc. Vui lòng chọn ngày chiếu khác bạn nhé!
               </p>
             </div>
           </div>
         ) : (
-          showtimes.map((movie) => (
+          filteredShowtimes.map((movie) => (
             <motion.div
               key={movie.movieId}
               initial={{ opacity: 0, y: 10 }}

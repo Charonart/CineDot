@@ -31,6 +31,7 @@ interface PaymentSidebarProps {
   showTime: string;
   showDate: string;
   seatSummaryText: string;
+  itemizedSeats?: { id: string; typeName: string; price: number }[];
   ticketPrice: number;
   appliedPricingRules?: AppliedPricingRuleSummary[];
   ticketPriceComposition?: TicketPriceComposition | null;
@@ -58,6 +59,7 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
   showTime,
   showDate,
   seatSummaryText,
+  itemizedSeats = [],
   ticketPrice,
   appliedPricingRules = [],
   ticketPriceComposition,
@@ -73,6 +75,7 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
   isAgreedTerms,
   onToggleTerms,
   onSubmitPayment,
+
   isProcessing,
 }) => {
   return (
@@ -144,7 +147,7 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Ticket className="w-3.5 h-3.5 text-[#7C6FE8]" />
-            <span>Tiền Vé Xem Phim</span>
+            <span>Tiền Vé Xem Phim ({itemizedSeats.length || 1})</span>
           </span>
           <span className="font-extrabold text-[#7C6FE8] text-sm sm:text-base">
             {ticketPrice.toLocaleString('vi-VN')}đ
@@ -152,29 +155,33 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
         </div>
 
         <div className="flex flex-col gap-2 text-xs">
-          <div className="p-3 rounded-2xl bg-gray-50 border border-gray-200/70 flex flex-col gap-1.5">
-            <span className="font-bold text-gray-950 leading-relaxed">{seatSummaryText}</span>
-
-            {ticketPriceComposition && (
-              <div className="pt-2 mt-1 border-t border-gray-200/60 flex flex-col gap-1 text-[11px] text-gray-500">
-                <div className="flex items-center justify-between">
-                  <span>• Giá vé cơ bản:</span>
-                  <span className="font-bold text-gray-900">
-                    {ticketPriceComposition.totalBasePrice.toLocaleString('vi-VN')}đ
-                  </span>
-                </div>
-
-                {ticketPriceComposition.totalSurcharge > 0 && (
-                  <div className="flex items-center justify-between text-amber-700">
-                    <span>• Phụ thu loại ghế (VIP/Đôi):</span>
-                    <span className="font-bold">
-                      +{ticketPriceComposition.totalSurcharge.toLocaleString('vi-VN')}đ
+          {itemizedSeats.length > 0 ? (
+            <div className="flex flex-col gap-1.5">
+              {itemizedSeats.map((seat, sIdx) => (
+                <div
+                  key={`${seat.id}-${sIdx}`}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-200/70"
+                >
+                  <div className="flex items-center gap-2 font-bold text-gray-900">
+                    <span className="px-2 py-0.5 rounded-md bg-[#EEECFB] text-[#7C6FE8] text-xs font-black">
+                      {seat.id}
+                    </span>
+                    <span className="text-gray-600 font-medium text-[11px]">
+                      {seat.typeName}
                     </span>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
+                  <span className="font-extrabold text-gray-900">
+                    {seat.price.toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-200/70 flex flex-col gap-1.5">
+              <span className="font-bold text-gray-950 leading-relaxed">{seatSummaryText}</span>
+            </div>
+          )}
+
 
           {appliedPricingRules.length > 0 && (
             <div className="flex flex-col gap-1.5 pt-1">

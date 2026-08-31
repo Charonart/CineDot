@@ -2,14 +2,16 @@
 
 import React from 'react';
 import {
-  Calendar,
   Plus,
   RefreshCw,
   Building2,
   Copy,
+  ChevronLeft,
+  ChevronRight,
   ZoomIn,
   ZoomOut,
-  Maximize2,
+  Magnet,
+  Calendar,
 } from 'lucide-react';
 import { AdminCinemaOption } from '../../types/adminShowtime.types';
 
@@ -26,17 +28,21 @@ interface ShowtimesToolbarProps {
   zoomLevel: number;
   onZoomChange: (level: number) => void;
 
+  snapMinutes: number;
+  onSnapChange: (snap: number) => void;
+
   isFetchingShowtimes: boolean;
   onRefresh: () => void;
   onOpenAddModal: () => void;
   onOpenCloneModal: () => void;
 }
 
-const ZOOM_PRESETS = [
-  { level: 0.75, label: '75% (Gọn)' },
-  { level: 1.0, label: '100%' },
-  { level: 1.35, label: '135%' },
-  { level: 1.75, label: '175% (Rộng)' },
+const SNAP_OPTIONS = [
+  { value: 5, label: '5p' },
+  { value: 10, label: '10p' },
+  { value: 15, label: '15p' },
+  { value: 30, label: '30p' },
+  { value: 1, label: 'Tự do' },
 ];
 
 export function ShowtimesToolbar({
@@ -49,11 +55,19 @@ export function ShowtimesToolbar({
   onSelectDate,
   zoomLevel,
   onZoomChange,
+  snapMinutes,
+  onSnapChange,
   isFetchingShowtimes,
   onRefresh,
   onOpenAddModal,
   onOpenCloneModal,
 }: ShowtimesToolbarProps) {
+  const handleStepDay = (step: number) => {
+    const d = new Date(selectedDateKey);
+    d.setDate(d.getDate() + step);
+    onSelectDate(d.toISOString().split('T')[0]);
+  };
+
   const handleZoomIn = () => {
     onZoomChange(Math.min(2.0, Math.round((zoomLevel + 0.25) * 100) / 100));
   };
@@ -63,63 +77,19 @@ export function ShowtimesToolbar({
   };
 
   return (
-    <div className="flex flex-col gap-4 text-slate-900">
-      {/* Top Bar: Title & Action Buttons */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center font-black shadow-xs">
-            <Calendar className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Quản Lý Suất Chiếu & Lịch Phòng
-            </h1>
-          </div>
-        </div>
-
-        {/* Top Actions */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={onRefresh}
-            disabled={isFetchingShowtimes}
-            className="px-3.5 py-2.5 rounded-2xl bg-white border border-gray-200 text-slate-700 hover:text-[#7C6FE8] hover:border-[#7C6FE8] font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isFetchingShowtimes ? 'animate-spin' : ''}`} />
-            <span>Làm Mới</span>
-          </button>
-
-          <button
-            onClick={onOpenCloneModal}
-            className="px-4 py-2.5 rounded-2xl bg-purple-50 text-[#7C6FE8] hover:bg-purple-100 border border-purple-200 font-extrabold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Copy className="w-3.5 h-3.5" />
-            <span>Sao Chép Lịch Ngày</span>
-          </button>
-
-          <button
-            onClick={onOpenAddModal}
-            className="px-4 py-2.5 rounded-2xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-[#7C6FE8]/30 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tạo Suất Chiếu Mới</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Filter Row: Cinema, Date Pills & Zoom Controls */}
-      <div className="p-4 rounded-3xl bg-white border border-gray-200 shadow-sm flex flex-col xl:flex-row items-center justify-between gap-4">
-        {/* Cinema Selector */}
-        <div className="flex items-center gap-2.5 w-full xl:w-auto">
-          <div className="w-9 h-9 rounded-2xl bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0">
-            <Building2 className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase">CỤM RẠP ĐANG CHỌN</span>
+    <div className="bg-slate-50/70 border-b border-gray-200 px-3.5 py-2.5 flex flex-col gap-2 select-none shrink-0 font-sans">
+      {/* Top Command Row */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto scrollbar-none flex-wrap">
+        {/* Left: Branch & Date Navigation Controls */}
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+          {/* Cinema Branch Dropdown */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-gray-200 text-xs font-medium shadow-2xs">
+            <Building2 className="w-3.5 h-3.5 text-[#7C6FE8] shrink-0" />
             <select
               value={selectedCinemaId || ''}
               onChange={(e) => onSelectCinema(Number(e.target.value))}
               disabled={isLoadingCinemas}
-              className="font-extrabold text-sm text-slate-900 bg-transparent focus:outline-none cursor-pointer pr-4"
+              className="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer pr-1 max-w-[180px] truncate"
             >
               {cinemas.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -128,73 +98,130 @@ export function ShowtimesToolbar({
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Date Selector Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full xl:w-auto pb-1 xl:pb-0">
-          {datePills.map((p) => (
+          {/* Quick Date Stepper (< Today >) */}
+          <div className="flex items-center rounded-md border border-gray-200 bg-white p-0.5 shadow-2xs">
             <button
-              key={p.key}
-              onClick={() => onSelectDate(p.key)}
-              className={`px-3 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                selectedDateKey === p.key
-                  ? 'bg-[#7C6FE8] text-white shadow-md shadow-[#7C6FE8]/25'
-                  : 'bg-slate-50 text-slate-600 border border-gray-200 hover:bg-slate-100'
-              }`}
+              onClick={() => handleStepDay(-1)}
+              className="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+              title="Ngày trước"
             >
-              {p.label}
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
-          ))}
+            <button
+              onClick={() => onSelectDate(new Date().toISOString().split('T')[0])}
+              className="px-2 py-0.5 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded transition-colors cursor-pointer"
+            >
+              Hôm nay
+            </button>
+            <button
+              onClick={() => handleStepDay(1)}
+              className="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+              title="Ngày tiếp theo"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-          {/* Custom Date Input */}
-          <div className="flex items-center border border-gray-200 rounded-2xl px-2.5 py-1.5 bg-slate-50 shrink-0">
+          {/* Native Date Picker */}
+          <div className="flex items-center gap-1 border border-gray-200 rounded-md px-2 py-1 bg-white shadow-2xs">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <input
               type="date"
               value={selectedDateKey}
               onChange={(e) => onSelectDate(e.target.value)}
-              className="text-xs font-bold text-slate-700 bg-transparent focus:outline-none cursor-pointer"
+              className="text-xs font-medium text-slate-800 bg-transparent focus:outline-none cursor-pointer"
             />
           </div>
+
+          {/* Refresh Button */}
+          <button
+            onClick={onRefresh}
+            disabled={isFetchingShowtimes}
+            className="p-1.5 rounded-md border border-gray-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-[#7C6FE8] text-xs transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+            title="Làm mới lịch chiếu"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetchingShowtimes ? 'animate-spin text-[#7C6FE8]' : ''}`} />
+          </button>
         </div>
 
-        {/* Zoom Controls Bar */}
-        <div className="flex items-center gap-2 w-full xl:w-auto justify-end border-t xl:border-t-0 pt-2 xl:pt-0 border-gray-100">
-          <div className="flex items-center bg-slate-50 p-1 rounded-2xl border border-gray-200 shadow-2xs">
+        {/* Right: Snap Option + Zoom Level + Actions */}
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+          {/* Snap Selector */}
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white border border-gray-200 text-xs font-medium shadow-2xs">
+            <Magnet className="w-3.5 h-3.5 text-[#7C6FE8] shrink-0" />
+            <span className="text-slate-400 text-[11px]">Hít lưới:</span>
+            <select
+              value={snapMinutes}
+              onChange={(e) => onSnapChange(Number(e.target.value))}
+              className="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer text-xs"
+            >
+              {SNAP_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Zoom Controls */}
+          <div className="flex items-center bg-white p-0.5 rounded-md border border-gray-200 text-xs shadow-2xs">
             <button
               onClick={handleZoomOut}
               disabled={zoomLevel <= 0.65}
-              className="p-1.5 rounded-xl hover:bg-white text-slate-600 hover:text-[#7C6FE8] disabled:opacity-40 transition-all cursor-pointer"
+              className="p-1 rounded text-slate-500 hover:text-slate-900 disabled:opacity-30 transition-colors cursor-pointer"
               title="Thu nhỏ timeline"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-
-            <div className="flex items-center gap-1 px-1">
-              {ZOOM_PRESETS.map((preset) => (
-                <button
-                  key={preset.level}
-                  onClick={() => onZoomChange(preset.level)}
-                  className={`px-2 py-1 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
-                    Math.abs(zoomLevel - preset.level) < 0.05
-                      ? 'bg-[#7C6FE8] text-white shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-
+            <span className="px-1 text-xs font-medium font-mono text-slate-700 tabular-nums">
+              {Math.round(zoomLevel * 100)}%
+            </span>
             <button
               onClick={handleZoomIn}
               disabled={zoomLevel >= 2.0}
-              className="p-1.5 rounded-xl hover:bg-white text-slate-600 hover:text-[#7C6FE8] disabled:opacity-40 transition-all cursor-pointer"
+              className="p-1 rounded text-slate-500 hover:text-slate-900 disabled:opacity-30 transition-colors cursor-pointer"
               title="Phóng to timeline"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* Clone Date Action */}
+          <button
+            onClick={onOpenCloneModal}
+            className="px-2.5 py-1 rounded-md bg-white hover:bg-slate-50 border border-gray-200 text-slate-700 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+          >
+            <Copy className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Sao chép ngày</span>
+          </button>
+
+          {/* Primary Add Showtime Action */}
+          <button
+            onClick={onOpenAddModal}
+            className="px-3 py-1 rounded-md bg-[#7C6FE8] hover:bg-[#6b5edb] text-white font-medium text-xs flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Tạo suất</span>
+          </button>
         </div>
+      </div>
+
+      {/* Date Rail (7-Day Strip) */}
+      <div className="flex items-center gap-1 overflow-x-auto pt-1 border-t border-gray-200/60 scrollbar-none">
+        {datePills.map((p) => (
+          <button
+            key={p.key}
+            onClick={() => onSelectDate(p.key)}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+              selectedDateKey === p.key
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
     </div>
   );

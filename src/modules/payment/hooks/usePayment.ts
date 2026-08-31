@@ -22,6 +22,12 @@ export interface AppliedPricingRuleSummary {
   isDiscount: boolean;
 }
 
+export interface ItemizedSeatItem {
+  id: string;
+  typeName: string;
+  price: number;
+}
+
 export interface TicketPriceComposition {
   totalBasePrice: number;
   totalSurcharge: number;
@@ -51,6 +57,7 @@ export function usePayment(
 
   // Server-calculated financial breakdown
   const [serverTicketPrice, setServerTicketPrice] = useState<number | null>(null);
+  const [serverSeats, setServerSeats] = useState<ItemizedSeatItem[] | null>(null);
   const [serverComboPrice, setServerComboPrice] = useState<number | null>(null);
   const [serverTierDiscount, setServerTierDiscount] = useState<number>(0);
   const [serverTierName, setServerTierName] = useState<string | undefined>(undefined);
@@ -69,6 +76,7 @@ export function usePayment(
   } | null>(null);
   const [bookingId, setBookingId] = useState<string | number | undefined>(() => getBookingSession(showtimeId)?.bookingId);
   const [bookingCode, setBookingCode] = useState<string | undefined>(() => getBookingSession(showtimeId)?.bookingCode);
+
 
   // Continuous Countdown timer synced with sessionStorage expiration
   useEffect(() => {
@@ -335,14 +343,14 @@ export function usePayment(
         setServerVatBreakdown(fb.vat_breakdown);
       }
 
-      // Parse itemized tickets for pricing rule breakdown
+      // Parse itemized tickets for pricing rule breakdown & exact seat costs
       if (result.items?.tickets && result.items.tickets.length > 0) {
         let totalBase = 0;
         let totalSurch = 0;
         let totalRuleAdj = 0;
         const ruleMap: Record<number, AppliedPricingRuleSummary> = {};
 
-        result.items.tickets.forEach((t) => {
+        const mappedTickets: ItemizedSeatItem[] = result.items.tickets.map((t: any) => {
           totalBase += t.base_price || 0;
           totalSurch += t.surcharge || 0;
 
@@ -375,7 +383,22 @@ export function usePayment(
             ruleMap[ruleId].ticketCount += 1;
             ruleMap[ruleId].totalAdjustment += adjPerTicket;
           }
+
+          const rawType = (t.seat_type || 'standard').toLowerCase();
+          const typeName = rawType.includes('vip')
+            ? 'Ghế VIP'
+            : rawType.includes('couple') || rawType.includes('sweet')
+            ? 'Ghế Đôi Sweetbox'
+            : 'Ghế Thường';
+
+          return {
+            id: t.seat_code || t.code || 'Ghế',
+            typeName,
+            price: Number(t.final_price || ((t.base_price || 0) + (t.surcharge || 0))),
+          };
         });
+
+        setServerSeats(mappedTickets);
 
         const ruleList = Object.values(ruleMap);
         setAppliedPricingRules(ruleList);
@@ -386,6 +409,7 @@ export function usePayment(
           appliedRules: ruleList,
         });
       }
+
 
       // Update food combo names and real prices from server response
       if (result.items?.combos && result.items.combos.length > 0) {
@@ -457,6 +481,42 @@ export function usePayment(
     });
   };
 
+  const itemizedSeats = useMemo<ItemizedSeatItem[]>(() => {
+    if (serverSeats && serverSeats.length > 0) {
+      return serverSeats;
+    }
+
+    const session = getBookingSession(showtimeId);
+    if (session?.selectedSeats && session.selectedSeats.length > 0) {
+      return session.selectedSeats.map((s) => {
+        const rawType = (s.type || 'standard').toLowerCase();
+        const typeName = rawType.includes('vip')
+          ? 'Ghế VIP'
+          : rawType.includes('couple') || rawType.includes('sweet')
+          ? 'Ghế Đôi Sweetbox'
+          : 'Ghế Thường';
+        return {
+          id: s.id,
+          typeName,
+          price: s.price,
+        };
+      });
+    }
+
+    const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
+    const basePrice = session?.basePrice || 90000;
+
+    return rawSeats.map((id) => {
+      const row = id.charAt(0).toUpperCase();
+      if (['E', 'F', 'G', 'H'].includes(row)) {
+        return { id, typeName: 'Ghế VIP', price: basePrice + 20000 };
+      } else if (['I', 'J'].includes(row)) {
+        return { id, typeName: 'Ghế Đôi Sweetbox', price: basePrice + 40000 };
+      }
+      return { id, typeName: 'Ghế Thường', price: basePrice };
+    });
+  }, [serverSeats, showtimeId, seatsParam]);
+
   return {
     selectedMethod,
     setSelectedMethod,
@@ -478,6 +538,7 @@ export function usePayment(
     formattedShowDate,
     showTime: timeParam || '18:00',
     seatSummaryText,
+    itemizedSeats,
     ticketPrice,
     appliedPricingRules,
     ticketPriceComposition,
@@ -492,3 +553,4 @@ export function usePayment(
     processBookingPayment: handleProcessPayment,
   };
 }
+

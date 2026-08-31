@@ -11,6 +11,7 @@ import {
   SeatStatus,
 } from '../types/seat-booking.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 
 export function formatShowDate(dateStr?: string): string {
   if (!dateStr) return 'Hôm nay';
@@ -184,18 +185,26 @@ export const seatBookingService = {
         }) || rawCinemas[0];
 
         if (targetCinema && Array.isArray(targetCinema.times)) {
-          return targetCinema.times.map((t: any) => ({
-            id: String(t.id || t.showtime_id),
-            time:
-              t.startTime ||
-              (t.showtime_start
-                ? new Date(t.showtime_start).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : '19:30'),
-            format: t.format || t.screen_type,
-          }));
+          return targetCinema.times
+            .filter((t: any) => {
+              return !isShowtimePassed({
+                dateStr: dateStr,
+                timeStr: t.startTime || t.time,
+                showtimeStart: t.showtime_start,
+              });
+            })
+            .map((t: any) => ({
+              id: String(t.id || t.showtime_id),
+              time:
+                t.startTime ||
+                (t.showtime_start
+                  ? new Date(t.showtime_start).toLocaleTimeString('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '19:30'),
+              format: t.format || t.screen_type,
+            }));
         }
       }
       return [];

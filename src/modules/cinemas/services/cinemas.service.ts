@@ -8,6 +8,7 @@ import {
   CinemaPricingFormat,
   CinemaMovieShowtime,
 } from '../types/cinemas.types';
+import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 
 export async function fetchCities(): Promise<string[]> {
   try {
@@ -107,37 +108,47 @@ export async function fetchCinemaShowtimes(slug: string, date?: string): Promise
     });
 
     if (res.data?.success && Array.isArray(res.data?.data)) {
-      return res.data.data.map((item: any) => {
-        const movie = item.movie || {};
-        const rawTimes = Array.isArray(item.times) ? item.times : [];
+      return res.data.data
+        .map((item: any) => {
+          const movie = item.movie || {};
+          const rawTimes = Array.isArray(item.times) ? item.times : [];
 
-        const slots = rawTimes.map((st: any) => {
-          const startTime = st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : (st.time || '19:30');
-          const room = st.room || {};
+          const slots = rawTimes
+            .filter((st: any) => {
+              return !isShowtimePassed({
+                dateStr: date,
+                timeStr: st.time,
+                showtimeStart: st.showtime_start,
+              });
+            })
+            .map((st: any) => {
+              const startTime = st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : (st.time || '19:30');
+              const room = st.room || {};
+              return {
+                id: st.showtime_id || st.id,
+                showtimeId: st.showtime_id || st.id,
+                time: startTime,
+                format: room.room_type || st.format || '2D Phụ Đề',
+                roomName: room.room_name || 'Phòng 01',
+              };
+            });
+
+          const genres = Array.isArray(movie.genres)
+            ? movie.genres.map((g: any) => g.name || g.genre_name || g).join(', ')
+            : 'Điện Ảnh';
+
           return {
-            id: st.showtime_id || st.id,
-            showtimeId: st.showtime_id || st.id,
-            time: startTime,
-            format: room.room_type || st.format || '2D Phụ Đề',
-            roomName: room.room_name || 'Phòng 01',
+            movieId: movie.movie_id || movie.id,
+            title: movie.title || 'Tên Phim',
+            slug: movie.slug || 'movie-detail',
+            posterUrl: imageHelper.getPosterUrl(movie.poster_path || movie.poster_url),
+            ageRating: movie.age_rating || (movie.adult ? 'T18' : 'P'),
+            duration: movie.duration ? `${movie.duration} phút` : '120 phút',
+            genres,
+            slots,
           };
-        });
-
-        const genres = Array.isArray(movie.genres)
-          ? movie.genres.map((g: any) => g.name || g.genre_name || g).join(', ')
-          : 'Điện Ảnh';
-
-        return {
-          movieId: movie.movie_id || movie.id,
-          title: movie.title || 'Tên Phim',
-          slug: movie.slug || 'movie-detail',
-          posterUrl: imageHelper.getPosterUrl(movie.poster_path || movie.poster_url),
-          ageRating: movie.age_rating || (movie.adult ? 'T18' : 'P'),
-          duration: movie.duration ? `${movie.duration} phút` : '120 phút',
-          genres,
-          slots,
-        };
-      });
+        })
+        .filter((movie: any) => movie.slots.length > 0);
     }
   } catch (error) {
     console.error('Failed to fetch cinema showtimes', error);

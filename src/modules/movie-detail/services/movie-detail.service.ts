@@ -9,6 +9,7 @@ import {
 } from '../types/movie-detail.types';
 import { MovieCardItem } from '@/modules/home/types/home.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 import {
   MOCK_MOVIE_DETAIL_SPIDERMAN,
   MOCK_MOVIE_DETAIL_COMING_SOON_MAP,
@@ -153,6 +154,13 @@ export async function fetchShowtimeSchedule(
           // Group showtimes by format (e.g. IMAX Laser, 2D Dolby Atmos, ScreenX, Gold Class)
           const formatMap: Record<string, any[]> = {};
           for (const t of rawTimes) {
+            const isPassed = isShowtimePassed({
+              dateStr: dateStr,
+              timeStr: t.startTime || t.time,
+              showtimeStart: t.showtime_start,
+            });
+            if (isPassed) continue;
+
             const formatName = t.format || t.screen_type || '2D Dolby Atmos';
             if (!formatMap[formatName]) {
               formatMap[formatName] = [];
@@ -170,10 +178,14 @@ export async function fetchShowtimeSchedule(
             });
           }
 
-          const formatGroups = Object.entries(formatMap).map(([formatName, showtimes]) => ({
-            formatName,
-            showtimes,
-          }));
+          const formatGroups = Object.entries(formatMap)
+            .filter(([_, showtimes]) => showtimes.length > 0)
+            .map(([formatName, showtimes]) => ({
+              formatName,
+              showtimes,
+            }));
+
+          if (formatGroups.length === 0) continue;
 
           mappedGroups.push({
             cinemaId: String(c.cinema_id || c.id),

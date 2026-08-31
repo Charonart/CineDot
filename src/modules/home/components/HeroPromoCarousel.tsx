@@ -12,6 +12,7 @@ import {
   fetchCinemaShowtimesTree,
   HomeCinemaOption,
 } from '../services/home.service';
+import { isShowtimePassed, filterUpcomingShowtimes } from '@/shared/utils/showtimeHelper';
 import { MOCK_PROMO_BANNERS } from '../mocks/mockHomeData';
 import { useTrailerStore } from '@/shared/store/trailerStore';
 
@@ -107,7 +108,14 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
       const hasShowtimesForCinema = Array.isArray(day.cinemas) && day.cinemas.some((c: any) => {
         const cObj = c.cinema || {};
         const cId = String(cObj.cinema_id || cObj.id || c.cinema_id || '');
-        return cId === String(targetCinemaId) && Array.isArray(c.times) && c.times.length > 0;
+        if (cId !== String(targetCinemaId) || !Array.isArray(c.times) || c.times.length === 0) return false;
+
+        // Ensure date has at least 1 upcoming showtime
+        return c.times.some((st: any) => !isShowtimePassed({
+          dateStr: day.date,
+          timeStr: st.time,
+          showtimeStart: st.showtime_start,
+        }));
       });
 
       if (hasShowtimesForCinema && day.date) {
@@ -289,6 +297,13 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
       if (cinemaEntry && Array.isArray(cinemaEntry.times)) {
         cinemaEntry.times.forEach((st: any) => {
+          const isPassed = isShowtimePassed({
+            dateStr: selectedDateId,
+            timeStr: st.time,
+            showtimeStart: st.showtime_start,
+          });
+          if (isPassed) return;
+
           const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
           const room = st.room || {};
           const format = room.room_type || st.format || '2D';
@@ -311,6 +326,13 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
       const rawSlots = movieEntry?.slots || movieEntry?.times || [];
       rawSlots.forEach((st: any) => {
+        const isPassed = isShowtimePassed({
+          dateStr: selectedDateId,
+          timeStr: st.time,
+          showtimeStart: st.showtime_start,
+        });
+        if (isPassed) return;
+
         const startTime = st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
         const format = st.format || st.roomName || '2D';
         slots.push({
@@ -335,7 +357,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
   // Conditions
   const isDateDisabled = !movieId || !cinemaId;
-  const isTimeDisabled = !movieId || !cinemaId || !date;
+  const isTimeDisabled = !movieId || !cinemaId || !date || timesList.length === 0;
   const isSubmitDisabled = !movieId || !cinemaId || !date || !time;
 
   const activeBanners = useMemo(() => {
@@ -369,7 +391,11 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   const getSelectedMovieLabel = () => selectedMovie?.title || (loadingMovies ? 'Đang lọc phim...' : 'Chọn Phim');
   const getSelectedCinemaLabel = () => selectedCinema?.name || (loadingCinemas ? 'Đang tìm rạp...' : 'Chọn Cụm Rạp');
   const getSelectedDateLabel = () => datesList.find((d) => d.id === date)?.label || (loadingDates ? 'Đang tải ngày...' : 'Chọn Ngày');
-  const getSelectedTimeLabel = () => timesList.find((t) => t.id === time || String(t.showtimeId) === time)?.label || (loadingTimes ? 'Đang tải suất...' : 'Chọn Suất Chiếu');
+  const getSelectedTimeLabel = () => {
+    if (loadingTimes) return 'Đang tải suất...';
+    if (date && timesList.length === 0) return 'Đã hết suất hôm nay';
+    return timesList.find((t) => t.id === time || String(t.showtimeId) === time)?.label || 'Chọn Suất Chiếu';
+  };
 
   const handlePrevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? activeBanners.length - 1 : prev - 1));

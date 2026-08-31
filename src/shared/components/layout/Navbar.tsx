@@ -2,261 +2,345 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '@/shared/store/useAuthStore';
 import { useCartStore } from '@/shared/store/useCartStore';
 import { AuthModal } from '@/modules/auth/components/AuthModal';
-import { PermissionGuard } from '@/shared/components/auth/PermissionGuard';
 import { MoviesMegaDropdown } from './MoviesMegaDropdown';
 import { CinemasMegaDropdown } from './CinemasMegaDropdown';
 import { StarShopMegaDropdown } from './StarShopMegaDropdown';
-import { User, LogOut, Ticket, ChevronDown, ShoppingBag } from 'lucide-react';
+import { UserNavMenu } from './UserNavMenu';
+import { ExpandableSearchBar } from '@/shared/ui/ExpandableSearchBar';
+import {
+  User,
+  Ticket,
+  ChevronDown,
+  ShoppingBag,
+  Film,
+  Sparkles,
+  Calendar,
+  MapPin,
+  Menu,
+  X,
+  Search,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, openAuthModal } = useAuthStore();
-
-  // Reactive subscription to Zustand cart store items
+  const router = useRouter();
+  const { user, isAuthenticated, openAuthModal } = useAuthStore();
   const items = useCartStore((state) => state.items);
 
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isMoviesDropdownOpen, setIsMoviesDropdownOpen] = useState(false);
-  const [isCinemasDropdownOpen, setIsCinemasDropdownOpen] = useState(false);
-  const [isStarShopDropdownOpen, setIsStarShopDropdownOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<'movies' | 'cinemas' | 'starshop' | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Prevent SSR Hydration Mismatch by ensuring client-only state updates after mount
+  // Prevent SSR Hydration Mismatch & initialize session check
   useEffect(() => {
     setMounted(true);
     useAuthStore.getState().fetchMe();
+
+    const handleScroll = () => {
+      if (window.scrollY > 24) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Compute reactive cart list and total count directly from items
+  // Compute reactive cart list and count
   const cartItemList = useMemo(() => Object.values(items), [items]);
-
   const totalCartCount = useMemo(() => {
     return cartItemList.reduce((sum, item) => sum + item.quantity, 0);
   }, [cartItemList]);
 
   const navLinks = [
-    { name: 'Phim', href: '/movies', dropdownType: 'movies' },
-    { name: 'Star Shop', href: '/star-shop', dropdownType: 'starshop' },
-    // { name: 'Góc Điện Ảnh', href: '/cinema-corner' },
-    { name: 'Sự Kiện', href: '/events' },
-    { name: 'Rạp/Giá Vé', href: '/cinemas', dropdownType: 'cinemas' },
-    { name: 'Rạp Đặc Biệt', href: '/special-theaters' },
+    {
+      name: 'Phim',
+      href: '/movies',
+      dropdownType: 'movies' as const,
+      icon: Film,
+    },
+    {
+      name: 'Star Shop',
+      href: '/star-shop',
+      dropdownType: 'starshop' as const,
+      icon: ShoppingBag,
+    },
+    {
+      name: 'Sự Kiện',
+      href: '/events',
+      icon: Calendar,
+    },
+    {
+      name: 'Rạp & Giá Vé',
+      href: '/cinemas',
+      dropdownType: 'cinemas' as const,
+      icon: MapPin,
+    },
+    {
+      name: 'Rạp Đặc Biệt',
+      href: '/special-theaters',
+      icon: Sparkles,
+    },
   ];
+
+  const handleSearchSubmit = (val: string) => {
+    if (val.trim()) {
+      router.push(`/movies?search=${encodeURIComponent(val.trim())}`);
+    }
+  };
 
   return (
     <>
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[min(1480px,calc(100vw-32px))]">
-        <div className="glass-nav rounded-full px-6 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-200/80 bg-white/90 backdrop-blur-xl relative text-gray-900">
-          {/* Logo */}
-          <Link className="font-sans font-extrabold text-2xl tracking-tight text-gray-900 flex items-center gap-1" href="/">
-            Cine<span className="text-[#7C6FE8]">Dot</span>
+      {/* Hallmark N10/N1b Hybrid Floating Nav Bar */}
+      <header
+        className={`fixed top-4 sm:top-5 left-1/2 -translate-x-1/2 z-[100] w-[min(1180px,calc(100vw-24px))] transition-all duration-300 ${
+          isScrolled ? 'top-3 sm:top-4' : 'top-4 sm:top-5'
+        }`}
+      >
+        <div
+          className={`rounded-full px-4 sm:px-6 flex items-center justify-between border transition-all duration-300 relative text-slate-900 ${
+            isScrolled
+              ? 'py-2.5 sm:py-3 bg-white/95 backdrop-blur-2xl border-gray-200/90 shadow-[0_12px_36px_-6px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.8)]'
+              : 'py-3 sm:py-3.5 bg-white/90 backdrop-blur-xl border-gray-200/70 shadow-[0_6px_24px_-4px_rgba(15,23,42,0.06)]'
+          }`}
+        >
+          {/* Left Brand Identity */}
+          <Link
+            className="font-sans font-black text-xl sm:text-2xl tracking-tight text-slate-900 flex items-center group shrink-0"
+            href="/"
+            onClick={() => setActiveDropdown(null)}
+          >
+            <span>Cine</span>
+            <span className="text-[#7C6FE8]">Dot</span>
           </Link>
 
-          {/* Center Links */}
-          <ul className="hidden lg:flex items-center space-x-6 xl:space-x-7 text-sm font-semibold text-gray-700">
+          {/* Center Navigation Links */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 text-xs font-bold text-slate-700">
             {navLinks.map((link) => {
-              const isMovies = link.dropdownType === 'movies';
-              const isCinemas = link.dropdownType === 'cinemas';
-              const isStarShop = link.dropdownType === 'starshop';
-              const isDropdown = isMovies || isCinemas || isStarShop;
-              const isOpen = isMovies
-                ? isMoviesDropdownOpen
-                : isCinemas
-                ? isCinemasDropdownOpen
-                : isStarShop
-                ? isStarShopDropdownOpen
-                : false;
+              const isDropdown = Boolean(link.dropdownType);
+              const isOpen = activeDropdown === link.dropdownType;
 
               return (
-                <li
+                <div
                   key={link.name}
                   className="relative py-1"
                   onMouseEnter={() => {
-                    if (isMovies) setIsMoviesDropdownOpen(true);
-                    if (isCinemas) setIsCinemasDropdownOpen(true);
-                    if (isStarShop) setIsStarShopDropdownOpen(true);
+                    if (link.dropdownType) setActiveDropdown(link.dropdownType);
                   }}
                   onMouseLeave={() => {
-                    if (isMovies) setIsMoviesDropdownOpen(false);
-                    if (isCinemas) setIsCinemasDropdownOpen(false);
-                    if (isStarShop) setIsStarShopDropdownOpen(false);
+                    if (link.dropdownType) setActiveDropdown(null);
                   }}
                 >
-                  {isDropdown ? (
-                    <Link
-                      href={link.href}
-                      className="hover:text-[#7C6FE8] transition-colors flex items-center gap-1 font-semibold cursor-pointer text-gray-700"
-                    >
-                      <span>{link.name}</span>
+                  <Link
+                    href={link.href}
+                    className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 cursor-pointer font-bold ${
+                      isOpen
+                        ? 'bg-purple-50 text-[#7C6FE8]'
+                        : 'hover:bg-gray-100/80 hover:text-[#7C6FE8] text-slate-700'
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    {isDropdown && (
                       <ChevronDown
-                        className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${
+                        className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${
                           isOpen ? 'rotate-180 text-[#7C6FE8]' : ''
                         }`}
                       />
-                    </Link>
-                  ) : (
-                    <Link
-                      className="hover:text-[#7C6FE8] transition-colors flex items-center gap-1 font-semibold text-gray-700"
-                      href={link.href}
-                    >
-                      <span>{link.name}</span>
-                    </Link>
-                  )}
+                    )}
+                  </Link>
 
-                  {/* Individual Dropdown rendering aligned to item */}
+                  {/* Mega Dropdowns aligned to trigger */}
                   <AnimatePresence>
-                    {isCinemas && isCinemasDropdownOpen && (
+                    {link.dropdownType === 'cinemas' && isOpen && (
                       <div
-                        onMouseEnter={() => setIsCinemasDropdownOpen(true)}
-                        onMouseLeave={() => setIsCinemasDropdownOpen(false)}
+                        onMouseEnter={() => setActiveDropdown('cinemas')}
+                        onMouseLeave={() => setActiveDropdown(null)}
                       >
-                        <CinemasMegaDropdown onClose={() => setIsCinemasDropdownOpen(false)} />
+                        <CinemasMegaDropdown onClose={() => setActiveDropdown(null)} />
                       </div>
                     )}
 
-                    {isStarShop && isStarShopDropdownOpen && (
+                    {link.dropdownType === 'starshop' && isOpen && (
                       <div
-                        onMouseEnter={() => setIsStarShopDropdownOpen(true)}
-                        onMouseLeave={() => setIsStarShopDropdownOpen(false)}
+                        onMouseEnter={() => setActiveDropdown('starshop')}
+                        onMouseLeave={() => setActiveDropdown(null)}
                       >
-                        <StarShopMegaDropdown onClose={() => setIsStarShopDropdownOpen(false)} />
+                        <StarShopMegaDropdown onClose={() => setActiveDropdown(null)} />
                       </div>
                     )}
                   </AnimatePresence>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center space-x-3 sm:space-x-5">
-            {/* Navbar Cart Icon Badge ONLY VISIBLE when (mounted && isAuthenticated && totalCartCount > 0) */}
+          {/* Right Action Hub */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Search Pill Trigger */}
+            <div className="hidden sm:block">
+              <ExpandableSearchBar
+                placeholder="Tìm phim, rạp chiếu..."
+                onSubmit={handleSearchSubmit}
+              />
+            </div>
+
+            {/* StarShop Cart Button */}
             {mounted && isAuthenticated && totalCartCount > 0 && (
               <Link href="/star-shop/cart">
                 <button
-                  className="relative p-2.5 text-[#7C6FE8] hover:bg-[#7C6FE8]/10 rounded-full transition-all cursor-pointer flex items-center justify-center border border-[#7C6FE8]/20 bg-purple-50"
-                  title="Xem trang Giỏ Hàng Star Shop"
+                  className="relative p-2.5 text-[#7C6FE8] hover:bg-purple-50 rounded-full transition-all cursor-pointer flex items-center justify-center border border-[#7C6FE8]/20 bg-purple-50/50 hover:scale-105 active:scale-95"
+                  title="Xem giỏ hàng Star Shop"
                 >
                   <ShoppingBag className="w-4 h-4 text-[#7C6FE8]" />
-                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white font-extrabold text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                  <span className="absolute -top-1 -right-1 bg-[#7C6FE8] text-white font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
                     {totalCartCount}
                   </span>
                 </button>
               </Link>
             )}
 
+            {/* Authenticated User Popover Menu / Unauthenticated Sign In */}
             {mounted && isAuthenticated && user ? (
-              <div className="flex items-center gap-2.5">
-                <PermissionGuard permissions={['admin', 'manage:cinemas', 'manage:movies', 'view:reports']}>
-                  <Link href="/admin" className="text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] bg-purple-50 hover:bg-purple-100 transition-colors px-3 py-1.5 rounded-full border border-purple-200 shadow-sm hidden md:block">
-                    Quản Trị
-                  </Link>
-                </PermissionGuard>
-                
-                <Link href="/profile" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-gray-100/90 px-3 py-1.5 rounded-full border border-gray-200">
-                  <div className="w-6 h-6 rounded-full bg-[#7C6FE8] text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
-                    {user.name ? user.name.charAt(0) : 'U'}
-                  </div>
-                  <span className="text-xs font-bold text-gray-800 hidden md:block">
-                    {user.name || user.username}
-                  </span>
-                </Link>
-
-                <button
-                  onClick={logout}
-                  className="text-xs font-bold text-gray-400 hover:text-rose-600 transition-colors p-1 cursor-pointer"
-                  title="Đăng xuất"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
+              <UserNavMenu />
             ) : (
               <button
                 onClick={() => openAuthModal('login')}
-                className="text-gray-700 hover:text-[#7C6FE8] transition-colors hidden md:flex items-center gap-1.5 cursor-pointer font-bold text-xs"
+                className="text-slate-700 hover:text-[#7C6FE8] transition-colors hidden md:flex items-center gap-1.5 cursor-pointer font-bold text-xs px-3 py-1.5 rounded-full hover:bg-gray-100/80"
               >
                 <User className="w-4 h-4 text-[#7C6FE8]" />
                 <span>Đăng nhập</span>
               </button>
             )}
 
+            {/* Primary CTA: Đặt vé ngay */}
             <Link
-              className="bg-[#7C6FE8] text-white px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs font-extrabold uppercase tracking-wider hover:bg-[#685bc7] shadow-sm shadow-[#7C6FE8]/25 transition-all inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95"
+              className="bg-[#7C6FE8] text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-xs font-black uppercase tracking-wider hover:bg-[#685bc7] shadow-sm shadow-[#7C6FE8]/30 transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95 shrink-0"
               href="/movies"
             >
-              Đặt vé
+              <Ticket className="w-3.5 h-3.5 fill-white hidden sm:inline-block" />
+              <span>Đặt vé</span>
             </Link>
 
-            {/* Mobile hamburger */}
+            {/* Mobile Hamburger Trigger */}
             <button
-              className="lg:hidden text-gray-700 hover:text-gray-900 focus:outline-none p-1 cursor-pointer"
+              className="lg:hidden p-2 text-slate-700 hover:text-slate-900 rounded-full hover:bg-gray-100 focus:outline-none transition-colors cursor-pointer"
               onClick={() => setIsMobileOpen(!isMobileOpen)}
-              aria-label="Toggle navigation"
+              aria-label="Mở menu điều hướng"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMobileOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
-        {/* Movies Mega Dropdown (Centered under nav) */}
+        {/* Movies Mega Dropdown (Centered under nav bar) */}
         <AnimatePresence>
-          {isMoviesDropdownOpen && (
+          {activeDropdown === 'movies' && (
             <div
-              onMouseEnter={() => setIsMoviesDropdownOpen(true)}
-              onMouseLeave={() => setIsMoviesDropdownOpen(false)}
+              onMouseEnter={() => setActiveDropdown('movies')}
+              onMouseLeave={() => setActiveDropdown(null)}
             >
-              <MoviesMegaDropdown onClose={() => setIsMoviesDropdownOpen(false)} />
+              <MoviesMegaDropdown onClose={() => setActiveDropdown(null)} />
             </div>
           )}
         </AnimatePresence>
 
-        {/* Mobile Drawer */}
-        {isMobileOpen && (
-          <div className="xl:hidden mt-3 p-4 glass-card rounded-2xl border border-white/20 shadow-lg flex flex-col gap-2 bg-white/95">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsMobileOpen(false)}
-                className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
+        {/* Mobile Navigation Drawer */}
+        <AnimatePresence>
+          {isMobileOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden mt-2.5 p-4 rounded-3xl bg-white/98 backdrop-blur-2xl border border-gray-200/90 shadow-[0_20px_50px_-10px_rgba(15,23,42,0.2)] flex flex-col gap-2.5 text-slate-900"
+            >
+              {/* Mobile Search input */}
+              <div className="relative flex items-center mb-1">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3.5" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm phim, rạp chiếu..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearchSubmit((e.target as HTMLInputElement).value);
+                      setIsMobileOpen(false);
+                    }
+                  }}
+                  className="w-full pl-10 pr-3 py-2.5 bg-gray-100 text-xs font-semibold text-slate-800 rounded-2xl border border-transparent focus:border-[#7C6FE8] outline-none"
+                />
+              </div>
 
-            {mounted && isAuthenticated ? (
-              <Link
-                href="/profile"
-                onClick={() => setIsMobileOpen(false)}
-                className="px-4 py-2.5 text-xs font-extrabold text-[#7C6FE8] hover:bg-purple-50 rounded-xl transition-colors flex items-center gap-2"
-              >
-                <Ticket className="w-4 h-4 text-[#7C6FE8]" />
-                <span>Trang Cá Nhân & Vé Của Tôi</span>
-              </Link>
-            ) : (
-              <button
-                onClick={() => {
-                  setIsMobileOpen(false);
-                  openAuthModal('login');
-                }}
-                className="px-4 py-2.5 text-xs font-extrabold text-[#7C6FE8] hover:bg-purple-50 rounded-xl transition-colors flex items-center gap-2 text-left"
-              >
-                <User className="w-4 h-4 text-[#7C6FE8]" />
-                <span>Đăng nhập tài khoản</span>
-              </button>
-            )}
-          </div>
-        )}
-      </nav>
+              {/* Mobile Links */}
+              <div className="flex flex-col gap-1">
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsMobileOpen(false)}
+                      className="px-3.5 py-2.5 text-xs font-bold text-slate-800 hover:bg-purple-50 hover:text-[#7C6FE8] rounded-2xl transition-colors flex items-center justify-between"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 text-[#7C6FE8]" />
+                        <span>{link.name}</span>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="h-px bg-gray-100 my-1" />
+
+              {/* Mobile User Profile / Sign In */}
+              {mounted && isAuthenticated && user ? (
+                <div className="flex flex-col gap-1">
+                  <Link
+                    href="/profile?tab=tickets"
+                    onClick={() => setIsMobileOpen(false)}
+                    className="px-3.5 py-2.5 text-xs font-extrabold text-[#7C6FE8] bg-purple-50 rounded-2xl transition-colors flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Ticket className="w-4 h-4" />
+                      <span>Vé Của Tôi & Lịch Đặt</span>
+                    </span>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#7C6FE8] text-white">
+                      {user.total_points || 0} pts
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/profile?tab=overview"
+                    onClick={() => setIsMobileOpen(false)}
+                    className="px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-gray-100 rounded-2xl transition-colors flex items-center gap-2.5"
+                  >
+                    <User className="w-4 h-4 text-gray-500" />
+                    <span>Trang Cá Nhân ({user.name || user.username})</span>
+                  </Link>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsMobileOpen(false);
+                    openAuthModal('login');
+                  }}
+                  className="w-full px-3.5 py-2.5 text-xs font-extrabold text-[#7C6FE8] bg-purple-50 hover:bg-purple-100 rounded-2xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Đăng nhập tài khoản</span>
+                </button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
 
       {/* Global Auth Modal Popup */}
       <AuthModal />

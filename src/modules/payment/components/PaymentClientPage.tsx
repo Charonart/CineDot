@@ -14,6 +14,8 @@ import { PaymentLoadingOverlay } from './PaymentLoadingOverlay';
 import { SeatTimeoutModal } from '@/modules/booking/components/SeatTimeoutModal';
 import { MOCK_PAYMENT_METHODS } from '../mocks/mockPaymentData';
 import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
+import { updateBookingSession } from '@/modules/booking/services/bookingSessionService';
+
 
 interface PaymentClientPageProps {
   showtimeId?: string;
@@ -57,6 +59,7 @@ export function PaymentClientPage({
     formattedShowDate,
     showTime,
     seatSummaryText,
+    itemizedSeats,
     ticketPrice,
     appliedPricingRules,
     ticketPriceComposition,
@@ -89,6 +92,13 @@ export function PaymentClientPage({
       });
 
       if (res.success) {
+        updateBookingSession(showtimeId, {
+          paymentConfirmed: true,
+          totalPaid: grandTotal,
+          paymentMethod: selectedMethod,
+          paidAt: new Date().toLocaleString('vi-VN'),
+        });
+
         if (res.paymentUrl) {
           window.location.href = res.paymentUrl;
         } else {
@@ -99,6 +109,7 @@ export function PaymentClientPage({
           );
         }
       } else {
+
         alert((res as any)?.message || 'Thanh toán thất bại, vui lòng thử lại.');
       }
     } catch {
@@ -109,12 +120,23 @@ export function PaymentClientPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFB] text-gray-900 flex flex-col justify-between pt-20 pb-24 selection:bg-[#7C6FE8] selection:text-white">
-      {/* 1. Header & Step Wizard Bar */}
-      <BookingStepWizard currentStep={4} />
+    <div className="min-h-screen bg-[#FAFAFB] text-gray-900 flex flex-col justify-between pt-24 sm:pt-28 pb-24 selection:bg-[#7C6FE8] selection:text-white">
+      {/* Main Payment Workflow Workbench Layout */}
+      <main className="max-w-[1240px] mx-auto px-4 sm:px-8 py-4 sm:py-6 w-full flex-1">
+        {/* Slim Horizontal Booking Step Wizard Ribbon */}
+        <BookingStepWizard
+          currentStep={4}
+          showtimeId={showtimeId}
+          movieSlug={movieParam || movieInfo.slug}
+          movieTitle={movieInfo.title}
+          seatsParam={seatsParam}
+          combosParam={combosParam}
+          dateParam={dateParam}
+          timeParam={timeParam || showTime}
+          cinemaParam={cinemaParam || decodedCinemaName}
+          className="mb-6"
+        />
 
-      {/* 2. Main Payment Workflow Workbench Layout */}
-      <main className="max-w-[1240px] mx-auto px-4 sm:px-8 py-6 sm:py-8 w-full flex-1">
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
             {/* Left Column: 68% Width (Payment Options) */}
@@ -152,7 +174,7 @@ export function PaymentClientPage({
             </div>
 
             {/* Right Column: 32% Width (Payment Summary Sidebar) */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 sticky top-28">
               <PaymentSidebar
                 movieTitle={movieInfo.title}
                 movieFormat={movieInfo.format}
@@ -162,6 +184,7 @@ export function PaymentClientPage({
                 showTime={showTime}
                 showDate={formattedShowDate}
                 seatSummaryText={seatSummaryText}
+                itemizedSeats={itemizedSeats}
                 ticketPrice={ticketPrice}
                 appliedPricingRules={appliedPricingRules}
                 ticketPriceComposition={ticketPriceComposition}
@@ -183,6 +206,7 @@ export function PaymentClientPage({
           </div>
         </div>
       </main>
+
 
       {/* 3. Full-screen Loading Overlay on Payment Process */}
       <PaymentLoadingOverlay

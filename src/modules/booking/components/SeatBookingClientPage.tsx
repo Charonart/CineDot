@@ -12,9 +12,11 @@ import { SeatGrid } from './SeatGrid';
 import { BookingSidebar } from './BookingSidebar';
 import { BookingSummaryBar } from './BookingSummaryBar';
 import { SeatTimeoutModal } from './SeatTimeoutModal';
+import { ExpiredShowtimeModal } from './ExpiredShowtimeModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
 import { seatBookingService } from '../services/seat-booking.service';
+import { getBookingSession } from '../services/bookingSessionService';
 
 interface SeatBookingClientPageProps {
   showtimeId: string;
@@ -34,6 +36,7 @@ export function SeatBookingClientPage({
   cinemaParam,
 }: SeatBookingClientPageProps) {
   const router = useRouter();
+
   const {
     bookingInfo,
     seats,
@@ -45,15 +48,28 @@ export function SeatBookingClientPage({
     totalPrice,
     formattedCountdown,
     isTimeout,
+    isExpiredShowtime,
     loading,
     isHolding,
     holdError,
     handleHoldSeats,
   } = useSeatBooking(showtimeId, movieParam, initialSeatsParam, dateParam, timeParam, cinemaParam);
 
-  const [isTimerActive, setIsTimerActive] = useState<boolean>(() => hasActiveBookingTimer(showtimeId));
+  const [isTimerActive, setIsTimerActive] = useState<boolean>(() => {
+    const session = getBookingSession(showtimeId);
+    return Boolean(session?.bookingId) && hasActiveBookingTimer(showtimeId);
+  });
   const [currentShowTime, setCurrentShowTime] = useState('19:30');
   const [siblingShowtimes, setSiblingShowtimes] = useState<SiblingShowtimeItem[]>([]);
+
+  useEffect(() => {
+    const session = getBookingSession(showtimeId);
+    if (!session?.bookingId) {
+      resetBookingTimer(showtimeId);
+      setIsTimerActive(false);
+    }
+  }, [showtimeId]);
+
 
   useEffect(() => {
     if (bookingInfo) {
@@ -100,13 +116,23 @@ export function SeatBookingClientPage({
   }
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen pt-20 pb-24 selection:bg-[#7C6FE8] selection:text-white relative">
-      {/* 1. Step Progress Wizard Bar */}
-      <BookingStepWizard currentStep={2} />
-
-      {/* 2. Main 2-Column Workbench Layout */}
+    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen pt-24 sm:pt-28 pb-24 selection:bg-[#7C6FE8] selection:text-white relative">
+      {/* Main 2-Column Workbench Layout */}
       <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-6 sm:py-8">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-4 sm:py-6">
+          {/* Slim Horizontal Booking Step Wizard Ribbon */}
+          <BookingStepWizard
+            currentStep={2}
+            showtimeId={showtimeId}
+            movieSlug={bookingInfo.movieSlug || movieParam}
+            movieTitle={bookingInfo.movieTitle}
+            dateParam={bookingInfo.showDate || dateParam}
+            timeParam={currentShowTime}
+            cinemaParam={bookingInfo.cinemaName || cinemaParam}
+            seatsParam={selectedSeats.map((s) => s.id).join(',')}
+            className="mb-6"
+          />
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
             {/* Left Column: 68% Width (lg:col-span-8 - Seat Map & Screen Workspace) */}
             <div className="lg:col-span-8 flex flex-col gap-6">
@@ -141,7 +167,7 @@ export function SeatBookingClientPage({
             </div>
 
             {/* Right Column: 32% Width (lg:col-span-4 - Booking Summary Sidebar) */}
-            <div className="lg:col-span-4 hidden lg:block">
+            <div className="lg:col-span-4 hidden lg:block sticky top-28">
               <BookingSidebar
                 info={bookingInfo}
                 currentShowTime={currentShowTime}
@@ -153,7 +179,6 @@ export function SeatBookingClientPage({
                 holdError={holdError}
                 onHoldSeats={handleHoldSeats}
               />
-
             </div>
           </div>
         </div>
@@ -174,6 +199,16 @@ export function SeatBookingClientPage({
         isOpen={isTimeout}
         movieSlug={bookingInfo.movieSlug}
         onReset={() => resetBookingTimer(showtimeId)}
+      />
+
+      {/* 4. Expired Showtime Guard Modal */}
+      <ExpiredShowtimeModal
+        isOpen={isExpiredShowtime}
+        movieSlug={bookingInfo.movieSlug}
+        showTime={bookingInfo.showTime || currentShowTime}
+        showDate={bookingInfo.showDate || dateParam}
+        siblingShowtimes={siblingShowtimes}
+        onSelectSiblingShowtime={handleSelectSiblingShowtime}
       />
     </div>
   );
