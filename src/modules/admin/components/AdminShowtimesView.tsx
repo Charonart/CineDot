@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { useAdminShowtimes } from '../hooks/useAdminShowtimes';
 import { AdminShowtimeGridItem, AdminMovieOption } from '../types/adminShowtime.types';
 import { ShowtimesToolbar } from './showtimes/ShowtimesToolbar';
@@ -29,6 +29,9 @@ export function AdminShowtimesView() {
 
   // Timeline Zoom Level (0.75: Compact, 1.0: Standard, 1.35: Detailed, 1.75: Ultra-wide)
   const [zoomLevel, setZoomLevel] = useState<number>(1.0);
+
+  // Snapping Interval in Minutes (5, 10, 15, 30, 1 for off)
+  const [snapMinutes, setSnapMinutes] = useState<number>(15);
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -61,7 +64,7 @@ export function AdminShowtimesView() {
   // Toast Notification
   const [toastMsg, setToastMsg] = useState('');
 
-  // 100% Real API Hook
+  // Real API Hook
   const {
     cinemas,
     isLoadingCinemas,
@@ -154,8 +157,17 @@ export function AdminShowtimesView() {
       setAddRoomId(rooms[0].id);
     }
 
+    const targetRoomId = roomId || addRoomId || rooms[0]?.id;
     if (defaultStartTime) {
       setAddStartTime(defaultStartTime);
+    } else if (targetRoomId) {
+      const roomShowtimes = showtimes.filter((st) => st.roomId === targetRoomId);
+      if (roomShowtimes.length > 0) {
+        const latestEndM = Math.max(...roomShowtimes.map((st) => st.endMinutes + st.cleaningBufferMinutes));
+        setAddStartTime(minutesToTime(latestEndM));
+      } else {
+        setAddStartTime('09:30');
+      }
     }
 
     setIsAddModalOpen(true);
@@ -183,7 +195,7 @@ export function AdminShowtimesView() {
       });
 
       setIsAddModalOpen(false);
-      setToastMsg('Tạo suất chiếu và khởi tạo sơ đồ ghế thành công!');
+      setToastMsg('Tạo suất chiếu thành công!');
       setTimeout(() => setToastMsg(''), 4000);
     } catch (err: unknown) {
       const errObj = err as { response?: { data?: { message?: string } }; message?: string };
@@ -289,16 +301,22 @@ export function AdminShowtimesView() {
   };
 
   return (
-    <div className="flex flex-col gap-6 font-sans pb-20 text-slate-900">
+    <div className="flex flex-col font-sans text-slate-900 select-none bg-white rounded-xl border border-gray-200/90 shadow-2xs overflow-hidden">
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed top-5 right-5 z-50 px-5 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-xs shadow-xl flex items-center gap-2 animate-bounce">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="fixed top-5 right-5 z-50 px-4 py-2 rounded-lg bg-slate-900 text-white font-medium text-xs shadow-xl flex items-center gap-2 border border-slate-800 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{toastMsg}</span>
+          <button
+            onClick={() => setToastMsg('')}
+            className="p-0.5 rounded hover:bg-slate-800 text-slate-400 ml-1 cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
-      {/* 1. Header & Filter Toolbar with Zoom Controls */}
+      {/* 1. Studio Top Command Strip */}
       <ShowtimesToolbar
         cinemas={cinemas}
         isLoadingCinemas={isLoadingCinemas}
@@ -309,28 +327,28 @@ export function AdminShowtimesView() {
         onSelectDate={(key) => setSelectedDateKey(key)}
         zoomLevel={zoomLevel}
         onZoomChange={(lvl) => setZoomLevel(lvl)}
+        snapMinutes={snapMinutes}
+        onSnapChange={(snap) => setSnapMinutes(snap)}
         isFetchingShowtimes={isFetchingShowtimes}
         onRefresh={() => refetchShowtimes()}
         onOpenAddModal={() => handleOpenAddModal()}
         onOpenCloneModal={() => setIsCloneModalOpen(true)}
       />
 
-      {/* 2. Staggering Conflict Warnings Banner */}
+      {/* 2. Inline Staggering Conflict Warning Banner */}
       {staggeringConflicts.length > 0 && (
-        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-3 text-xs text-amber-900">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+        <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/80 flex items-center gap-2 text-xs text-amber-900">
+          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
           <div className="flex-1">
-            <strong>Cảnh báo giãn cách sảnh (Staggering Alert):</strong> Phát hiện {staggeringConflicts.length} cặp suất
-            chiếu bắt đầu cách nhau $\le 10$ phút giữa các phòng. Khuyến nghị giãn cách 15 phút để giảm tải sảnh bắp
-            nước và cửa soát vé.
+            <strong>Giãn cách sảnh:</strong> Phát hiện {staggeringConflicts.length} cặp suất chiếu bắt đầu cách nhau <strong>&le; 10 phút</strong> giữa các phòng. Khuyến nghị giãn cách 15 phút để giảm tải sảnh bắp nước và cửa soát vé.
           </div>
         </div>
       )}
 
-      {/* 3. Main Workspace: Movie Sidebar (3 Cols) + Gantt Timeline Canvas (9 Cols) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        {/* Left Column: Movie Library */}
-        <div className="xl:col-span-3 flex flex-col gap-3">
+      {/* 3. Integrated Split Workspace: Left Movie Tray (260px) + Right Gantt Canvas */}
+      <div className="flex flex-col lg:flex-row min-h-[640px]">
+        {/* Left Movie Catalog Tray */}
+        <div className="w-full lg:w-64 shrink-0">
           <ShowtimesMovieSidebar
             movies={movies}
             isLoadingMovies={isLoadingMovies}
@@ -338,13 +356,14 @@ export function AdminShowtimesView() {
           />
         </div>
 
-        {/* Right Column: Timeline Canvas */}
-        <div className="xl:col-span-9 flex flex-col gap-4">
+        {/* Right Timeline Canvas */}
+        <div className="flex-1 min-w-0">
           <ShowtimesTimelineCanvas
             rooms={rooms}
             showtimes={showtimes}
             isLoadingRooms={isLoadingRooms}
             zoomLevel={zoomLevel}
+            snapMinutes={snapMinutes}
             selectedDateKey={selectedDateKey}
             onOpenAddModal={handleOpenAddModal}
             onViewShowtime={(st) => setViewingShowtime(st)}
@@ -371,6 +390,7 @@ export function AdminShowtimesView() {
         isCreating={isCreatingShowtime}
         movies={movies}
         rooms={rooms}
+        existingShowtimes={showtimes}
         addMovieId={addMovieId}
         setAddMovieId={setAddMovieId}
         addRoomId={addRoomId}
@@ -411,6 +431,16 @@ export function AdminShowtimesView() {
 
         viewingShowtime={viewingShowtime}
         onCloseViewModal={() => setViewingShowtime(null)}
+        onOpenEditFromView={(st) => {
+          setEditingShowtime(st);
+          setEditStartTime(st.startTime);
+          setEditPrice(st.basePrice);
+          setIsEditModalOpen(true);
+        }}
+        onOpenDeleteFromView={(st) => {
+          setDeletingShowtime(st);
+          setIsDeleteModalOpen(true);
+        }}
       />
     </div>
   );

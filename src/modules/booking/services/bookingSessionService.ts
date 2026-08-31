@@ -59,7 +59,10 @@ export interface BookingSessionData {
   totalFoodPrice?: number;
   totalPaid?: number;
   paymentMethod?: string;
+  paymentConfirmed?: boolean;
+  paidAt?: string;
 }
+
 
 export function saveBookingSession(data: BookingSessionData): void {
   if (typeof window === 'undefined') return;
@@ -91,4 +94,43 @@ export function updateBookingSession(
   const current = getBookingSession(showtimeId);
   if (!current) return;
   saveBookingSession({ ...current, ...patch });
+}
+
+/**
+ * Cancel pending booking and release held seats in Redis and clear session
+ */
+export async function cancelBookingAndReleaseSeats(showtimeId: string): Promise<void> {
+  if (typeof window === 'undefined') return;
+  try {
+    const session = getBookingSession(showtimeId);
+    const bookingTarget = session?.bookingId || session?.bookingCode;
+
+    // 1. Call POST /api/bookings/{id}/cancel
+    if (bookingTarget) {
+      try {
+        const { apiClient } = await import('@/shared/lib/apiClient');
+        const { ENDPOINTS } = await import('@/shared/constants/endpoints');
+        await apiClient.post(ENDPOINTS.BOOKINGS.CANCEL(bookingTarget));
+      } catch (err) {
+        console.warn('⚠️ Cancel booking API error:', err);
+      }
+    }
+
+    // 2. Release temporary held seats in Redis if seat IDs exist
+    if (session?.showtimeSeatIds && session.showtimeSeatIds.length > 0) {
+      try {
+        const { seatBookingService } = await import('./seat-booking.service');
+        await seatBookingService.releaseSeats(showtimeId, session.showtimeSeatIds);
+      } catch (err) {
+        console.warn('⚠️ Release seats error:', err);
+      }
+    }
+
+    // 3. Clear holding timer & session state
+    const { resetBookingTimer } = await import('./bookingTimerService');
+    resetBookingTimer(showtimeId);
+    clearBookingSession(showtimeId);
+  } catch (err) {
+    console.warn('⚠️ cancelBookingAndReleaseSeats error:', err);
+  }
 }

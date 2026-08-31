@@ -5,6 +5,7 @@ import { getRemainingBookingSeconds, formatSecondsToMMSS } from '../services/boo
 import { saveBookingSession, updateBookingSession } from '../services/bookingSessionService';
 import { getEcho } from '@/shared/lib/echo';
 import { useAuthStore } from '@/shared/store/useAuthStore';
+import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 
 export function useSeatBooking(
   showtimeId: string = '1726',
@@ -332,6 +333,14 @@ export function useSeatBooking(
     }
   };
 
+  const isExpiredShowtime = useMemo(() => {
+    if (!bookingInfo) return false;
+    return isShowtimePassed({
+      dateStr: dateParam || bookingInfo.showDate,
+      timeStr: timeParam || bookingInfo.showTime,
+    });
+  }, [bookingInfo, dateParam, timeParam]);
+
   return {
     bookingInfo,
     seats,
@@ -345,6 +354,7 @@ export function useSeatBooking(
     selectedSeatLabels,
     formattedCountdown,
     isTimeout,
+    isExpiredShowtime,
     holdError,
     isHolding,
     handleHoldSeats,

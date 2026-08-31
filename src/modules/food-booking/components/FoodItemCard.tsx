@@ -1,8 +1,9 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · theme: White Minimal · component: FoodItemCard */
 'use client';
 
 import React from 'react';
+import { Minus, Plus, Sparkles, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Minus, Plus, Sparkles } from 'lucide-react';
 import { FoodItem } from '../types/food-booking.types';
 
 interface FoodItemCardProps {
@@ -19,78 +20,108 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
   const isSelected = quantity > 0;
 
   return (
-    <div
-      className={`w-full bg-white rounded-3xl p-5 shadow-[0_12px_40px_rgba(0,0,0,0.04)] border transition-all flex flex-col sm:flex-row items-center gap-5 ${
+    <motion.div
+      layout
+      whileTap={{ scale: 0.99 }}
+      onClick={() => {
+        if (quantity === 0) onUpdateQuantity(1);
+      }}
+      className={`group relative rounded-2xl p-3 sm:p-3.5 flex items-center gap-3 sm:gap-3.5 transition-all duration-150 select-none cursor-pointer ${
         isSelected
-          ? 'border-[#7C6FE8] shadow-[0_12px_40px_rgba(124,111,232,0.12)]'
-          : 'border-gray-100 hover:border-gray-200'
+          ? 'bg-[#FAF9FE] border-2 border-[#7C6FE8] shadow-[0_4px_16px_rgba(124,111,232,0.12)] ring-1 ring-[#7C6FE8]/20'
+          : 'bg-white border border-gray-200/90 shadow-xs hover:border-gray-300 hover:shadow-sm'
       }`}
     >
-      {/* Thumbnail Image */}
-      <div className="relative w-full sm:w-28 aspect-square rounded-2xl overflow-hidden bg-slate-100 shrink-0">
+      {/* Thumbnail Image (Compact Square) */}
+      <div className="relative w-20 sm:w-22 h-20 sm:h-22 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200/70">
         <img
           src={item.imageUrl}
           alt={item.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
         />
+
         {item.badge && (
-          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[#7C6FE8] text-white text-[9px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1">
-            <Sparkles className="w-2.5 h-2.5" />
+          <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-[#7C6FE8]/95 backdrop-blur-xs text-white text-[9px] font-black uppercase tracking-wider shadow-xs flex items-center gap-0.5">
+            <Sparkles className="w-2 h-2" />
             <span>{item.badge}</span>
           </div>
         )}
       </div>
 
-      {/* Details */}
-      <div className="flex flex-col gap-1.5 flex-1 w-full sm:w-auto">
-        <h3 className="font-bold text-base text-[#131413] leading-snug">
-          {item.name}
-        </h3>
-        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+      {/* Details (Middle Section) */}
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <h3 className="font-extrabold text-sm text-gray-950 leading-tight truncate group-hover:text-[#7C6FE8] transition-colors">
+            {item.name}
+          </h3>
+        </div>
+
+        <p className="text-[11px] text-gray-500 line-clamp-1 font-medium leading-normal">
           {item.description}
         </p>
 
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-base font-extrabold text-[#7C6FE8]">
-            {item.price.toLocaleString()}đ
+        <div className="flex items-baseline gap-2 mt-0.5">
+          <span className="text-sm sm:text-base font-black text-[#7C6FE8]">
+            {item.price.toLocaleString('vi-VN')}đ
           </span>
-          {item.originalPrice && (
-            <span className="text-xs text-slate-400 line-through">
-              {item.originalPrice.toLocaleString()}đ
+          {item.originalPrice && item.originalPrice > item.price && (
+            <span className="text-[11px] text-gray-400 line-through font-semibold">
+              {item.originalPrice.toLocaleString('vi-VN')}đ
             </span>
           )}
         </div>
       </div>
 
-      {/* Quantity Increment/Decrement Controls */}
-      <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-2xl border border-gray-100 shrink-0">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onUpdateQuantity(-1)}
-          disabled={quantity <= 0}
-          className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
-            quantity > 0
-              ? 'bg-white hover:bg-slate-200 text-slate-700 shadow-2xs'
-              : 'bg-transparent text-gray-300 cursor-not-allowed'
-          }`}
-        >
-          <Minus className="w-3.5 h-3.5" />
-        </motion.button>
+      {/* Stepper / Add Action (Right Section) */}
+      <div
+        className="shrink-0"
+        onClick={(e) => e.stopPropagation()} // prevent double-triggering card click
+      >
+        {quantity === 0 ? (
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => onUpdateQuantity(1)}
+            aria-label={`Thêm ${item.name}`}
+            className="px-3.5 py-2 rounded-xl bg-[#EEECFB] hover:bg-[#7C6FE8] text-[#7C6FE8] hover:text-white font-extrabold text-xs flex items-center gap-1 transition-all shadow-xs cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Thêm</span>
+          </motion.button>
+        ) : (
+          <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-gray-200/90 shadow-xs">
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.88 }}
+              onClick={() => onUpdateQuantity(-1)}
+              aria-label={`Giảm số lượng ${item.name}`}
+              className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </motion.button>
 
-        <span className="w-6 text-center font-extrabold text-sm text-[#131413]">
-          {quantity}
-        </span>
+            <span className="w-5 text-center font-black text-xs text-gray-950 font-mono">
+              {quantity}
+            </span>
 
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onUpdateQuantity(1)}
-          className="w-8 h-8 rounded-xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white flex items-center justify-center shadow-xs transition-colors cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-        </motion.button>
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.88 }}
+              onClick={() => onUpdateQuantity(1)}
+              aria-label={`Tăng số lượng ${item.name}`}
+              className="w-7 h-7 rounded-lg bg-[#7C6FE8] hover:bg-[#685bc7] text-white flex items-center justify-center shadow-xs transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </motion.button>
+          </div>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 };
+
+
+
+

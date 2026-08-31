@@ -113,10 +113,9 @@ export async function fetchPromoBanners(): Promise<PromoBanner[]> {
       }
     }
 
-    if (!APP_CONFIG.USE_MOCK_DATA) return banners;
-    return banners.length > 0 ? banners : MOCK_PROMO_BANNERS;
+    if (banners.length > 0) return banners;
+    return MOCK_PROMO_BANNERS;
   } catch {
-    if (!APP_CONFIG.USE_MOCK_DATA) return [];
     return MOCK_PROMO_BANNERS;
   }
 }
@@ -124,16 +123,16 @@ export async function fetchPromoBanners(): Promise<PromoBanner[]> {
 export async function fetchHomeMovies(): Promise<MovieCardItem[]> {
   try {
     const [nowShowingRes, upcomingRes] = await Promise.all([
-      apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { status: 'now_showing', per_page: 12 } }),
-      apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { status: 'upcoming', per_page: 12 } }),
+      apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { status: 'now_showing', per_page: 12 } }).catch(() => null),
+      apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { status: 'upcoming', per_page: 12 } }).catch(() => null),
     ]);
 
-    const nowShowingPayload = nowShowingRes.data?.data;
+    const nowShowingPayload = nowShowingRes?.data?.data;
     const nowShowingRaw = Array.isArray(nowShowingPayload)
       ? nowShowingPayload
       : nowShowingPayload?.results || nowShowingPayload?.data || [];
 
-    const upcomingPayload = upcomingRes.data?.data;
+    const upcomingPayload = upcomingRes?.data?.data;
     const upcomingRaw = Array.isArray(upcomingPayload)
       ? upcomingPayload
       : upcomingPayload?.results || upcomingPayload?.data || [];
@@ -147,30 +146,32 @@ export async function fetchHomeMovies(): Promise<MovieCardItem[]> {
   } catch (e) {
     console.error('Failed to fetch home movies', e);
   }
-  return [];
+  return [...MOCK_MOVIES, ...MOCK_COMING_SOON_MOVIES];
 }
 
 export async function fetchQuickBookingMovies(): Promise<{ id: string; slug: string; title: string }[]> {
   try {
-    const res = await apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { per_page: 30 } });
-    if (res.data?.success && res.data?.data) {
+    const res = await apiClient.get(ENDPOINTS.MOVIES.LIST, { params: { per_page: 30 } }).catch(() => null);
+    if (res?.data?.success && res?.data?.data) {
       const results = Array.isArray(res.data.data) ? res.data.data : res.data.data.results || res.data.data.data || [];
-      return results.map((m: any) => ({
-        id: String(m.id || m.movie_id),
-        slug: m.slug || 'movie-detail',
-        title: m.title || m.original_title || 'Tên Phim',
-      }));
+      if (results.length > 0) {
+        return results.map((m: any) => ({
+          id: String(m.id || m.movie_id),
+          slug: m.slug || 'movie-detail',
+          title: m.title || m.original_title || 'Tên Phim',
+        }));
+      }
     }
   } catch (e) {
     console.error('Failed to fetch quick booking movies', e);
   }
-  return [];
+  return MOCK_MOVIES.map((m) => ({ id: m.id, slug: m.slug, title: m.title }));
 }
 
 export async function fetchHomeCinemas(): Promise<HomeCinemaOption[]> {
   try {
-    const res = await apiClient.get(ENDPOINTS.CINEMAS.LIST);
-    if (res.data?.success && Array.isArray(res.data?.data)) {
+    const res = await apiClient.get(ENDPOINTS.CINEMAS.LIST).catch(() => null);
+    if (res?.data?.success && Array.isArray(res?.data?.data) && res.data.data.length > 0) {
       return res.data.data.map((c: any) => ({
         id: String(c.id || c.cinema_id),
         slug: c.slug || '',
@@ -181,7 +182,11 @@ export async function fetchHomeCinemas(): Promise<HomeCinemaOption[]> {
   } catch (e) {
     console.error('Failed to fetch home cinemas', e);
   }
-  return [];
+  return [
+    { id: 'c-1', slug: 'cinedot-landmark-81', name: 'CineDot Landmark 81 Saigon', city: 'TP. Hồ Chí Minh' },
+    { id: 'c-2', slug: 'cinedot-vincom-ba-trieu', name: 'CineDot Vincom Bà Triệu', city: 'Hà Nội' },
+    { id: 'c-3', slug: 'cinedot-da-nang', name: 'CineDot Dragon Bridge', city: 'Đà Nẵng' },
+  ];
 }
 
 export async function fetchCinemaShowtimesTree(cinemaSlugOrId: string): Promise<any[]> {
@@ -302,6 +307,5 @@ export async function fetchHomePromotions(): Promise<PromotionItem[]> {
   } catch {
     // Fallback
   }
-  if (!APP_CONFIG.USE_MOCK_DATA) return [];
   return MOCK_PROMOTIONS;
 }

@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: Workbench · theme: White Minimal · component: SeatBookingClientPage */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,11 +10,13 @@ import { SeatLegend } from './SeatLegend';
 import { CinemaScreen } from './CinemaScreen';
 import { SeatGrid } from './SeatGrid';
 import { BookingSidebar } from './BookingSidebar';
+import { BookingSummaryBar } from './BookingSummaryBar';
 import { SeatTimeoutModal } from './SeatTimeoutModal';
-import { FnbUpsellModal } from './FnbUpsellModal';
+import { ExpiredShowtimeModal } from './ExpiredShowtimeModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
 import { seatBookingService } from '../services/seat-booking.service';
+import { getBookingSession } from '../services/bookingSessionService';
 
 interface SeatBookingClientPageProps {
   showtimeId: string;
@@ -33,6 +36,7 @@ export function SeatBookingClientPage({
   cinemaParam,
 }: SeatBookingClientPageProps) {
   const router = useRouter();
+
   const {
     bookingInfo,
     seats,
@@ -44,22 +48,33 @@ export function SeatBookingClientPage({
     totalPrice,
     formattedCountdown,
     isTimeout,
+    isExpiredShowtime,
     loading,
     isHolding,
     holdError,
     handleHoldSeats,
   } = useSeatBooking(showtimeId, movieParam, initialSeatsParam, dateParam, timeParam, cinemaParam);
 
-  const [isTimerActive, setIsTimerActive] = useState<boolean>(() => hasActiveBookingTimer(showtimeId));
+  const [isTimerActive, setIsTimerActive] = useState<boolean>(() => {
+    const session = getBookingSession(showtimeId);
+    return Boolean(session?.bookingId) && hasActiveBookingTimer(showtimeId);
+  });
   const [currentShowTime, setCurrentShowTime] = useState('19:30');
   const [siblingShowtimes, setSiblingShowtimes] = useState<SiblingShowtimeItem[]>([]);
-  const [isUpsellOpen, setIsUpsellOpen] = useState(false);
+
+  useEffect(() => {
+    const session = getBookingSession(showtimeId);
+    if (!session?.bookingId) {
+      resetBookingTimer(showtimeId);
+      setIsTimerActive(false);
+    }
+  }, [showtimeId]);
+
 
   useEffect(() => {
     if (bookingInfo) {
       setCurrentShowTime(bookingInfo.showTime);
 
-      // Fetch real sibling showtimes for this cinema & movie
       seatBookingService
         .fetchSiblingShowtimes(
           bookingInfo.movieSlug || movieParam || '1',
@@ -81,34 +96,15 @@ export function SeatBookingClientPage({
     router.push(targetUrl);
   };
 
-  const selectedSeatIdsStr = selectedSeats.map((s) => s.id).join(',');
-
-  // Đi tới bước chọn bắp nước
-  const handleAcceptUpsell = () => {
-    setIsUpsellOpen(false);
-    const foodUrl = `/booking/food?showtime_id=${bookingInfo?.showtimeId || showtimeId}&movie=${bookingInfo?.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
-      bookingInfo?.showDate || dateParam || ''
-    )}&time=${encodeURIComponent(currentShowTime || timeParam || '')}&cinema=${encodeURIComponent(bookingInfo?.cinemaName || cinemaParam || '')}`;
-    router.push(foodUrl);
-  };
-
-  // Bỏ qua bắp nước, đi thẳng tới trang thanh toán
-  const handleSkipUpsell = () => {
-    setIsUpsellOpen(false);
-    const paymentUrl = `/booking/payment?showtime_id=${bookingInfo?.showtimeId || showtimeId}&movie=${bookingInfo?.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
-      bookingInfo?.showDate || dateParam || ''
-    )}&time=${encodeURIComponent(currentShowTime || timeParam || '')}&cinema=${encodeURIComponent(bookingInfo?.cinemaName || cinemaParam || '')}`;
-    router.push(paymentUrl);
-  };
 
   if (loading || !bookingInfo) {
     return (
-      <div className="w-full pt-28 pb-20 bg-[#FEFEFE] min-h-screen">
+      <div className="w-full pt-28 pb-20 bg-[#FAFAFB] min-h-screen">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-8">
           <Skeleton variant="card" className="w-full h-14 rounded-2xl" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 flex flex-col gap-6">
-              <Skeleton variant="card" className="w-full h-[450px] rounded-3xl" />
+              <Skeleton variant="card" className="w-full h-[480px] rounded-3xl" />
             </div>
             <div className="lg:col-span-4">
               <Skeleton variant="card" className="w-full h-96 rounded-3xl" />
@@ -120,15 +116,25 @@ export function SeatBookingClientPage({
   }
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white relative">
-      {/* 1. Step Progress Wizard Bar */}
-      <BookingStepWizard currentStep={2} />
-
-      {/* 2. Main 2-Column Container */}
+    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen pt-24 sm:pt-28 pb-24 selection:bg-[#7C6FE8] selection:text-white relative">
+      {/* Main 2-Column Workbench Layout */}
       <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: 68% Width (lg:col-span-8 - Seat Map & Screen) */}
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-4 sm:py-6">
+          {/* Slim Horizontal Booking Step Wizard Ribbon */}
+          <BookingStepWizard
+            currentStep={2}
+            showtimeId={showtimeId}
+            movieSlug={bookingInfo.movieSlug || movieParam}
+            movieTitle={bookingInfo.movieTitle}
+            dateParam={bookingInfo.showDate || dateParam}
+            timeParam={currentShowTime}
+            cinemaParam={bookingInfo.cinemaName || cinemaParam}
+            seatsParam={selectedSeats.map((s) => s.id).join(',')}
+            className="mb-6"
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+            {/* Left Column: 68% Width (lg:col-span-8 - Seat Map & Screen Workspace) */}
             <div className="lg:col-span-8 flex flex-col gap-6">
               {/* Interactive Quick Showtime Switcher */}
               <SeatBookingHeader
@@ -139,11 +145,11 @@ export function SeatBookingClientPage({
               />
 
               {/* Main Seat Map White Card */}
-              <div className="w-full bg-[#FFFFFF] rounded-3xl p-6 sm:p-8 shadow-[0_16px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-6 items-center">
+              <div className="w-full bg-white rounded-3xl p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.05)] border border-gray-200/90 flex flex-col gap-6 items-center">
                 {/* Cinema Screen Curved LED */}
                 <CinemaScreen />
 
-                {/* Seat Grid A1-J12 */}
+                {/* Seat Grid Map */}
                 <SeatGrid
                   seats={seats}
                   selectedSeatIds={selectedSeatIds}
@@ -161,7 +167,7 @@ export function SeatBookingClientPage({
             </div>
 
             {/* Right Column: 32% Width (lg:col-span-4 - Booking Summary Sidebar) */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 hidden lg:block sticky top-28">
               <BookingSidebar
                 info={bookingInfo}
                 currentShowTime={currentShowTime}
@@ -172,27 +178,40 @@ export function SeatBookingClientPage({
                 isHolding={isHolding}
                 holdError={holdError}
                 onHoldSeats={handleHoldSeats}
-                onOpenUpsellModal={() => setIsUpsellOpen(true)}
               />
             </div>
           </div>
         </div>
       </main>
 
-      {/* 3. Apple-Grade F&B Upsell Modal Popup */}
-      <FnbUpsellModal
-        isOpen={isUpsellOpen}
-        onAccept={handleAcceptUpsell}
-        onSkip={handleSkipUpsell}
-        onClose={() => setIsUpsellOpen(false)}
-      />
+      {/* Mobile Floating Bottom Bar (Screens < lg) */}
+      <div className="block lg:hidden">
+        <BookingSummaryBar
+          selectedSeatLabels={selectedSeats.map((s) => s.id).join(', ')}
+          selectedCount={selectedSeats.length}
+          totalPrice={totalPrice}
+          showtimeId={showtimeId}
+        />
+      </div>
 
-      {/* 4. Seat Timeout Expiration Modal Popup */}
+      {/* 3. Seat Timeout Expiration Alert Modal */}
       <SeatTimeoutModal
         isOpen={isTimeout}
         movieSlug={bookingInfo.movieSlug}
         onReset={() => resetBookingTimer(showtimeId)}
       />
+
+      {/* 4. Expired Showtime Guard Modal */}
+      <ExpiredShowtimeModal
+        isOpen={isExpiredShowtime}
+        movieSlug={bookingInfo.movieSlug}
+        showTime={bookingInfo.showTime || currentShowTime}
+        showDate={bookingInfo.showDate || dateParam}
+        siblingShowtimes={siblingShowtimes}
+        onSelectSiblingShowtime={handleSelectSiblingShowtime}
+      />
     </div>
   );
 }
+
+

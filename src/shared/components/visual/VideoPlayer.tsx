@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import { Play, Pause, Volume2, VolumeX, RotateCcw, RotateCw, Maximize, Minimize, Film } from 'lucide-react';
 
 export interface VideoPlayerProps {
   src?: string;
@@ -13,11 +14,21 @@ export interface VideoPlayerProps {
   style?: React.CSSProperties;
 }
 
+function extractYouTubeId(urlOrId?: string): string | null {
+  if (!urlOrId) return null;
+  const trimmed = urlOrId.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/
+  );
+  return match ? match[1] : null;
+}
+
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   src,
   poster,
-  title = 'CINE Trailer',
-  autoPlay = false,
+  title = 'CineDot Trailer',
+  autoPlay = true,
   muted = false,
   className = '',
   style,
@@ -25,46 +36,30 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const youtubeId = extractYouTubeId(src);
+  const isYouTube = !!youtubeId;
+
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(muted);
   const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [bufferedProgress, setBufferedProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(!!src);
+  const [isLoading, setIsLoading] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-  const [hasError, setHasError] = useState(false);
 
-  const isYouTube = src ? (src.includes('youtube.com') || src.includes('youtu.be') || src.includes('youtube/embed')) : false;
-
-  // Reset state when src changes
+  // Reset when src changes
   useEffect(() => {
     setIsPlaying(autoPlay);
-    setIsReady(false);
-    setHasError(false);
-    setIsLoading(!!src);
+    setIsLoading(true);
     setCurrentTime(0);
     setBufferedProgress(0);
   }, [src, autoPlay]);
 
-  // Sync state if autoPlay changes for HTML5 video
+  // Sync controls overlay visibility timer for HTML5 player
   useEffect(() => {
-    const video = videoRef.current;
-    if (video && !isYouTube) {
-      if (isPlaying) {
-        video.play().catch(() => {
-          // Prevent autoplay policy exceptions from throwing errors
-        });
-      } else {
-        video.pause();
-      }
-    }
-  }, [isPlaying, isYouTube]);
-
-  // Sync controls overlay visibility timer
-  useEffect(() => {
+    if (isYouTube) return;
     let timeoutId: NodeJS.Timeout;
     const handleActivity = () => {
       setShowControls(true);
@@ -89,9 +84,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       }
       clearTimeout(timeoutId);
     };
-  }, [isPlaying]);
+  }, [isPlaying, isYouTube]);
 
-  // Sync fullscreen change event
+  // Sync fullscreen change
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -111,12 +106,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const togglePlay = () => {
-    if (isYouTube) {
-      setIsPlaying(!isPlaying);
-      setIsLoading(false);
-      return;
-    }
-
     const video = videoRef.current;
     if (!video) return;
 
@@ -130,14 +119,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const toggleMute = () => {
-    if (isYouTube) {
-      setIsMuted(!isMuted);
-      return;
-    }
-
     const video = videoRef.current;
     if (!video) return;
-
     video.muted = !video.muted;
     setIsMuted(video.muted);
   };
@@ -145,27 +128,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const vol = parseFloat(e.target.value);
     setVolume(vol);
-
-    if (isYouTube) {
-      setIsMuted(vol === 0);
-      return;
-    }
-
     const video = videoRef.current;
     if (!video) return;
-
     video.volume = vol;
-    if (vol === 0) {
-      video.muted = true;
-      setIsMuted(true);
-    } else {
-      video.muted = false;
-      setIsMuted(false);
-    }
+    video.muted = vol === 0;
+    setIsMuted(vol === 0);
   };
 
   const handleRewind = () => {
-    if (isYouTube) return;
     const video = videoRef.current;
     if (video) {
       video.currentTime = Math.max(0, video.currentTime - 10);
@@ -173,7 +143,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handleForward = () => {
-    if (isYouTube) return;
     const video = videoRef.current;
     if (video) {
       video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
@@ -206,17 +175,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
-  const handleLoadedMetadata = () => {
-    const video = videoRef.current;
-    if (video) {
-      setDuration(video.duration);
-      setIsLoading(false);
-      setHasError(false);
-    }
-  };
-
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isYouTube) return;
     const video = videoRef.current;
     if (!video || !video.duration) return;
 
@@ -225,303 +184,183 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     video.currentTime = pos * video.duration;
   };
 
-  const handleVideoError = () => {
-    setIsLoading(false);
-    setHasError(true);
-  };
-
-  // 1. Fallback UI when src is completely missing or loading failed
-  if (!src || hasError) {
+  // 1. Fallback when no valid source
+  if (!src && !poster) {
     return (
-      <div 
-        className={`cine-video-player w-full aspect-video movies-empty-state ${className}`} 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          flexDirection: 'column', 
-          background: '#0a0a0a',
-          backgroundImage: poster ? `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)), url('${poster}')` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          padding: '24px',
-          color: 'var(--color-text-muted)',
-          textAlign: 'center',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
-          position: 'relative',
-          ...style
-        }}
+      <div
+        className={`w-full aspect-video rounded-2xl bg-slate-950 flex flex-col items-center justify-center text-center p-6 text-gray-400 gap-3 ${className}`}
+        style={style}
       >
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 100%)',
-          borderRadius: '20px',
-          pointerEvents: 'none'
-        }} />
-        <div style={{ zIndex: 1, position: 'relative' }}>
-          <button 
-            type="button" 
-            className="cine-center-play-btn" 
-            aria-label="Play Disabled"
-            style={{ 
-              marginBottom: '16px', 
-              opacity: 0.6, 
-              cursor: 'not-allowed', 
-              transform: 'none',
-              background: 'rgba(255, 255, 255, 0.05)'
-            }}
-            disabled
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
-          </button>
-          <p style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: 600, color: '#FFF' }}>
-            {hasError ? 'Trailer đang được cập nhật' : 'Không tìm thấy liên kết video trailer'}
-          </p>
-          <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)' }}>
-            Vui lòng thử lại sau hoặc liên hệ hỗ trợ
-          </p>
+        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white">
+          <Film className="w-6 h-6" />
         </div>
+        <p className="text-sm font-bold text-white">Trailer đang được cập nhật</p>
+        <p className="text-xs text-gray-400">Vui lòng quay lại sau</p>
       </div>
     );
   }
 
-  // Generate YouTube clean embed URL if it is a YouTube trailer
-  const getYouTubeEmbedUrl = (rawSrc: string) => {
-    let embedUrl = rawSrc;
-    if (rawSrc.includes('youtube.com/watch?v=')) {
-      const videoId = rawSrc.split('v=')[1]?.split('&')[0];
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    } else if (rawSrc.includes('youtu.be/')) {
-      const videoId = rawSrc.split('youtu.be/')[1]?.split('?')[0];
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    }
-    return embedUrl;
-  };
+  // 2. YouTube Engine
+  if (isYouTube && youtubeId) {
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=${autoPlay ? 1 : 0}&mute=${muted ? 1 : 0}&rel=0&modestbranding=1&enablejsapi=1`;
 
-  const finalYouTubeSrc = isYouTube ? getYouTubeEmbedUrl(src) : '';
-
-  return (
-    <div 
-      ref={containerRef}
-      className={`cine-video-player w-full aspect-video ${isLoading ? 'is-loading' : ''} ${showControls ? 'show-controls' : ''} ${className}`}
-      style={{
-        position: 'relative',
-        borderRadius: '20px',
-        overflow: 'hidden',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-        ...style
-      }}
-    >
-      {/* Smart Poster Backdrop Loading Cover (Fades out smoothly in 500ms when isReady && isPlaying) */}
-      <div 
-        className={`absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950 bg-cover bg-center transition-opacity duration-500 ${
-          isReady && isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'
-        }`} 
-        style={{ 
-          backgroundImage: poster ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${poster}')` : undefined,
-        }}
-        onClick={togglePlay}
-        data-coccoc-element="false"
+    return (
+      <div
+        ref={containerRef}
+        className={`relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl ${className}`}
+        style={style}
       >
-        {/* Loading Spinner or Play Button */}
-        {isPlaying && !isReady ? (
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-[#7C6FE8] animate-spin shadow-2xl" />
-            <span className="text-xs font-mono font-bold text-white/90 uppercase tracking-widest bg-black/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
-              Đang tải Trailer...
-            </span>
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950 gap-3">
+            <div className="w-10 h-10 rounded-full border-3 border-white/20 border-t-[#7C6FE8] animate-spin" />
+            <span className="text-xs font-semibold text-gray-300">Đang tải trailer...</span>
           </div>
-        ) : (
-          <button 
-            type="button" 
-            className="w-16 h-16 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white flex items-center justify-center shadow-2xl transition-transform hover:scale-110 cursor-pointer" 
-            aria-label="Play"
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay();
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 ml-1">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
-          </button>
         )}
-      </div>
-
-      {/* Protective Top Guard (Prevents browser extensions like Cốc Cốc / IDM from rendering top-left download bar) */}
-      <div className="absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none" data-coccoc-element="false" />
-
-      {/* DUAL MODE ENGINE: YouTube IFrame or HTML5 Video */}
-      {isYouTube ? (
         <iframe
-          className="cine-video-element w-full h-full border-0 bg-black relative z-1"
-          src={`${finalYouTubeSrc}?autoplay=${isPlaying ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1`}
+          src={embedUrl}
           title={title}
-          frameBorder="0"
+          className="w-full h-full border-0 relative z-0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-          style={{ width: '100%', height: '100%', border: 'none', background: '#000', zIndex: 1 }}
-          onLoad={() => {
-            setIsLoading(false);
-            setTimeout(() => setIsReady(true), 300);
-          }}
+          onLoad={() => setIsLoading(false)}
         />
-      ) : (
-        <video
-          ref={videoRef}
-          className="cine-video-element w-full h-full object-cover relative z-1"
-          src={src}
-          playsInline
-          muted={isMuted}
-          onTimeUpdate={handleTimeUpdate}
-          onProgress={handleProgress}
-          onLoadedMetadata={handleLoadedMetadata}
-          onWaiting={() => setIsLoading(true)}
-          onPlaying={() => {
+      </div>
+    );
+  }
+
+  // 3. HTML5 Video Engine
+  return (
+    <div
+      ref={containerRef}
+      className={`relative w-full aspect-video bg-black rounded-2xl overflow-hidden group shadow-2xl ${className}`}
+      style={style}
+    >
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        playsInline
+        muted={isMuted}
+        autoPlay={autoPlay}
+        onTimeUpdate={handleTimeUpdate}
+        onProgress={handleProgress}
+        onLoadedMetadata={() => {
+          const video = videoRef.current;
+          if (video) {
+            setDuration(video.duration);
             setIsLoading(false);
-            setIsReady(true);
-          }}
-          onError={handleVideoError}
-          onClick={togglePlay}
-          title={title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
+          }
+        }}
+        onWaiting={() => setIsLoading(true)}
+        onPlaying={() => {
+          setIsLoading(false);
+          setIsPlaying(true);
+        }}
+        onClick={togglePlay}
+        className="w-full h-full object-cover cursor-pointer"
+      />
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
+          <div className="w-10 h-10 rounded-full border-3 border-white/20 border-t-[#7C6FE8] animate-spin" />
+        </div>
       )}
 
-      {/* Custom Controls Bar - Only for direct HTML5 video because YouTube iframe has its own robust embedded overlay controls */}
-      {!isYouTube && (
-        <>
-          {/* Controls Overlay */}
-          <div className="cine-controls-overlay" onClick={togglePlay}></div>
+      {/* Controls Bar */}
+      <div
+        className={`absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
+          showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Timeline / Progress Bar */}
+        <div
+          role="slider"
+          aria-label="Timeline"
+          aria-valuenow={Math.round(currentTime)}
+          aria-valuemin={0}
+          aria-valuemax={Math.round(duration || 100)}
+          onClick={handleProgressClick}
+          className="relative w-full h-1.5 bg-white/20 rounded-full cursor-pointer mb-3 group/timeline overflow-hidden"
+        >
+          <div
+            className="absolute left-0 top-0 bottom-0 bg-white/30 rounded-full"
+            style={{ width: `${bufferedProgress}%` }}
+          />
+          <div
+            className="absolute left-0 top-0 bottom-0 bg-[#7C6FE8] rounded-full"
+            style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
+          />
+        </div>
 
-          <div className="cine-controls-bar">
-            {/* Progress Area */}
-            <div 
-              className="cine-progress-area" 
-              role="slider" 
-              aria-label="Timeline" 
-              aria-valuenow={Math.round(currentTime)}
-              aria-valuemin={0}
-              aria-valuemax={Math.round(duration || 100)}
-              onClick={handleProgressClick}
+        {/* Buttons Row */}
+        <div className="flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            {/* Play/Pause */}
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
             >
-              <div className="cine-progress-buffered" style={{ width: `${bufferedProgress}%` }}></div>
-              <div className="cine-progress-fill" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
-              <div className="cine-progress-scrubber" style={{ left: `${(currentTime / (duration || 1)) * 100}%` }}></div>
+              {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white" />}
+            </button>
+
+            {/* Skip -10s / +10s */}
+            <button
+              type="button"
+              onClick={handleRewind}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+              title="-10s"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleForward}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+              title="+10s"
+            >
+              <RotateCw className="w-4 h-4" />
+            </button>
+
+            {/* Volume / Mute */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleMute}
+                className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+              >
+                {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="w-16 h-1 bg-white/30 rounded-lg accent-[#7C6FE8] cursor-pointer"
+              />
             </div>
 
-            {/* Controls Row */}
-            <div className="cine-controls-row">
-              {/* Left Controls */}
-              <div className="cine-controls-left">
-                {/* Play/Pause */}
-                <button 
-                  type="button" 
-                  className="cine-control-btn cine-play-btn" 
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
-                  onClick={togglePlay}
-                >
-                  {!isPlaying ? (
-                    <svg viewBox="0 0 24 24" className="play-icon" fill="currentColor">
-                      <polygon points="5,3 19,12 5,21" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" className="pause-icon" fill="currentColor">
-                      <rect x="6" y="4" width="4" height="16" />
-                      <rect x="14" y="4" width="4" height="16" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Skip Back 10s */}
-                <button 
-                  type="button" 
-                  className="cine-control-btn cine-rewind-btn" 
-                  aria-label="Rewind 10s"
-                  onClick={handleRewind}
-                >
-                  <svg viewBox="0 0 24 24" className="stroke-only" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0-.57-8.38l.41.81" />
-                  </svg>
-                </button>
-
-                {/* Skip Forward 10s */}
-                <button 
-                  type="button" 
-                  className="cine-control-btn cine-forward-btn" 
-                  aria-label="Forward 10s"
-                  onClick={handleForward}
-                >
-                  <svg viewBox="0 0 24 24" className="stroke-only" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1 .57-8.38l-.41.81" />
-                  </svg>
-                </button>
-
-                {/* Volume Control */}
-                <div className="cine-volume-container">
-                  <button 
-                    type="button" 
-                    className="cine-control-btn cine-mute-btn" 
-                    aria-label={isMuted ? 'Unmute' : 'Mute'}
-                    onClick={toggleMute}
-                  >
-                    {isMuted || volume === 0 ? (
-                      <svg viewBox="0 0 24 24" className="volume-mute-icon" fill="currentColor">
-                        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
-                      </svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" className="volume-up-icon" fill="currentColor">
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-                      </svg>
-                    )}
-                  </button>
-                  <input 
-                    type="range" 
-                    className="cine-volume-slider" 
-                    min="0" 
-                    max="1" 
-                    step="0.05" 
-                    value={isMuted ? 0 : volume} 
-                    aria-label="Volume"
-                    onChange={handleVolumeChange}
-                  />
-                </div>
-
-                {/* Time Display */}
-                <span className="cine-time-display">
-                  {formatTime(currentTime)} / {formatTime(duration)}
-                </span>
-              </div>
-
-              {/* Right Controls */}
-              <div className="cine-controls-right">
-                {/* Fullscreen */}
-                <button 
-                  type="button" 
-                  className="cine-control-btn cine-fullscreen-btn" 
-                  aria-label="Fullscreen"
-                  onClick={toggleFullscreen}
-                >
-                  {!isFullscreen ? (
-                    <svg viewBox="0 0 24 24" className="stroke-only expand-icon" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" className="stroke-only shrink-icon" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M4 14h6v6m10-6h-6v6M4 10h6V4m10 6h-6V4" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
+            {/* Time display */}
+            <span className="text-xs text-gray-300 font-mono">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
           </div>
-        </>
-      )}
+
+          <div className="flex items-center gap-2">
+            {/* Fullscreen */}
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+            >
+              {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

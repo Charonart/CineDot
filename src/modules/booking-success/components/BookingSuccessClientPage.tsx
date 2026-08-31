@@ -1,12 +1,14 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: Workbench · theme: White Minimal · component: BookingSuccessClientPage */
 'use client';
 
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Download, Ticket, Home, Check } from 'lucide-react';
+import { Download, Ticket, Home, Check, Sparkles } from 'lucide-react';
 import { useBookingSuccess } from '../hooks/useBookingSuccess';
 import { BookingStepWizard } from '@/modules/booking/components/BookingStepWizard';
 import { DigitalTicketCard } from './DigitalTicketCard';
+import { InvalidBookingState } from './InvalidBookingState';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 interface BookingSuccessClientPageProps {
@@ -35,9 +37,12 @@ export function BookingSuccessClientPage({
   const {
     ticket,
     loading,
+    isInvalid,
     isDownloading,
     downloadSuccess,
+    isCopied,
     handleDownloadPDF,
+    handleCopyBookingCode,
   } = useBookingSuccess(
     bookingIdParam,
     movieParam,
@@ -46,124 +51,137 @@ export function BookingSuccessClientPage({
     timeParam,
     cinemaParam,
     totalParam,
-    showtimeIdParam
+    showtimeIdParam,
+    statusParam
   );
 
-  if (loading || !ticket) {
+  if (loading) {
     return (
-      <div className="w-full pt-24 pb-20 bg-[#FEFEFE] min-h-screen">
+      <div className="w-full pt-24 pb-20 bg-[#FAFAFB] min-h-screen">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-8 flex flex-col gap-8 items-center">
           <Skeleton variant="card" className="w-full h-14 rounded-2xl" />
-          <Skeleton variant="card" className="w-full max-w-lg h-[600px] rounded-3xl" />
+          <Skeleton variant="card" className="w-full max-w-md h-[560px] rounded-3xl" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col font-sans bg-[#FEFEFE] text-[#131413] min-h-screen pt-24 pb-20 selection:bg-[#7C6FE8] selection:text-white">
-      {/* 1. Step Wizard Bar (Step 5: Hoàn tất ACTIVE, 100% progress) */}
-      <BookingStepWizard currentStep={5} />
-
-      {/* 2. Main Content Container */}
+    <div className="w-full flex flex-col font-sans bg-[#FAFAFB] text-gray-900 min-h-screen pt-24 sm:pt-28 pb-24 selection:bg-[#7C6FE8] selection:text-white">
+      {/* Main Content Container */}
       <main className="w-full">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8 flex flex-col items-center gap-8">
-          {/* Header Success / Error Message */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-col items-center text-center gap-3"
-          >
-            {statusParam === 'failed' || statusParam === 'invalid_signature' ? (
-              <>
-                <div className="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center shadow-lg shadow-red-500/20 ring-8 ring-red-50">
-                  <span className="text-4xl font-black">X</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
-                  Thanh Toán Thất Bại
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
-                  Rất tiếc, giao dịch thanh toán của bạn không thành công hoặc đã bị hủy. Đơn hàng của bạn đã bị hủy bỏ.
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-8 ring-emerald-50">
-                  <CheckCircle2 className="w-10 h-10" />
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#131413] tracking-tight">
-                  Thanh Toán Thành Công!
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-md font-medium">
-                  Cảm ơn bạn đã lựa chọn CineDot. Vé xem phim điện tử của bạn đã được xuất thành công và sẵn sàng sử dụng.
-                </p>
-              </>
-            )}
-          </motion.div>
-
-          {/* Digital Ticket Stub Card */}
-          {statusParam !== 'failed' && statusParam !== 'invalid_signature' && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="w-full"
-            >
-              <DigitalTicketCard ticket={ticket} />
-            </motion.div>
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-4 sm:py-6 flex flex-col items-center gap-6 sm:gap-8">
+          {/* Top Booking Step Completed Ribbon */}
+          {!isInvalid && ticket && (
+            <div className="w-full max-w-2xl">
+              <BookingStepWizard
+                currentStep={5}
+                showtimeId={showtimeIdParam}
+                movieSlug={movieParam}
+                seatsParam={seatsParam}
+                dateParam={dateParam}
+                timeParam={timeParam}
+                cinemaParam={cinemaParam}
+              />
+            </div>
           )}
 
-          {/* Action Buttons Row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-lg pt-2"
-          >
-            {/* Download PDF Button */}
-            {statusParam !== 'failed' && statusParam !== 'invalid_signature' && (
-              <button
-                onClick={handleDownloadPDF}
-                disabled={isDownloading}
-                className={`w-full sm:flex-1 py-3.5 px-6 rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  downloadSuccess
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-lg shadow-[#7C6FE8]/35'
-                }`}
-              >
-                {downloadSuccess ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>ĐÃ TẢI VÉ PDF THÀNH CÔNG</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4" />
-                    <span>{isDownloading ? 'ĐANG TẠO VÉ PDF...' : 'TẢI VÉ VỀ MÁY (PDF)'}</span>
-                  </>
-                )}
-              </button>
-            )}
+          {isInvalid || !ticket ? (
+            /* Unverified / Invalid Booking State */
+            <InvalidBookingState
+              message={
+                statusParam === 'failed' || statusParam === 'invalid_signature'
+                  ? 'Giao dịch thanh toán chưa hoàn tất'
+                  : 'Không tìm thấy thông tin đơn đặt vé hợp lệ'
+              }
+              subMessage={
+                statusParam === 'failed' || statusParam === 'invalid_signature'
+                  ? 'Giao dịch đã bị hủy hoặc xảy ra lỗi từ cổng thanh toán. Ghế đã được tự động giải phóng.'
+                  : 'Đơn đặt vé này không tồn tại hoặc chưa được thanh toán. Vui lòng kiểm tra lại đơn hàng trong trang cá nhân.'
+              }
+            />
+          ) : (
+            /* Valid Verified Digital Ticket Confirmation */
+            <>
+              {/* Header Success Message */}
+              <div className="flex flex-col items-center text-center gap-2 max-w-lg">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-black uppercase tracking-wider">
+                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                  <span>Thanh toán thành công</span>
+                </div>
+                <h1 className="text-xl sm:text-2xl font-black text-gray-950 tracking-tight">
+                  Vé Điện Tử CineDot Đã Sẵn Sàng
+                </h1>
+                <p className="text-xs text-gray-500 font-medium max-w-sm">
+                  Thông tin vé đã được lưu vào tài khoản. Xuất trình mã QR trực tiếp tại cửa soát vé để vào phòng chiếu.
+                </p>
+              </div>
 
-            {/* View My Tickets Link (Page 5: /profile) */}
-            <Link href="/profile" className="w-full sm:flex-1">
-              <button className="w-full py-3.5 px-6 rounded-full bg-white border border-gray-200 hover:border-[#7C6FE8] text-slate-700 hover:text-[#7C6FE8] font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs">
-                <Ticket className="w-4 h-4 text-[#7C6FE8]" />
-                <span>Xem tất cả Vé của tôi</span>
-              </button>
-            </Link>
-          </motion.div>
+              {/* Digital Ticket Stub Card */}
+              <div className="w-full">
+                <DigitalTicketCard
+                  ticket={ticket}
+                  isCopied={isCopied}
+                  onCopyCode={handleCopyBookingCode}
+                />
+              </div>
 
-          {/* Return Home Link */}
-          <Link href="/">
-            <button className="text-xs font-bold text-slate-500 hover:text-[#7C6FE8] flex items-center gap-1.5 transition-colors cursor-pointer pt-2">
-              <Home className="w-3.5 h-3.5" />
-              <span>Quay về Trang Chủ</span>
-            </button>
-          </Link>
+              {/* Action Buttons Row */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md pt-1">
+                {/* Download PDF Button */}
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleDownloadPDF}
+                  disabled={isDownloading}
+                  className={`w-full sm:flex-1 py-3 px-5 rounded-full text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs ${
+                    downloadSuccess
+                      ? 'bg-emerald-600 text-white shadow-emerald-500/20'
+                      : 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-[0_4px_14px_rgba(124,111,232,0.3)]'
+                  }`}
+                >
+                  {downloadSuccess ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Đã tải vé PDF</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      <span>{isDownloading ? 'Đang tạo file…' : 'Tải vé điện tử (PDF)'}</span>
+                    </>
+                  )}
+                </motion.button>
+
+                {/* View My Tickets Link */}
+                <Link href="/profile" className="w-full sm:flex-1">
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 px-5 rounded-full bg-white border border-gray-200 hover:border-gray-300 text-gray-800 hover:text-gray-950 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <Ticket className="w-4 h-4 text-[#7C6FE8]" />
+                    <span>Xem vé của tôi</span>
+                  </motion.button>
+                </Link>
+              </div>
+
+              {/* Return Home Link */}
+              <Link href="/">
+                <button
+                  type="button"
+                  className="text-xs font-bold text-gray-500 hover:text-[#7C6FE8] flex items-center gap-1.5 transition-colors cursor-pointer pt-1"
+                >
+                  <Home className="w-3.5 h-3.5" />
+                  <span>Quay về Trang Chủ</span>
+                </button>
+              </Link>
+            </>
+          )}
         </div>
       </main>
     </div>
   );
 }
+
+

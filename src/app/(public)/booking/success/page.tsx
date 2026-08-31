@@ -6,13 +6,22 @@ interface BookingSuccessPageProps {
     booking_id?: string;
     booking_code?: string;
     showtime_id?: string;
+    showtimeId?: string;
     movie?: string;
     seats?: string;
     date?: string;
     time?: string;
     cinema?: string;
     total?: string;
+    amount?: string;
     status?: string;
+    id?: string;
+    code?: string;
+    order_id?: string;
+    vnp_TxnRef?: string;
+    vnp_ResponseCode?: string;
+    vnp_TransactionNo?: string;
+    apptransid?: string;
   }>;
 }
 
@@ -22,19 +31,32 @@ export const metadata = {
 };
 
 export default async function BookingSuccessPage({ searchParams }: BookingSuccessPageProps) {
-  const { booking_id, booking_code, showtime_id, movie, seats, date, time, cinema, total, status } = await searchParams;
+  const params = await searchParams;
+
+  const bookingIdParam =
+    params.booking_code ||
+    params.booking_id ||
+    params.code ||
+    params.id ||
+    params.order_id ||
+    params.vnp_TxnRef ||
+    params.apptransid;
+
+  const showtimeIdParam = params.showtime_id || params.showtimeId;
+  const totalParam = params.total || params.amount;
 
   return (
     <BookingSuccessClientPage
-      bookingIdParam={booking_code || booking_id}
-      showtimeIdParam={showtime_id}
-      movieParam={movie}
-      seatsParam={seats}
-      dateParam={date}
-      timeParam={time}
-      cinemaParam={cinema}
-      totalParam={total}
-      statusParam={status}
+      bookingIdParam={bookingIdParam}
+      showtimeIdParam={showtimeIdParam}
+      movieParam={params.movie}
+      seatsParam={params.seats}
+      dateParam={params.date}
+      timeParam={params.time}
+      cinemaParam={params.cinema}
+      totalParam={totalParam}
+      statusParam={params.status || (params.vnp_ResponseCode && params.vnp_ResponseCode !== '00' ? 'failed' : undefined)}
     />
   );
 }
+

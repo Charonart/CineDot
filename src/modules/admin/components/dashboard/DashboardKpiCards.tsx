@@ -13,7 +13,7 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({ kpis, isLo
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col gap-3">
+          <div key={i} className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-2xs flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <Skeleton className="w-24 h-4 rounded-md" />
               <Skeleton className="w-8 h-8 rounded-xl" />
@@ -76,7 +76,7 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({ kpis, isLo
         return (
           <div
             key={card.id}
-            className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md hover:border-purple-200 transition-all duration-200 flex flex-col justify-between gap-3"
+            className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-xs hover:border-[#7C6FE8]/40 transition-all duration-200 flex flex-col justify-between gap-3"
           >
             {/* Top Row: Label & Icon */}
             <div className="flex items-center justify-between">

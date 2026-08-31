@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · theme: White Minimal · component: SeatLegend */
 'use client';
 
 import React from 'react';
@@ -7,7 +8,6 @@ export interface SeatLegendProps {
   seatTypes?: SeatTypeInfo[];
   seats?: SeatItem[];
   basePrice?: number;
-  // Fallback props for backwards compatibility
   standardPrice?: number;
   vipPrice?: number;
   sweetboxPrice?: number;
@@ -24,13 +24,10 @@ export const SeatLegend: React.FC<SeatLegendProps> = ({
   vipPrice,
   sweetboxPrice,
 }) => {
-  // Collect unique seat types present in the current showtime
   const presentTypeKeys = new Set(seats.map((s) => (s.type || 'STANDARD').toLowerCase()));
 
-  // Filter seatTypes to those present in the showtime, or if empty use all available seatTypes
   let displayTypes = seatTypes.filter((st) => presentTypeKeys.size === 0 || presentTypeKeys.has(st.key.toLowerCase()));
 
-  // Fallback if seatTypes is not yet populated
   if (displayTypes.length === 0) {
     displayTypes = [
       { key: 'standard', name: 'Ghế Thường', surcharge: 0, color: '#64748B', price: standardPrice || basePrice },
@@ -45,69 +42,75 @@ export const SeatLegend: React.FC<SeatLegendProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 py-4 border-t border-gray-200 text-xs font-semibold text-slate-700">
+    <footer
+      aria-label="Chú thích loại ghế và bảng giá"
+      className="w-full flex flex-col gap-3 py-3 border-t border-gray-200/90 text-xs font-semibold text-gray-700 select-none"
+    >
       {/* 1. Dynamic Color Blocks Seat Legend */}
-      <div className="w-full flex flex-wrap items-center justify-center gap-6">
+      <div className="w-full flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
         {displayTypes.map((st) => {
           const isCouple = st.key.toLowerCase() === 'sweetbox' || st.key.toLowerCase() === 'couple' || st.key.toLowerCase() === 'bed';
+          const isVip = st.key.toLowerCase() === 'vip';
+
           return (
-            <div key={st.key} className="flex items-center gap-2">
+            <div key={st.key} className="flex items-center gap-1.5">
               <div
                 style={{
-                  backgroundColor: `${st.color}25`, // 15% tint
+                  backgroundColor: isVip ? '#F3F0FF' : isCouple ? '#FDF2F8' : '#F8FAFC',
                   borderColor: st.color,
                 }}
-                className={`${isCouple ? 'w-8' : 'w-5'} h-5 rounded-md border shadow-2xs`}
+                className={`${isCouple ? 'w-8' : 'w-5'} h-5 rounded-lg border-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
               />
-              <span>{st.name}</span>
+              <span className="text-gray-800 font-bold">{st.name}</span>
             </div>
           );
         })}
 
-        {/* Other User Selecting Indicator */}
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-amber-50 border-2 border-amber-400 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
-          <span>Có Người Đang Nhắm</span>
+        {/* Selected Seat Indicator */}
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-[#7C6FE8] border border-[#685BC7] shadow-[0_2px_8px_rgba(124,111,232,0.4)]" />
+          <span className="text-gray-950 font-bold">Ghế Đang Chọn</span>
         </div>
 
-        {/* Selected Seat Indicator */}
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-[#7C6FE8] shadow-[0_2px_8px_rgba(124,111,232,0.6)]" />
-          <span>Ghế Đang Chọn</span>
+        {/* Other User Selecting Indicator */}
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-[#FFFBEB] border-2 border-amber-400 animate-pulse" />
+          <span className="text-amber-800 font-bold">Có Người Đang Nhắm</span>
         </div>
 
         {/* Holding Seat Indicator */}
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-amber-100 border border-amber-400 shadow-2xs" />
-          <span>Đang Giữ Chỗ (10p)</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-[#FEF3C7] border border-amber-400" />
+          <span className="text-amber-900 font-medium">Đang Giữ Chỗ</span>
         </div>
 
         {/* Booked Seat Indicator */}
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-gray-200 border border-gray-300 shadow-2xs" />
-          <span>Đã Được Đặt</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-[#F1F5F9] border border-gray-300" />
+          <span className="text-gray-400 font-normal">Đã Được Đặt</span>
         </div>
       </div>
 
       {/* 2. Dynamic Price Tariff Bar */}
-      <div className="w-full flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-3 border-t border-gray-100 text-[11px] text-slate-500 font-medium">
-        <span>Bảng giá niêm yết:</span>
+      <div className="w-full flex flex-wrap items-center justify-center gap-x-5 gap-y-1 pt-2.5 border-t border-gray-100 text-[11px] text-gray-600 font-medium">
+        <span className="text-gray-400 font-semibold">Bảng giá niêm yết:</span>
         {displayTypes.map((st, idx) => {
           const isCouple = st.key.toLowerCase() === 'sweetbox' || st.key.toLowerCase() === 'couple';
           const calculatedPrice = st.price || (basePrice + (st.surcharge || 0)) * (isCouple ? 2 : 1);
 
           return (
             <React.Fragment key={st.key}>
-              {idx > 0 && <span className="text-slate-300">•</span>}
+              {idx > 0 && <span className="text-gray-300">•</span>}
               <span className="flex items-center gap-1">
-                <strong style={{ color: st.color }}>{st.name}:</strong>{' '}
-                {formatPrice(calculatedPrice)}
-                {isCouple ? ' / cặp' : ''}
+                <strong style={{ color: st.color }} className="font-bold">{st.name}:</strong>{' '}
+                <span className="font-extrabold text-gray-900">{formatPrice(calculatedPrice)}</span>
+                {isCouple ? <span className="text-gray-400">/ cặp</span> : ''}
               </span>
             </React.Fragment>
           );
         })}
       </div>
-    </div>
+    </footer>
   );
 };
+

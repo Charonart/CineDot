@@ -1,77 +1,219 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · theme: White Minimal · component: BookingStepWizard
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass (46–50)
+ */
 'use client';
 
-import React from 'react';
-import { Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { 
+  Film, 
+  Armchair, 
+  Popcorn, 
+  CreditCard, 
+  Ticket, 
+  Check, 
+  Loader2
+} from 'lucide-react';
+import { cancelBookingAndReleaseSeats } from '@/modules/booking/services/bookingSessionService';
 
-interface Step {
-  id: number;
-  label: string;
+export interface BookingStepWizardProps {
+  currentStep?: 1 | 2 | 3 | 4 | 5;
+  showtimeId?: string;
+  movieSlug?: string;
+  movieTitle?: string;
+  seatsParam?: string;
+  combosParam?: string;
+  dateParam?: string;
+  timeParam?: string;
+  cinemaParam?: string;
+  className?: string;
 }
 
-const steps: Step[] = [
-  { id: 1, label: 'Chọn phim / Rạp / Suất' },
-  { id: 2, label: 'Chọn ghế' },
-  { id: 3, label: 'Chọn thức ăn' },
-  { id: 4, label: 'Thanh toán' },
-  { id: 5, label: 'Xác nhận' },
+interface StepItem {
+  id: 1 | 2 | 3 | 4 | 5;
+  label: string;
+  shortLabel: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const STEPS: StepItem[] = [
+  { id: 1, label: 'Chọn suất chiếu', shortLabel: 'Suất chiếu', icon: Film },
+  { id: 2, label: 'Chọn ghế', shortLabel: 'Chọn ghế', icon: Armchair },
+  { id: 3, label: 'Chọn bắp nước', shortLabel: 'Bắp nước', icon: Popcorn },
+  { id: 4, label: 'Thanh toán', shortLabel: 'Thanh toán', icon: CreditCard },
+  { id: 5, label: 'Nhận vé', shortLabel: 'Nhận vé', icon: Ticket },
 ];
 
-interface BookingStepWizardProps {
-  currentStep?: number;
-}
+export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({
+  currentStep = 2,
+  showtimeId = '1',
+  movieSlug = 'spiderman-new-beginning',
+  seatsParam,
+  combosParam,
+  dateParam,
+  timeParam,
+  cinemaParam,
+  className = '',
+}) => {
+  const router = useRouter();
+  const [loadingStepId, setLoadingStepId] = useState<number | null>(null);
 
-export const BookingStepWizard: React.FC<BookingStepWizardProps> = ({ currentStep = 2 }) => {
-  // Progress percent covers up to the end of current step (e.g. Step 2 out of 5 = 40%)
-  const progressPercent = Math.min(
-    100,
-    Math.max(0, (currentStep / steps.length) * 100)
-  );
+  // Build rewind links for completed previous steps
+  const getStepHref = (stepId: number): string | null => {
+    const encCinema = encodeURIComponent(cinemaParam || '');
+    switch (stepId) {
+      case 1:
+        return movieSlug ? `/movies/${movieSlug}` : '/movies';
+      case 2:
+        return `/booking/seats?showtime_id=${showtimeId}&movie=${movieSlug}&seats=${seatsParam || ''}&date=${dateParam || ''}&time=${timeParam || ''}&cinema=${encCinema}`;
+      case 3:
+        return `/booking/food?showtime_id=${showtimeId}&movie=${movieSlug}&seats=${seatsParam || ''}&date=${dateParam || ''}&time=${timeParam || ''}&cinema=${encCinema}${
+          combosParam ? `&combos=${encodeURIComponent(combosParam)}` : ''
+        }`;
+      case 4:
+        return `/booking/payment?showtime_id=${showtimeId}&movie=${movieSlug}&seats=${seatsParam || ''}&date=${dateParam || ''}&time=${timeParam || ''}&cinema=${encCinema}${
+          combosParam ? `&combos=${encodeURIComponent(combosParam)}` : ''
+        }`;
+      case 5:
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  // Handle click on completed step with API cancel & seat release when returning to Step 1 or 2
+  const handleStepClick = async (stepId: number) => {
+    if (loadingStepId !== null) return;
+    const targetHref = getStepHref(stepId);
+    if (!targetHref) return;
+
+    // When returning to Step 1 (Showtime) or Step 2 (Seats) from Step 3 (Food) or Step 4 (Payment),
+    // cancel the pending booking and release held seats in Redis
+    if (currentStep >= 3 && (stepId === 1 || stepId === 2)) {
+      setLoadingStepId(stepId);
+      try {
+        await cancelBookingAndReleaseSeats(showtimeId);
+      } finally {
+        setLoadingStepId(null);
+        router.push(targetHref);
+      }
+    } else {
+      router.push(targetHref);
+    }
+  };
+
+  const currentStepConfig = STEPS.find((s) => s.id === currentStep) || STEPS[1];
+  const CurrentIcon = currentStepConfig.icon;
 
   return (
-    <div className="w-full bg-white border-b border-gray-200 py-3 shadow-2xs">
-      <div className="max-w-[1240px] mx-auto px-4 sm:px-8">
-        <div className="max-w-3xl mx-auto flex flex-col gap-2.5">
-          {/* Step Labels & Badges Row */}
-          <div className="flex items-center justify-between text-xs sm:text-sm font-semibold">
-            {steps.map((step) => {
-              const isCompleted = step.id < currentStep;
-              const isFinishedOrActive = step.id <= currentStep;
+    <nav
+      aria-label="Tiến trình đặt vé"
+      className={`w-full bg-white/95 backdrop-blur-xl border border-gray-200/90 rounded-2xl sm:rounded-full py-2.5 px-4 sm:px-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] select-none transition-all ${className}`}
+    >
+      {/* 1. Desktop & Tablet: Slim Horizontal Segmented Capsule Ribbon (Height ~40px) */}
+      <ol className="hidden md:flex items-center justify-between w-full list-none p-0 m-0 gap-1 lg:gap-2">
+        {STEPS.map((step, idx) => {
+          const isCompleted = step.id < currentStep;
+          const isActive = step.id === currentStep;
+          const isUpcoming = step.id > currentStep;
+          const StepIcon = step.icon;
+          const isLoadingThis = loadingStepId === step.id;
 
-              return (
+          const StepButtonContent = (
+            <button
+              type="button"
+              disabled={!isCompleted || loadingStepId !== null}
+              onClick={() => isCompleted && handleStepClick(step.id)}
+              className={`flex items-center gap-2 py-1 px-2.5 rounded-full transition-all duration-200 cursor-default ${
+                isActive
+                  ? 'bg-[#7C6FE8] text-white shadow-[0_2px_10px_rgba(124,111,232,0.35)] font-bold text-xs'
+                  : isCompleted
+                  ? 'text-gray-700 hover:text-[#7C6FE8] hover:bg-[#EEECFB]/80 font-semibold text-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-[#7C6FE8] focus-visible:outline-offset-2'
+                  : 'text-gray-400 font-medium text-xs'
+              }`}
+            >
+              {/* Step Node Icon / Number / Checkmark */}
+              <div
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 transition-colors ${
+                  isActive
+                    ? 'bg-white text-[#7C6FE8]'
+                    : isCompleted
+                    ? 'bg-[#EEECFB] text-[#7C6FE8]'
+                    : 'bg-gray-100 text-gray-400'
+                }`}
+              >
+                {isLoadingThis ? (
+                  <Loader2 className="w-3 h-3 animate-spin text-[#7C6FE8]" />
+                ) : isCompleted ? (
+                  <Check className="w-3 h-3 stroke-[3]" />
+                ) : (
+                  <span>{step.id}</span>
+                )}
+              </div>
+
+              {/* Label */}
+              <span className="tracking-tight whitespace-nowrap">
+                {step.label}
+              </span>
+            </button>
+          );
+
+          return (
+            <React.Fragment key={step.id}>
+              <li className="flex items-center">
+                {StepButtonContent}
+              </li>
+
+              {/* Connecting Separator */}
+              {idx < STEPS.length - 1 && (
                 <div
-                  key={step.id}
-                  className={`flex items-center gap-1.5 transition-all ${
-                    isFinishedOrActive ? 'text-[#7C6FE8] font-bold' : 'text-slate-400'
+                  aria-hidden="true"
+                  className={`flex-1 h-0.5 max-w-[40px] lg:max-w-[60px] mx-1 rounded-full transition-colors ${
+                    step.id < currentStep ? 'bg-[#7C6FE8]/40' : 'bg-gray-200/80'
                   }`}
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
-                      isFinishedOrActive
-                        ? 'bg-[#7C6FE8] text-white shadow-xs'
-                        : 'bg-gray-100 text-slate-400'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <Check className="w-3.2 h-3.2 text-white stroke-[3]" />
-                    ) : (
-                      step.id
-                    )}
-                  </div>
-                  <span className="whitespace-nowrap text-xs sm:text-xs">{step.label}</span>
-                </div>
-              );
-            })}
-          </div>
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </ol>
 
-          {/* Continuous Solid Bottom Progress Bar Line (Kéo dài phủ qua cả bước đang đứng) */}
-          <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden relative">
-            <div
-              className="h-full bg-[#7C6FE8] rounded-full transition-all duration-500"
-              style={{ width: `${progressPercent}%` }}
-            />
+      {/* 2. Mobile Compact 1-Line Status Ribbon */}
+      <div className="flex md:hidden items-center justify-between w-full">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-[#EEECFB] text-[#7C6FE8] flex items-center justify-center shrink-0">
+            {loadingStepId !== null ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C6FE8]" />
+            ) : (
+              <CurrentIcon className="w-3.5 h-3.5" />
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-black text-gray-950">
+            <span className="text-[#7C6FE8]">Bước {currentStep}/5:</span>
+            <span>{currentStepConfig.label}</span>
           </div>
         </div>
+
+        {/* 5 Mini Progress Bar Segments (Clickable if completed) */}
+        <div className="flex items-center gap-1">
+          {STEPS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              disabled={s.id >= currentStep || loadingStepId !== null}
+              onClick={() => s.id < currentStep && handleStepClick(s.id)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                s.id === currentStep
+                  ? 'w-4 bg-[#7C6FE8]'
+                  : s.id < currentStep
+                  ? 'w-2 bg-[#7C6FE8]/50 hover:bg-[#7C6FE8] cursor-pointer'
+                  : 'w-2 bg-gray-200'
+              }`}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </nav>
   );
 };

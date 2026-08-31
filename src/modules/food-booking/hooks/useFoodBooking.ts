@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { FoodItem, FoodCategory, SelectedFoodItem } from '../types/food-booking.types';
+import { FoodItem, SelectedFoodItem } from '../types/food-booking.types';
 import { fetchFoodItems } from '../services/food-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '@/modules/booking/services/bookingTimerService';
-
 import { updateBookingSession } from '@/modules/booking/services/bookingSessionService';
 
 export function useFoodBooking(initialCombo?: string, showtimeId: string = '1', combosParam?: string) {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [activeCategory, setActiveCategory] = useState<FoodCategory>('ALL');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<number>(() => getRemainingBookingSeconds(showtimeId));
@@ -62,12 +60,6 @@ export function useFoodBooking(initialCombo?: string, showtimeId: string = '1', 
       isMounted = false;
     };
   }, [initialCombo, combosParam]);
-
-  // Filter food items by active category
-  const filteredFoodItems = useMemo(() => {
-    if (activeCategory === 'ALL') return foodItems;
-    return foodItems.filter((i) => i.category === activeCategory);
-  }, [foodItems, activeCategory]);
 
   // Continuous Countdown timer synced with sessionStorage expiration
   useEffect(() => {
@@ -133,9 +125,7 @@ export function useFoodBooking(initialCombo?: string, showtimeId: string = '1', 
   }, [selectedFoodList, totalFoodPrice, showtimeId]);
 
   return {
-    foodItems: filteredFoodItems,
-    activeCategory,
-    setActiveCategory,
+    foodItems,
     quantities,
     updateQuantity,
     selectedFoodList,
@@ -145,3 +135,4 @@ export function useFoodBooking(initialCombo?: string, showtimeId: string = '1', 
     loading,
   };
 }
+

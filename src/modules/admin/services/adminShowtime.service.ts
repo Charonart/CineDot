@@ -155,9 +155,12 @@ export const adminShowtimeService = {
       id: Number(m.movie_id || m.id),
       title: m.title || 'Phim Chiếu Rạp',
       posterUrl: m.poster_url || '',
+      bannerUrl: m.banner_url || m.banner || m.backdrop_url || m.poster_url || '',
+      status: m.status || (m.is_showing ? 'NOW_SHOWING' : 'COMING_SOON'),
+      releaseDate: m.release_date || '',
       duration: Number(m.duration || 120),
       ageRating: m.age_rating || 'P',
-      genres: Array.isArray(m.genres) ? m.genres.map((g: any) => g.name || g.genre_name) : [],
+      genres: Array.isArray(m.genres) ? m.genres.map((g: any) => g.name || g.genre_name || String(g)) : [],
     }));
   },
 };

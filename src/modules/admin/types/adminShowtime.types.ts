@@ -4,6 +4,7 @@ export interface AdminShowtimeGridItem {
   movieId: number;
   movieTitle: string;
   moviePoster: string;
+  movieBanner?: string;
   movieAgeRating: string;
   durationMinutes: number;
   cleaningBufferMinutes: number;
@@ -44,6 +45,9 @@ export interface AdminMovieOption {
   id: number;
   title: string;
   posterUrl: string;
+  bannerUrl?: string;
+  status?: string;
+  releaseDate?: string;
   duration: number;
   ageRating: string;
   genres: string[];

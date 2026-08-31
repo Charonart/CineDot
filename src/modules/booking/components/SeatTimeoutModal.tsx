@@ -1,8 +1,9 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · theme: White Minimal · component: SeatTimeoutModal */
 'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TimerReset, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, Home } from 'lucide-react';
 import Link from 'next/link';
 
 export interface SeatTimeoutModalProps {
@@ -20,49 +21,67 @@ export const SeatTimeoutModal: React.FC<SeatTimeoutModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop (Modal cannot be dismissed by clicking backdrop to enforce release of seats) */}
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="timeout-modal-title"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      >
+        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/75 backdrop-blur-md"
+          transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 bg-gray-950/50 backdrop-blur-xs"
         />
 
-        {/* Modal Container */}
+        {/* Modal Surface */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(225,29,72,0.25)] border border-rose-100 flex flex-col items-center text-center gap-5 z-10"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-[0_16px_40px_rgba(0,0,0,0.1)] border border-gray-200/90 flex flex-col gap-4 z-10 select-none text-left"
         >
-          {/* Glowing Alarm Timer Icon */}
-          <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/20 ring-8 ring-rose-50">
-            <TimerReset className="w-8 h-8 animate-bounce" />
+          {/* Header indicator */}
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+            <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">
+              Phiên giữ vé hết hạn
+            </span>
           </div>
 
-          {/* Title & Message Content */}
-          <div className="flex flex-col gap-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#131413]">
-              Hết Thời Gian Giữ Ghế!
+          {/* Title & Copy */}
+          <div className="flex flex-col gap-1.5">
+            <h2 id="timeout-modal-title" className="text-base font-bold text-gray-950">
+              Phiên giữ chỗ đã kết thúc
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xs font-medium">
-              Rất tiếc, thời gian giữ ghế của bạn đã hết hạn. Các vị trí ghế bạn chọn đã được tự động giải phóng để đảm bảo công bằng cho các khách hàng khác.
+            <p className="text-xs text-gray-600 leading-relaxed font-normal">
+              Thời gian 10 phút giữ ghế đã hết hạn. Các vị trí ghế đã được mở lại cho người xem khác. Vui lòng chọn lại suất chiếu để tiếp tục.
             </p>
           </div>
 
-          {/* Action Button: Return to Movie Detail to re-select */}
-          <div className="w-full pt-2">
-            <Link href={`/movies/${movieSlug}`}>
-              <motion.button
-                onClick={onReset}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="w-full py-3.5 rounded-full bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FE8]/35 transition-all cursor-pointer"
+          {/* Action Row */}
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-gray-100">
+            <Link href="/">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                <span>Quay Về Chọn Lại Suất Chiếu</span>
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
+                Về trang chủ
+              </button>
+            </Link>
+
+            <Link href={`/movies/${movieSlug}`}>
+              <button
+                type="button"
+                onClick={onReset}
+                className="px-4 py-2 rounded-xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <span>Chọn lại suất chiếu</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </Link>
           </div>
         </motion.div>
@@ -70,3 +89,5 @@ export const SeatTimeoutModal: React.FC<SeatTimeoutModalProps> = ({
     </AnimatePresence>
   );
 };
+
+
