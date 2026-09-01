@@ -117,6 +117,29 @@ export interface AiDraftValidationResult {
   warnings: AiWarningItem[];
 }
 
+export interface AiToolCallItem {
+  id?: string;
+  name: string;
+  args?: Record<string, any>;
+  result?: any;
+  latency_ms?: number;
+}
+
+export interface AiThinkingStep {
+  title: string;
+  detail?: string;
+  status?: 'completed' | 'in_progress' | 'warning';
+}
+
+export interface AiTokenUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  latency_ms?: number;
+  model?: string;
+  estimated_cost_vnd?: number;
+}
+
 export interface AiDraftSummary {
   total_showtimes: number;
   total_rooms_used: number;
@@ -132,6 +155,10 @@ export interface AiDraftSummary {
   cinema_name: string;
   prime_time_info: EffectivePrimeTimeInfo;
   strategy_explanation: string;
+  thinking_steps?: AiThinkingStep[];
+  reasoning?: string;
+  tool_calls?: AiToolCallItem[];
+  usage?: AiTokenUsage;
 }
 
 export interface AiChatMessage {
@@ -144,6 +171,9 @@ export interface AiChatMessage {
   showtimes?: AiDraftShowtimeItem[];
   validation?: AiDraftValidationResult;
   suggestedFollowups?: string[];
+  thinking_steps?: AiThinkingStep[];
+  tool_calls?: AiToolCallItem[];
+  usage?: AiTokenUsage;
 }
 
 export interface GenerateAiDraftRequest {

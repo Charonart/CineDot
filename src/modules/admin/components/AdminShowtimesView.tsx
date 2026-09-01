@@ -277,7 +277,7 @@ export function AdminShowtimesView() {
 
   // Effective Showtimes: In Draft Preview mode, display the Draft showtimes + only booked/locked showtimes from DB
   const effectiveShowtimes = useMemo(() => {
-    if (!hasDraft || !draftData) return showtimes;
+    if (!draftData) return showtimes;
 
     // Lọc các suất cũ trong DB: Chỉ giữ lại các suất đã có vé mua (bookedSeats > 0) hoặc bị khóa cứng
     // Các suất cũ chưa bán vé sẽ được thay thế hoàn toàn bởi bản nháp mới để tránh bị chồng chất 2 lớp

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Lock, Edit3, Trash2, GripVertical, Users, Clock, Tag } from 'lucide-react';
+import { Lock, Edit3, Trash2, GripVertical, Users, Clock, Tag, Sparkles } from 'lucide-react';
 import { AdminShowtimeGridItem } from '../../types/adminShowtime.types';
 
 interface ShowtimeBlockItemProps {
@@ -52,6 +52,8 @@ export function ShowtimeBlockItem({
     );
   };
 
+  const isDraft = Boolean(showtime.isDraft);
+
   return (
     <div
       style={{
@@ -62,25 +64,33 @@ export function ShowtimeBlockItem({
       onDragStart={handleDragStart}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`absolute top-1 bottom-1 flex rounded-md overflow-visible text-xs select-none transition-all ${
-        isHovered ? 'z-40' : 'z-10'
+      className={`absolute top-1 bottom-1 flex rounded-lg overflow-visible text-xs select-none transition-all ${
+        isHovered ? 'z-40 scale-[1.01]' : 'z-10'
       } ${showtime.isLocked ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}`}
     >
       {/* Outer Card Container */}
       <div
-        className={`w-full h-full flex rounded-md overflow-hidden transition-all ${
-          showtime.isDraft
-            ? 'border-2 border-dashed border-[#7C6FE8] ring-2 ring-[#7C6FE8]/20 shadow-md shadow-[#7C6FE8]/10'
-            : 'border border-slate-700/80 shadow-2xs hover:shadow-md'
+        className={`w-full h-full flex rounded-lg overflow-hidden transition-all ${
+          isDraft
+            ? 'border-2 border-dashed border-[#7C6FE8] ring-2 ring-[#7C6FE8]/30 shadow-lg shadow-[#7C6FE8]/20 bg-slate-950/90'
+            : 'border border-slate-700/80 shadow-2xs hover:shadow-md bg-slate-900'
         }`}
       >
         {/* Main Movie Block */}
         <div
-          style={{ width: `${(movieWidthPct / totalBlockWidthPct) * 100}%` }}
+          style={{
+            width: `${(movieWidthPct / totalBlockWidthPct) * 100}%`,
+            ...(isDraft
+              ? {
+                  backgroundImage:
+                    'repeating-linear-gradient(135deg, rgba(124, 111, 232, 0.12), rgba(124, 111, 232, 0.12) 8px, rgba(15, 23, 42, 0.95) 8px, rgba(15, 23, 42, 0.95) 16px)',
+                }
+              : {}),
+          }}
           className={`${
-            showtime.isDraft
-              ? 'bg-slate-900 border-l-4 border-l-[#7C6FE8]'
-              : 'bg-slate-900 border-l-4 border-l-[#7C6FE8]'
+            isDraft
+              ? 'border-l-4 border-l-[#7C6FE8]'
+              : 'border-l-4 border-l-emerald-500'
           } text-white p-1.5 flex flex-col justify-between overflow-hidden relative`}
           onClick={() => onView(showtime)}
         >
@@ -88,10 +98,10 @@ export function ShowtimeBlockItem({
           <div className="flex items-center justify-between gap-1 min-w-0">
             <div className="flex items-center gap-1 min-w-0 flex-1">
               {!showtime.isLocked && (
-                <GripVertical className="w-3 h-3 text-slate-400 opacity-60 group-hover/card:opacity-100 shrink-0" />
+                <GripVertical className="w-3 h-3 text-slate-400 opacity-60 shrink-0" />
               )}
               <span
-                className="font-semibold text-[11px] text-white truncate leading-tight"
+                className="font-bold text-[11px] text-white truncate leading-tight"
                 title={showtime.movieTitle}
               >
                 {showtime.movieTitle}
@@ -99,12 +109,13 @@ export function ShowtimeBlockItem({
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
-              {showtime.isDraft ? (
-                <span className="px-1.5 py-0.2 rounded bg-[#7C6FE8]/30 text-[#D8D4F7] font-bold text-[8.5px] border border-[#7C6FE8]/50 shadow-2xs">
-                  AI Nháp
+              {isDraft ? (
+                <span className="px-1.5 py-0.2 rounded bg-[#7C6FE8] text-white font-extrabold text-[8.5px] uppercase tracking-wide flex items-center gap-1 shadow-xs border border-white/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+                  <span>AI Nháp</span>
                 </span>
               ) : (
-                <span className="px-1 py-0.2 rounded bg-slate-800 text-[#7C6FE8] font-semibold text-[9px] border border-slate-700">
+                <span className="px-1 py-0.2 rounded bg-slate-800 text-slate-300 font-semibold text-[9px] border border-slate-700">
                   {showtime.roomType?.includes('IMAX') ? 'IMAX' : '2D'}
                 </span>
               )}
@@ -118,49 +129,64 @@ export function ShowtimeBlockItem({
 
           {/* Row 2: Time Range & Price */}
           <div className="flex items-center justify-between text-[10px] font-mono leading-none">
-            <span className="font-semibold text-amber-300">
+            <span className={`font-bold ${isDraft ? 'text-[#D8D4F7]' : 'text-amber-300'}`}>
               {showtime.startTime} – {showtime.endTime}
             </span>
             <span className="font-semibold text-emerald-400">{formatVND(showtime.basePrice)}</span>
           </div>
 
-          {/* Row 3: Occupancy Bar */}
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden flex items-center">
-            <div
-              className={`h-full transition-all ${
-                showtime.occupancyRate > 60
-                  ? 'bg-emerald-400'
-                  : showtime.occupancyRate > 20
-                  ? 'bg-[#7C6FE8]'
-                  : 'bg-slate-500'
-              }`}
-              style={{ width: `${Math.min(100, Math.max(5, showtime.occupancyRate))}%` }}
-            />
+          {/* Row 3: Occupancy Bar / Status Indicator */}
+          <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden flex items-center">
+            {isDraft ? (
+              <div className="h-full w-full bg-gradient-to-r from-[#7C6FE8] to-purple-400 opacity-80" />
+            ) : (
+              <div
+                className={`h-full transition-all ${
+                  showtime.occupancyRate > 60
+                    ? 'bg-emerald-400'
+                    : showtime.occupancyRate > 20
+                    ? 'bg-indigo-400'
+                    : 'bg-slate-500'
+                }`}
+                style={{ width: `${Math.min(100, Math.max(5, showtime.occupancyRate))}%` }}
+              />
+            )}
           </div>
         </div>
 
         {/* Cleaning Buffer Stripe */}
         <div
           style={{ width: `${(bufferWidthPct / totalBlockWidthPct) * 100}%` }}
-          className="bg-slate-200/90 text-slate-700 flex items-center justify-center text-[9px] font-semibold border-l border-slate-300/80 cursor-default select-none"
+          className={`${
+            isDraft
+              ? 'bg-purple-900/40 text-[#D8D4F7] border-l border-purple-800/50'
+              : 'bg-slate-200 text-slate-700 border-l border-slate-300'
+          } flex items-center justify-center text-[9px] font-mono font-semibold cursor-default select-none`}
           title={`Dọn phòng: ${showtime.cleaningBufferMinutes} phút`}
         >
-          <span className="opacity-75">15m</span>
+          <span className="opacity-80">15m</span>
         </div>
       </div>
 
       {/* Hover HUD Popover */}
       {isHovered && (
         <div
-          className={`absolute left-0 z-50 w-64 p-3 bg-slate-900 text-white rounded-lg shadow-xl border border-slate-700/80 pointer-events-auto flex flex-col gap-2 ${
+          className={`absolute left-0 z-50 w-64 p-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-slate-700 pointer-events-auto flex flex-col gap-2 ${
             rowIndex === 0 ? 'top-full mt-2' : 'bottom-full mb-2'
           }`}
         >
           <div className="flex items-start justify-between gap-2 border-b border-slate-800 pb-2">
             <div className="flex flex-col min-w-0">
-              <span className="font-semibold text-xs text-white leading-snug truncate">
-                {showtime.movieTitle}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-xs text-white leading-snug truncate">
+                  {showtime.movieTitle}
+                </span>
+                {isDraft && (
+                  <span className="px-1.5 py-0.2 rounded bg-[#7C6FE8] text-white font-bold text-[8.5px] uppercase">
+                    AI Nháp
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] text-slate-400">
                 {showtime.roomName} • <span className="text-[#7C6FE8]">{showtime.roomType}</span>
               </span>
@@ -183,7 +209,11 @@ export function ShowtimeBlockItem({
             <div className="flex items-center gap-1 text-slate-300 col-span-2">
               <Users className="w-3 h-3 text-purple-400" />
               <span>
-                Lấp đầy: <strong>{showtime.bookedSeats}/{showtime.totalSeats}</strong> ({showtime.occupancyRate}%)
+                {isDraft ? (
+                  <span>Dự kiến công suất: <strong>{showtime.totalSeats} ghế</strong></span>
+                ) : (
+                  <span>Lấp đầy: <strong>{showtime.bookedSeats}/{showtime.totalSeats}</strong> ({showtime.occupancyRate}%)</span>
+                )}
               </span>
             </div>
           </div>
