@@ -3,11 +3,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { useAdminShowtimes } from '../hooks/useAdminShowtimes';
+import { useAdminAiSchedule } from '../hooks/useAdminAiSchedule';
 import { AdminShowtimeGridItem, AdminMovieOption } from '../types/adminShowtime.types';
 import { ShowtimesToolbar } from './showtimes/ShowtimesToolbar';
 import { ShowtimesMovieSidebar } from './showtimes/ShowtimesMovieSidebar';
 import { ShowtimesTimelineCanvas } from './showtimes/ShowtimesTimelineCanvas';
 import { ShowtimeModals } from './showtimes/ShowtimeModals';
+import { AiScheduleModal } from './showtimes/AiScheduleModal';
+import { AiScheduleDraftBanner } from './showtimes/AiScheduleDraftBanner';
 
 function timeToMinutes(timeStr: string): number {
   const [h, m] = timeStr.split(':').map(Number);
@@ -38,6 +41,8 @@ export function AdminShowtimesView() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
   const [viewingShowtime, setViewingShowtime] = useState<AdminShowtimeGridItem | null>(null);
   const [editingShowtime, setEditingShowtime] = useState<AdminShowtimeGridItem | null>(null);
   const [deletingShowtime, setDeletingShowtime] = useState<AdminShowtimeGridItem | null>(null);
@@ -63,6 +68,26 @@ export function AdminShowtimesView() {
 
   // Toast Notification
   const [toastMsg, setToastMsg] = useState('');
+
+  // AI Schedule Hook
+  const {
+    config: aiConfig,
+    strategies: aiStrategies,
+    isLoadingStrategies,
+    draftData,
+    hasDraft,
+    isGeneratingDraft,
+    isApplyingDraft,
+    generateDraft,
+    updateDraftShowtime,
+    removeDraftShowtime,
+    clearDraft,
+    applyDraft,
+    updateConfig: updateAiConfig,
+    testConnection: testAiConnection,
+    isTestingConnection,
+    testResult: aiTestResult,
+  } = useAdminAiSchedule(selectedCinemaId, selectedDateKey);
 
   // Real API Hook
   const {
@@ -234,9 +259,64 @@ export function AdminShowtimesView() {
     }
   };
 
+  // Effective Showtimes: Merge real showtimes with Draft showtimes when in Draft Preview mode
+  const effectiveShowtimes = useMemo(() => {
+    if (!hasDraft || !draftData) return showtimes;
+
+    const draftGridItems: AdminShowtimeGridItem[] = draftData.draft_showtimes.map((dst, idx) => {
+      const timePartsStart = dst.showtime_start.split(' ')[1] || '09:00:00';
+      const timePartsEnd = dst.showtime_end.split(' ')[1] || '11:00:00';
+      const startM = timeToMinutes(timePartsStart.substring(0, 5));
+      const endM = timeToMinutes(timePartsEnd.substring(0, 5));
+
+      const targetRoom = rooms.find((r) => r.id === dst.room_id);
+      const targetMovie = movies.find((m) => m.id === dst.movie_id);
+
+      return {
+        id: -1 * (idx + 1),
+        showtimeId: -1 * (idx + 1),
+        movieId: dst.movie_id,
+        movieTitle: dst.movie_title || targetMovie?.title || 'Phim',
+        moviePoster: dst.movie_poster || targetMovie?.posterUrl || '',
+        movieAgeRating: targetMovie?.ageRating || 'P',
+        durationMinutes: dst.duration || 120,
+        cleaningBufferMinutes: dst.buffer_minutes || 15,
+        cinemaId: selectedCinemaId || 1,
+        cinemaName: '',
+        roomId: dst.room_id,
+        roomName: dst.room_name || targetRoom?.name || `Phòng ${dst.room_id}`,
+        roomType: dst.room_type || targetRoom?.type || '2D',
+        showDate: dst.showtime_start.split(' ')[0],
+        startTime: timePartsStart.substring(0, 5),
+        endTime: timePartsEnd.substring(0, 5),
+        startMinutes: startM,
+        endMinutes: endM,
+        basePrice: dst.base_price || 100000,
+        bookedSeats: 0,
+        totalSeats: targetRoom?.capacity || 100,
+        occupancyRate: 0,
+        isLocked: false,
+        status: 'OPEN',
+        isDraft: true,
+        tempId: dst.temp_id,
+      };
+    });
+
+    return [...showtimes, ...draftGridItems];
+  }, [showtimes, hasDraft, draftData, rooms, movies, selectedCinemaId]);
+
   // Handle Delete Submit
   const handleDeleteSubmit = async () => {
     if (!deletingShowtime) return;
+
+    if (deletingShowtime.isDraft && deletingShowtime.tempId) {
+      removeDraftShowtime(deletingShowtime.tempId);
+      setIsDeleteModalOpen(false);
+      setDeletingShowtime(null);
+      setToastMsg('Đã xóa suất chiếu nháp!');
+      setTimeout(() => setToastMsg(''), 4000);
+      return;
+    }
 
     try {
       await deleteShowtime(deletingShowtime.id);
@@ -279,6 +359,24 @@ export function AdminShowtimesView() {
     newStartTime: string,
     newEndTime: string
   ) => {
+    // If it's a draft item (negative id)
+    if (showtimeId < 0 && draftData) {
+      const draftIndex = Math.abs(showtimeId) - 1;
+      const targetDraft = draftData.draft_showtimes[draftIndex];
+      if (targetDraft) {
+        const fullStart = `${selectedDateKey} ${newStartTime}:00`;
+        const fullEnd = `${selectedDateKey} ${newEndTime}:00`;
+        updateDraftShowtime(targetDraft.temp_id, {
+          room_id: targetRoomId,
+          showtime_start: fullStart,
+          showtime_end: fullEnd,
+        });
+        setToastMsg(`Đã dời suất chiếu nháp sang ${newStartTime}!`);
+        setTimeout(() => setToastMsg(''), 4000);
+        return;
+      }
+    }
+
     try {
       const fullStart = `${selectedDateKey} ${newStartTime}:00`;
       const fullEnd = `${selectedDateKey} ${newEndTime}:00`;
@@ -297,6 +395,18 @@ export function AdminShowtimesView() {
     } catch (err: unknown) {
       const errObj = err as { response?: { data?: { message?: string } }; message?: string };
       alert(errObj?.response?.data?.message || errObj?.message || 'Lỗi khi dời suất chiếu.');
+    }
+  };
+
+  // Handle Apply Draft
+  const handleApplyDraft = async (cleanExistingDate?: boolean) => {
+    try {
+      const res = await applyDraft(cleanExistingDate);
+      await refetchShowtimes();
+      setToastMsg(`Áp dụng thành công ${res.showtimes_count} suất chiếu vào hệ thống!`);
+      setTimeout(() => setToastMsg(''), 5000);
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi lưu bản nháp vào hệ thống.');
     }
   };
 
@@ -333,10 +443,21 @@ export function AdminShowtimesView() {
         onRefresh={() => refetchShowtimes()}
         onOpenAddModal={() => handleOpenAddModal()}
         onOpenCloneModal={() => setIsCloneModalOpen(true)}
+        onOpenAiModal={() => setIsAiModalOpen(true)}
       />
 
-      {/* 2. Inline Staggering Conflict Warning Banner */}
-      {staggeringConflicts.length > 0 && (
+      {/* 2. AI Draft Preview Banner (If Draft Mode is active) */}
+      {hasDraft && draftData && (
+        <AiScheduleDraftBanner
+          draftData={draftData}
+          onClearDraft={clearDraft}
+          onApplyDraft={handleApplyDraft}
+          isApplying={isApplyingDraft}
+        />
+      )}
+
+      {/* 3. Inline Staggering Conflict Warning Banner */}
+      {!hasDraft && staggeringConflicts.length > 0 && (
         <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/80 flex items-center gap-2 text-xs text-amber-900">
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
           <div className="flex-1">
@@ -345,7 +466,7 @@ export function AdminShowtimesView() {
         </div>
       )}
 
-      {/* 3. Integrated Split Workspace: Left Movie Tray (260px) + Right Gantt Canvas */}
+      {/* 4. Integrated Split Workspace: Left Movie Tray (260px) + Right Gantt Canvas */}
       <div className="flex flex-col lg:flex-row min-h-[640px]">
         {/* Left Movie Catalog Tray */}
         <div className="w-full lg:w-64 shrink-0">
@@ -360,7 +481,7 @@ export function AdminShowtimesView() {
         <div className="flex-1 min-w-0">
           <ShowtimesTimelineCanvas
             rooms={rooms}
-            showtimes={showtimes}
+            showtimes={effectiveShowtimes}
             isLoadingRooms={isLoadingRooms}
             zoomLevel={zoomLevel}
             snapMinutes={snapMinutes}
@@ -382,7 +503,7 @@ export function AdminShowtimesView() {
         </div>
       </div>
 
-      {/* 4. Modals Container */}
+      {/* 5. Modals Container */}
       <ShowtimeModals
         isAddModalOpen={isAddModalOpen}
         onCloseAddModal={() => setIsAddModalOpen(false)}
@@ -441,6 +562,26 @@ export function AdminShowtimesView() {
           setDeletingShowtime(st);
           setIsDeleteModalOpen(true);
         }}
+      />
+
+      {/* 6. AI Schedule Generator Modal (3 Tabs) */}
+      <AiScheduleModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        selectedCinemaId={selectedCinemaId}
+        cinemas={cinemas}
+        selectedDateKey={selectedDateKey}
+        movies={movies}
+        rooms={rooms}
+        config={aiConfig}
+        strategies={aiStrategies}
+        isLoadingStrategies={isLoadingStrategies}
+        isGeneratingDraft={isGeneratingDraft}
+        onGenerateDraft={generateDraft}
+        onUpdateConfig={updateAiConfig}
+        onTestConnection={testAiConnection}
+        isTestingConnection={isTestingConnection}
+        testResult={aiTestResult}
       />
     </div>
   );

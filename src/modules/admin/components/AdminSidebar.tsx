@@ -302,9 +302,11 @@ export const AdminSidebar: React.FC = () => {
               className="flex items-center gap-2 min-w-0"
               title="CineDot ERP Dashboard"
             >
-              <div className="w-7 h-7 rounded-md bg-[#7C6FE8] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                C
-              </div>
+              <img
+                src="/assets/images/cinedot-icon.png"
+                alt="CineDot"
+                className="w-7 h-7 object-contain rounded-md shrink-0 shadow-2xs"
+              />
               {!isSidebarCollapsed && (
                 <div className="flex flex-col min-w-0">
                   <span className="font-bold text-sm tracking-tight text-slate-900 leading-tight truncate">

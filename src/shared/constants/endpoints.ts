@@ -137,6 +137,14 @@ export const ENDPOINTS = {
     SCHEDULES: '/admin/schedules',
     SCHEDULE_DETAIL: (id: number | string) => `/admin/schedules/${id}`,
 
+    // AI Showtime Generator Suite
+    SHOWTIMES_AI_CONFIG: '/admin/showtimes/ai/config',
+    SHOWTIMES_AI_TEST_CONNECTION: '/admin/showtimes/ai/test-connection',
+    SHOWTIMES_AI_STRATEGIES: '/admin/showtimes/ai/strategies',
+    SHOWTIMES_AI_GENERATE_DRAFT: '/admin/showtimes/ai/generate-draft',
+    SHOWTIMES_AI_VALIDATE_DRAFT: '/admin/showtimes/ai/validate-draft',
+    SHOWTIMES_AI_APPLY_DRAFT: '/admin/showtimes/ai/apply-draft',
+
     CAMPAIGNS: '/admin/campaigns',
     CAMPAIGNS_STATS: '/admin/campaigns/stats',
     CAMPAIGNS_BULK: '/admin/campaigns/bulk',

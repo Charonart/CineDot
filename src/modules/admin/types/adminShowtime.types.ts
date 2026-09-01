@@ -24,6 +24,8 @@ export interface AdminShowtimeGridItem {
   occupancyRate: number; // % (e.g. 85.5)
   isLocked: boolean; // True if bookedSeats > 0 (Hard Lock)
   status: 'OPEN' | 'CLOSED';
+  isDraft?: boolean;
+  tempId?: string;
 }
 
 export interface AdminCinemaOption {

@@ -12,6 +12,7 @@ import {
   ZoomOut,
   Magnet,
   Calendar,
+  Sparkles,
 } from 'lucide-react';
 import { AdminCinemaOption } from '../../types/adminShowtime.types';
 
@@ -35,6 +36,7 @@ interface ShowtimesToolbarProps {
   onRefresh: () => void;
   onOpenAddModal: () => void;
   onOpenCloneModal: () => void;
+  onOpenAiModal?: () => void;
 }
 
 const SNAP_OPTIONS = [
@@ -61,6 +63,7 @@ export function ShowtimesToolbar({
   onRefresh,
   onOpenAddModal,
   onOpenCloneModal,
+  onOpenAiModal,
 }: ShowtimesToolbarProps) {
   const handleStepDay = (step: number) => {
     const d = new Date(selectedDateKey);
@@ -186,6 +189,18 @@ export function ShowtimesToolbar({
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* AI Schedule Generator Action */}
+          {onOpenAiModal && (
+            <button
+              onClick={onOpenAiModal}
+              className="px-3 py-1 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-purple-500/20 transition-all cursor-pointer"
+              title="Mở studio AI tạo suất chiếu tự động"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>✨ AI Tạo lịch</span>
+            </button>
+          )}
 
           {/* Clone Date Action */}
           <button

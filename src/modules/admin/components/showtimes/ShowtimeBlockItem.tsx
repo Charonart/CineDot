@@ -67,11 +67,21 @@ export function ShowtimeBlockItem({
       } ${showtime.isLocked ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}`}
     >
       {/* Outer Card Container */}
-      <div className="w-full h-full flex rounded-md overflow-hidden border border-slate-700/80 shadow-2xs hover:shadow-md transition-shadow">
+      <div
+        className={`w-full h-full flex rounded-md overflow-hidden transition-shadow ${
+          showtime.isDraft
+            ? 'border-2 border-dashed border-purple-400 ring-2 ring-purple-400/30 shadow-md shadow-purple-900/30'
+            : 'border border-slate-700/80 shadow-2xs hover:shadow-md'
+        }`}
+      >
         {/* Main Movie Block */}
         <div
           style={{ width: `${(movieWidthPct / totalBlockWidthPct) * 100}%` }}
-          className="bg-slate-900 border-l-4 border-l-[#7C6FE8] text-white p-1.5 flex flex-col justify-between overflow-hidden relative"
+          className={`${
+            showtime.isDraft
+              ? 'bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border-l-4 border-l-purple-400'
+              : 'bg-slate-900 border-l-4 border-l-[#7C6FE8]'
+          } text-white p-1.5 flex flex-col justify-between overflow-hidden relative`}
           onClick={() => onView(showtime)}
         >
           {/* Row 1: Title & Format Badge & Lock */}
@@ -89,9 +99,15 @@ export function ShowtimeBlockItem({
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
-              <span className="px-1 py-0.2 rounded bg-slate-800 text-[#7C6FE8] font-semibold text-[9px] border border-slate-700">
-                {showtime.roomType.includes('IMAX') ? 'IMAX' : '2D'}
-              </span>
+              {showtime.isDraft ? (
+                <span className="px-1 py-0.2 rounded bg-purple-900/90 text-amber-300 font-bold text-[8px] border border-purple-400/60 shadow-2xs">
+                  ✨ AI
+                </span>
+              ) : (
+                <span className="px-1 py-0.2 rounded bg-slate-800 text-[#7C6FE8] font-semibold text-[9px] border border-slate-700">
+                  {showtime.roomType?.includes('IMAX') ? 'IMAX' : '2D'}
+                </span>
+              )}
               {showtime.isLocked && (
                 <span title={`Đã có ${showtime.bookedSeats} vé đặt (Khóa không cho di chuyển)`} className="shrink-0">
                   <Lock className="w-3 h-3 text-amber-400" />
