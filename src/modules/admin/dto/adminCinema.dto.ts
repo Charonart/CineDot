@@ -21,7 +21,12 @@ export interface AdminRoomItemDTO {
   id?: number;
   cinema_id?: number;
   room_name: string;
-  room_type?: string; // "IMAX", "2D", "3D", "4DX", "GOLD_CLASS"
+  room_type?: string; // "IMAX", "2D", "3D", "4DX", "GOLD_CLASS", "SCREENX", "DOLBY_CINEMA", "ONYX_LED"
+  screen_type?: string;
+  sound_technology?: string;
+  screen_config?: any;
+  features?: string[];
+  template_key?: string;
   seat_matrix?: SeatMatrixItemDTO[] | null;
   total_seats?: number;
   is_active?: boolean;
@@ -81,6 +86,11 @@ export interface UpdateCinemaRequestDTO {
 export interface CreateRoomRequestDTO {
   room_name: string;
   room_type?: string;
+  screen_type?: string;
+  sound_technology?: string;
+  screen_config?: any;
+  features?: string[];
+  template_key?: string;
   total_seats?: number;
   seat_matrix?: SeatMatrixItemDTO[];
   is_active?: boolean;
@@ -89,6 +99,11 @@ export interface CreateRoomRequestDTO {
 export interface UpdateRoomRequestDTO {
   room_name?: string;
   room_type?: string;
+  screen_type?: string;
+  sound_technology?: string;
+  screen_config?: any;
+  features?: string[];
+  template_key?: string;
   total_seats?: number;
   seat_matrix?: SeatMatrixItemDTO[];
   is_active?: boolean;

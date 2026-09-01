@@ -11,9 +11,11 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 const FORMAT_TABS: { id: TheaterFormat; label: string }[] = [
   { id: 'ALL', label: 'Tất Cả Định Dạng' },
   { id: 'IMAX', label: 'IMAX Laser 3D' },
-  { id: '4DX', label: '4DX Motion' },
+  { id: 'SCREENX', label: 'ScreenX 270°' },
+  { id: 'DOLBY_CINEMA', label: 'Dolby Cinema' },
+  { id: 'ONYX_LED', label: 'Samsung Onyx LED' },
   { id: 'GOLD_CLASS', label: 'Gold Class VIP' },
-  { id: 'DOLBY_ATMOS', label: 'Dolby Atmos' },
+  { id: 'STANDARD_3D', label: 'Digital 3D Atmos' },
 ];
 
 export function SpecialTheatersClientPage() {

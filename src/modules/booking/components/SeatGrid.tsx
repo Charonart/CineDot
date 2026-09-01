@@ -54,6 +54,8 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
       const seat = sortedSeats[i];
       const normType = (seat.type || 'standard').toLowerCase();
       const isCouple = normType === 'couple' || normType === 'sweetbox';
+      const isDeluxe = normType === 'deluxe';
+      const isBed = normType === 'bed';
       
       const nextSeat = i + 1 < sortedSeats.length ? sortedSeats[i + 1] : null;
       const isNextCouple = nextSeat && ((nextSeat.type || 'standard').toLowerCase() === 'couple' || (nextSeat.type || 'standard').toLowerCase() === 'sweetbox');
@@ -97,10 +99,10 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
             cy: seat.canvas?.cy || 0,
             angle: seat.canvas?.angle || 0,
           },
-          width: isCouple ? SEAT_SIZE * 1.6 : SEAT_SIZE,
+          width: isCouple ? SEAT_SIZE * 1.6 : isBed ? SEAT_SIZE * 1.8 : isDeluxe ? SEAT_SIZE * 1.3 : SEAT_SIZE,
           label: String(seat.id),
-          color: seat.color || (normType === 'vip' ? '#7C6FE8' : isCouple ? '#EC4899' : '#64748B'),
-          typeName: seat.typeName || (normType === 'vip' ? 'Ghế VIP' : isCouple ? 'Ghế Đôi' : 'Ghế Thường'),
+          color: seat.color || (normType === 'vip' ? '#7C6FE8' : isCouple ? '#EC4899' : isDeluxe ? '#D97706' : isBed ? '#059669' : '#64748B'),
+          typeName: seat.typeName || (normType === 'vip' ? 'Ghế VIP' : isCouple ? 'Ghế Đôi' : isDeluxe ? 'Ghế Deluxe Ngả Lưng' : isBed ? 'Giường Nằm VIP Bed' : 'Ghế Thường'),
           price: seat.price,
         });
         i += 1;
@@ -250,6 +252,8 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
             const isStandard = normType === 'standard' || normType === 'regular';
             const isVip = normType === 'vip';
             const isCouple = normType === 'couple' || normType === 'sweetbox';
+            const isDeluxe = normType === 'deluxe';
+            const isBed = normType === 'bed';
 
             let dynamicBg = '#F8FAFC';
             let dynamicBorder = '#CBD5E1';
@@ -263,6 +267,14 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
               dynamicBg = '#FDF2F8';
               dynamicBorder = '#EC4899';
               dynamicText = '#DB2777';
+            } else if (isDeluxe) {
+              dynamicBg = '#FFFBEB';
+              dynamicBorder = '#D97706';
+              dynamicText = '#B45309';
+            } else if (isBed) {
+              dynamicBg = '#ECFDF5';
+              dynamicBorder = '#059669';
+              dynamicText = '#047857';
             }
 
             if (isBooked) {

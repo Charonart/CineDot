@@ -1,4 +1,13 @@
-export type TheaterFormat = 'ALL' | 'IMAX' | '4DX' | 'GOLD_CLASS' | 'DOLBY_ATMOS';
+export type TheaterFormat =
+  | 'ALL'
+  | 'IMAX'
+  | 'SCREENX'
+  | 'DOLBY_CINEMA'
+  | 'ONYX_LED'
+  | 'GOLD_CLASS'
+  | 'STANDARD_3D'
+  | '4DX'
+  | 'DOLBY_ATMOS';
 
 export interface SpecialTheaterSpec {
   id: string;
@@ -9,6 +18,8 @@ export interface SpecialTheaterSpec {
   imageUrl: string;
   badgeText: string;
   badgeColor: string;
+  screenType?: string;
+  soundTechnology?: string;
   specs: string[];
   features: string[];
   applicableCinemas: string[];
@@ -19,7 +30,10 @@ export interface SpecialTheaterSpec {
 export interface ComparisonMatrixRow {
   featureName: string;
   imax: string;
-  fourDx: string;
+  screenx: string;
+  dolbyCinema: string;
+  onyxLed: string;
   goldClass: string;
-  dolbyAtmos: string;
+  standard3d: string;
 }
+

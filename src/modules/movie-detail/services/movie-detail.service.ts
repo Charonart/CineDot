@@ -116,14 +116,18 @@ export async function fetchMovieDetail(slug: string): Promise<MovieDetail | null
 }
 
 
-export async function fetchShowtimeSchedule(
+export async function fetchMovieShowtimes(
   slug: string,
   dateStr?: string,
-  provinceName?: string
+  provinceName?: string,
+  screenType?: string,
+  soundTechnology?: string
 ): Promise<CinemaShowtimeGroup[]> {
   try {
     const params: Record<string, any> = { movie_id: slug };
     if (dateStr) params.date = dateStr;
+    if (screenType && screenType !== 'ALL') params.screen_type = screenType;
+    if (soundTechnology && soundTechnology !== 'ALL') params.sound_technology = soundTechnology;
 
     const res = await apiClient.get(ENDPOINTS.SHOWTIMES.LIST, { params });
     if (res.data?.success && res.data?.data) {
@@ -161,7 +165,7 @@ export async function fetchShowtimeSchedule(
             });
             if (isPassed) continue;
 
-            const formatName = t.format || t.screen_type || '2D Dolby Atmos';
+            const formatName = t.format || t.screen_type || '2D Digital';
             if (!formatMap[formatName]) {
               formatMap[formatName] = [];
             }
@@ -172,6 +176,9 @@ export async function fetchShowtimeSchedule(
               roomName: t.screen || t.room_name || 'Phòng chiếu',
               screen: t.screen || t.room_name,
               format: formatName,
+              screen_type: t.screen_type,
+              sound_technology: t.sound_technology,
+              features: t.features || [],
               price: t.price || 90000,
               availableSeats: Number(t.availableSeats ?? t.available_seats ?? 48),
               totalSeats: Number(t.totalSeats ?? t.total_seats ?? 64),

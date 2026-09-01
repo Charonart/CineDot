@@ -767,12 +767,54 @@ export const AdminSeatCanvasEditor: React.FC<AdminSeatCanvasEditorProps> = ({
                 transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
               }}
             >
-              {/* Clean Architectural Screen Arc */}
-              <div className="w-full flex flex-col items-center gap-1.5 pt-2 pb-8 pointer-events-none">
-                <div className="w-full max-w-md h-2 border-t-2 border-slate-300 rounded-[100%]" />
-                <span className="text-[10px] font-medium text-slate-400 tracking-widest uppercase">
-                  MÀN HÌNH CHẾU ({roomFormat})
-                </span>
+              {/* Dynamic Cinema Screen Arc / Multi-wall Layout */}
+              <div className="w-full flex flex-col items-center gap-1.5 pt-1 pb-6 pointer-events-none select-none">
+                {roomFormat.toLowerCase().includes('screenx') ? (
+                  <div className="w-full max-w-lg flex items-center justify-between gap-3 px-2">
+                    <div className="flex-1 flex flex-col items-end">
+                      <div className="w-full h-1.5 border-t-2 border-l-2 border-[#7C6FE8] rounded-tl-lg transform -skew-y-6" />
+                      <span className="text-[8px] font-bold text-[#7C6FE8]">TƯỜNG TRÁI 270°</span>
+                    </div>
+                    <div className="flex-[2] flex flex-col items-center">
+                      <div className="w-full h-2 border-t-2 border-[#7C6FE8] rounded-[100%]" />
+                      <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">
+                        SCREENX 270° ({roomFormat})
+                      </span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-start">
+                      <div className="w-full h-1.5 border-t-2 border-r-2 border-[#7C6FE8] rounded-tr-lg transform skew-y-6" />
+                      <span className="text-[8px] font-bold text-[#7C6FE8]">TƯỜNG PHẢI 270°</span>
+                    </div>
+                  </div>
+                ) : roomFormat.toLowerCase().includes('onyx') ? (
+                  <div className="w-full max-w-md flex flex-col items-center gap-1">
+                    <div className="w-full h-2 bg-slate-900 border-2 border-cyan-400 rounded-sm shadow-[0_0_8px_rgba(34,211,238,0.4)]" />
+                    <span className="text-[9px] font-bold text-cyan-700 tracking-widest uppercase">
+                      MÀN HÌNH SAMSUNG ONYX 4K LED
+                    </span>
+                  </div>
+                ) : roomFormat.toLowerCase().includes('imax') ? (
+                  <div className="w-full max-w-lg flex flex-col items-center gap-1">
+                    <div className="w-full h-3 border-t-3 border-[#7C6FE8] rounded-[100%] shadow-[0_-2px_8px_rgba(124,111,232,0.4)]" />
+                    <span className="text-[9px] font-bold text-[#7C6FE8] tracking-widest uppercase">
+                      MÀN HÌNH CONG IMAX LASER 3D (1.90:1)
+                    </span>
+                  </div>
+                ) : roomFormat.toLowerCase().includes('dolby') ? (
+                  <div className="w-full max-w-md flex flex-col items-center gap-1">
+                    <div className="w-full h-2.5 border-t-2 border-amber-500 rounded-[100%]" />
+                    <span className="text-[9px] font-bold text-amber-700 tracking-widest uppercase">
+                      MÀN HÌNH DOLBY VISION HDR (2.39:1)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="w-full max-w-md flex flex-col items-center gap-1">
+                    <div className="w-full h-2 border-t-2 border-slate-300 rounded-[100%]" />
+                    <span className="text-[9px] font-medium text-slate-500 tracking-widest uppercase">
+                      MÀN HÌNH CHIẾU ({roomFormat})
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* 1. Sweetbox / Couple Pair Connector Enclosures */}

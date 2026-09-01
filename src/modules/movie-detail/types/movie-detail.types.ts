@@ -5,6 +5,9 @@ export interface ShowtimeSlot {
   roomName?: string;
   screen?: string;
   format?: string;
+  screen_type?: string;
+  sound_technology?: string;
+  features?: string[];
   price?: number | string;
   availableSeats: number;
   totalSeats: number;

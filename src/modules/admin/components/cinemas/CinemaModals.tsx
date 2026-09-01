@@ -535,17 +535,19 @@ export const CinemaModals: React.FC<CinemaModalsProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-700">Định dạng công nghệ</label>
+                  <label className="text-xs font-medium text-slate-700">Định dạng công nghệ (Template phòng)</label>
                   <select
                     value={newRoomFormat}
                     onChange={(e) => onNewRoomFormatChange(e.target.value)}
                     className="px-3 py-1.5 rounded-lg bg-slate-50 border border-gray-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#7C6FE8]"
                   >
-                    <option value="IMAX 3D Laser">IMAX 3D Laser</option>
-                    <option value="4DX Motion">4DX Motion</option>
-                    <option value="VIP Gold Class">VIP Gold Class</option>
-                    <option value="3D Experience">3D Experience</option>
-                    <option value="2D Standard">2D Standard</option>
+                    <option value="IMAX 3D Laser">IMAX Laser 3D (Dual Laser + IMAX 12ch)</option>
+                    <option value="Dolby Cinema">Dolby Cinema (Dolby Vision HDR + Atmos)</option>
+                    <option value="ScreenX 270°">ScreenX 270° (Màn 3 mặt + Atmos)</option>
+                    <option value="Samsung Onyx Cinema LED">Samsung Onyx 4K LED (Tự phát sáng + Atmos)</option>
+                    <option value="VIP Gold Class">VIP Gold Class (Ghế Recliner & Bed + Atmos)</option>
+                    <option value="Digital 3D Atmos">Digital 3D Atmos (Kính phân cực 3D + Atmos)</option>
+                    <option value="2D Standard">2D Standard (Digital 2K/4K + 7.1 Surround)</option>
                   </select>
                 </div>
 

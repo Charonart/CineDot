@@ -17,29 +17,33 @@ export const TechComparisonMatrix: React.FC<TechComparisonMatrixProps> = ({ rows
           <span>BẢNG SO SÁNH TRỰC QUAN</span>
         </span>
         <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-          So Sánh Tính Năng Các Định Dạng Phòng Chiếu
+          So Sánh Tính Năng 6 Định Dạng Phòng Chiếu Hiện Đại
         </h3>
       </div>
 
       <div className="w-full overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[700px]">
+        <table className="w-full text-left border-collapse min-w-[840px]">
           <thead>
             <tr className="border-b border-gray-200 text-xs font-extrabold text-slate-900 uppercase tracking-wider bg-slate-50">
-              <th className="p-4 rounded-l-2xl">Tính Năng / Đặc Quyền</th>
-              <th className="p-4 text-[#7C6FE8]">IMAX 3D Laser</th>
-              <th className="p-4 text-purple-600">4DX Motion</th>
-              <th className="p-4 text-emerald-600">Gold Class VIP</th>
-              <th className="p-4 rounded-r-2xl text-indigo-600">Dolby Atmos</th>
+              <th className="p-3.5 rounded-l-2xl">Tính Năng / Đặc Quyền</th>
+              <th className="p-3.5 text-amber-600">IMAX Laser</th>
+              <th className="p-3.5 text-[#7C6FE8]">ScreenX 270°</th>
+              <th className="p-3.5 text-purple-600">Dolby Cinema</th>
+              <th className="p-3.5 text-cyan-600">Samsung Onyx</th>
+              <th className="p-3.5 text-emerald-600">Gold Class</th>
+              <th className="p-3.5 rounded-r-2xl text-blue-600">Digital 3D</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-xs font-semibold text-slate-700">
             {rows.map((row, idx) => (
               <tr key={idx} className="hover:bg-purple-50/40 transition-colors">
-                <td className="p-4 font-extrabold text-slate-900">{row.featureName}</td>
-                <td className="p-4 font-bold text-slate-800">{row.imax}</td>
-                <td className="p-4">{row.fourDx}</td>
-                <td className="p-4 font-bold text-emerald-700">{row.goldClass}</td>
-                <td className="p-4">{row.dolbyAtmos}</td>
+                <td className="p-3.5 font-extrabold text-slate-900">{row.featureName}</td>
+                <td className="p-3.5 font-bold text-amber-900">{row.imax}</td>
+                <td className="p-3.5 font-bold text-[#7C6FE8]">{row.screenx}</td>
+                <td className="p-3.5 font-bold text-purple-900">{row.dolbyCinema}</td>
+                <td className="p-3.5 font-bold text-cyan-800">{row.onyxLed}</td>
+                <td className="p-3.5 font-bold text-emerald-700">{row.goldClass}</td>
+                <td className="p-3.5 text-slate-600">{row.standard3d}</td>
               </tr>
             ))}
           </tbody>

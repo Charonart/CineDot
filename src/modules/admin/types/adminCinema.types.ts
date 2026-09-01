@@ -18,8 +18,13 @@ export interface AdminRoomItem {
   id: number;
   cinemaId: number;
   name: string;
-  format: string; // "IMAX 3D Laser" | "4DX Motion" | "VIP Gold Class" | "2D Standard"
-  roomType: string; // "IMAX" | "4DX" | "GOLD_CLASS" | "2D" | "3D"
+  format: string; // "IMAX 3D Laser" | "ScreenX 270°" | "Dolby Cinema" | "Samsung Onyx Cinema LED" | "VIP Gold Class" | "2D Standard"
+  roomType: string; // "IMAX" | "SCREENX" | "DOLBY_CINEMA" | "ONYX_LED" | "GOLD_CLASS" | "2D" | "3D"
+  screen_type?: string;
+  sound_technology?: string;
+  screen_config?: any;
+  features?: string[];
+  template_key?: string;
   status: 'ACTIVE' | 'MAINTENANCE';
   totalSeats: number;
   seats: AdminSeatItem[];

@@ -14,15 +14,20 @@ import {
 
 const FORMAT_TO_TYPE: Record<string, string> = {
   'IMAX 3D Laser': 'IMAX',
-  '4DX Motion': '4DX',
+  'ScreenX 270°': 'SCREENX',
+  'Dolby Cinema': 'DOLBY_CINEMA',
+  'Samsung Onyx Cinema LED': 'ONYX_LED',
   'VIP Gold Class': 'GOLD_CLASS',
   '3D Experience': '3D',
+  'Digital 3D Atmos': '3D',
   '2D Standard': '2D',
 };
 
 const TYPE_TO_FORMAT: Record<string, string> = {
   IMAX: 'IMAX 3D Laser',
-  '4DX': '4DX Motion',
+  SCREENX: 'ScreenX 270°',
+  DOLBY_CINEMA: 'Dolby Cinema',
+  ONYX_LED: 'Samsung Onyx Cinema LED',
   GOLD_CLASS: 'VIP Gold Class',
   '3D': '3D Experience',
   '2D': '2D Standard',
@@ -149,6 +154,11 @@ export const adminCinemaMapper = {
       name: dto.room_name || 'Phòng chiếu',
       format,
       roomType,
+      screen_type: dto.screen_type,
+      sound_technology: dto.sound_technology,
+      screen_config: dto.screen_config,
+      features: dto.features,
+      template_key: dto.template_key,
       status: dto.is_active !== false ? 'ACTIVE' : 'MAINTENANCE',
       totalSeats: Number(dto.total_seats || seats.length),
       seats,

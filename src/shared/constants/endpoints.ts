@@ -61,6 +61,17 @@ export const ENDPOINTS = {
     ROOM_LAYOUT: (roomId: number | string) => `/rooms/${roomId}/layout`,
     SEAT_TYPES: '/seat-types',
   },
+  ROOM_FORMATS: {
+    LIST: '/room-formats',
+  },
+  SPECIAL_THEATERS: {
+    DETAIL: (type: string) => `/special-theaters/${type}`,
+  },
+  ROOMS: {
+    LIST: '/rooms',
+    LAYOUT: (id: number | string) => `/rooms/${id}/layout`,
+    SEATS: (id: number | string) => `/rooms/${id}/seats`,
+  },
   SHOWTIMES: {
     LIST: '/showtimes',
     DETAIL: (id: number | string) => `/showtimes/${id}`,

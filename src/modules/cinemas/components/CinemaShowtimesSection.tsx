@@ -44,20 +44,42 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
     };
   });
 
+  const [selectedTechFilter, setSelectedTechFilter] = React.useState('ALL');
+
+  const TECH_FORMAT_FILTERS = [
+    { id: 'ALL', label: 'Tất Cả' },
+    { id: 'imax', label: 'IMAX Laser' },
+    { id: 'screenx', label: 'ScreenX 270°' },
+    { id: 'dolby', label: 'Dolby Cinema / Atmos' },
+    { id: 'onyx', label: 'Samsung Onyx LED' },
+    { id: 'gold', label: 'Gold Class VIP' },
+    { id: '3d', label: '3D Digital' },
+  ];
+
   const filteredShowtimes = useMemo(() => {
     return showtimes
       .map((movie) => ({
         ...movie,
-        slots: movie.slots.filter(
-          (slot) =>
-            !isShowtimePassed({
-              dateStr: selectedDate,
-              timeStr: slot.time,
-            })
-        ),
+        slots: movie.slots.filter((slot) => {
+          const isPassed = isShowtimePassed({
+            dateStr: selectedDate,
+            timeStr: slot.time,
+          });
+          if (isPassed) return false;
+
+          if (selectedTechFilter !== 'ALL') {
+            const rawFormat = (slot.format || '').toLowerCase();
+            const rawRoom = (slot.roomName || '').toLowerCase();
+            const target = selectedTechFilter.toLowerCase();
+            if (!rawFormat.includes(target) && !rawRoom.includes(target)) {
+              return false;
+            }
+          }
+          return true;
+        }),
       }))
       .filter((movie) => movie.slots.length > 0);
-  }, [showtimes, selectedDate]);
+  }, [showtimes, selectedDate, selectedTechFilter]);
 
   const handleSelectSlot = (showtimeId: string | number) => {
     const targetUrl = `/booking/seats?showtime_id=${encodeURIComponent(String(showtimeId))}`;
@@ -84,7 +106,7 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
       </div>
 
       {/* Date Carousel Selector */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
         {dateOptions.map((opt) => {
           const isSelected = selectedDate === opt.isoDate;
           return (
@@ -103,6 +125,27 @@ export const CinemaShowtimesSection: React.FC<CinemaShowtimesSectionProps> = ({
               <span className="text-sm font-extrabold mt-0.5">
                 {opt.dateFormatted}
               </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Technology Format Filter Chips */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {TECH_FORMAT_FILTERS.map((tf) => {
+          const isActive = selectedTechFilter === tf.id;
+          return (
+            <button
+              key={tf.id}
+              type="button"
+              onClick={() => setSelectedTechFilter(tf.id)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-[#7C6FE8] text-white shadow-xs shadow-[#7C6FE8]/30 scale-105'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-gray-200/80'
+              }`}
+            >
+              {tf.label}
             </button>
           );
         })}

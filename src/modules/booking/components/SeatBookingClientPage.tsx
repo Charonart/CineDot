@@ -168,8 +168,12 @@ export function SeatBookingClientPage({
 
               {/* Main Seat Map White Card */}
               <div className="w-full bg-white rounded-3xl p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.05)] border border-gray-200/90 flex flex-col gap-6 items-center">
-                {/* Cinema Screen Curved LED */}
-                <CinemaScreen />
+                {/* Cinema Screen Dynamic Canvas */}
+                <CinemaScreen
+                  screenConfig={bookingInfo.screenConfig}
+                  screenType={bookingInfo.screenType}
+                  formatName={bookingInfo.movieFormat}
+                />
 
                 {/* Seat Grid Map */}
                 <SeatGrid

@@ -29,11 +29,20 @@ export const SeatLegend: React.FC<SeatLegendProps> = ({
   let displayTypes = seatTypes.filter((st) => presentTypeKeys.size === 0 || presentTypeKeys.has(st.key.toLowerCase()));
 
   if (displayTypes.length === 0) {
-    displayTypes = [
+    const baseList: SeatTypeInfo[] = [
       { key: 'standard', name: 'Ghế Thường', surcharge: 0, color: '#64748B', price: standardPrice || basePrice },
       { key: 'vip', name: 'Ghế VIP', surcharge: 20000, color: '#7C6FE8', price: vipPrice || (basePrice + 20000) },
       { key: 'sweetbox', name: 'Ghế Đôi Sweetbox', surcharge: 40000, color: '#EC4899', price: sweetboxPrice || ((basePrice + 40000) * 2) },
     ];
+
+    if (presentTypeKeys.has('deluxe')) {
+      baseList.push({ key: 'deluxe', name: 'Ghế Deluxe Ngả Lưng', surcharge: 35000, color: '#D97706', price: basePrice + 35000 });
+    }
+    if (presentTypeKeys.has('bed')) {
+      baseList.push({ key: 'bed', name: 'Giường Nằm VIP Bed', surcharge: 70000, color: '#059669', price: (basePrice + 70000) * 2 });
+    }
+
+    displayTypes = baseList;
   }
 
   const formatPrice = (p?: number) => {

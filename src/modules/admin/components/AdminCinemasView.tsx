@@ -310,11 +310,46 @@ export function AdminCinemasView() {
 
     try {
       const defaultSeats = adminCinemaMapper.generateDefaultSeats();
+      const rType = adminCinemaMapper.formatToRoomType(newRoomFormat);
+      
+      let screenType = 'standard_2d';
+      let soundTech = 'surround_71';
+      let templateKey = 'standard_2d';
+
+      if (newRoomFormat.includes('IMAX')) {
+        screenType = 'imax_laser';
+        soundTech = 'imax_sound';
+        templateKey = 'imax_laser';
+      } else if (newRoomFormat.includes('Dolby Cinema')) {
+        screenType = 'dolby_cinema';
+        soundTech = 'dolby_atmos';
+        templateKey = 'dolby_cinema';
+      } else if (newRoomFormat.includes('ScreenX')) {
+        screenType = 'screenx';
+        soundTech = 'dolby_atmos';
+        templateKey = 'screenx';
+      } else if (newRoomFormat.includes('Onyx')) {
+        screenType = 'onyx_led';
+        soundTech = 'dolby_atmos';
+        templateKey = 'onyx_led';
+      } else if (newRoomFormat.includes('Gold Class')) {
+        screenType = 'standard_2d';
+        soundTech = 'dolby_atmos';
+        templateKey = 'gold_class';
+      } else if (newRoomFormat.includes('3D')) {
+        screenType = 'standard_3d';
+        soundTech = 'dolby_atmos';
+        templateKey = 'standard_3d';
+      }
+
       const created = await createRoom({
         cinemaId: currentCinema.id,
         payload: {
           room_name: newRoomName.trim(),
-          room_type: adminCinemaMapper.formatToRoomType(newRoomFormat),
+          room_type: rType,
+          screen_type: screenType,
+          sound_technology: soundTech,
+          template_key: templateKey,
           total_seats: defaultSeats.length,
           seat_matrix: adminCinemaMapper.seatsToMatrixPayload(defaultSeats),
           is_active: true,

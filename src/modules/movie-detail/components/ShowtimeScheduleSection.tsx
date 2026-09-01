@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ChevronDown, Bell, Loader2, MapPin, Film, Building2 } from 'lucide-react';
 import { useAuthStore } from '@/shared/store/useAuthStore';
-import { fetchShowtimeSchedule } from '../services/movie-detail.service';
+import { fetchMovieShowtimes } from '../services/movie-detail.service';
 import { CinemaShowtimeGroup } from '../types/movie-detail.types';
 import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
 
@@ -13,6 +13,16 @@ interface ShowtimeScheduleSectionProps {
   movieSlug?: string;
   isComingSoon?: boolean;
 }
+
+const TECH_FORMAT_FILTERS = [
+  { id: 'ALL', label: 'Tất Cả Định Dạng' },
+  { id: 'imax_laser', label: 'IMAX Laser' },
+  { id: 'screenx', label: 'ScreenX 270°' },
+  { id: 'dolby_cinema', label: 'Dolby Cinema' },
+  { id: 'onyx_led', label: 'Samsung Onyx LED' },
+  { id: 'dolby_atmos', label: 'Dolby Atmos' },
+  { id: 'standard_3d', label: '3D Digital' },
+];
 
 const generateDateOptions = () => {
   const dates = [];
@@ -40,6 +50,7 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   const [selectedDateStr, setSelectedDateStr] = useState(dateOptions[0].dateStr);
   const [selectedRegion, setSelectedRegion] = useState('Toàn quốc');
   const [selectedCinemaFilter, setSelectedCinemaFilter] = useState('Tất cả rạp');
+  const [selectedTechFilter, setSelectedTechFilter] = useState('ALL');
   const [openDropdown, setOpenDropdown] = useState<'region' | 'cinema' | null>(null);
   const [isNotified, setIsNotified] = useState(false);
   const [schedule, setSchedule] = useState<CinemaShowtimeGroup[]>([]);
@@ -53,14 +64,19 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   useEffect(() => {
     if (isComingSoonMovie) return;
     setLoadingSchedule(true);
-    fetchShowtimeSchedule(movieSlug, selectedDateStr, selectedRegion)
+
+    const isSoundTech = selectedTechFilter === 'dolby_atmos' || selectedTechFilter === 'imax_sound' || selectedTechFilter === 'surround_71';
+    const sType = isSoundTech ? undefined : selectedTechFilter;
+    const sTech = isSoundTech ? selectedTechFilter : undefined;
+
+    fetchMovieShowtimes(movieSlug, selectedDateStr, selectedRegion, sType, sTech)
       .then((data) => {
         setSchedule(data);
       })
       .finally(() => {
         setLoadingSchedule(false);
       });
-  }, [movieSlug, selectedDateStr, selectedRegion, isComingSoonMovie]);
+  }, [movieSlug, selectedDateStr, selectedRegion, selectedTechFilter, isComingSoonMovie]);
 
   const handleScrollLeft = () => {
     if (scrollRef.current) {
@@ -288,6 +304,27 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
                 </AnimatePresence>
               </div>
             </div>
+          </div>
+
+          {/* Technology Format Filter Pills */}
+          <div className="w-full flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {TECH_FORMAT_FILTERS.map((tf) => {
+              const isActive = selectedTechFilter === tf.id;
+              return (
+                <button
+                  key={tf.id}
+                  type="button"
+                  onClick={() => setSelectedTechFilter(tf.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#7C6FE8] text-white shadow-xs shadow-[#7C6FE8]/30 scale-105'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-gray-200/80'
+                  }`}
+                >
+                  {tf.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Cinema Cards Section */}

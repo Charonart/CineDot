@@ -1,3 +1,33 @@
+export type RoomScreenType =
+  | 'standard_2d'
+  | 'standard_3d'
+  | 'imax_laser'
+  | 'screenx'
+  | 'dolby_cinema'
+  | 'onyx_led'
+  | string;
+
+export type RoomSoundTechnology =
+  | 'surround_71'
+  | 'dolby_atmos'
+  | 'imax_sound'
+  | string;
+
+export type ScreenCanvasShape = 'curved' | 'three_sided' | 'led_wall' | 'flat' | string;
+
+export interface ScreenCanvasConfig {
+  shape: ScreenCanvasShape;
+  aspect_ratio?: string;
+  width?: number;
+  curve_depth?: number;
+  label?: string;
+  side_walls?: boolean;
+  side_wall_angle?: number;
+  side_wall_length?: number;
+  left_wall_label?: string;
+  right_wall_label?: string;
+}
+
 export type SeatType = 'STANDARD' | 'VIP' | 'SWEETBOX' | 'COUPLE' | 'DELUXE' | 'BED' | string;
 
 export type SeatStatus = 'AVAILABLE' | 'SELECTED' | 'BOOKED' | 'HOLDING' | 'BLOCKED';
@@ -44,6 +74,10 @@ export interface ShowtimeBookingInfo {
   movieSlug: string;
   movieTitle: string;
   movieFormat: string;
+  screenType?: RoomScreenType;
+  soundTechnology?: RoomSoundTechnology;
+  screenConfig?: ScreenCanvasConfig;
+  features?: string[];
   posterUrl: string;
   backdropUrl?: string;
   ageRating: string;
@@ -81,4 +115,5 @@ export interface SeatStatusUpdatedEvent {
   user_id?: number | string;
   updated_at?: string;
 }
+
 
