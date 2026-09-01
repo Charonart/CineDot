@@ -106,7 +106,7 @@ export const ExpiredShowtimeModal: React.FC<ExpiredShowtimeModalProps> = ({
               </button>
             </Link>
 
-            <Link href={`/movies/${movieSlug}#showtime-schedule`}>
+            <Link href={`/movies/${movieSlug}`}>
               <button
                 type="button"
                 className="px-4 py-2 rounded-xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"

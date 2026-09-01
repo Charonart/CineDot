@@ -46,11 +46,7 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
   const handleBookClick = (e: React.MouseEvent, movie: MovieCardItem) => {
     e.preventDefault();
     e.stopPropagation();
-    if (movie.status === 'now-showing') {
-      router.push(`/movies/${movie.slug}#showtime-schedule`);
-    } else {
-      router.push(`/movies/${movie.slug}`);
-    }
+    router.push(`/movies/${movie.slug}`);
   };
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
@@ -60,7 +56,7 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
     { id: 'coming-soon', label: 'Sắp Chiếu', icon: <Clock className="w-3.5 h-3.5" /> },
   ];
 
-  const viewMoreLink = activeTab === 'coming-soon' ? '/movies?tab=coming-soon' : '/movies?tab=now-showing';
+  const viewMoreLink = activeTab === 'coming-soon' ? '/movies/coming-soon' : '/movies/now-showing';
 
   return (
     <section className="relative w-full py-16 sm:py-20 bg-[#FAFAFB]">

@@ -17,7 +17,7 @@ export const MovieGridCard: React.FC<MovieGridCardProps> = ({ movie }) => {
 
   const isNowShowing = movie.status === 'NOW_SHOWING';
   const detailUrl = `/movies/${movie.slug}`;
-  const scheduleUrl = `/movies/${movie.slug}#showtime-schedule`;
+  const scheduleUrl = `/movies/${movie.slug}`;
 
   const handleBookClick = (e: React.MouseEvent) => {
     e.stopPropagation();

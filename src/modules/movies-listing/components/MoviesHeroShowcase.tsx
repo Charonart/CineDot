@@ -30,7 +30,7 @@ export const MoviesHeroShowcase: React.FC<MoviesHeroShowcaseProps> = ({ movie })
   const backdropUrl = 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1600&auto=format&fit=crop&q=80';
 
   const handleBookNow = () => {
-    router.push(`/movies/${featured.slug}#showtime-schedule`);
+    router.push(`/movies/${featured.slug}`);
   };
 
   const genreText = Array.isArray(featured.genre) ? featured.genre.join(' • ') : featured.genre;

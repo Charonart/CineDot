@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: MovieDetailPageProps): Promis
     };
   }
 
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://cinedot.vn').replace(/\/+$/, '');
   const title = `${movie.title} - Lịch chiếu & Đặt vé | CineDot`;
   const description =
     movie.synopsis && movie.synopsis.length > 10
@@ -33,18 +34,30 @@ export async function generateMetadata({ params }: MovieDetailPageProps): Promis
         : movie.synopsis
       : `Xem lịch chiếu phim, mua vé online và theo dõi trailer bộ phim ${movie.title} tại hệ thống rạp CineDot chuẩn quốc tế.`;
 
-  const ogImage = movie.backdropUrl || movie.posterUrl || '/assets/cinedot-og.jpg';
+  const ogImageUrl = movie.backdropUrl || movie.posterUrl || `${siteUrl}/assets/cinedot-og.jpg`;
+  const ogImage = ogImageUrl.startsWith('http') ? ogImageUrl : `${siteUrl}${ogImageUrl.startsWith('/') ? '' : '/'}${ogImageUrl}`;
 
   return {
     title,
     description,
+    keywords: [
+      movie.title,
+      movie.originalTitle,
+      `lịch chiếu ${movie.title}`,
+      `đặt vé ${movie.title}`,
+      `giá vé ${movie.title}`,
+      `trailer ${movie.title}`,
+      'phim chiếu rạp',
+      'vé xem phim',
+      ...(Array.isArray(movie.genre) ? movie.genre : []),
+    ].filter(Boolean) as string[],
     alternates: {
-      canonical: `/movies/${movie.slug}`,
+      canonical: `${siteUrl}/movies/${movie.slug}`,
     },
     openGraph: {
       type: 'video.movie',
       locale: 'vi_VN',
-      url: `/movies/${movie.slug}`,
+      url: `${siteUrl}/movies/${movie.slug}`,
       siteName: 'CineDot',
       title,
       description,
@@ -63,6 +76,17 @@ export async function generateMetadata({ params }: MovieDetailPageProps): Promis
       description,
       images: [ogImage],
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 
@@ -74,7 +98,7 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
     notFound();
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://cinedot.vn';
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://cinedot.vn').replace(/\/+$/, '');
 
   // Format ISO 8601 duration e.g. 120 phút -> PT120M
   const durationMatch = movie.duration?.match(/\d+/);
@@ -89,10 +113,30 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
     image: [movie.posterUrl, movie.backdropUrl].filter(Boolean),
     description: movie.synopsis || undefined,
     dateCreated: movie.releaseDate || undefined,
+    datePublished: movie.releaseDate || undefined,
     genre: Array.isArray(movie.genre) ? movie.genre : undefined,
     duration: isoDuration,
+    contentRating: movie.ageRating || undefined,
     inLanguage: 'vi',
   };
+
+  if (movie.country) {
+    movieSchema.countryOfOrigin = {
+      '@type': 'Country',
+      name: movie.country,
+    };
+  }
+
+  if (movie.trailerUrl) {
+    movieSchema.trailer = {
+      '@type': 'VideoObject',
+      name: `Trailer chính thức ${movie.title}`,
+      description: `Trailer chính thức phim ${movie.title} tại cụm rạp CineDot`,
+      thumbnailUrl: movie.backdropUrl || movie.posterUrl,
+      embedUrl: movie.trailerUrl,
+      uploadDate: movie.releaseDate || undefined,
+    };
+  }
 
   if (movie.director) {
     movieSchema.director = {

@@ -23,7 +23,7 @@ export const HeroSlider: React.FC = () => {
   };
 
   const handleBookNow = () => {
-    router.push(`/movies/${featuredMovie.slug}#showtime-schedule`);
+    router.push(`/movies/${featuredMovie.slug}`);
   };
 
   return (

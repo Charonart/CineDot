@@ -44,7 +44,7 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
   const handleBookNow = (e: React.MouseEvent, movieSlug: string) => {
     e.stopPropagation();
     if (onClose) onClose();
-    router.push(`/movies/${movieSlug}#showtime-schedule`);
+    router.push(`/movies/${movieSlug}`);
   };
 
   const handleMovieClick = (movieSlug: string) => {
@@ -96,7 +96,7 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
 
         <div className="flex items-center gap-4">
           <Link
-            href={`/movies?category=${activeTab}`}
+            href={activeTab === 'coming-soon' ? '/movies/coming-soon' : '/movies/now-showing'}
             onClick={onClose}
             className="group inline-flex items-center gap-1.5 text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] transition-colors"
           >
