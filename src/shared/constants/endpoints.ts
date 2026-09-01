@@ -214,4 +214,10 @@ export const ENDPOINTS = {
     SEAT_TYPES: '/admin/seat-types',
     SEAT_TYPE_DETAIL: (id: string | number) => `/admin/seat-types/${id}`,
   },
+  // ── 9. SEO & Sitemap ──
+  SITEMAP: {
+    ALL: '/sitemap',
+    MOVIES: '/sitemap/movies',
+    CINEMAS: '/sitemap/cinemas',
+  },
 };

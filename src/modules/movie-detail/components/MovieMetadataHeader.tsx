@@ -63,7 +63,7 @@ export const MovieMetadataHeader: React.FC<MovieMetadataHeaderProps> = ({
         >
           <img
             src={movie.posterUrl}
-            alt={movie.title}
+            alt={`Poster phim ${movie.title}`}
             className="w-full h-full object-cover"
           />
 

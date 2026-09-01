@@ -10,20 +10,22 @@ import {
   submitMovieReview,
 } from '../services/movie-detail.service';
 
-export function useMovieDetail(slug: string) {
-  const [movie, setMovie] = useState<MovieDetail | null>(null);
-  const [cast, setCast] = useState<MovieCastMember[]>([]);
-  const [crew, setCrew] = useState<MovieCrewMember[]>([]);
+export function useMovieDetail(slug: string, initialMovie?: MovieDetail | null) {
+  const [movie, setMovie] = useState<MovieDetail | null>(initialMovie || null);
+  const [cast, setCast] = useState<MovieCastMember[]>(initialMovie?.castMembers || []);
+  const [crew, setCrew] = useState<MovieCrewMember[]>(initialMovie?.crewMembers || []);
   const [recommended, setRecommended] = useState<MovieCardItem[]>([]);
   const [reviews, setReviews] = useState<MovieReviewItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(!initialMovie);
 
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
-      setLoading(true);
+      if (!initialMovie) {
+        setLoading(true);
+      }
       try {
-        const movieData = await fetchMovieDetail(slug);
+        const movieData = initialMovie || (await fetchMovieDetail(slug));
 
         if (isMounted && movieData) {
           setMovie(movieData);
@@ -52,7 +54,7 @@ export function useMovieDetail(slug: string) {
     return () => {
       isMounted = false;
     };
-  }, [slug]);
+  }, [slug, initialMovie]);
 
   const handlePostReview = useCallback(async (rating: number, comment: string) => {
     if (!movie?.id) return { success: false, message: 'Phim không tồn tại' };

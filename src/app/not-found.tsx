@@ -1,7 +1,6 @@
-/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · theme: White Minimal · component: NotFound */
 import React from 'react';
 import Link from 'next/link';
-import { Film, Home, Clapperboard, Compass, ArrowRight } from 'lucide-react';
+import { Film, Home, Clapperboard, Compass } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -25,7 +24,7 @@ export default function NotFound() {
         {/* Messaging */}
         <div className="flex flex-col gap-2 max-w-md">
           <h1 className="text-xl sm:text-2xl font-black text-gray-950 tracking-tight leading-snug">
-            Suất Chiếu Này Chưa Được Khởi Chiếu
+            Nội Dung Này Không Tồn Tại Hoặc Đã Ngừng Chiếu
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed">
             Đường dẫn bạn đang tìm kiếm có thể đã bị dời đi, rạp đã thay đổi lịch chiếu hoặc liên kết không chính xác.
@@ -74,4 +73,3 @@ export default function NotFound() {
     </div>
   );
 }
-

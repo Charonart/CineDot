@@ -7,13 +7,15 @@ import { MovieMetadataHeader } from './MovieMetadataHeader';
 import { MovieOverviewSection } from './MovieOverviewSection';
 import { ShowtimeScheduleSection } from './ShowtimeScheduleSection';
 import { RecommendedSidebar } from './RecommendedSidebar';
+import { MovieDetail } from '../types/movie-detail.types';
 
 interface MovieDetailPageClientProps {
   slug: string;
+  initialMovie?: MovieDetail | null;
 }
 
-export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
-  const { movie, loading, recommended } = useMovieDetail(slug);
+export function MovieDetailPageClient({ slug, initialMovie }: MovieDetailPageClientProps) {
+  const { movie, loading, recommended } = useMovieDetail(slug, initialMovie);
 
   const scrollToSchedule = () => {
     const el = document.getElementById('showtime-schedule');

@@ -1,5 +1,8 @@
 import React from 'react';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { MovieDetailPageClient } from '@/modules/movie-detail/components/MovieDetailPageClient';
+import { fetchMovieDetail } from '@/modules/movie-detail/services/movie-detail.service';
 
 interface MovieDetailPageProps {
   params: Promise<{
@@ -7,31 +10,150 @@ interface MovieDetailPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: MovieDetailPageProps) {
-  try {
-    const resolvedParams = await params;
-    const slug = resolvedParams?.slug || '';
-    const formattedTitle = slug
-      ? slug
-          .split('-')
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' ')
-      : 'Chi Tiết Phim';
+export async function generateMetadata({ params }: MovieDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const movie = await fetchMovieDetail(slug);
 
+  if (!movie) {
     return {
-      title: `${formattedTitle} - CineDot Rạp Phim IMAX`,
-      description: `Xem lịch chiếu phim, mua vé và xem trailer bộ phim ${formattedTitle} tại hệ thống rạp CineDot.`,
-    };
-  } catch {
-    return {
-      title: 'Chi Tiết Phim - CineDot Rạp Phim IMAX',
+      title: 'Phim Không Tồn Tại - CineDot',
+      description: 'Bộ phim bạn đang tìm kiếm không tồn tại hoặc đã ngừng chiếu tại cụm rạp CineDot.',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
+
+  const title = `${movie.title} - Lịch chiếu & Đặt vé | CineDot`;
+  const description =
+    movie.synopsis && movie.synopsis.length > 10
+      ? movie.synopsis.length > 160
+        ? `${movie.synopsis.slice(0, 157)}...`
+        : movie.synopsis
+      : `Xem lịch chiếu phim, mua vé online và theo dõi trailer bộ phim ${movie.title} tại hệ thống rạp CineDot chuẩn quốc tế.`;
+
+  const ogImage = movie.backdropUrl || movie.posterUrl || '/assets/cinedot-og.jpg';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/movies/${movie.slug}`,
+    },
+    openGraph: {
+      type: 'video.movie',
+      locale: 'vi_VN',
+      url: `/movies/${movie.slug}`,
+      siteName: 'CineDot',
+      title,
+      description,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `Poster phim ${movie.title}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
+  };
 }
 
 export default async function MovieDetailPage({ params }: MovieDetailPageProps) {
-  const resolvedParams = await params;
-  const slug = resolvedParams?.slug || 'conan-movie-27';
+  const { slug } = await params;
+  const movie = await fetchMovieDetail(slug);
 
-  return <MovieDetailPageClient slug={slug} />;
+  if (!movie) {
+    notFound();
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://cinedot.vn';
+
+  // Format ISO 8601 duration e.g. 120 phút -> PT120M
+  const durationMatch = movie.duration?.match(/\d+/);
+  const isoDuration = durationMatch ? `PT${durationMatch[0]}M` : undefined;
+
+  const movieSchema: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': 'Movie',
+    name: movie.title,
+    alternateName: movie.originalTitle || undefined,
+    url: `${siteUrl}/movies/${movie.slug}`,
+    image: [movie.posterUrl, movie.backdropUrl].filter(Boolean),
+    description: movie.synopsis || undefined,
+    dateCreated: movie.releaseDate || undefined,
+    genre: Array.isArray(movie.genre) ? movie.genre : undefined,
+    duration: isoDuration,
+    inLanguage: 'vi',
+  };
+
+  if (movie.director) {
+    movieSchema.director = {
+      '@type': 'Person',
+      name: movie.director,
+    };
+  }
+
+  if (Array.isArray(movie.castMembers) && movie.castMembers.length > 0) {
+    movieSchema.actor = movie.castMembers.slice(0, 10).map((actor) => ({
+      '@type': 'Person',
+      name: actor.name,
+    }));
+  }
+
+  if (movie.rating > 0 && movie.voteCount > 0) {
+    movieSchema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: movie.rating,
+      reviewCount: movie.voteCount,
+      bestRating: 10,
+      worstRating: 1,
+    };
+  }
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Trang chủ',
+        item: siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Danh sách phim',
+        item: `${siteUrl}/movies`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: movie.title,
+        item: `${siteUrl}/movies/${movie.slug}`,
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(movieSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <MovieDetailPageClient slug={slug} initialMovie={movie} />
+    </>
+  );
 }

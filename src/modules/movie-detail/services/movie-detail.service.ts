@@ -97,6 +97,7 @@ export async function fetchMovieDetail(slug: string): Promise<MovieDetail | null
         rating: Number(m.rating || m.vote_average || 0),
         voteCount: Number(m.voteCount || m.vote_count || 0),
         status,
+        updated_at: m.updated_at || m.updatedAt || undefined,
       };
     }
   } catch {

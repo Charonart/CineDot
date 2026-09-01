@@ -96,4 +96,5 @@ export interface MovieDetail {
   rating: number;
   voteCount: number;
   status: 'NOW_SHOWING' | 'COMING_SOON';
+  updated_at?: string;
 }
