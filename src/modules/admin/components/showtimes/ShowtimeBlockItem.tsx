@@ -68,9 +68,9 @@ export function ShowtimeBlockItem({
     >
       {/* Outer Card Container */}
       <div
-        className={`w-full h-full flex rounded-md overflow-hidden transition-shadow ${
+        className={`w-full h-full flex rounded-md overflow-hidden transition-all ${
           showtime.isDraft
-            ? 'border-2 border-dashed border-purple-400 ring-2 ring-purple-400/30 shadow-md shadow-purple-900/30'
+            ? 'border-2 border-dashed border-[#7C6FE8] ring-2 ring-[#7C6FE8]/20 shadow-md shadow-[#7C6FE8]/10'
             : 'border border-slate-700/80 shadow-2xs hover:shadow-md'
         }`}
       >
@@ -79,7 +79,7 @@ export function ShowtimeBlockItem({
           style={{ width: `${(movieWidthPct / totalBlockWidthPct) * 100}%` }}
           className={`${
             showtime.isDraft
-              ? 'bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border-l-4 border-l-purple-400'
+              ? 'bg-slate-900 border-l-4 border-l-[#7C6FE8]'
               : 'bg-slate-900 border-l-4 border-l-[#7C6FE8]'
           } text-white p-1.5 flex flex-col justify-between overflow-hidden relative`}
           onClick={() => onView(showtime)}
@@ -100,8 +100,8 @@ export function ShowtimeBlockItem({
 
             <div className="flex items-center gap-1 shrink-0">
               {showtime.isDraft ? (
-                <span className="px-1 py-0.2 rounded bg-purple-900/90 text-amber-300 font-bold text-[8px] border border-purple-400/60 shadow-2xs">
-                  ✨ AI
+                <span className="px-1.5 py-0.2 rounded bg-[#7C6FE8]/30 text-[#D8D4F7] font-bold text-[8.5px] border border-[#7C6FE8]/50 shadow-2xs">
+                  AI Nháp
                 </span>
               ) : (
                 <span className="px-1 py-0.2 rounded bg-slate-800 text-[#7C6FE8] font-semibold text-[9px] border border-slate-700">

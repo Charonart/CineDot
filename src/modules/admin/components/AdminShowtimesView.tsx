@@ -83,6 +83,8 @@ export function AdminShowtimesView() {
     removeDraftShowtime,
     clearDraft,
     applyDraft,
+    chatHistory: aiChatHistory,
+    clearChat,
     updateConfig: updateAiConfig,
     testConnection: testAiConnection,
     isTestingConnection,
@@ -259,9 +261,29 @@ export function AdminShowtimesView() {
     }
   };
 
-  // Effective Showtimes: Merge real showtimes with Draft showtimes when in Draft Preview mode
+  // Handle Apply AI Draft Showtimes to DB & Reload Grid
+  const handleApplyDraft = async (cleanExistingDate: boolean = true) => {
+    try {
+      const res = await applyDraft(cleanExistingDate);
+      await refetchShowtimes();
+      setIsAiModalOpen(false);
+      setToastMsg(`Áp dụng thành công ${res.showtimes_count} suất chiếu và khởi tạo ${res.seats_count} ghế!`);
+      setTimeout(() => setToastMsg(''), 4000);
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } }; message?: string };
+      alert(errObj?.response?.data?.message || errObj?.message || 'Lỗi khi áp dụng bản nháp lịch chiếu.');
+    }
+  };
+
+  // Effective Showtimes: In Draft Preview mode, display the Draft showtimes + only booked/locked showtimes from DB
   const effectiveShowtimes = useMemo(() => {
     if (!hasDraft || !draftData) return showtimes;
+
+    // Lọc các suất cũ trong DB: Chỉ giữ lại các suất đã có vé mua (bookedSeats > 0) hoặc bị khóa cứng
+    // Các suất cũ chưa bán vé sẽ được thay thế hoàn toàn bởi bản nháp mới để tránh bị chồng chất 2 lớp
+    const lockedOrBookedDbShowtimes = showtimes.filter(
+      (st) => (st.bookedSeats && st.bookedSeats > 0) || st.isLocked
+    );
 
     const draftGridItems: AdminShowtimeGridItem[] = draftData.draft_showtimes.map((dst, idx) => {
       const timePartsStart = dst.showtime_start.split(' ')[1] || '09:00:00';
@@ -292,17 +314,17 @@ export function AdminShowtimesView() {
         startMinutes: startM,
         endMinutes: endM,
         basePrice: dst.base_price || 100000,
-        bookedSeats: 0,
+        bookedSeats: dst.booked_seats || 0,
         totalSeats: targetRoom?.capacity || 100,
         occupancyRate: 0,
-        isLocked: false,
+        isLocked: !!dst.is_locked,
         status: 'OPEN',
         isDraft: true,
         tempId: dst.temp_id,
       };
     });
 
-    return [...showtimes, ...draftGridItems];
+    return [...lockedOrBookedDbShowtimes, ...draftGridItems];
   }, [showtimes, hasDraft, draftData, rooms, movies, selectedCinemaId]);
 
   // Handle Delete Submit
@@ -395,18 +417,6 @@ export function AdminShowtimesView() {
     } catch (err: unknown) {
       const errObj = err as { response?: { data?: { message?: string } }; message?: string };
       alert(errObj?.response?.data?.message || errObj?.message || 'Lỗi khi dời suất chiếu.');
-    }
-  };
-
-  // Handle Apply Draft
-  const handleApplyDraft = async (cleanExistingDate?: boolean) => {
-    try {
-      const res = await applyDraft(cleanExistingDate);
-      await refetchShowtimes();
-      setToastMsg(`Áp dụng thành công ${res.showtimes_count} suất chiếu vào hệ thống!`);
-      setTimeout(() => setToastMsg(''), 5000);
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi lưu bản nháp vào hệ thống.');
     }
   };
 
@@ -564,7 +574,7 @@ export function AdminShowtimesView() {
         }}
       />
 
-      {/* 6. AI Schedule Generator Modal (3 Tabs) */}
+      {/* 6. AI Schedule Generator Studio (Copilot Chat, Scope, Presets, Engine) */}
       <AiScheduleModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
@@ -582,6 +592,14 @@ export function AdminShowtimesView() {
         onTestConnection={testAiConnection}
         isTestingConnection={isTestingConnection}
         testResult={aiTestResult}
+        chatHistory={aiChatHistory}
+        onClearChat={clearChat}
+        hasDraft={hasDraft}
+        draftData={draftData}
+        onApplyDraft={handleApplyDraft}
+        isApplyingDraft={isApplyingDraft}
+        onRemoveDraftShowtime={removeDraftShowtime}
+        onClearDraft={clearDraft}
       />
     </div>
   );

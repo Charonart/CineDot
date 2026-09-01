@@ -91,6 +91,8 @@ export interface AiDraftShowtimeItem {
   base_price: number;
   buffer_minutes: number;
   is_prime_time: boolean;
+  booked_seats?: number;
+  is_locked?: boolean;
 }
 
 export interface AiConflictItem {
@@ -132,6 +134,18 @@ export interface AiDraftSummary {
   strategy_explanation: string;
 }
 
+export interface AiChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  draftCount?: number;
+  draftSummary?: AiDraftSummary;
+  showtimes?: AiDraftShowtimeItem[];
+  validation?: AiDraftValidationResult;
+  suggestedFollowups?: string[];
+}
+
 export interface GenerateAiDraftRequest {
   cinema_id: number;
   target_date: string;
@@ -142,6 +156,9 @@ export interface GenerateAiDraftRequest {
   selected_room_ids?: number[];
   schedule_mode?: 'smart_fill' | 'optimize' | 'replace_all';
   clean_existing_date?: boolean;
+  current_draft_showtimes?: AiDraftShowtimeItem[];
+  chat_history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  time_range?: { start?: string; end?: string };
   override_config?: {
     ai_provider?: string;
     ai_api_key?: string;
@@ -174,3 +191,4 @@ export interface ApplyAiDraftResponse {
   showtimes_count: number;
   seats_count: number;
 }
+

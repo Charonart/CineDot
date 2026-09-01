@@ -12,6 +12,7 @@ import {
   GenerateAiDraftResponse,
   AiDraftShowtimeItem,
   ApplyAiDraftResponse,
+  AiChatMessage,
 } from '../types/adminAiSchedule.types';
 
 export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: string) {
@@ -27,6 +28,9 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
   const [draftData, setDraftData] = useState<GenerateAiDraftResponse | null>(null);
   const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
   const [isApplyingDraft, setIsApplyingDraft] = useState(false);
+
+  // Multi-Turn Copilot Chat History
+  const [chatHistory, setChatHistory] = useState<AiChatMessage[]>([]);
 
   // Test Connection State
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -64,6 +68,11 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
     fetchStrategies();
   }, [selectedCinemaId, fetchConfig, fetchStrategies]);
 
+  // Clear chat history & draft when date or cinema changes
+  useEffect(() => {
+    setChatHistory([]);
+  }, [selectedDateKey, selectedCinemaId]);
+
   // Update Config Action
   const updateConfig = async (params: UpdateAiScheduleConfigRequest): Promise<AiScheduleConfigDTO> => {
     const updated = await adminAiScheduleService.updateConfig(params);
@@ -84,13 +93,63 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
     }
   };
 
-  // Generate Draft Action
+  // Generate / Refine Draft Action
   const generateDraft = async (params: GenerateAiDraftRequest): Promise<GenerateAiDraftResponse> => {
     setIsGeneratingDraft(true);
+
+    const userMessageContent = params.prompt || (params.strategy_id ? `Chiến lược: ${params.strategy_id}` : 'Sinh lịch chiếu');
+    const userMsg: AiChatMessage = {
+      id: `msg_user_${Date.now()}`,
+      role: 'user',
+      content: userMessageContent,
+      timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setChatHistory((prev) => [...prev, userMsg]);
+
     try {
-      const res = await adminAiScheduleService.generateDraft(params);
+      const payload: GenerateAiDraftRequest = {
+        ...params,
+        current_draft_showtimes: params.current_draft_showtimes || (draftData ? draftData.draft_showtimes : undefined),
+        chat_history: chatHistory.map((m) => ({ role: m.role, content: m.content })),
+      };
+
+      const res = await adminAiScheduleService.generateDraft(payload);
       setDraftData(res);
+
+      const suggestedFollowups: string[] = [];
+      if (res.validation?.conflicts && res.validation.conflicts.length > 0) {
+        suggestedFollowups.push('Khắc phục xung đột thời gian');
+      }
+      if (res.summary?.prime_time_coverage_percent && res.summary.prime_time_coverage_percent < 70) {
+        suggestedFollowups.push('Tăng thêm suất chiếu vào Khung Giờ Vàng (18:00 - 22:30)');
+      }
+      suggestedFollowups.push('Dời các suất phòng 1 lùi 15 phút');
+      suggestedFollowups.push('Thêm 1 suất chiếu đêm muộn sau 22:30');
+
+      const assistantMsg: AiChatMessage = {
+        id: `msg_assistant_${Date.now()}`,
+        role: 'assistant',
+        content: res.summary.strategy_explanation || 'Đã cập nhật bản nháp lịch chiếu thành công.',
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        draftCount: res.draft_showtimes.length,
+        draftSummary: res.summary,
+        showtimes: res.draft_showtimes,
+        validation: res.validation,
+        suggestedFollowups: suggestedFollowups.slice(0, 3),
+      };
+
+      setChatHistory((prev) => [...prev, assistantMsg]);
       return res;
+    } catch (err) {
+      const errorMsg: AiChatMessage = {
+        id: `msg_err_${Date.now()}`,
+        role: 'assistant',
+        content: 'Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng kiểm tra lại kết nối hoặc câu lệnh.',
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      };
+      setChatHistory((prev) => [...prev, errorMsg]);
+      throw err;
     } finally {
       setIsGeneratingDraft(false);
     }
@@ -131,6 +190,10 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
   // Clear / Discard Draft
   const clearDraft = () => {
     setDraftData(null);
+  };
+
+  const clearChat = () => {
+    setChatHistory([]);
   };
 
   // Apply Draft Action
@@ -175,8 +238,12 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
     clearDraft,
     applyDraft,
 
+    chatHistory,
+    clearChat,
+
     isTestingConnection,
     testResult,
     testConnection,
   };
 }
+

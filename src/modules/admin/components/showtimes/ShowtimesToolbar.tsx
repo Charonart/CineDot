@@ -190,15 +190,15 @@ export function ShowtimesToolbar({
             </button>
           </div>
 
-          {/* AI Schedule Generator Action */}
+          {/* CineAI Studio Trigger Action */}
           {onOpenAiModal && (
             <button
               onClick={onOpenAiModal}
-              className="px-3 py-1 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-purple-500/20 transition-all cursor-pointer"
-              title="Mở studio AI tạo suất chiếu tự động"
+              className="px-3 py-1 rounded-md bg-[#EEECFB] hover:bg-[#D8D4F7] text-[#7C6FE8] hover:text-[#685bc7] border border-[#D8D4F7] font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer group"
+              title="Mở CineAI Showtime Studio để tạo ma trận suất chiếu tự động"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>✨ AI Tạo lịch</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#7C6FE8] group-hover:rotate-12 transition-transform" />
+              <span>Studio AI Tạo Lịch</span>
             </button>
           )}
 
