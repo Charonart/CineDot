@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Ticket, Flame, Sparkles, Clock, Film, ChevronRight } from 'lucide-react';
+import { Play, Ticket, Clock, Film, ChevronRight } from 'lucide-react';
 import { MovieCardItem } from '../types/home.types';
 import { MOCK_MOVIES, MOCK_COMING_SOON_MOVIES } from '../mocks/mockHomeData';
 import { useTrailerStore } from '@/shared/store/trailerStore';
@@ -15,7 +15,7 @@ interface MovieTabsSectionProps {
   isLoading?: boolean;
 }
 
-type TabType = 'all-now' | 'hot' | 'imax' | 'coming-soon';
+type TabType = 'all-now' | 'coming-soon';
 
 export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLoading }) => {
   const router = useRouter();
@@ -28,8 +28,6 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
 
   const filteredMovies = activeMovies.filter((m) => {
     if (activeTab === 'coming-soon') return m.status === 'coming-soon';
-    if (activeTab === 'hot') return m.isHot || m.rating >= 8.5 || m.status === 'now-showing';
-    if (activeTab === 'imax') return m.formatBadge?.includes('IMAX') || m.formatBadge?.includes('4DX') || m.formatBadge?.includes('3D') || m.status === 'now-showing';
     return m.status === 'now-showing';
   });
 
@@ -55,15 +53,13 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'all-now', label: 'Đang Chiếu', icon: <Film className="w-3.5 h-3.5" /> },
-    { id: 'hot', label: 'Phim Hot', icon: <Flame className="w-3.5 h-3.5 text-amber-500" /> },
-    { id: 'imax', label: 'IMAX / 4DX', icon: <Sparkles className="w-3.5 h-3.5 text-[#7C6FE8]" /> },
     { id: 'coming-soon', label: 'Sắp Chiếu', icon: <Clock className="w-3.5 h-3.5" /> },
   ];
 
   const viewMoreLink = activeTab === 'coming-soon' ? '/movies?tab=coming-soon' : '/movies?tab=now-showing';
 
   return (
-    <section className="relative w-full py-16 sm:py-20 bg-[#FAFAFB]">
+    <section className="relative z-10 w-full py-16 sm:py-20 bg-[#FAFAFB]">
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-8">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">

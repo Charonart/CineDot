@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Film, MapPin, Calendar, Clock, Loader2, Play, Ticket, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -31,6 +31,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   const router = useRouter();
   const openTrailer = useTrailerStore((state) => state.openTrailer);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const dockRef = useRef<HTMLDivElement>(null);
 
   // Master lists
   const [allMoviesList, setAllMoviesList] = useState<QuickMovieOption[]>([]);
@@ -60,6 +61,19 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
 
   // Active dropdown state
   const [openDropdown, setOpenDropdown] = useState<'movie' | 'cinema' | 'date' | 'time' | null>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // 1. Initial Load: Fetch Both Movies and Cinemas
   useEffect(() => {
@@ -406,7 +420,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
   };
 
   return (
-    <section className="relative w-full overflow-hidden pt-24 pb-12 sm:pt-28 sm:pb-16 bg-[#FAFAFB]">
+    <section className="relative z-20 w-full pt-24 pb-12 sm:pt-28 sm:pb-16 bg-[#FAFAFB]">
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-8 flex flex-col gap-6 lg:gap-8">
         {/* TOP: Cinematic Marquee Banner */}
         <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[2.4/1] max-h-[480px] rounded-3xl overflow-hidden shadow-[0_16px_45px_rgba(0,0,0,0.18)] border border-gray-200/50 group bg-slate-950">
@@ -514,7 +528,7 @@ export const HeroPromoCarousel: React.FC<HeroPromoCarouselProps> = ({ banners, o
         </div>
 
         {/* BOTTOM: 1-Click Floating Quick Booking Dock */}
-        <div id="quick-booking-dock" className="relative z-30 w-full">
+        <div id="quick-booking-dock" ref={dockRef} className="relative z-30 w-full">
           <form
             onSubmit={handleSubmit}
             className="glass-dock rounded-2xl lg:rounded-full p-2.5 sm:p-3 flex flex-col lg:flex-row items-center justify-between gap-3 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-gray-200/90 bg-white/95 backdrop-blur-xl"

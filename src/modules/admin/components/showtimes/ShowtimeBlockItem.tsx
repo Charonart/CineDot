@@ -171,29 +171,44 @@ export function ShowtimeBlockItem({
       {/* Hover HUD Popover */}
       {isHovered && (
         <div
-          className={`absolute left-0 z-50 w-64 p-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-slate-700 pointer-events-auto flex flex-col gap-2 ${
+          className={`absolute left-0 z-50 w-72 p-3 bg-slate-950 text-white rounded-xl shadow-2xl border border-slate-700 pointer-events-auto flex flex-col gap-2.5 overflow-hidden animate-in fade-in duration-100 ${
             rowIndex === 0 ? 'top-full mt-2' : 'bottom-full mb-2'
           }`}
         >
-          <div className="flex items-start justify-between gap-2 border-b border-slate-800 pb-2">
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-xs text-white leading-snug truncate">
+          {/* Movie Backdrop Thumbnail Banner */}
+          {(showtime.movieBanner || showtime.moviePoster) && (
+            <div className="relative w-full h-16 rounded-lg overflow-hidden bg-slate-900 border border-slate-800 shrink-0">
+              <img
+                src={showtime.movieBanner || showtime.moviePoster}
+                alt={showtime.movieTitle}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&auto=format&fit=crop&q=80';
+                }}
+                className="w-full h-full object-cover opacity-75"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+              <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between z-10">
+                <span className="font-bold text-xs text-white truncate drop-shadow-md">
                   {showtime.movieTitle}
                 </span>
-                {isDraft && (
-                  <span className="px-1.5 py-0.2 rounded bg-[#7C6FE8] text-white font-bold text-[8.5px] uppercase">
-                    AI Nháp
-                  </span>
-                )}
+                <span className="px-1.5 py-0.2 rounded bg-slate-900/90 text-white font-bold text-[9px] border border-white/20 shrink-0">
+                  {showtime.movieAgeRating || 'P'}
+                </span>
               </div>
-              <span className="text-[10px] text-slate-400">
-                {showtime.roomName} • <span className="text-[#7C6FE8]">{showtime.roomType}</span>
+            </div>
+          )}
+
+          <div className="flex items-start justify-between gap-2 border-b border-slate-800/80 pb-1.5">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11px] text-slate-300 font-medium">
+                {showtime.roomName} • <span className="text-[#7C6FE8] font-semibold">{showtime.roomType}</span>
               </span>
             </div>
-            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-white font-semibold text-[9px] border border-slate-700 shrink-0">
-              {showtime.movieAgeRating}
-            </span>
+            {isDraft && (
+              <span className="px-1.5 py-0.2 rounded bg-[#7C6FE8] text-white font-bold text-[8.5px] uppercase shrink-0">
+                AI Nháp
+              </span>
+            )}
           </div>
 
           {/* Metadata Grid */}

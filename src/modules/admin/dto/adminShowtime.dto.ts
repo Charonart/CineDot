@@ -11,6 +11,12 @@ export interface AdminShowtimeMovieDTO {
   movie_id: number;
   title: string;
   poster_url?: string;
+  poster_path?: string;
+  poster?: string;
+  backdrop_path?: string;
+  backdrop_url?: string;
+  banner_url?: string;
+  banner?: string;
   age_rating?: string;
   duration?: number;
   genres?: Array<{ genre_id: number; name: string }>;

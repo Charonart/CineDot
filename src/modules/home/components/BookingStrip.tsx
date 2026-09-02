@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Film, MapPin, Calendar, Clock, Loader2 } from 'lucide-react';
@@ -26,6 +26,7 @@ interface BookingStripProps {
 
 export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const router = useRouter();
+  const dockRef = useRef<HTMLFormElement>(null);
   const [allMoviesList, setAllMoviesList] = useState<QuickMovieOption[]>([]);
   const [allCinemasList, setAllCinemasList] = useState<HomeCinemaOption[]>([]);
 
@@ -48,6 +49,19 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
   const [loadingTimes, setLoadingTimes] = useState(false);
 
   const [openDropdown, setOpenDropdown] = useState<'movie' | 'cinema' | 'date' | 'time' | null>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -364,6 +378,7 @@ export const BookingStrip: React.FC<BookingStripProps> = ({ onQuickBook }) => {
 
   return (
     <form
+      ref={dockRef}
       onSubmit={handleSubmit}
       className="glass-dock rounded-2xl lg:rounded-full p-3 sm:p-4 flex flex-col lg:flex-row items-center justify-between gap-4 transition-all"
     >

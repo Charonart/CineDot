@@ -52,8 +52,8 @@ interface AiScheduleModalProps {
   movies: AdminMovieOption[];
   rooms: AdminRoomOption[];
   config: AiScheduleConfigDTO | null;
-  strategies: AiStrategyOption[];
-  isLoadingStrategies: boolean;
+  strategies?: AiStrategyOption[];
+  isLoadingStrategies?: boolean;
   isGeneratingDraft: boolean;
   onGenerateDraft: (params: GenerateAiDraftRequest) => Promise<any>;
   onUpdateConfig: (params: UpdateAiScheduleConfigRequest) => Promise<any>;
@@ -71,11 +71,14 @@ interface AiScheduleModalProps {
 }
 
 const CLEAN_PROMPT_SUGGESTIONS = [
+  'Lập lịch chiếu tối ưu cả ngày cho tất cả các phòng',
   'Kéo toàn bộ suất sát nhau theo đúng 15 phút dọn phòng',
   'Ưu tiên phim bom tấn vào phòng lớn nhất và khung giờ vàng 18:00 - 22:30',
-  'Giãn cách giờ bắt đầu giữa các phòng tối thiểu 15 phút để chống kẹt sảnh',
-  'Đẩy các phim hoạt hình và thiếu nhi lên các suất sáng trước 16:00',
+  'Đẩy các phim hoạt hình và gia đình lên các suất sáng trước 16:00',
   'Xếp các phim hành động và 18+ vào các suất đêm muộn sau 21:30',
+  'Dời suất chiếu lúc 14:00 ở Phòng 1 sang 14:30',
+  'Xóa 1 suất chiếu buổi sáng ở Phòng 1',
+  'Thêm 1 suất chiếu bom tấn lúc 20:00 vào Phòng 1',
 ];
 
 const POPULAR_PROVIDERS = [
@@ -125,8 +128,8 @@ export function AiScheduleModal({
   movies,
   rooms,
   config,
-  strategies,
-  isLoadingStrategies,
+  strategies = [],
+  isLoadingStrategies = false,
   isGeneratingDraft,
   onGenerateDraft,
   onUpdateConfig,
@@ -143,13 +146,12 @@ export function AiScheduleModal({
   onClearDraft,
 }: AiScheduleModalProps) {
   // Navigation & Sub-drawer state
-  const [activeTab, setActiveTab] = useState<'copilot' | 'presets' | 'config'>('copilot');
+  const [activeTab, setActiveTab] = useState<'copilot' | 'config'>('copilot');
   const [isScopePopoverOpen, setIsScopePopoverOpen] = useState(false);
   const [scopeType, setScopeType] = useState<'rooms' | 'movies' | 'time' | null>(null);
   const [expandedTraceMsgId, setExpandedTraceMsgId] = useState<string | null>(null);
 
   // Strategy & Mode selection
-  const [selectedStrategyId, setSelectedStrategyId] = useState('prime_time_boost');
   const [targetDate, setTargetDate] = useState(selectedDateKey);
   const [scheduleMode, setScheduleMode] = useState<'smart_fill' | 'optimize' | 'replace_all'>('smart_fill');
   const [refineMode, setRefineMode] = useState<'refine' | 'new'>(hasDraft ? 'refine' : 'new');
@@ -258,28 +260,6 @@ export function AiScheduleModal({
     opening_time: openingTime || undefined,
     closing_time: closingTime || undefined,
   });
-
-  // Handle Preset Submit
-  const handleGeneratePreset = async () => {
-    if (!selectedCinemaId) return;
-    try {
-      await onGenerateDraft({
-        cinema_id: selectedCinemaId,
-        target_date: targetDate,
-        mode: 'preset',
-        strategy_id: selectedStrategyId,
-        selected_movie_ids: selectedMovieIds.length > 0 ? selectedMovieIds : undefined,
-        selected_room_ids: selectedRoomIds.length > 0 ? selectedRoomIds : undefined,
-        schedule_mode: scheduleMode,
-        clean_existing_date: scheduleMode === 'replace_all',
-        time_range: getTimeRangeObject(),
-        override_config: getActiveOverrideConfig(),
-      });
-      setActiveTab('copilot');
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi sinh lịch chiếu theo chiến lược.');
-    }
-  };
 
   // Handle Prompt Submit
   const handleGeneratePrompt = async (customText?: string) => {
@@ -404,19 +384,6 @@ export function AiScheduleModal({
               title="Cài đặt Engine & API Key"
             >
               <Settings className="w-4 h-4" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab(activeTab === 'presets' ? 'copilot' : 'presets')}
-              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === 'presets'
-                  ? 'bg-[#7C6FE8] text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-              title="Chiến lược mẫu"
-            >
-              <Zap className="w-4 h-4" />
             </button>
 
             <button
@@ -972,76 +939,6 @@ export function AiScheduleModal({
                 <span>Gửi</span>
               </button>
             </form>
-          </div>
-        )}
-
-        {/* ══════════ PRESET STRATEGIES VIEW ══════════ */}
-        {activeTab === 'presets' && (
-          <div className="p-5 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-              <span className="font-bold text-slate-900">Chiến Lược Mẫu Tối Ưu</span>
-              <button
-                type="button"
-                onClick={() => setActiveTab('copilot')}
-                className="text-[#7C6FE8] font-semibold hover:underline cursor-pointer"
-              >
-                Quay lại Copilot
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2.5">
-              {strategies.map((st) => {
-                const isSelected = selectedStrategyId === st.id;
-                return (
-                  <div
-                    key={st.id}
-                    onClick={() => setSelectedStrategyId(st.id)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-[#7C6FE8] bg-[#EEECFB]/40 ring-1 ring-[#7C6FE8]'
-                        : 'border-slate-200 bg-white hover:bg-slate-50'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-slate-900">{st.name}</span>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                          {st.badge}
-                        </span>
-                      </div>
-                      <p className="text-slate-600 text-[11px] leading-relaxed mb-2">
-                        {st.description}
-                      </p>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-100 text-[10.5px] text-slate-500 flex items-center justify-between">
-                      <span>Phù hợp: {st.recommended_for}</span>
-                      <div
-                        className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                          isSelected ? 'border-[#7C6FE8] bg-[#7C6FE8]' : 'border-slate-300'
-                        }`}
-                      >
-                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGeneratePreset}
-              disabled={isGeneratingDraft}
-              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50 mt-2"
-            >
-              {isGeneratingDraft ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Zap className="w-3.5 h-3.5 text-[#7C6FE8]" />
-              )}
-              <span>Sinh Bản Nháp Theo Chiến Lược Đã Chọn</span>
-            </button>
           </div>
         )}
 

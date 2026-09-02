@@ -97,7 +97,7 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
   const generateDraft = async (params: GenerateAiDraftRequest): Promise<GenerateAiDraftResponse> => {
     setIsGeneratingDraft(true);
 
-    const userMessageContent = params.prompt || (params.strategy_id ? `Chiến lược: ${params.strategy_id}` : 'Sinh lịch chiếu');
+    const userMessageContent = params.prompt || 'Lập lịch chiếu AI';
     const userMsg: AiChatMessage = {
       id: `msg_user_${Date.now()}`,
       role: 'user',
@@ -110,6 +110,7 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
     try {
       const payload: GenerateAiDraftRequest = {
         ...params,
+        mode: 'prompt',
         current_draft_showtimes: params.current_draft_showtimes || (draftData ? draftData.draft_showtimes : undefined),
         chat_history: chatHistory.map((m) => ({ role: m.role, content: m.content })),
       };
@@ -188,11 +189,12 @@ export function useAdminAiSchedule(selectedCinemaId?: number, selectedDateKey?: 
 
       setChatHistory((prev) => [...prev, assistantMsg]);
       return res;
-    } catch (err) {
+    } catch (err: any) {
+      const serverErrMsg = err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi xử lý yêu cầu AI.';
       const errorMsg: AiChatMessage = {
         id: `msg_err_${Date.now()}`,
         role: 'assistant',
-        content: 'Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng kiểm tra lại kết nối hoặc câu lệnh.',
+        content: `⚠️ ${serverErrMsg}`,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       };
       setChatHistory((prev) => [...prev, errorMsg]);

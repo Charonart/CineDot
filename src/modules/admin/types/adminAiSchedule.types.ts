@@ -72,8 +72,9 @@ export interface AiStrategyOption {
   name: string;
   description: string;
   icon: string;
-  badge: string;
-  recommended_for: string;
+  badge?: string;
+  prompt?: string;
+  recommended_for?: string;
 }
 
 export interface AiDraftShowtimeItem {
@@ -179,7 +180,7 @@ export interface AiChatMessage {
 export interface GenerateAiDraftRequest {
   cinema_id: number;
   target_date: string;
-  mode: 'preset' | 'prompt';
+  mode?: 'preset' | 'prompt';
   strategy_id?: string;
   prompt?: string;
   selected_movie_ids?: number[];

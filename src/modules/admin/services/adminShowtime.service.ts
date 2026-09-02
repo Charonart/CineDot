@@ -1,3 +1,4 @@
+import { imageHelper } from '@/shared/utils/imageHelper';
 import { apiClient } from '@/shared/lib/apiClient';
 import { ApiResponse } from '@/shared/types/api.types';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
@@ -151,16 +152,40 @@ export const adminShowtimeService = {
     const rawData = res.data?.data;
     const list = Array.isArray(rawData) ? rawData : Array.isArray(rawData?.data) ? rawData.data : [];
 
-    return list.map((m: any) => ({
-      id: Number(m.movie_id || m.id),
-      title: m.title || 'Phim Chiếu Rạp',
-      posterUrl: m.poster_url || '',
-      bannerUrl: m.banner_url || m.banner || m.backdrop_url || m.poster_url || '',
-      status: m.status || (m.is_showing ? 'NOW_SHOWING' : 'COMING_SOON'),
-      releaseDate: m.release_date || '',
-      duration: Number(m.duration || 120),
-      ageRating: m.age_rating || 'P',
-      genres: Array.isArray(m.genres) ? m.genres.map((g: any) => g.name || g.genre_name || String(g)) : [],
-    }));
+    return list.map((m: any) => {
+      const rawPoster = m.poster_path || m.poster_url || m.posterUrl || m.poster || '';
+      const rawBackdrop = m.backdrop_path || m.backdrop_url || m.backdropUrl || m.banner_url || m.banner || rawPoster;
+      
+      const rawStatus = (m.status || (m.is_showing ? 'NOW_SHOWING' : 'NOW_SHOWING')).toLowerCase();
+      let status: 'NOW_SHOWING' | 'COMING_SOON' | 'STOPPED' = 'NOW_SHOWING';
+      if (rawStatus.includes('coming') || rawStatus.includes('upcoming')) {
+        status = 'COMING_SOON';
+      } else if (rawStatus.includes('stop') || rawStatus.includes('end')) {
+        status = 'STOPPED';
+      }
+
+      const genresList: string[] = [];
+      if (Array.isArray(m.genres)) {
+        m.genres.forEach((g: any) => {
+          if (typeof g === 'string') genresList.push(g);
+          else if (g?.name) genresList.push(g.name);
+          else if (g?.genre_name) genresList.push(g.genre_name);
+        });
+      } else if (Array.isArray(m.genre)) {
+        genresList.push(...m.genre);
+      }
+
+      return {
+        id: Number(m.movie_id || m.id),
+        title: m.title || 'Phim Chiếu Rạp',
+        posterUrl: imageHelper.getPosterUrl(rawPoster, 'md'),
+        bannerUrl: imageHelper.getBackdropUrl(rawBackdrop, 'lg'),
+        status,
+        releaseDate: m.release_date || m.releaseDate || '',
+        duration: Number(m.duration_minutes || m.duration || 120),
+        ageRating: m.age_rating || m.ageRating || 'P',
+        genres: genresList.length > 0 ? genresList : ['Phim rạp'],
+      };
+    });
   },
 };

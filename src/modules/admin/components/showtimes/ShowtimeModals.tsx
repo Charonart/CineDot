@@ -21,6 +21,8 @@ import {
   AdminRoomOption,
   AdminShowtimeGridItem,
 } from '../../types/adminShowtime.types';
+import { AdminBackdropBanner } from '../ui/AdminBackdropBanner';
+import { imageHelper } from '@/shared/utils/imageHelper';
 
 function timeToMinutes(timeStr: string): number {
   const [h, m] = timeStr.split(':').map(Number);
@@ -233,14 +235,53 @@ export function ShowtimeModals({
                     <span>1. Chọn bộ phim</span>
                   </label>
                   {selectedMovie && (
-                    <span className="text-[11px] text-[#7C6FE8] font-medium bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                    <span className="text-[11px] text-[#7C6FE8] font-semibold bg-purple-50 px-2.5 py-0.5 rounded-md border border-purple-100">
                       {selectedMovie.title} ({selectedMovie.duration}p • {selectedMovie.ageRating})
                     </span>
                   )}
                 </div>
 
+                {/* Selected Movie Banner Preview (If selected) */}
+                {selectedMovie && (
+                  <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 shadow-xs flex items-end p-3">
+                    <img
+                      src={selectedMovie.bannerUrl || selectedMovie.posterUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80'}
+                      alt={selectedMovie.title}
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80';
+                      }}
+                      className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                    <div className="relative z-10 flex items-center gap-3 w-full">
+                      <img
+                        src={imageHelper.getPosterUrl(selectedMovie.posterUrl, 'sm')}
+                        alt={selectedMovie.title}
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&auto=format&fit=crop&q=80';
+                        }}
+                        className="w-9 h-13 object-cover rounded-md shadow-md border border-white/20 shrink-0"
+                      />
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-white font-bold text-xs truncate leading-tight">
+                          {selectedMovie.title}
+                        </span>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-300 mt-0.5">
+                          <span className="px-1.5 py-0.2 rounded bg-white/20 text-white font-bold text-[9.5px]">
+                            {selectedMovie.ageRating}
+                          </span>
+                          <span className="font-mono text-purple-200">{selectedMovie.duration} phút</span>
+                          <span className="text-slate-400 truncate">
+                            {selectedMovie.genres?.slice(0, 2).join(', ')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Movie Search Bar */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-gray-200">
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-gray-200 focus-within:border-[#7C6FE8] focus-within:ring-1 focus-within:ring-[#7C6FE8]/20 transition-all">
                   <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <input
                     type="text"
@@ -264,6 +305,7 @@ export function ShowtimeModals({
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto p-1 bg-slate-50/50 rounded-lg border border-gray-200">
                   {modalFilteredMovies.map((m) => {
                     const isSelected = (addMovieId || movies[0]?.id) === m.id;
+                    const posterSrc = imageHelper.getPosterUrl(m.posterUrl, 'sm');
                     return (
                       <div
                         key={m.id}
@@ -274,17 +316,14 @@ export function ShowtimeModals({
                             : 'bg-white text-slate-800 border-gray-200 hover:border-purple-300'
                         }`}
                       >
-                        {m.posterUrl ? (
-                          <img
-                            src={m.posterUrl}
-                            alt={m.title}
-                            className="w-7 h-10 object-cover rounded shrink-0"
-                          />
-                        ) : (
-                          <div className="w-7 h-10 rounded bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-[9px] shrink-0">
-                            CD
-                          </div>
-                        )}
+                        <img
+                          src={posterSrc}
+                          alt={m.title}
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&auto=format&fit=crop&q=80';
+                          }}
+                          className="w-7 h-10 object-cover rounded shrink-0 bg-slate-100 shadow-2xs"
+                        />
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className={`font-semibold text-[11px] truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                             {m.title}
@@ -659,60 +698,82 @@ export function ShowtimeModals({
       {viewingShowtime && (
         <div
           onClick={onCloseViewModal}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs font-sans"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans animate-in fade-in"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3.5 shadow-xl relative"
+            className="w-full max-w-lg bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-4 shadow-2xl relative max-h-[90vh] overflow-y-auto"
           >
-            {/* Header */}
+            {/* Movie Backdrop Banner */}
+            <AdminBackdropBanner
+              src={viewingShowtime.movieBanner || viewingShowtime.moviePoster}
+              alt={viewingShowtime.movieTitle}
+              aspectRatio="custom"
+              heightClass="h-36 sm:h-44"
+              showOverlay={true}
+              badgeText={viewingShowtime.movieAgeRating || 'P'}
+              badgeColor="bg-[#7C6FE8]"
+              fallbackTitle={viewingShowtime.movieTitle}
+              overlayContent={
+                <div className="flex items-center justify-between gap-2 text-white">
+                  <div className="flex flex-col min-w-0">
+                    <h3 className="text-sm sm:text-base font-black truncate drop-shadow-md">
+                      {viewingShowtime.movieTitle}
+                    </h3>
+                    <span className="text-[11px] text-slate-200 drop-shadow">
+                      {viewingShowtime.cinemaName} • <strong>{viewingShowtime.roomName}</strong> ({viewingShowtime.roomType})
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-900/80 text-amber-300 font-mono text-xs font-bold border border-amber-400/30 backdrop-blur-xs shrink-0">
+                    {viewingShowtime.startTime} – {viewingShowtime.endTime}
+                  </span>
+                </div>
+              }
+            />
+
+            {/* Header / Title Bar */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-purple-50 text-[#7C6FE8] flex items-center justify-center">
                   <Eye className="w-3.5 h-3.5" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900">Chi tiết suất chiếu</h3>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-900">Chi tiết suất chiếu</span>
+                  <span className="text-[10.5px] text-slate-400">
+                    Ngày chiếu: <strong className="text-slate-700">{viewingShowtime.showDate}</strong>
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={onCloseViewModal}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Movie & Room Info */}
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-gray-200">
-              {viewingShowtime.moviePoster ? (
-                <img
-                  src={viewingShowtime.moviePoster}
-                  alt={viewingShowtime.movieTitle}
-                  className="w-12 h-18 object-cover rounded shadow-2xs shrink-0"
-                />
-              ) : (
-                <div className="w-12 h-18 rounded bg-purple-50 text-[#7C6FE8] flex items-center justify-center shrink-0 font-bold text-xs">
-                  CD
-                </div>
-              )}
-              <div className="flex flex-col gap-1 flex-1 text-xs">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="font-semibold text-xs text-slate-900 leading-tight">
-                    {viewingShowtime.movieTitle}
-                  </span>
-                  <span className="px-1.5 py-0.2 rounded bg-slate-200 font-semibold text-[10px] text-slate-700">
-                    {viewingShowtime.movieAgeRating}
-                  </span>
-                </div>
-
-                <span className="text-slate-500">
-                  {viewingShowtime.cinemaName} • <strong>{viewingShowtime.roomName}</strong> ({viewingShowtime.roomType})
+            {/* Movie & Room Info Strip */}
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-gray-200/80">
+              <img
+                src={imageHelper.getPosterUrl(viewingShowtime.moviePoster, 'sm')}
+                alt={viewingShowtime.movieTitle}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&auto=format&fit=crop&q=80';
+                }}
+                className="w-10 h-14 object-cover rounded-lg shadow-2xs shrink-0 bg-slate-200"
+              />
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0 text-xs">
+                <span className="font-bold text-slate-900 truncate">
+                  {viewingShowtime.movieTitle}
                 </span>
-
-                <div className="flex items-center gap-1.5 font-mono text-[#7C6FE8] font-semibold text-xs mt-0.5">
+                <span className="text-slate-500 text-[11px]">
+                  Thời lượng: <strong className="font-mono text-slate-700">{viewingShowtime.durationMinutes} phút</strong> (Dọn phòng: {viewingShowtime.cleaningBufferMinutes}p)
+                </span>
+                <div className="flex items-center gap-1.5 font-mono text-[#7C6FE8] font-bold text-xs mt-0.5">
                   <Clock className="w-3.5 h-3.5" />
                   <span>
-                    {viewingShowtime.startTime} – {viewingShowtime.endTime} ({viewingShowtime.showDate})
+                    {viewingShowtime.startTime} – {viewingShowtime.endTime}
                   </span>
                 </div>
               </div>

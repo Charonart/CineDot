@@ -1,3 +1,4 @@
+import { imageHelper } from '@/shared/utils/imageHelper';
 import { AdminShowtimeItemDTO } from '../dto/adminShowtime.dto';
 import { AdminShowtimeGridItem } from '../types/adminShowtime.types';
 
@@ -47,12 +48,16 @@ export const adminShowtimeMapper = {
     const occupancyRate = totalSeats > 0 ? Math.round((bookedSeats / totalSeats) * 1000) / 10 : 0;
     const isLocked = bookedSeats > 0;
 
+    const rawPoster = dto.movie?.poster_path || dto.movie?.poster_url || dto.movie?.poster || '';
+    const rawBackdrop = dto.movie?.backdrop_path || dto.movie?.backdrop_url || dto.movie?.banner_url || rawPoster;
+
     return {
       id: Number(dto.showtime_id),
       showtimeId: Number(dto.showtime_id),
       movieId: Number(dto.movie_id || dto.movie?.movie_id || 0),
       movieTitle: dto.movie?.title || 'Phim Chiếu Rạp',
-      moviePoster: dto.movie?.poster_url || '',
+      moviePoster: imageHelper.getPosterUrl(rawPoster, 'md'),
+      movieBanner: imageHelper.getBackdropUrl(rawBackdrop, 'lg'),
       movieAgeRating: dto.movie?.age_rating || 'P',
       durationMinutes: duration,
       cleaningBufferMinutes: 15,

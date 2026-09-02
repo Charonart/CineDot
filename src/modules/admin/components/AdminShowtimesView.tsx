@@ -300,6 +300,7 @@ export function AdminShowtimesView() {
         movieId: dst.movie_id,
         movieTitle: dst.movie_title || targetMovie?.title || 'Phim',
         moviePoster: dst.movie_poster || targetMovie?.posterUrl || '',
+        movieBanner: targetMovie?.bannerUrl || targetMovie?.posterUrl || '',
         movieAgeRating: targetMovie?.ageRating || 'P',
         durationMinutes: dst.duration || 120,
         cleaningBufferMinutes: dst.buffer_minutes || 15,
