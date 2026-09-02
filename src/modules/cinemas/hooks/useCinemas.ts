@@ -11,6 +11,7 @@ import {
 import {
   fetchCities,
   fetchCinemasByCity,
+  fetchCinemaDetail,
   fetchPricingFormat,
   fetchCinemaShowtimes,
 } from '../services/cinemas.service';
@@ -18,6 +19,7 @@ import {
 export function useCinemas() {
   const searchParams = useSearchParams();
   const urlCity = searchParams ? searchParams.get('city') : null;
+  const urlCinema = searchParams ? searchParams.get('cinema') : null;
 
   const [cities, setCities] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>(urlCity || 'Tất cả thành phố');
@@ -62,7 +64,9 @@ export function useCinemas() {
         if (isMounted) {
           setCinemas(data);
           if (data.length > 0) {
-            setSelectedCinema(data[0]);
+            // Check if urlCinema matches any
+            const matched = urlCinema ? data.find((c) => c.slug === urlCinema) : null;
+            setSelectedCinema(matched || data[0]);
           } else {
             setSelectedCinema(null);
           }
@@ -75,7 +79,25 @@ export function useCinemas() {
     return () => {
       isMounted = false;
     };
-  }, [selectedCity]);
+  }, [selectedCity, urlCinema]);
+
+  // 3.5. Load cinema rooms and details when selectedCinema changes
+  useEffect(() => {
+    if (!selectedCinema?.slug) return;
+    let isMounted = true;
+    async function loadDetail() {
+      const detail = await fetchCinemaDetail(selectedCinema!.slug);
+      if (isMounted && detail && detail.rooms && detail.rooms.length > 0) {
+        setSelectedCinema((prev) => (prev ? { ...prev, ...detail } : detail));
+      }
+    }
+    if (!selectedCinema.rooms || selectedCinema.rooms.length === 0) {
+      loadDetail();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCinema?.slug]);
 
   // 4. Load pricing when pricingTab changes
   useEffect(() => {

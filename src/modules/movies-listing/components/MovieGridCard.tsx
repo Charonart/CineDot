@@ -6,6 +6,7 @@ import { Play, Ticket, Star, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MovieListingItem } from '../types/movies-listing.types';
 import { useTrailerStore } from '@/shared/store/trailerStore';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
 
 interface MovieGridCardProps {
   movie: MovieListingItem;
@@ -15,13 +16,13 @@ export const MovieGridCard: React.FC<MovieGridCardProps> = ({ movie }) => {
   const router = useRouter();
   const openTrailer = useTrailerStore((state) => state.openTrailer);
 
-  const isNowShowing = movie.status === 'NOW_SHOWING';
+  const isNowShowingMovie = movie.status === 'now_showing';
   const detailUrl = `/movies/${movie.slug}`;
   const scheduleUrl = `/movies/${movie.slug}#showtime-schedule`;
 
   const handleBookClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isNowShowing) {
+    if (isNowShowingMovie) {
       router.push(scheduleUrl);
     } else {
       router.push(detailUrl);
@@ -58,16 +59,16 @@ export const MovieGridCard: React.FC<MovieGridCardProps> = ({ movie }) => {
           <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-extrabold uppercase shadow-sm">
             {movie.formatBadge || '2D'}
           </span>
-          <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-black shadow-sm">
-            {movie.ageRating || 'P'}
-          </span>
+          <AgeRatingBadge ageRating={movie.ageRating} size="xs" variant="solid" />
         </div>
 
         {/* Rating Score Badge */}
         {movie.rating > 0 && (
-          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-amber-300 text-[11px] font-bold border border-white/10 z-10">
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            <span>{movie.rating.toFixed(1)}</span>
+          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-bold border border-white/10 z-10 shadow-xs">
+            <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">
+              IMDb
+            </span>
+            <span className="text-amber-300 font-extrabold">{movie.rating.toFixed(1)}</span>
           </div>
         )}
 
@@ -79,7 +80,7 @@ export const MovieGridCard: React.FC<MovieGridCardProps> = ({ movie }) => {
             className="w-full max-w-[140px] py-2 px-4 bg-[#7C6FE8] hover:bg-[#685bc7] text-white rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
           >
             <Ticket className="w-3.5 h-3.5 fill-white shrink-0" />
-            <span>{isNowShowing ? 'ĐẶT VÉ' : 'CHI TIẾT'}</span>
+            <span>{isNowShowingMovie ? 'ĐẶT VÉ' : 'CHI TIẾT'}</span>
           </button>
 
           <button

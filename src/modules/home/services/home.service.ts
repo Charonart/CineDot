@@ -2,6 +2,7 @@ import { apiClient } from '@/shared/lib/apiClient';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
 import { PromoBanner, MovieCardItem, ArticleItem, PromotionItem } from '../types/home.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { MovieStatus, normalizeMovieStatus } from '@/shared/utils/movieStatusHelper';
 import {
   MOCK_PROMO_BANNERS,
   MOCK_MOVIES,
@@ -33,11 +34,8 @@ export interface QuickShowtimeOption {
   showtimeId: string | number;
 }
 
-export function mapMovieToCardItem(m: any, defaultStatus: 'now-showing' | 'coming-soon' = 'now-showing'): MovieCardItem {
-  const statusStr = (m.status || '').toLowerCase();
-  let status: 'now-showing' | 'coming-soon' = defaultStatus;
-  if (statusStr === 'now_showing' || statusStr === 'now-showing') status = 'now-showing';
-  else if (statusStr === 'coming_soon' || statusStr === 'coming-soon' || statusStr === 'upcoming') status = 'coming-soon';
+export function mapMovieToCardItem(m: any, defaultStatus: MovieStatus = 'now_showing'): MovieCardItem {
+  const status: MovieStatus = normalizeMovieStatus(m.status || defaultStatus);
 
   const genres = Array.isArray(m.genres)
     ? m.genres.map((g: any) => g.name || g).join(', ')
@@ -67,7 +65,10 @@ export function mapMovieToCardItem(m: any, defaultStatus: 'now-showing' | 'comin
     slug: m.slug || 'movie-detail',
     genre: genres,
     duration,
-    rating: Number(m.rating || m.vote_average || 4.8),
+    rating: Number(m.vote_average ?? m.rating ?? 0),
+    voteCount: Number(m.vote_count ?? m.voteCount ?? 0),
+    imdbId: m.imdb_id || m.imdbId || (m.id ? `tt${String(m.id).padStart(7, '0')}` : undefined),
+    imdbUrl: m.imdb_url || m.imdbUrl || (m.imdb_id ? `https://www.imdb.com/title/${m.imdb_id}` : undefined),
     ageRating: m.ageRating || m.age_rating || 'P',
     posterUrl: poster,
     status,
@@ -137,8 +138,8 @@ export async function fetchHomeMovies(): Promise<MovieCardItem[]> {
       ? upcomingPayload
       : upcomingPayload?.results || upcomingPayload?.data || [];
 
-    const nowShowingCards = nowShowingRaw.map((m: any) => mapMovieToCardItem(m, 'now-showing'));
-    const upcomingCards = upcomingRaw.map((m: any) => mapMovieToCardItem(m, 'coming-soon'));
+    const nowShowingCards = nowShowingRaw.map((m: any) => mapMovieToCardItem(m, 'now_showing'));
+    const upcomingCards = upcomingRaw.map((m: any) => mapMovieToCardItem(m, 'upcoming'));
 
     if (nowShowingCards.length > 0 || upcomingCards.length > 0) {
       return [...nowShowingCards, ...upcomingCards];
@@ -255,8 +256,8 @@ export async function fetchNavbarMovies(): Promise<{ nowShowing: MovieCardItem[]
       const nowShowingList = Array.isArray(now_showing) ? now_showing : [];
       const comingSoonList = Array.isArray(coming_soon) && coming_soon.length > 0 ? coming_soon : (Array.isArray(upcoming) && upcoming.length > 0 ? upcoming : trending);
       return {
-        nowShowing: nowShowingList.map((m: any) => mapMovieToCardItem(m, 'now-showing')),
-        comingSoon: comingSoonList.map((m: any) => mapMovieToCardItem(m, 'coming-soon')),
+        nowShowing: nowShowingList.map((m: any) => mapMovieToCardItem(m, 'now_showing')),
+        comingSoon: comingSoonList.map((m: any) => mapMovieToCardItem(m, 'upcoming')),
       };
     }
   } catch {

@@ -11,6 +11,8 @@ interface BookingSummaryBarProps {
   selectedCount: number;
   totalPrice: number;
   showtimeId: string;
+  isHolding?: boolean;
+  onContinue?: () => Promise<void> | void;
 }
 
 export const BookingSummaryBar: React.FC<BookingSummaryBarProps> = ({
@@ -18,6 +20,8 @@ export const BookingSummaryBar: React.FC<BookingSummaryBarProps> = ({
   selectedCount,
   totalPrice,
   showtimeId,
+  isHolding = false,
+  onContinue,
 }) => {
   const isSelected = selectedCount > 0;
 
@@ -54,21 +58,21 @@ export const BookingSummaryBar: React.FC<BookingSummaryBarProps> = ({
             </span>
           </div>
 
-          <Link href={isSelected ? `/booking/food?showtime_id=${showtimeId}` : '#'}>
-            <motion.button
-              whileHover={isSelected ? { scale: 1.02 } : {}}
-              whileTap={isSelected ? { scale: 0.98 } : {}}
-              disabled={!isSelected}
-              className={`px-6 sm:px-7 py-3 rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer select-none ${
-                isSelected
-                  ? 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-[0_4px_14px_rgba(124,111,232,0.35)]'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-              }`}
-            >
-              <span>TIẾP TỤC CHỌN BẮP NƯỚC</span>
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
-          </Link>
+          <motion.button
+            type="button"
+            whileHover={isSelected && !isHolding ? { scale: 1.02 } : {}}
+            whileTap={isSelected && !isHolding ? { scale: 0.98 } : {}}
+            disabled={!isSelected || isHolding}
+            onClick={onContinue}
+            className={`px-6 sm:px-7 py-3 rounded-full font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer select-none ${
+              isSelected
+                ? 'bg-[#7C6FE8] hover:bg-[#685bc7] text-white shadow-[0_4px_14px_rgba(124,111,232,0.35)]'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+            } ${isHolding ? 'opacity-70 cursor-wait' : ''}`}
+          >
+            <span>{isHolding ? 'Đang xử lý...' : 'Tiếp tục'}</span>
+            {!isHolding && <ArrowRight className="w-4 h-4" />}
+          </motion.button>
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '148 phút',
     releaseDate: '31/07/2026',
     rating: 9.2,
-    status: 'NOW_SHOWING',
+    status: 'now_showing',
     isHot: true,
   },
   {
@@ -30,7 +30,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '110 phút',
     releaseDate: '26/07/2026',
     rating: 8.9,
-    status: 'NOW_SHOWING',
+    status: 'now_showing',
     isHot: true,
   },
   {
@@ -46,7 +46,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '131 phút',
     releaseDate: '10/02/2026',
     rating: 8.7,
-    status: 'NOW_SHOWING',
+    status: 'now_showing',
   },
   {
     id: 'm-4',
@@ -61,7 +61,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '96 phút',
     releaseDate: '14/06/2026',
     rating: 9.0,
-    status: 'NOW_SHOWING',
+    status: 'now_showing',
   },
   {
     id: 'm-5',
@@ -76,7 +76,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '166 phút',
     releaseDate: '01/03/2026',
     rating: 9.5,
-    status: 'NOW_SHOWING',
+    status: 'now_showing',
   },
   {
     id: 'm-6',
@@ -91,10 +91,10 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '128 phút',
     releaseDate: '26/07/2026',
     rating: 9.1,
-    status: 'NOW_SHOWING',
+    status: 'now_showing',
   },
 
-  // COMING SOON MOVIES
+  // UPCOMING MOVIES
   {
     id: 'm-7',
     slug: 'joker-folie-a-deux',
@@ -108,7 +108,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '138 phút',
     releaseDate: '04/10/2026',
     rating: 0,
-    status: 'COMING_SOON',
+    status: 'upcoming',
   },
   {
     id: 'm-8',
@@ -123,7 +123,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '120 phút',
     releaseDate: '25/10/2026',
     rating: 0,
-    status: 'COMING_SOON',
+    status: 'upcoming',
   },
   {
     id: 'm-9',
@@ -138,7 +138,7 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '150 phút',
     releaseDate: '22/11/2026',
     rating: 0,
-    status: 'COMING_SOON',
+    status: 'upcoming',
   },
   {
     id: 'm-10',
@@ -153,6 +153,6 @@ export const MOCK_MOVIES_LISTING: MovieListingItem[] = [
     duration: '160 phút',
     releaseDate: '27/11/2026',
     rating: 0,
-    status: 'COMING_SOON',
+    status: 'upcoming',
   },
 ];

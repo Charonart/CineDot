@@ -18,6 +18,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 import { hasActiveBookingTimer, resetBookingTimer } from '../services/bookingTimerService';
 import { seatBookingService } from '../services/seat-booking.service';
 import { getBookingSession } from '../services/bookingSessionService';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
 interface SeatBookingClientPageProps {
   showtimeId: string;
@@ -82,6 +83,25 @@ export function SeatBookingClientPage({
       bookingInfo.showDate || dateParam || ''
     )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(bookingInfo.cinemaName || cinemaParam || '')}`;
     router.push(paymentUrl);
+  };
+
+  const handleMobileContinue = async () => {
+    if (selectedSeats.length === 0 || isHolding) return;
+
+    const res = await handleHoldSeats();
+    if (res?.success === false) {
+      if (res.needsAuth) {
+        const foodUrl = `/booking/food?showtime_id=${showtimeId}&movie=${bookingInfo?.movieSlug || movieParam || ''}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+          bookingInfo?.showDate || dateParam || ''
+        )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(bookingInfo?.cinemaName || cinemaParam || '')}`;
+        useAuthStore.getState().openAuthModal('login', 'Vui lòng đăng nhập tài khoản để tiếp tục giữ ghế và đặt vé.', foodUrl);
+        return;
+      }
+      alert(res.message || 'Lỗi giữ ghế, vui lòng thử lại.');
+      return;
+    }
+
+    setIsComboSuggestOpen(true);
   };
 
   useEffect(() => {
@@ -218,6 +238,8 @@ export function SeatBookingClientPage({
           selectedCount={selectedSeats.length}
           totalPrice={totalPrice}
           showtimeId={showtimeId}
+          isHolding={isHolding}
+          onContinue={handleMobileContinue}
         />
       </div>
 

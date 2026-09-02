@@ -32,7 +32,7 @@ export const MOCK_MOVIES: MovieCardItem[] = [
     ageRating: 'P',
     formatBadge: 'IMAX',
     posterUrl: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=600&auto=format&fit=crop',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'm-2',
@@ -44,7 +44,7 @@ export const MOCK_MOVIES: MovieCardItem[] = [
     ageRating: 'P',
     formatBadge: '2D Phụ Đề',
     posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=600&auto=format&fit=crop',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'm-3',
@@ -56,7 +56,7 @@ export const MOCK_MOVIES: MovieCardItem[] = [
     ageRating: 'T16',
     formatBadge: '4DX',
     posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'm-4',
@@ -68,7 +68,7 @@ export const MOCK_MOVIES: MovieCardItem[] = [
     ageRating: 'P',
     formatBadge: '3D',
     posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'm-5',
@@ -80,7 +80,7 @@ export const MOCK_MOVIES: MovieCardItem[] = [
     ageRating: 'T16',
     formatBadge: 'IMAX 3D',
     posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'm-6',
@@ -92,7 +92,7 @@ export const MOCK_MOVIES: MovieCardItem[] = [
     ageRating: 'T18',
     formatBadge: '2D Phụ Đề',
     posterUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop',
-    status: 'now-showing',
+    status: 'now_showing',
   },
 ];
 
@@ -107,7 +107,7 @@ export const MOCK_COMING_SOON_MOVIES: MovieCardItem[] = [
     ageRating: 'T18',
     formatBadge: 'IMAX 2D',
     posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
-    status: 'coming-soon',
+    status: 'upcoming',
   },
   {
     id: 'cs-2',
@@ -119,7 +119,7 @@ export const MOCK_COMING_SOON_MOVIES: MovieCardItem[] = [
     ageRating: 'T16',
     formatBadge: '3D Phụ Đề',
     posterUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600&auto=format&fit=crop',
-    status: 'coming-soon',
+    status: 'upcoming',
   },
   {
     id: 'cs-3',
@@ -131,7 +131,7 @@ export const MOCK_COMING_SOON_MOVIES: MovieCardItem[] = [
     ageRating: 'T18',
     formatBadge: 'IMAX Laser',
     posterUrl: 'https://images.unsplash.com/photo-1543536448-d247542f907d?q=80&w=600&auto=format&fit=crop',
-    status: 'coming-soon',
+    status: 'upcoming',
   },
   {
     id: 'cs-4',
@@ -143,7 +143,7 @@ export const MOCK_COMING_SOON_MOVIES: MovieCardItem[] = [
     ageRating: 'P',
     formatBadge: '2D Phụ Đề',
     posterUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop',
-    status: 'coming-soon',
+    status: 'upcoming',
   },
 ];
 
@@ -158,7 +158,7 @@ export const MOCK_EARLY_TICKET_MOVIES: MovieCardItem[] = [
     ageRating: 'T18',
     formatBadge: 'IMAX 3D',
     posterUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop',
-    status: 'coming-soon',
+    status: 'upcoming',
   },
   {
     id: 'et-2',
@@ -170,7 +170,7 @@ export const MOCK_EARLY_TICKET_MOVIES: MovieCardItem[] = [
     ageRating: 'T16',
     formatBadge: 'Onyx LED',
     posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
-    status: 'coming-soon',
+    status: 'upcoming',
   },
 ];
 

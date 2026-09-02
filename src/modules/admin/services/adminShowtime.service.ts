@@ -1,4 +1,5 @@
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { normalizeMovieStatus } from '@/shared/utils/movieStatusHelper';
 import { apiClient } from '@/shared/lib/apiClient';
 import { ApiResponse } from '@/shared/types/api.types';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
@@ -156,13 +157,7 @@ export const adminShowtimeService = {
       const rawPoster = m.poster_path || m.poster_url || m.posterUrl || m.poster || '';
       const rawBackdrop = m.backdrop_path || m.backdrop_url || m.backdropUrl || m.banner_url || m.banner || rawPoster;
       
-      const rawStatus = (m.status || (m.is_showing ? 'NOW_SHOWING' : 'NOW_SHOWING')).toLowerCase();
-      let status: 'NOW_SHOWING' | 'COMING_SOON' | 'STOPPED' = 'NOW_SHOWING';
-      if (rawStatus.includes('coming') || rawStatus.includes('upcoming')) {
-        status = 'COMING_SOON';
-      } else if (rawStatus.includes('stop') || rawStatus.includes('end')) {
-        status = 'STOPPED';
-      }
+      const status = normalizeMovieStatus(m.status || (m.is_showing ? 'now_showing' : undefined));
 
       const genresList: string[] = [];
       if (Array.isArray(m.genres)) {

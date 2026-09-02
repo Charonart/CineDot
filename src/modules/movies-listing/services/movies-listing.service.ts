@@ -3,6 +3,7 @@ import { ENDPOINTS } from '@/shared/constants/endpoints';
 import { MovieListingItem, MovieListingTab } from '../types/movies-listing.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
 import { MOCK_MOVIES_LISTING } from '../mocks/mockMoviesListingData';
+import { MovieStatus, normalizeMovieStatus } from '@/shared/utils/movieStatusHelper';
 
 export interface MoviesListingResult {
   movies: MovieListingItem[];
@@ -17,10 +18,10 @@ export async function fetchMoviesListing(
   genreId?: number | string,
   page: number = 1
 ): Promise<MoviesListingResult> {
-  const targetStatus = tab === 'now-showing' ? 'NOW_SHOWING' : 'COMING_SOON';
+  const canonicalStatus: MovieStatus = tab === 'upcoming' || tab === 'coming-soon' ? 'upcoming' : 'now_showing';
   try {
     const params: Record<string, any> = {
-      status: targetStatus,
+      status: canonicalStatus,
       per_page: 12,
       page,
     };
@@ -40,7 +41,7 @@ export async function fetchMoviesListing(
       const totalResults = payload.totalResults || payload.total || rawList.length;
 
       if (rawList.length > 0) {
-        const mapped = rawList.map((m: any) => {
+        const mapped: MovieListingItem[] = rawList.map((m: any) => {
           const genres = Array.isArray(m.genres)
             ? m.genres.map((g: any) => g.name || g)
             : Array.isArray(m.genre)
@@ -67,9 +68,11 @@ export async function fetchMoviesListing(
             ageRating: m.age_rating || m.ageRating || 'P',
             genre: genres,
             duration,
-            releaseDate: m.release_date || m.releaseDate || '2026-08-20',
-            rating: Number(m.rating || m.vote_average || 4.8),
-            status: targetStatus,
+            rating: Number(m.vote_average ?? m.rating ?? 0),
+            voteCount: Number(m.vote_count ?? m.voteCount ?? 0),
+            imdbId: m.imdb_id || m.imdbId || (m.id ? `tt${String(m.id).padStart(7, '0')}` : undefined),
+            imdbUrl: m.imdb_url || m.imdbUrl || (m.imdb_id ? `https://www.imdb.com/title/${m.imdb_id}` : undefined),
+            status: normalizeMovieStatus(m.status),
             isHot: Boolean(m.is_hot || m.isHot || true),
           };
         });
@@ -84,7 +87,7 @@ export async function fetchMoviesListing(
     }
 
     // Fallback
-    let filtered = MOCK_MOVIES_LISTING.filter((m) => m.status === targetStatus);
+    let filtered = MOCK_MOVIES_LISTING.filter((m) => m.status === canonicalStatus);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(
@@ -100,7 +103,7 @@ export async function fetchMoviesListing(
       totalResults: filtered.length,
     };
   } catch {
-    let filtered = MOCK_MOVIES_LISTING.filter((m) => m.status === targetStatus);
+    let filtered = MOCK_MOVIES_LISTING.filter((m) => m.status === canonicalStatus);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(

@@ -25,11 +25,18 @@ export interface AdminMovieItemDTO {
   releaseDate?: string;
   original_language?: string;
   originalLanguage?: string;
-  adult?: boolean;
-  video?: boolean;
+  age_rating?: string;
+  ageRating?: string;
   popularity?: number | string;
   vote_average?: number;
+  vote_count?: number;
+  voteCount?: number;
   rating?: number | string;
+  imdb_id?: string;
+  imdbId?: string;
+  imdb_url?: string;
+  imdbUrl?: string;
+  tmdb_id?: number;
   poster_path?: string;
   poster_url?: string;
   posterUrl?: string;
@@ -67,8 +74,6 @@ export interface CreateMovieRequestDTO {
   overview?: string;
   release_date?: string;
   original_language?: string;
-  adult?: boolean;
-  video?: boolean;
   popularity?: number;
   backdrop_path?: string;
   poster_path: string;
@@ -76,6 +81,11 @@ export interface CreateMovieRequestDTO {
   status: 'now_showing' | 'upcoming' | 'ended' | 'coming_soon' | 'stopped' | string;
   genre_ids: number[];
   trailer_url?: string;
+  vote_average?: number;
+  vote_count?: number;
+  imdb_id?: string;
+  age_rating?: string;
+  ageRating?: string;
 }
 
 export interface UpdateMovieRequestDTO {
@@ -84,13 +94,16 @@ export interface UpdateMovieRequestDTO {
   overview?: string;
   release_date?: string;
   original_language?: string;
-  adult?: boolean;
-  video?: boolean;
   popularity?: number;
   backdrop_path?: string;
   poster_path?: string;
   duration_minutes?: number;
   status?: 'now_showing' | 'upcoming' | 'ended' | 'coming_soon' | 'stopped' | string;
+  vote_average?: number;
+  vote_count?: number;
+  imdb_id?: string;
+  age_rating?: string;
+  ageRating?: string;
   genre_ids?: number[];
   trailer_url?: string;
 }
@@ -109,6 +122,8 @@ export interface TmdbSearchResultDTO {
   backdrop_path?: string | null;
   release_date?: string;
   vote_average?: number;
+  vote_count?: number;
+  imdb_id?: string;
   overview?: string;
   genres?: string[] | GenreItemDTO[];
 }

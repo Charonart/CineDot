@@ -130,24 +130,39 @@ export async function createPaymentGatewayUrl(
   bookingId: number | string,
   gateway: string = 'vnpay',
   combos?: { combo_id: number; quantity: number }[],
-  voucherCode?: string
-): Promise<string | null> {
+  voucherCode?: string,
+  showtimeId?: string
+): Promise<{ success: boolean; paymentUrl?: string; message?: string }> {
   try {
     const res = await apiClient.post(ENDPOINTS.PAYMENTS.CREATE_URL, {
       booking_id: bookingId,
+      showtime_id: showtimeId,
       payment_method: gateway.toUpperCase(),
       combos,
       voucher_code: voucherCode,
     });
 
     const rd = res.data as any;
-    if (rd?.success && (rd?.payment_url || rd?.data?.payment_url)) {
-      return rd.payment_url || rd.data.payment_url;
+    const url = rd?.payment_url || rd?.data?.payment_url;
+    if (rd?.success && url) {
+      return { success: true, paymentUrl: url };
     }
-  } catch {
-    // Fallback
+    return {
+      success: false,
+      message: rd?.message || 'Không thể tạo liên kết thanh toán.',
+    };
+  } catch (err: any) {
+    const msg = err?.response?.data?.message || err?.message || 'Lỗi kết nối cổng thanh toán.';
+    return { success: false, message: msg };
   }
-  return null;
+}
+
+export interface ProcessPaymentResult {
+  success: boolean;
+  bookingId: string;
+  paymentUrl?: string;
+  message?: string;
+  needsAuth?: boolean;
 }
 
 export async function processBookingPayment(payload: {
@@ -160,30 +175,40 @@ export async function processBookingPayment(payload: {
   bookingCode?: string;
   combos?: { combo_id: number; quantity: number }[];
   voucherCode?: string;
-}): Promise<{ success: boolean; bookingId: string; paymentUrl?: string }> {
+}): Promise<ProcessPaymentResult> {
   try {
-    // If we have a bookingId, call create payment URL
-    if (payload.bookingId) {
-      const paymentUrl = await createPaymentGatewayUrl(
-        payload.bookingId,
+    // 1. Try createUrl if we have a booking identifier
+    const targetBookingId = payload.bookingId || payload.bookingCode;
+    if (targetBookingId) {
+      const urlRes = await createPaymentGatewayUrl(
+        targetBookingId,
         payload.paymentMethod.toLowerCase(),
         payload.combos,
-        payload.voucherCode
+        payload.voucherCode,
+        payload.showtimeId
       );
-      if (paymentUrl) {
+      if (urlRes.success && urlRes.paymentUrl) {
         return {
           success: true,
-          bookingId: String(payload.bookingId),
-          paymentUrl,
+          bookingId: String(targetBookingId),
+          paymentUrl: urlRes.paymentUrl,
+        };
+      }
+      if (urlRes.message && !urlRes.message.includes('Không tìm thấy')) {
+        return {
+          success: false,
+          bookingId: String(targetBookingId),
+          message: urlRes.message,
         };
       }
     }
 
+    // 2. Call process payment endpoint
     const res = await apiClient.post(ENDPOINTS.PAYMENTS.PROCESS, {
       booking_id: payload.bookingId,
       booking_code: payload.bookingCode,
       showtime_id: payload.showtimeId,
-      payment_method: payload.paymentMethod,
+      payment_method: payload.paymentMethod.toUpperCase(),
       amount: payload.totalAmount,
       combos: payload.combos,
       voucher_code: payload.voucherCode,
@@ -199,9 +224,18 @@ export async function processBookingPayment(payload: {
         paymentUrl: rd.payment_url || rd.data?.payment_url,
       };
     }
-    return { success: false, bookingId: String(payload.bookingId || '') };
+    return {
+      success: false,
+      bookingId: String(payload.bookingId || ''),
+      message: rd?.message || 'Thanh toán không thành công.',
+    };
   } catch (err: any) {
     console.error('Process booking payment error', err);
-    return { success: false, bookingId: String(payload.bookingId || '') };
+    const msg = err?.response?.data?.message || err?.message || 'Đã có lỗi xảy ra khi gửi yêu cầu thanh toán.';
+    return {
+      success: false,
+      bookingId: String(payload.bookingId || ''),
+      message: msg,
+    };
   }
 }

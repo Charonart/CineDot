@@ -67,7 +67,8 @@ export function MovieDetailPageClient({ slug }: MovieDetailPageClientProps) {
               {/* 3. Showtime Schedule Section */}
               <ShowtimeScheduleSection
                 movieSlug={movie.slug}
-                isComingSoon={movie.status === 'COMING_SOON'}
+                isComingSoon={movie.status === 'upcoming'}
+                ageRating={movie.ageRating}
               />
             </div>
 

@@ -12,6 +12,8 @@ export const AUTH_LOCAL_STORAGE_KEYS = [
   'cinedot_token',
   'cinedot_admin_token',
   'cinedot_user',
+  'cinedot_current_user',
+  'cinedot_permissions',
   'cinedot_admin_user',
   'cinedot_admin_permissions',
 ] as const;

@@ -15,7 +15,7 @@ interface MoviesMegaDropdownProps {
 
 export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose }) => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>('now-showing');
+  const [activeTab, setActiveTab] = useState<'now_showing' | 'upcoming'>('now_showing');
   const [nowShowingMovies, setNowShowingMovies] = useState<MovieCardItem[]>([]);
   const [comingSoonMovies, setComingSoonMovies] = useState<MovieCardItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -52,7 +52,7 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
     router.push(`/movies/${movieSlug}`);
   };
 
-  const displayedMovies = activeTab === 'now-showing' ? nowShowingMovies : comingSoonMovies;
+  const displayedMovies = activeTab === 'now_showing' ? nowShowingMovies : comingSoonMovies;
 
   return (
     <motion.div
@@ -66,9 +66,9 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
         <div className="flex items-center gap-2 bg-gray-100/80 p-1 rounded-2xl">
           <button
-            onClick={() => setActiveTab('now-showing')}
+            onClick={() => setActiveTab('now_showing')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'now-showing'
+              activeTab === 'now_showing'
                 ? 'bg-white text-slate-900 shadow-xs shadow-black/5 font-extrabold'
                 : 'text-gray-500 hover:text-gray-900'
             }`}
@@ -80,9 +80,9 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
           </button>
 
           <button
-            onClick={() => setActiveTab('coming-soon')}
+            onClick={() => setActiveTab('upcoming')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'coming-soon'
+              activeTab === 'upcoming'
                 ? 'bg-white text-slate-900 shadow-xs shadow-black/5 font-extrabold'
                 : 'text-gray-500 hover:text-gray-900'
             }`}
@@ -96,7 +96,7 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
 
         <div className="flex items-center gap-4">
           <Link
-            href={`/movies?category=${activeTab}`}
+            href={activeTab === 'upcoming' ? '/movies?tab=upcoming' : '/movies?tab=now_showing'}
             onClick={onClose}
             className="group inline-flex items-center gap-1.5 text-xs font-bold text-[#7C6FE8] hover:text-[#685bc7] transition-colors"
           >
@@ -144,11 +144,13 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
                   </span>
                 </div>
 
-                {/* Star rating pill */}
+                {/* IMDb rating pill */}
                 {movie.rating > 0 && (
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-md text-amber-300 text-[10px] font-extrabold z-10 border border-white/10">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    <span>{movie.rating.toFixed(1)}</span>
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-md text-white text-[10px] font-extrabold z-10 border border-white/10 shadow-xs">
+                    <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[8px] leading-tight">
+                      IMDb
+                    </span>
+                    <span className="text-amber-300 font-bold">{movie.rating.toFixed(1)}</span>
                   </div>
                 )}
 
@@ -161,7 +163,7 @@ export const MoviesMegaDropdown: React.FC<MoviesMegaDropdownProps> = ({ onClose 
 
                 {/* Hover overlay with tactile action button */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2.5 z-20">
-                  {activeTab === 'now-showing' ? (
+                  {activeTab === 'now_showing' ? (
                     <button
                       onClick={(e) => handleBookNow(e, movie.slug)}
                       className="w-full py-2 px-2.5 rounded-xl bg-[#7C6FE8] hover:bg-[#685bc7] text-white font-extrabold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-[#7C6FE8]/40 transition-all cursor-pointer hover:scale-[1.02] active:scale-95"

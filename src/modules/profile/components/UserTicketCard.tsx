@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserTicketItem } from '../types/profile.types';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
 import { QRCodeImage } from '@/shared/ui/QRCodeImage';
 
 interface UserTicketCardProps {
@@ -125,9 +126,7 @@ export const UserTicketCard: React.FC<UserTicketCardProps> = ({
                     </span>
                   ) : null}
 
-                  <span className="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 text-[10px] font-black border border-amber-200/90">
-                    Khán giả {ticket.ageRating || 'P'}
-                  </span>
+                  <AgeRatingBadge ageRating={ticket.ageRating} size="xs" variant="soft" />
 
                   {isCancelled ? (
                     <span className="px-2.5 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[10px] font-extrabold border border-rose-200">

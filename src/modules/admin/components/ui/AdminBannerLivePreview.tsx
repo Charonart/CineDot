@@ -17,6 +17,7 @@ import {
 import { imageHelper } from '@/shared/utils/imageHelper';
 import { AdminBackdropBanner } from './AdminBackdropBanner';
 import { AdminPosterCard } from './AdminPosterCard';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
 
 interface AdminBannerLivePreviewProps {
   title: string;
@@ -25,7 +26,7 @@ interface AdminBannerLivePreviewProps {
   backdropPath?: string;
   releaseDate?: string;
   durationMinutes?: number | string;
-  adult?: boolean;
+  ageRating?: string;
   status?: string;
   genres?: string[];
   rating?: number | string;
@@ -39,7 +40,7 @@ export function AdminBannerLivePreview({
   backdropPath,
   releaseDate,
   durationMinutes,
-  adult = false,
+  ageRating = 'P',
   status = 'now_showing',
   genres = [],
   rating = 8.5,
@@ -54,19 +55,10 @@ export function AdminBannerLivePreview({
   const finalPosterUrl = cleanedPoster ? imageHelper.getPosterUrl(cleanedPoster, 'lg') : '';
   const finalBackdropUrl = cleanedBackdrop ? imageHelper.getBackdropUrl(cleanedBackdrop, 'lg') : '';
 
-  const statusLabel =
-    status === 'now_showing' || status === 'NOW_SHOWING'
-      ? 'Đang Chiếu'
-      : status === 'upcoming' || status === 'COMING_SOON'
-      ? 'Sắp Chiếu'
-      : 'Ngừng Chiếu';
-
-  const statusBg =
-    status === 'now_showing' || status === 'NOW_SHOWING'
-      ? 'bg-[#7C6FE8]'
-      : status === 'upcoming' || status === 'COMING_SOON'
-      ? 'bg-amber-500'
-      : 'bg-slate-600';
+  const isNow = status === 'now_showing';
+  const isUp = status === 'upcoming';
+  const statusLabel = isNow ? 'Đang Chiếu' : isUp ? 'Sắp Chiếu' : 'Ngừng Chiếu';
+  const statusBg = isNow ? 'bg-[#7C6FE8]' : isUp ? 'bg-amber-500' : 'bg-slate-600';
 
   return (
     <div className={`flex flex-col gap-3 rounded-2xl bg-slate-900/90 border border-purple-500/20 p-4 shadow-xl ${className}`}>
@@ -155,7 +147,7 @@ export function AdminBannerLivePreview({
                   src={finalPosterUrl}
                   alt={title}
                   size="sm"
-                  adult={adult}
+                  ageRating={ageRating}
                   className="w-20 h-28 sm:w-24 sm:h-36 shadow-2xl"
                   fallbackText={title}
                 />
@@ -167,13 +159,10 @@ export function AdminBannerLivePreview({
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-black text-white ${statusBg}`}>
                     {statusLabel}
                   </span>
-                  {adult && (
-                    <span className="px-1.5 py-0.5 rounded-md bg-rose-600 text-white text-[9px] font-black">
-                      18+
-                    </span>
-                  )}
-                  <span className="text-[10px] font-bold text-amber-400 bg-black/40 px-2 py-0.5 rounded-md border border-amber-400/20">
-                    ★ {rating} TMDB
+                  <AgeRatingBadge ageRating={ageRating} size="xs" variant="solid" />
+                  <span className="text-[10px] font-bold text-amber-400 bg-black/50 px-2 py-0.5 rounded-md border border-amber-400/30 flex items-center gap-1">
+                    <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[8px] leading-tight">IMDb</span>
+                    <span>{Number(rating) > 0 ? Number(rating).toFixed(1) : '8.5'}</span>
                   </span>
                 </div>
 
@@ -241,7 +230,7 @@ export function AdminBannerLivePreview({
               alt={title || 'Poster Preview'}
               size="lg"
               rounded="2xl"
-              adult={adult}
+              ageRating={ageRating}
               rating={rating}
               fallbackText={title || 'Poster'}
               className="shadow-2xl border border-white/20"

@@ -9,17 +9,18 @@ import { MovieCardItem } from '../types/home.types';
 import { MOCK_MOVIES, MOCK_COMING_SOON_MOVIES } from '../mocks/mockHomeData';
 import { useTrailerStore } from '@/shared/store/trailerStore';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
 
 interface MovieTabsSectionProps {
   movies: MovieCardItem[];
   isLoading?: boolean;
 }
 
-type TabType = 'all-now' | 'coming-soon';
+type TabType = 'now_showing' | 'upcoming';
 
 export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLoading }) => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>('all-now');
+  const [activeTab, setActiveTab] = useState<TabType>('now_showing');
   const openTrailer = useTrailerStore((state) => state.openTrailer);
 
   const activeMovies = React.useMemo(() => {
@@ -27,8 +28,7 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
   }, [movies]);
 
   const filteredMovies = activeMovies.filter((m) => {
-    if (activeTab === 'coming-soon') return m.status === 'coming-soon';
-    return m.status === 'now-showing';
+    return m.status === activeTab;
   });
 
   const handleWatchTrailer = (e: React.MouseEvent, movie: MovieCardItem) => {
@@ -44,7 +44,7 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
   const handleBookClick = (e: React.MouseEvent, movie: MovieCardItem) => {
     e.preventDefault();
     e.stopPropagation();
-    if (movie.status === 'now-showing') {
+    if (movie.status === 'now_showing') {
       router.push(`/movies/${movie.slug}#showtime-schedule`);
     } else {
       router.push(`/movies/${movie.slug}`);
@@ -52,11 +52,11 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
   };
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-    { id: 'all-now', label: 'Đang Chiếu', icon: <Film className="w-3.5 h-3.5" /> },
-    { id: 'coming-soon', label: 'Sắp Chiếu', icon: <Clock className="w-3.5 h-3.5" /> },
+    { id: 'now_showing', label: 'Đang Chiếu', icon: <Film className="w-3.5 h-3.5" /> },
+    { id: 'upcoming', label: 'Sắp Chiếu', icon: <Clock className="w-3.5 h-3.5" /> },
   ];
 
-  const viewMoreLink = activeTab === 'coming-soon' ? '/movies?tab=coming-soon' : '/movies?tab=now-showing';
+  const viewMoreLink = activeTab === 'upcoming' ? '/movies?tab=upcoming' : '/movies?tab=now_showing';
 
   return (
     <section className="relative z-10 w-full py-16 sm:py-20 bg-[#FAFAFB]">
@@ -168,9 +168,7 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
                         <span className="px-2.5 py-0.5 rounded-full bg-[#7C6FE8] text-white text-[10px] font-extrabold uppercase shadow-sm">
                           {movie.formatBadge || '2D'}
                         </span>
-                        <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-black shadow-sm">
-                          {movie.ageRating}
-                        </span>
+                        <AgeRatingBadge ageRating={movie.ageRating} size="xs" variant="solid" />
                       </div>
 
                       {/* Hover Overlay with Rapid Action Buttons */}
@@ -181,7 +179,7 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
                           className="w-full max-w-[140px] py-2 px-4 bg-[#7C6FE8] hover:bg-[#685bc7] text-white rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
                         >
                           <Ticket className="w-3.5 h-3.5 fill-white shrink-0" />
-                          <span>{activeTab === 'coming-soon' ? 'CHI TIẾT' : 'ĐẶT VÉ'}</span>
+                          <span>{activeTab === 'upcoming' ? 'CHI TIẾT' : 'ĐẶT VÉ'}</span>
                         </button>
 
                         <button
@@ -201,9 +199,16 @@ export const MovieTabsSection: React.FC<MovieTabsSectionProps> = ({ movies, isLo
                         {movie.title}
                       </h3>
                       <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
-                        <span className="flex items-center gap-1 text-amber-500 font-bold">
-                          ★ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'}
-                        </span>
+                        {movie.rating > 0 ? (
+                          <span className="inline-flex items-center gap-1 font-bold text-gray-800">
+                            <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">
+                              IMDb
+                            </span>
+                            <span className="text-amber-600 font-extrabold">{movie.rating.toFixed(1)}</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-gray-400 italic">Chưa có đánh giá</span>
+                        )}
                         <span className="text-[11px] text-gray-500 truncate max-w-[120px]">{movie.genre}</span>
                       </div>
                       {movie.duration && (

@@ -18,6 +18,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean;
 
   // Modal Popup states
   isAuthModalOpen: boolean;
@@ -25,6 +26,7 @@ interface AuthState {
   authNotice: string;
   postLoginRedirectUrl: string | null;
 
+  initAuthStore: () => void;
   setAuth: (user: User, permissions: string[], token: string) => void;
   login: (emailOrPhone: string, pass: string) => Promise<AuthActionResult>;
   register: (data: { name: string; email: string; phone?: string; pass: string }) => Promise<AuthActionResult>;
@@ -60,20 +62,61 @@ const getInitialState = () => {
   const token =
     Cookies.get('cine_token') ||
     Cookies.get('cinedot_token') ||
+    Cookies.get('cinedot_admin_token') ||
     localStorage.getItem('cinedot_token') ||
-    localStorage.getItem('cine_token');
-  const storedUser = localStorage.getItem('cinedot_current_user');
-  const storedPerms = localStorage.getItem('cinedot_permissions');
+    localStorage.getItem('cine_token') ||
+    localStorage.getItem('cinedot_admin_token') ||
+    null;
+
+  const storedUser =
+    localStorage.getItem('cinedot_current_user') ||
+    localStorage.getItem('cinedot_user') ||
+    localStorage.getItem('cinedot_admin_user');
+
+  const storedPerms =
+    localStorage.getItem('cinedot_permissions') ||
+    localStorage.getItem('cinedot_admin_permissions');
   
   let user: User | null = null;
   let permissions: string[] = [];
   
   if (storedUser) {
     try {
-      user = JSON.parse(storedUser);
+      const parsed = JSON.parse(storedUser);
+      if (parsed) {
+        user = {
+          id: parsed.id || parsed.user_id || 1,
+          user_id: parsed.user_id || parsed.id || 1,
+          username: parsed.username || (parsed.email ? parsed.email.split('@')[0] : 'user'),
+          email: parsed.email || '',
+          fullname: parsed.fullname || parsed.name || 'Khách Hàng',
+          name: parsed.name || parsed.fullname || 'Khách Hàng',
+          phone: parsed.phone,
+          avatar: parsed.avatar,
+          total_points: parsed.total_points || 0,
+          user_tier: parsed.user_tier || 'Bronze',
+          role_name: parsed.role_name || parsed.role || 'CUSTOMER',
+        };
+      }
     } catch {
       user = null;
     }
+  }
+
+  // If a valid token exists but cached user profile is missing, synthesize a temporary fallback user
+  // so the user is immediately recognized as authenticated while fetchMe verifies in background
+  if (token && !user) {
+    user = {
+      id: 1,
+      user_id: 1,
+      username: 'member',
+      email: '',
+      fullname: 'Thành viên CineDot',
+      name: 'Thành viên CineDot',
+      role_name: 'CUSTOMER',
+      total_points: 0,
+      user_tier: 'Bronze',
+    };
   }
   
   if (storedPerms) {
@@ -94,24 +137,40 @@ export const useAuthStore = create<AuthState>((set, get) => {
     user: initialUser,
     permissions: initialPermissions,
     token: initialToken,
-    isAuthenticated: Boolean(initialToken && initialUser),
+    isAuthenticated: Boolean(initialToken),
     isLoading: false,
+    isInitialized: typeof window !== 'undefined',
 
     isAuthModalOpen: false,
     authModalTab: 'login',
     authNotice: '',
     postLoginRedirectUrl: null,
 
+    initAuthStore: () => {
+      const state = getInitialState();
+      set({
+        user: state.user,
+        token: state.token,
+        permissions: state.permissions,
+        isAuthenticated: Boolean(state.token),
+        isInitialized: true,
+      });
+      if (state.token) {
+        get().fetchMe();
+      }
+    },
+
     setAuth: (user, permissions, token) => {
       if (typeof window !== 'undefined') {
         localStorage.setItem('cinedot_token', token);
         localStorage.setItem('cine_token', token);
         localStorage.setItem('cinedot_current_user', JSON.stringify(user));
+        localStorage.setItem('cinedot_user', JSON.stringify(user));
         localStorage.setItem('cinedot_permissions', JSON.stringify(permissions));
         Cookies.set('cinedot_token', token, { expires: 7, path: '/' });
         Cookies.set('cine_token', token, { expires: 7, path: '/' });
       }
-      set({ user, permissions, token, isAuthenticated: true });
+      set({ user, permissions, token, isAuthenticated: true, isInitialized: true });
     },
 
     login: async (emailOrPhone, pass) => {
@@ -125,12 +184,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
         if (res.success && res.data) {
           const u = res.data.user;
           const userObj: User = {
-            id: u.user_id,
-            user_id: u.user_id,
-            username: u.username,
+            id: u.user_id || (u as any).id || 1,
+            user_id: u.user_id || (u as any).id || 1,
+            username: u.username || (u.email ? u.email.split('@')[0] : 'user'),
             email: u.email,
-            fullname: u.fullname,
-            name: u.fullname,
+            fullname: u.fullname || u.name || 'Khách Hàng',
+            name: u.fullname || u.name || 'Khách Hàng',
             phone: u.phone,
             avatar: u.avatar,
             total_points: u.total_points || 0,
@@ -166,12 +225,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
         if (res.success && res.data) {
           const u = res.data.user;
           const userObj: User = {
-            id: u.user_id,
-            user_id: u.user_id,
-            username: u.username,
+            id: u.user_id || (u as any).id || 1,
+            user_id: u.user_id || (u as any).id || 1,
+            username: u.username || (u.email ? u.email.split('@')[0] : 'user'),
             email: u.email,
-            fullname: u.fullname,
-            name: u.fullname,
+            fullname: u.fullname || u.name || 'Khách Hàng',
+            name: u.fullname || u.name || 'Khách Hàng',
             phone: u.phone,
             avatar: u.avatar,
             total_points: u.total_points || 0,
@@ -246,19 +305,29 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     fetchMe: async () => {
-      const token = get().token;
+      const token =
+        get().token ||
+        (typeof window !== 'undefined'
+          ? Cookies.get('cine_token') ||
+            Cookies.get('cinedot_token') ||
+            Cookies.get('cinedot_admin_token') ||
+            localStorage.getItem('cinedot_token') ||
+            localStorage.getItem('cine_token') ||
+            localStorage.getItem('cinedot_admin_token')
+          : null);
+
       if (!token) return;
       try {
         const res = await authService.me();
         if (res.success && res.data) {
           const u = res.data.user;
           const userObj: User = {
-            id: u.user_id,
-            user_id: u.user_id,
-            username: u.username,
+            id: u.user_id || (u as any).id || 1,
+            user_id: u.user_id || (u as any).id || 1,
+            username: u.username || (u.email ? u.email.split('@')[0] : 'user'),
             email: u.email,
-            fullname: u.fullname,
-            name: u.fullname,
+            fullname: u.fullname || u.name || 'Khách Hàng',
+            name: u.fullname || u.name || 'Khách Hàng',
             phone: u.phone,
             avatar: u.avatar,
             total_points: u.total_points || 0,
@@ -268,28 +337,40 @@ export const useAuthStore = create<AuthState>((set, get) => {
           
           if (typeof window !== 'undefined') {
             localStorage.setItem('cinedot_current_user', JSON.stringify(userObj));
+            localStorage.setItem('cinedot_user', JSON.stringify(userObj));
             localStorage.setItem('cinedot_permissions', JSON.stringify(res.data.permissions || []));
           }
           
           set({
             user: userObj,
+            token,
             permissions: res.data.permissions || [],
             isAuthenticated: true,
           });
         }
-      } catch {
-        // Token might be invalid
+      } catch (err: any) {
+        // Only clear credentials if backend explicitly rejects the token with 401 Unauthorized
+        const is401 = err?.status === 401 || err?.code === '401' || err?.response?.status === 401;
+        if (is401) {
+          clearAllAuthSession();
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            permissions: [],
+          });
+        }
       }
     },
 
     hasPermission: (permission) => {
       const { permissions } = get();
-      return permissions.includes(permission) || permissions.includes('*') || get().user?.role_name === 'admin';
+      return permissions.includes(permission) || permissions.includes('*') || get().user?.role_name === 'admin' || (get().user as any)?.role === 'SUPER_ADMIN';
     },
 
     hasAnyPermission: (permList) => {
       const { permissions } = get();
-      return permList.some((p) => permissions.includes(p)) || permissions.includes('*') || get().user?.role_name === 'admin';
+      return permList.some((p) => permissions.includes(p)) || permissions.includes('*') || get().user?.role_name === 'admin' || (get().user as any)?.role === 'SUPER_ADMIN';
     },
 
     openAuthModal: (tab = 'login', notice = '', redirectUrl) => {

@@ -6,6 +6,7 @@ import {
   validateVoucherCode,
   processBookingPayment,
   calculateBookingSummary,
+  ProcessPaymentResult,
 } from '../services/payment.service';
 import { formatShowDate, seatBookingService } from '@/modules/booking/services/seat-booking.service';
 import { getRemainingBookingSeconds, formatSecondsToMMSS } from '@/modules/booking/services/bookingTimerService';
@@ -324,6 +325,11 @@ export function usePayment(
     });
 
     if (result && result.financial_breakdown) {
+      if (result.booking_summary?.booking_code) {
+        setBookingCode(result.booking_summary.booking_code);
+        updateBookingSession(showtimeId, { bookingCode: result.booking_summary.booking_code });
+      }
+
       const fb = result.financial_breakdown;
       setServerTicketPrice(fb.subtotal_tickets);
       setServerComboPrice(fb.subtotal_combos);
@@ -462,7 +468,11 @@ export function usePayment(
     await fetchSummary('');
   };
 
-  const handleProcessPayment = async (payload: any) => {
+  const handleProcessPayment = async (payload: any): Promise<ProcessPaymentResult> => {
+    const session = getBookingSession(showtimeId);
+    let curBookingId = bookingId || session?.bookingId || payload.bookingId;
+    let curBookingCode = bookingCode || session?.bookingCode || payload.bookingCode;
+
     const combosPayload = combosParam
       ? combosParam
           .split(',')
@@ -473,10 +483,56 @@ export function usePayment(
           .filter((c) => c.combo_id > 0 && c.quantity > 0)
       : [];
 
+    const cleanShowtimeId = String(showtimeId).replace('showtime-', '');
+
+    // If booking hasn't been held in backend yet, hold it now
+    if (!curBookingId && !curBookingCode) {
+      let seatIds = session?.showtimeSeatIds || [];
+      const rawSeats = seatsParam ? seatsParam.split(',').filter(Boolean) : [];
+      if (seatIds.length === 0 && rawSeats.length > 0) {
+        try {
+          const seatData = await seatBookingService.fetchShowtimeBookingData(cleanShowtimeId);
+          if (seatData?.seats?.length > 0) {
+            seatIds = seatData.seats
+              .filter((s) => rawSeats.includes(s.id))
+              .map((s) => s.showtime_seat_id);
+          }
+        } catch {}
+      }
+
+      if (seatIds.length > 0) {
+        const holdRes = await seatBookingService.holdSeats({
+          showtime_id: cleanShowtimeId,
+          showtime_seat_ids: seatIds,
+          combos: combosPayload,
+          voucher_code: appliedVoucher?.code,
+        });
+        if (holdRes?.success) {
+          curBookingId = holdRes.booking_id;
+          curBookingCode = holdRes.booking_code;
+          setBookingId(holdRes.booking_id);
+          setBookingCode(holdRes.booking_code);
+          updateBookingSession(showtimeId, {
+            bookingId: holdRes.booking_id,
+            bookingCode: holdRes.booking_code,
+            showtimeSeatIds: seatIds,
+          });
+        } else if (holdRes?.needsAuth) {
+          return {
+            success: false,
+            bookingId: '',
+            message: 'Vui lòng đăng nhập tài khoản để thanh toán đơn đặt vé.',
+            needsAuth: true,
+          };
+        }
+      }
+    }
+
     return processBookingPayment({
       ...payload,
-      bookingId: bookingId || payload.bookingId,
-      bookingCode: bookingCode || payload.bookingCode,
+      showtimeId: cleanShowtimeId,
+      bookingId: curBookingId,
+      bookingCode: curBookingCode,
       combos: combosPayload,
       voucherCode: appliedVoucher?.code,
     });

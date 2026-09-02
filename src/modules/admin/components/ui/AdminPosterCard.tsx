@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Film, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
 
 interface AdminPosterCardProps {
   src?: string | null;
@@ -11,7 +12,7 @@ interface AdminPosterCardProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'responsive' | 'custom';
   aspectRatio?: '2/3' | 'custom';
   rounded?: 'lg' | 'xl' | '2xl' | '3xl';
-  adult?: boolean;
+  ageRating?: string;
   rating?: number | string;
   fallbackText?: string;
 }
@@ -39,7 +40,7 @@ export function AdminPosterCard({
   size = 'sm',
   aspectRatio = '2/3',
   rounded = 'xl',
-  adult = false,
+  ageRating,
   rating,
   fallbackText,
 }: AdminPosterCardProps) {
@@ -99,12 +100,10 @@ export function AdminPosterCard({
         />
       )}
 
-      {/* 18+ Badge Overlay */}
-      {adult && (
-        <div className="absolute top-1 right-1 z-20">
-          <span className="px-1.5 py-0.5 rounded bg-rose-600/90 text-white text-[8px] font-black uppercase tracking-wider shadow-xs backdrop-blur-xs">
-            18+
-          </span>
+      {/* Age Rating Badge Overlay */}
+      {ageRating && (
+        <div className="absolute top-1 right-1 z-20 pointer-events-none">
+          <AgeRatingBadge ageRating={ageRating} size="xs" variant="solid" />
         </div>
       )}
 

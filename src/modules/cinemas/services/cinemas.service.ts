@@ -4,6 +4,8 @@ import { masterDataService } from '@/shared/services/masterData.service';
 import { imageHelper } from '@/shared/utils/imageHelper';
 import {
   CinemaItem,
+  CinemaRoomItem,
+  RoomLayoutData,
   PricingFormatTab,
   CinemaPricingFormat,
   CinemaMovieShowtime,
@@ -36,7 +38,7 @@ export async function fetchCinemasByCity(city?: string): Promise<CinemaItem[]> {
         id: String(c.cinema_id || c.id),
         slug: c.slug || 'cinedot-landmark-81',
         name: c.cinema_name || c.name || 'CineDot Cinema',
-        city: c.province || c.province_name || c.city || 'Hồ Chí Minh',
+        city: c.province || c.province_name || c.city || 'TP. Hồ Chí Minh',
         address: c.cinema_address || c.address || 'Địa chỉ cụm rạp',
         phone: c.phone || '1900 1234',
         status: c.isActive === false ? 'MAINTENANCE' : 'OPEN',
@@ -44,6 +46,21 @@ export async function fetchCinemasByCity(city?: string): Promise<CinemaItem[]> {
         bannerUrl: imageHelper.getBackdropUrl(c.banner_url || c.bannerUrl),
         mapUrl: c.map_url || `https://maps.google.com/?q=${encodeURIComponent(c.cinema_name || c.name)}`,
         description: c.description || 'Cụm rạp tiêu chuẩn quốc tế với phòng chiếu hiện đại và âm thanh vòm đỉnh cao.',
+        rooms: Array.isArray(c.rooms)
+          ? c.rooms.map((r: any) => ({
+              id: r.room_id || r.id,
+              roomId: r.room_id || r.id,
+              name: r.room_name || r.name,
+              roomName: r.room_name || r.name,
+              roomType: r.room_type || '2D Digital',
+              totalSeats: Number(r.total_seats) || 0,
+              screenType: r.screen_type,
+              soundTechnology: r.sound_technology,
+              screenConfig: r.screen_config,
+              features: Array.isArray(r.features) ? r.features : [],
+              isActive: r.is_active !== false,
+            }))
+          : [],
       }));
     }
   } catch (error) {
@@ -61,7 +78,7 @@ export async function fetchCinemaDetail(slug: string): Promise<CinemaItem | null
         id: String(c.cinema_id || c.id),
         slug: c.slug || slug,
         name: c.cinema_name || c.name || 'CineDot Cinema',
-        city: c.province || c.province_name || c.city || 'Hồ Chí Minh',
+        city: c.province || c.province_name || c.city || 'TP. Hồ Chí Minh',
         address: c.cinema_address || c.address || 'Địa chỉ cụm rạp',
         phone: c.phone || '1900 1234',
         status: c.isActive === false ? 'MAINTENANCE' : 'OPEN',
@@ -69,6 +86,21 @@ export async function fetchCinemaDetail(slug: string): Promise<CinemaItem | null
         bannerUrl: imageHelper.getBackdropUrl(c.banner_url || c.bannerUrl),
         mapUrl: c.map_url || `https://maps.google.com/?q=${encodeURIComponent(c.cinema_name || c.name)}`,
         description: c.description || 'Cụm rạp tiêu chuẩn quốc tế với phòng chiếu hiện đại và âm thanh vòm đỉnh cao.',
+        rooms: Array.isArray(c.rooms)
+          ? c.rooms.map((r: any) => ({
+              id: r.room_id || r.id,
+              roomId: r.room_id || r.id,
+              name: r.room_name || r.name,
+              roomName: r.room_name || r.name,
+              roomType: r.room_type || '2D Digital',
+              totalSeats: Number(r.total_seats) || 0,
+              screenType: r.screen_type,
+              soundTechnology: r.sound_technology,
+              screenConfig: r.screen_config,
+              features: Array.isArray(r.features) ? r.features : [],
+              isActive: r.is_active !== false,
+            }))
+          : [],
       };
     }
   } catch (error) {
@@ -107,29 +139,38 @@ export async function fetchCinemaShowtimes(slug: string, date?: string): Promise
       params: { date },
     });
 
-    if (res.data?.success && Array.isArray(res.data?.data)) {
-      return res.data.data
+    const rawResults = Array.isArray(res.data?.data?.results)
+      ? res.data.data.results
+      : Array.isArray(res.data?.data)
+      ? res.data.data
+      : [];
+
+    if (rawResults.length > 0) {
+      return rawResults
         .map((item: any) => {
           const movie = item.movie || {};
           const rawTimes = Array.isArray(item.times) ? item.times : [];
 
           const slots = rawTimes
             .filter((st: any) => {
+              const timeStr = st.startTime || st.time;
               return !isShowtimePassed({
-                dateStr: date,
-                timeStr: st.time,
+                dateStr: date || st.showDate,
+                timeStr,
                 showtimeStart: st.showtime_start,
               });
             })
             .map((st: any) => {
-              const startTime = st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : (st.time || '19:30');
+              const startTime = st.startTime || st.time || (st.showtime_start ? new Date(st.showtime_start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '19:30');
               const room = st.room || {};
               return {
-                id: st.showtime_id || st.id,
-                showtimeId: st.showtime_id || st.id,
+                id: st.id || st.showtime_id,
+                showtimeId: st.id || st.showtime_id,
                 time: startTime,
-                format: room.room_type || st.format || '2D Phụ Đề',
-                roomName: room.room_name || 'Phòng 01',
+                format: st.format || room.room_type || '2D Digital',
+                roomName: st.screen || room.room_name || 'Phòng chiếu',
+                price: st.price,
+                screenType: st.screen_type || room.screen_type,
               };
             });
 
@@ -138,12 +179,12 @@ export async function fetchCinemaShowtimes(slug: string, date?: string): Promise
             : 'Điện Ảnh';
 
           return {
-            movieId: movie.movie_id || movie.id,
+            movieId: movie.id || movie.movie_id,
             title: movie.title || 'Tên Phim',
             slug: movie.slug || 'movie-detail',
-            posterUrl: imageHelper.getPosterUrl(movie.poster_path || movie.poster_url),
-            ageRating: movie.age_rating || (movie.adult ? 'T18' : 'P'),
-            duration: movie.duration ? `${movie.duration} phút` : '120 phút',
+            posterUrl: imageHelper.getPosterUrl(movie.posterUrl || movie.poster_path || movie.poster_url),
+            ageRating: movie.ageRating || movie.age_rating || 'P',
+            duration: movie.runtime ? `${movie.runtime} phút` : (movie.duration ? `${movie.duration} phút` : '120 phút'),
             genres,
             slots,
           };
@@ -155,3 +196,16 @@ export async function fetchCinemaShowtimes(slug: string, date?: string): Promise
   }
   return [];
 }
+
+export async function fetchRoomLayout(roomId: number | string): Promise<RoomLayoutData | null> {
+  try {
+    const res = await apiClient.get(`/rooms/${roomId}/layout`);
+    if (res.data && res.data.seats) {
+      return res.data as RoomLayoutData;
+    }
+  } catch (error) {
+    console.error('Failed to fetch room layout', error);
+  }
+  return null;
+}
+

@@ -1,3 +1,5 @@
+import { MovieStatus } from '@/shared/utils/movieStatusHelper';
+
 export interface ShowtimeSlot {
   id: string;
   time: string;
@@ -95,5 +97,8 @@ export interface MovieDetail {
   synopsis: string;
   rating: number;
   voteCount: number;
-  status: 'NOW_SHOWING' | 'COMING_SOON';
+  imdbId?: string;
+  imdbUrl?: string;
+  tmdbId?: number;
+  status: MovieStatus;
 }

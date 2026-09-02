@@ -16,6 +16,7 @@ import {
   Tv,
 } from 'lucide-react';
 import { AdminPosterCard, AdminBackdropBanner } from '../ui';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
 
 interface AdminTmdbSyncModalProps {
   isOpen: boolean;
@@ -66,7 +67,8 @@ export const AdminTmdbSyncModal: React.FC<AdminTmdbSyncModalProps> = ({ isOpen, 
         overview: movie.overview,
         release_date: movie.releaseDate,
         original_language: movie.originalLanguage || 'en',
-        adult: movie.adult,
+        age_rating: movie.ageRating || 'P',
+        ageRating: movie.ageRating || 'P',
         popularity: movie.popularity,
         poster_path: movie.rawPosterPath || movie.posterUrl,
         backdrop_path: movie.rawBackdropPath || movie.backdropUrl,
@@ -167,18 +169,14 @@ export const AdminTmdbSyncModal: React.FC<AdminTmdbSyncModalProps> = ({ isOpen, 
                     src={movie.posterUrl}
                     alt={movie.title}
                     size="sm"
-                    adult={movie.adult}
+                    ageRating={movie.ageRating}
                     fallbackText={movie.title}
                     className="shrink-0 shadow-xs border border-gray-200"
                   />
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-extrabold text-sm text-slate-900 truncate">{movie.title}</h4>
-                      {movie.adult && (
-                        <span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-black">
-                          18+
-                        </span>
-                      )}
+                      <AgeRatingBadge ageRating={movie.ageRating} size="xs" variant="solid" />
                     </div>
                     <span className="text-xs text-slate-500 font-medium truncate">{movie.originalTitle}</span>
                     <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold mt-0.5">

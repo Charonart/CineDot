@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Clock, ArrowRight, ArrowLeft, Ticket, Timer, ShieldCheck } from 'lucide-react';
 import { ShowtimeBookingInfo, SeatItem } from '../types/seat-booking.types';
 import { startBookingTimer } from '../services/bookingTimerService';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
 interface BookingSidebarProps {
   info: ShowtimeBookingInfo;
@@ -71,12 +72,14 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
   const handleContinueClick = async () => {
     if (!isSelected || isHolding) return;
 
+    const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
+      info.showDate
+    )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
+
     const res = await onHoldSeats();
     if (res?.success === false) {
       if (res.needsAuth) {
-        import('@/shared/store/useAuthStore').then(({ useAuthStore }) => {
-          useAuthStore.getState().openAuthModal('login');
-        });
+        useAuthStore.getState().openAuthModal('login', 'Vui lòng đăng nhập tài khoản để tiếp tục giữ ghế và đặt vé.', foodUrl);
         return;
       }
       alert(res.message || 'Lỗi giữ ghế, vui lòng thử lại.');
@@ -88,9 +91,6 @@ export const BookingSidebar: React.FC<BookingSidebarProps> = ({
     if (onOpenComboModal) {
       onOpenComboModal();
     } else {
-      const foodUrl = `/booking/food?showtime_id=${info.showtimeId}&movie=${info.movieSlug}&seats=${selectedSeatIdsStr}&date=${encodeURIComponent(
-        info.showDate
-      )}&time=${encodeURIComponent(currentShowTime)}&cinema=${encodeURIComponent(info.cinemaName)}`;
       router.push(foodUrl);
     }
   };

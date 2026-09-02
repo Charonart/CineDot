@@ -258,9 +258,11 @@ export function ShowtimesTimelineCanvas({
   };
 
   const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>, roomId: number) => {
+    const target = e.target as HTMLElement;
     if (
-      (e.target as HTMLElement).closest('.showtime-block-item') ||
-      (e.target as HTMLElement).closest('.group\\/card')
+      target.closest('.showtime-block-item') ||
+      target.closest('[data-showtime-block]') ||
+      target.closest('.group\\/card')
     ) {
       return;
     }

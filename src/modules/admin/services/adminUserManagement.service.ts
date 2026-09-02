@@ -114,41 +114,31 @@ export const adminUserManagementService = {
 
   // ── 2. Roles & Permissions ──
   async getRoles(): Promise<RoleItemDTO[]> {
-    const res = await apiClient.get<{ success: boolean; data: RoleItemDTO[] }>(
-      ENDPOINTS.ADMIN.ROLES
-    );
-    return res.data.data;
+    const res = await apiClient.get<any>(ENDPOINTS.ADMIN.ROLES);
+    const d = res.data?.data ?? res.data;
+    return Array.isArray(d) ? d : [];
   },
 
   async getRoleDetail(id: number | string): Promise<RoleItemDTO & { permissions: any[] }> {
-    const res = await apiClient.get<{ success: boolean; data: any }>(
-      ENDPOINTS.ADMIN.ROLE_DETAIL(id)
-    );
-    return res.data.data;
+    const res = await apiClient.get<any>(ENDPOINTS.ADMIN.ROLE_DETAIL(id));
+    return res.data?.data ?? res.data;
   },
 
   async createRole(payload: CreateRolePayload): Promise<RoleItemDTO> {
-    const res = await apiClient.post<{ success: boolean; message: string; data: RoleItemDTO }>(
-      ENDPOINTS.ADMIN.ROLES,
-      payload
-    );
-    return res.data.data;
+    const res = await apiClient.post<any>(ENDPOINTS.ADMIN.ROLES, payload);
+    return res.data?.data ?? res.data;
   },
 
   async updateRole(id: number | string, payload: UpdateRolePayload): Promise<RoleItemDTO> {
-    const res = await apiClient.put<{ success: boolean; message: string; data: RoleItemDTO }>(
-      ENDPOINTS.ADMIN.ROLE_DETAIL(id),
-      payload
-    );
-    return res.data.data;
+    const res = await apiClient.put<any>(ENDPOINTS.ADMIN.ROLE_DETAIL(id), payload);
+    return res.data?.data ?? res.data;
   },
 
   async syncRolePermissions(id: number | string, permissionIds: number[]): Promise<any> {
-    const res = await apiClient.put<{ success: boolean; message: string; data: any }>(
-      ENDPOINTS.ADMIN.ROLE_PERMISSIONS(id),
-      { permission_ids: permissionIds }
-    );
-    return res.data.data;
+    const res = await apiClient.put<any>(ENDPOINTS.ADMIN.ROLE_PERMISSIONS(id), {
+      permission_ids: permissionIds,
+    });
+    return res.data?.data ?? res.data;
   },
 
   async deleteRole(id: number | string): Promise<{ success: boolean; message: string }> {
@@ -159,10 +149,12 @@ export const adminUserManagementService = {
   },
 
   async getPermissions(): Promise<PermissionsListResponseDTO> {
-    const res = await apiClient.get<{ success: boolean; data: PermissionsListResponseDTO }>(
-      ENDPOINTS.ADMIN.PERMISSIONS
-    );
-    return res.data.data;
+    const res = await apiClient.get<any>(ENDPOINTS.ADMIN.PERMISSIONS);
+    const d = res.data?.data ?? res.data;
+    return {
+      list: Array.isArray(d?.list) ? d.list : Array.isArray(d) ? d : [],
+      grouped: d?.grouped && typeof d.grouped === 'object' ? d.grouped : {},
+    };
   },
 
   // ── 3. User Tiers ──

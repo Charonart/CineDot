@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Film, Plus, Search, Loader2, GripVertical, Clapperboard, X, Clock } from 'lucide-react';
 import { AdminMovieOption } from '../../types/adminShowtime.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { isNowShowing, isUpcoming } from '@/shared/utils/movieStatusHelper';
 
 interface ShowtimesMovieSidebarProps {
   movies: AdminMovieOption[];
@@ -12,17 +13,7 @@ interface ShowtimesMovieSidebarProps {
   onDragStartMovie?: (movie: AdminMovieOption) => void;
 }
 
-type MovieFilterTab = 'ALL' | 'NOW_SHOWING' | 'COMING_SOON';
-
-const isNowShowing = (m: AdminMovieOption): boolean => {
-  const s = (m.status || '').toLowerCase().trim();
-  return !s.includes('coming') && !s.includes('upcoming') && !s.includes('stop') && !s.includes('end');
-};
-
-const isComingSoon = (m: AdminMovieOption): boolean => {
-  const s = (m.status || '').toLowerCase().trim();
-  return s.includes('coming') || s.includes('upcoming');
-};
+type MovieFilterTab = 'ALL' | 'now_showing' | 'upcoming';
 
 export function ShowtimesMovieSidebar({
   movies,
@@ -31,20 +22,19 @@ export function ShowtimesMovieSidebar({
   onDragStartMovie,
 }: ShowtimesMovieSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<MovieFilterTab>('NOW_SHOWING');
+  const [activeTab, setActiveTab] = useState<MovieFilterTab>('now_showing');
 
-  const nowShowingCount = useMemo(() => movies.filter(isNowShowing).length, [movies]);
-  const comingSoonCount = useMemo(() => movies.filter(isComingSoon).length, [movies]);
+  const nowShowingCount = useMemo(() => movies.filter((m) => isNowShowing(m.status)).length, [movies]);
+  const upcomingCount = useMemo(() => movies.filter((m) => isUpcoming(m.status)).length, [movies]);
 
   // Filter movies by active tab & search keyword
   const filteredMovies = useMemo(() => {
     return movies.filter((m) => {
       // 1. Status Filter
-      if (activeTab === 'NOW_SHOWING') {
-        // If there are explicit now-showing movies, use that; otherwise allow all if only 1 status
-        if (nowShowingCount > 0 && !isNowShowing(m)) return false;
-      } else if (activeTab === 'COMING_SOON') {
-        if (!isComingSoon(m)) return false;
+      if (activeTab === 'now_showing') {
+        if (nowShowingCount > 0 && !isNowShowing(m.status)) return false;
+      } else if (activeTab === 'upcoming') {
+        if (!isUpcoming(m.status)) return false;
       }
 
       // 2. Search Filter
@@ -140,9 +130,9 @@ export function ShowtimesMovieSidebar({
         {/* Status Segment Tabs */}
         <div className="grid grid-cols-3 gap-1 bg-slate-200/70 p-0.5 rounded-lg text-[11px] font-medium">
           <button
-            onClick={() => setActiveTab('NOW_SHOWING')}
+            onClick={() => setActiveTab('now_showing')}
             className={`py-1 px-1 rounded-md text-center transition-all cursor-pointer truncate ${
-              activeTab === 'NOW_SHOWING'
+              activeTab === 'now_showing'
                 ? 'bg-white text-slate-900 shadow-2xs font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
@@ -150,14 +140,14 @@ export function ShowtimesMovieSidebar({
             Đang chiếu ({nowShowingCount})
           </button>
           <button
-            onClick={() => setActiveTab('COMING_SOON')}
+            onClick={() => setActiveTab('upcoming')}
             className={`py-1 px-1 rounded-md text-center transition-all cursor-pointer truncate ${
-              activeTab === 'COMING_SOON'
+              activeTab === 'upcoming'
                 ? 'bg-white text-slate-900 shadow-2xs font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Sắp chiếu ({comingSoonCount})
+            Sắp chiếu ({upcomingCount})
           </button>
           <button
             onClick={() => setActiveTab('ALL')}

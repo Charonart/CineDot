@@ -28,6 +28,8 @@ import {
   Tv,
   Layers,
   FileText,
+  Star,
+  ExternalLink,
 } from 'lucide-react';
 import { useAdminMovies, useAdminMovieCredits } from '../hooks/useAdminMovies';
 import { adminMovieService } from '../services/adminMovie.service';
@@ -36,15 +38,17 @@ import { createMovieSchema } from '../schemas/adminMovie.schema';
 import { AdminTmdbSyncModal } from './modals/AdminTmdbSyncModal';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
+import { getAgeRatingInfo } from '@/shared/utils/ageRatingHelper';
 import { AdminBackdropBanner, AdminPosterCard, AdminBannerLivePreview } from './ui';
 import { CineDataTable, useServerTable } from '@/shared/components/table';
 import { CineColumnDef, BulkAction } from '@/shared/types/dataTable.types';
 
 const STATUS_OPTIONS = [
   { id: 'ALL', label: 'Trạng thái: Tất cả', apiKey: undefined },
-  { id: 'NOW_SHOWING', label: 'Đang chiếu (now_showing)', apiKey: 'now_showing' },
-  { id: 'COMING_SOON', label: 'Sắp chiếu (upcoming)', apiKey: 'upcoming' },
-  { id: 'STOPPED', label: 'Ngừng chiếu (ended)', apiKey: 'ended' },
+  { id: 'now_showing', label: 'Đang chiếu (now_showing)', apiKey: 'now_showing' },
+  { id: 'upcoming', label: 'Sắp chiếu (upcoming)', apiKey: 'upcoming' },
+  { id: 'ended', label: 'Ngừng chiếu (ended)', apiKey: 'ended' },
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -100,13 +104,16 @@ export function AdminMoviesView() {
   const [addReleaseDate, setAddReleaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [addDurationMinutes, setAddDurationMinutes] = useState(120);
   const [addOriginalLanguage, setAddOriginalLanguage] = useState('vi');
-  const [addAdult, setAddAdult] = useState(false);
+  const [addAgeRating, setAddAgeRating] = useState('P');
   const [addPopularity, setAddPopularity] = useState<number | string>(10);
   const [addStatus, setAddStatus] = useState<'now_showing' | 'upcoming' | 'ended'>('now_showing');
   const [addSelectedGenreIds, setAddSelectedGenreIds] = useState<number[]>([1]);
   const [addPosterPath, setAddPosterPath] = useState('');
   const [addBackdropPath, setAddBackdropPath] = useState('');
   const [addTrailerUrl, setAddTrailerUrl] = useState('');
+  const [addImdbId, setAddImdbId] = useState('');
+  const [addRating, setAddRating] = useState<number | string>(0);
+  const [addVoteCount, setAddVoteCount] = useState<number | string>(0);
   const [addErrorMsg, setAddErrorMsg] = useState('');
   const [addSuccessMsg, setAddSuccessMsg] = useState('');
 
@@ -117,13 +124,16 @@ export function AdminMoviesView() {
   const [editReleaseDate, setEditReleaseDate] = useState('');
   const [editDurationMinutes, setEditDurationMinutes] = useState(120);
   const [editOriginalLanguage, setEditOriginalLanguage] = useState('vi');
-  const [editAdult, setEditAdult] = useState(false);
+  const [editAgeRating, setEditAgeRating] = useState('P');
   const [editPopularity, setEditPopularity] = useState<number | string>(10);
   const [editStatus, setEditStatus] = useState<'now_showing' | 'upcoming' | 'ended'>('now_showing');
   const [editSelectedGenreIds, setEditSelectedGenreIds] = useState<number[]>([]);
   const [editPosterPath, setEditPosterPath] = useState('');
   const [editBackdropPath, setEditBackdropPath] = useState('');
   const [editTrailerUrl, setEditTrailerUrl] = useState('');
+  const [editImdbId, setEditImdbId] = useState('');
+  const [editRating, setEditRating] = useState<number | string>(0);
+  const [editVoteCount, setEditVoteCount] = useState<number | string>(0);
   const [editErrorMsg, setEditErrorMsg] = useState('');
   const [editSuccessMsg, setEditSuccessMsg] = useState('');
 
@@ -139,8 +149,11 @@ export function AdminMoviesView() {
     setEditReleaseDate(movie.releaseDate || new Date().toISOString().split('T')[0]);
     setEditDurationMinutes(movie.durationMinutes || 120);
     setEditOriginalLanguage(movie.originalLanguage || 'vi');
-    setEditAdult(Boolean(movie.adult));
+    setEditAgeRating(movie.ageRating || 'P');
     setEditPopularity(movie.popularity ?? 10);
+    setEditImdbId(movie.imdbId || '');
+    setEditRating(movie.rating || 0);
+    setEditVoteCount(movie.voteCount || 0);
     
     // Normalize raw status to now_showing / upcoming / ended
     let normalizedStatus: 'now_showing' | 'upcoming' | 'ended' = 'now_showing';
@@ -192,7 +205,7 @@ export function AdminMoviesView() {
       overview: addOverview.trim() || undefined,
       releaseDate: addReleaseDate,
       originalLanguage: addOriginalLanguage,
-      adult: addAdult,
+      ageRating: addAgeRating,
       popularity: Number(addPopularity) || 0,
       durationMinutes: Number(addDurationMinutes),
       status: addStatus,
@@ -214,7 +227,8 @@ export function AdminMoviesView() {
         overview: addOverview.trim() || undefined,
         release_date: addReleaseDate,
         original_language: addOriginalLanguage,
-        adult: addAdult,
+        age_rating: addAgeRating,
+        ageRating: addAgeRating,
         popularity: Number(addPopularity) || 0,
         duration_minutes: Number(addDurationMinutes),
         status: addStatus,
@@ -222,6 +236,9 @@ export function AdminMoviesView() {
         poster_path: cleanedPoster,
         backdrop_path: cleanedBackdrop || undefined,
         trailer_url: addTrailerUrl.trim() || undefined,
+        imdb_id: addImdbId.trim() || undefined,
+        vote_average: Number(addRating) || 0,
+        vote_count: Number(addVoteCount) || 0,
       });
 
       setAddSuccessMsg(`Đã tạo thành công phim "${addTitle}" trên hệ thống CineDot!`);
@@ -233,6 +250,9 @@ export function AdminMoviesView() {
         setAddPosterPath('');
         setAddBackdropPath('');
         setAddTrailerUrl('');
+        setAddImdbId('');
+        setAddRating(0);
+        setAddVoteCount(0);
         setAddSuccessMsg('');
       }, 1200);
     } catch (err: unknown) {
@@ -260,7 +280,8 @@ export function AdminMoviesView() {
           overview: editOverview.trim() || undefined,
           release_date: editReleaseDate,
           original_language: editOriginalLanguage,
-          adult: editAdult,
+          age_rating: editAgeRating,
+          ageRating: editAgeRating,
           popularity: Number(editPopularity) || 0,
           duration_minutes: Number(editDurationMinutes),
           status: editStatus,
@@ -268,6 +289,9 @@ export function AdminMoviesView() {
           poster_path: cleanedPoster || undefined,
           backdrop_path: cleanedBackdrop || undefined,
           trailer_url: editTrailerUrl.trim() || undefined,
+          imdb_id: editImdbId.trim() || undefined,
+          vote_average: Number(editRating) || 0,
+          vote_count: Number(editVoteCount) || 0,
         },
       });
 
@@ -308,7 +332,7 @@ export function AdminMoviesView() {
               src={row.posterUrl}
               alt={row.title}
               size="sm"
-              adult={row.adult}
+              ageRating={row.ageRating}
               fallbackText={row.title}
               className="shrink-0 border border-gray-200 shadow-xs"
             />
@@ -320,11 +344,7 @@ export function AdminMoviesView() {
                 >
                   {row.title}
                 </h3>
-                {row.adult && (
-                  <span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-black">
-                    18+
-                  </span>
-                )}
+                <AgeRatingBadge ageRating={row.ageRating} size="xs" variant="solid" />
               </div>
               <span className="text-[11px] text-slate-400 font-medium line-clamp-1 italic">
                 {row.originalTitle}
@@ -397,14 +417,14 @@ export function AdminMoviesView() {
           { label: 'Ngừng chiếu', value: 'ended', badgeClass: 'bg-slate-100 text-slate-600 border-gray-200' },
         ],
         cell: ({ row }: { row: AdminMovieItem }) => {
-          if (row.status === 'NOW_SHOWING') {
+          if (row.status === 'now_showing') {
             return (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200">
                 Đang chiếu
               </span>
             );
           }
-          if (row.status === 'COMING_SOON') {
+          if (row.status === 'upcoming') {
             return (
               <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-200">
                 Sắp chiếu
@@ -417,6 +437,59 @@ export function AdminMoviesView() {
             </span>
           );
         },
+      },
+      {
+        key: 'vote_average',
+        title: 'Điểm IMDb',
+        dataType: 'text',
+        sortable: true,
+        filterable: true,
+        width: 140,
+        cell: ({ row }: { row: AdminMovieItem }) => (
+          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight shadow-2xs">
+              IMDb
+            </span>
+            {row.rating > 0 ? (
+              <span className="font-extrabold text-xs text-slate-800">
+                {row.rating.toFixed(1)}
+              </span>
+            ) : (
+              <span className="text-[10px] text-slate-400 italic">Chưa có đánh giá</span>
+            )}
+            {row.imdbId && (
+              <a
+                href={row.imdbUrl || `https://www.imdb.com/title/${row.imdbId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-slate-400 hover:text-[#7C6FE8] transition-colors"
+                title={`Mã IMDb: ${row.imdbId} - Mở trang IMDb`}
+              >
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'age_rating',
+        title: 'Độ Tuổi',
+        dataType: 'select',
+        options: [
+          { label: 'P - Mọi lứa tuổi', value: 'P' },
+          { label: 'K - Dưới 13T có GH', value: 'K' },
+          { label: 'T13 - Từ 13 tuổi', value: 'T13' },
+          { label: 'T16 - Từ 16 tuổi', value: 'T16' },
+          { label: 'T18 - Từ 18 tuổi', value: 'T18' },
+        ],
+        sortable: true,
+        filterable: true,
+        width: 110,
+        cell: ({ row }: { row: AdminMovieItem }) => (
+          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+            <AgeRatingBadge ageRating={row.ageRating} size="xs" variant="solid" showTooltip />
+          </div>
+        ),
       },
       {
         key: 'actions',
@@ -546,27 +619,23 @@ export function AdminMoviesView() {
               heightClass="h-44 sm:h-52"
               showOverlay={true}
               badgeText={
-                viewingMovie.status === 'NOW_SHOWING'
+                viewingMovie.status === 'now_showing'
                   ? 'Đang Chiếu'
-                  : viewingMovie.status === 'COMING_SOON'
+                  : viewingMovie.status === 'upcoming'
                   ? 'Sắp Chiếu'
                   : 'Ngừng Chiếu'
               }
               badgeColor={
-                viewingMovie.status === 'NOW_SHOWING'
+                viewingMovie.status === 'now_showing'
                   ? 'bg-[#7C6FE8]'
-                  : viewingMovie.status === 'COMING_SOON'
+                  : viewingMovie.status === 'upcoming'
                   ? 'bg-amber-500'
                   : 'bg-slate-600'
               }
               fallbackTitle={`Backdrop: ${viewingMovie.title}`}
               overlayContent={
                 <div className="flex items-center gap-2">
-                  {viewingMovie.adult && (
-                    <span className="px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-black shadow-md">
-                      18+
-                    </span>
-                  )}
+                  <AgeRatingBadge ageRating={viewingMovie.ageRating} size="sm" variant="solid" />
                   <span className="px-2.5 py-1 rounded-full bg-black/60 text-amber-300 text-[11px] font-extrabold backdrop-blur-xs border border-amber-400/20">
                     ★ {viewingMovie.popularity} Điểm nổi bật
                   </span>
@@ -592,7 +661,7 @@ export function AdminMoviesView() {
                 src={viewingMovie.posterUrl}
                 alt={viewingMovie.title}
                 size="lg"
-                adult={viewingMovie.adult}
+                ageRating={viewingMovie.ageRating}
                 rounded="2xl"
                 fallbackText={viewingMovie.title}
                 className="shadow-xl border border-gray-200 shrink-0 self-center sm:self-start"
@@ -600,7 +669,7 @@ export function AdminMoviesView() {
 
               <div className="flex flex-col gap-4 flex-1">
                 {/* Information Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs bg-slate-50 p-4 rounded-2xl border border-gray-100">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs bg-slate-50 p-4 rounded-2xl border border-gray-100">
                   <div>
                     <span className="text-slate-400 block text-[11px] flex items-center gap-1">
                       <Clock className="w-3 h-3" /> Thời lượng
@@ -615,15 +684,37 @@ export function AdminMoviesView() {
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[11px] flex items-center gap-1">
-                      <Globe className="w-3 h-3" /> Ngôn ngữ
+                      <ShieldAlert className="w-3 h-3" /> Độ tuổi
                     </span>
-                    <span className="font-bold text-slate-800 uppercase">{viewingMovie.originalLanguage}</span>
+                    <div className="mt-0.5">
+                      <AgeRatingBadge ageRating={viewingMovie.ageRating} size="xs" variant="solid" />
+                    </div>
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[11px] flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" /> Popularity
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span> Đánh giá
                     </span>
-                    <span className="font-bold text-[#7C6FE8]">{viewingMovie.popularity}</span>
+                    <span className="font-black text-amber-600">
+                      {viewingMovie.rating > 0 ? `${viewingMovie.rating.toFixed(1)}/10` : 'Chưa có đánh giá'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px] flex items-center gap-1">
+                      <Globe className="w-3 h-3" /> Mã IMDb
+                    </span>
+                    {viewingMovie.imdbId ? (
+                      <a
+                        href={viewingMovie.imdbUrl || `https://www.imdb.com/title/${viewingMovie.imdbId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-bold text-[#7C6FE8] hover:underline flex items-center gap-1"
+                      >
+                        <span>{viewingMovie.imdbId}</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    ) : (
+                      <span className="font-medium text-slate-400">—</span>
+                    )}
                   </div>
                 </div>
 
@@ -840,7 +931,7 @@ export function AdminMoviesView() {
                   backdropPath={cleanTmdbPath(addBackdropPath)}
                   releaseDate={addReleaseDate}
                   durationMinutes={addDurationMinutes}
-                  adult={addAdult}
+                  ageRating={addAgeRating}
                   status={addStatus}
                   genres={genres.filter((g) => addSelectedGenreIds.includes(g.id)).map((g) => g.name)}
                   rating={Number(addPopularity) || 8.0}
@@ -897,8 +988,8 @@ export function AdminMoviesView() {
                   />
                 </div>
 
-                {/* Release Date, Language, Popularity */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Release Date, Age Rating, Language, Popularity */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-slate-700">Ngày Khởi Chiếu *</label>
                     <input
@@ -908,6 +999,24 @@ export function AdminMoviesView() {
                       required
                       className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all"
                     />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                      <span>Độ Tuổi *</span>
+                      <AgeRatingBadge ageRating={addAgeRating} size="xs" variant="solid" />
+                    </label>
+                    <select
+                      value={addAgeRating}
+                      onChange={(e) => setAddAgeRating(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all cursor-pointer"
+                    >
+                      <option value="P">P — Mọi lứa tuổi (Phổ biến)</option>
+                      <option value="K">K — Dưới 13T có người giám hộ</option>
+                      <option value="T13">T13 — Khán giả từ đủ 13 tuổi (13+)</option>
+                      <option value="T16">T16 — Khán giả từ đủ 16 tuổi (16+)</option>
+                      <option value="T18">T18 — Khán giả từ đủ 18 tuổi (18+)</option>
+                    </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -926,13 +1035,62 @@ export function AdminMoviesView() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-slate-700">Popularity Score (Điểm thịnh hành)</label>
+                    <label className="text-xs font-bold text-slate-700">Popularity (Điểm nổi bật)</label>
                     <input
                       type="number"
                       min="0"
                       step="any"
                       value={addPopularity}
                       onChange={(e) => setAddPopularity(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* IMDb Rating & ID Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span>
+                      <span>Mã IMDb (imdb_id)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={addImdbId}
+                      onChange={(e) => setAddImdbId(e.target.value)}
+                      placeholder="VD: tt10872600"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span>
+                      <span>Điểm đánh giá (0 - 10)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      value={addRating}
+                      onChange={(e) => setAddRating(e.target.value)}
+                      placeholder="VD: 8.5"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span>
+                      <span>Số lượt vote</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={addVoteCount}
+                      onChange={(e) => setAddVoteCount(e.target.value)}
+                      placeholder="VD: 125000"
                       className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#7C6FE8] transition-all"
                     />
                   </div>
@@ -975,29 +1133,6 @@ export function AdminMoviesView() {
                     >
                       Ngừng Chiếu
                     </button>
-                  </div>
-                </div>
-
-                {/* Adult 18+ Toggle Card */}
-                <div
-                  onClick={() => setAddAdult(!addAdult)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                    addAdult
-                      ? 'bg-rose-50 border-rose-200 text-rose-800'
-                      : 'bg-white border-gray-200 text-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className={`p-2 rounded-xl ${addAdult ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      <ShieldAlert className="w-4 h-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold">Phim Giới Hạn Độ Tuổi 18+ (C18 / Adult)</span>
-                      <span className="text-[11px] text-slate-400 font-medium">Bật nếu phim có nội dung dành riêng cho người lớn</span>
-                    </div>
-                  </div>
-                  <div className={`w-5 h-5 rounded-lg border flex items-center justify-center ${addAdult ? 'bg-rose-500 border-rose-500 text-white' : 'border-gray-300'}`}>
-                    {addAdult && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
                 </div>
 
@@ -1213,7 +1348,7 @@ export function AdminMoviesView() {
                   backdropPath={cleanTmdbPath(editBackdropPath)}
                   releaseDate={editReleaseDate}
                   durationMinutes={editDurationMinutes}
-                  adult={editAdult}
+                  ageRating={editAgeRating}
                   status={editStatus}
                   genres={genres.filter((g) => editSelectedGenreIds.includes(g.id)).map((g) => g.name)}
                   rating={Number(editPopularity) || 8.0}
@@ -1270,8 +1405,8 @@ export function AdminMoviesView() {
                   />
                 </div>
 
-                {/* Release Date, Language, Popularity */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Release Date, Age Rating, Language, Popularity */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-slate-700">Ngày Khởi Chiếu *</label>
                     <input
@@ -1281,6 +1416,24 @@ export function AdminMoviesView() {
                       required
                       className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
                     />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                      <span>Độ Tuổi *</span>
+                      <AgeRatingBadge ageRating={editAgeRating} size="xs" variant="solid" />
+                    </label>
+                    <select
+                      value={editAgeRating}
+                      onChange={(e) => setEditAgeRating(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    >
+                      <option value="P">P — Mọi lứa tuổi (Phổ biến)</option>
+                      <option value="K">K — Dưới 13T có người giám hộ</option>
+                      <option value="T13">T13 — Khán giả từ đủ 13 tuổi (13+)</option>
+                      <option value="T16">T16 — Khán giả từ đủ 16 tuổi (16+)</option>
+                      <option value="T18">T18 — Khán giả từ đủ 18 tuổi (18+)</option>
+                    </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -1299,13 +1452,62 @@ export function AdminMoviesView() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-slate-700">Popularity Score (Điểm thịnh hành)</label>
+                    <label className="text-xs font-bold text-slate-700">Popularity (Điểm nổi bật)</label>
                     <input
                       type="number"
                       min="0"
                       step="any"
                       value={editPopularity}
                       onChange={(e) => setEditPopularity(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* IMDb Rating & ID Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span>
+                      <span>Mã IMDb (imdb_id)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editImdbId}
+                      onChange={(e) => setEditImdbId(e.target.value)}
+                      placeholder="VD: tt10872600"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span>
+                      <span>Điểm đánh giá (0 - 10)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      value={editRating}
+                      onChange={(e) => setEditRating(e.target.value)}
+                      placeholder="VD: 8.5"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">IMDb</span>
+                      <span>Số lượt vote</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editVoteCount}
+                      onChange={(e) => setEditVoteCount(e.target.value)}
+                      placeholder="VD: 125000"
                       className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
                     />
                   </div>
@@ -1348,29 +1550,6 @@ export function AdminMoviesView() {
                     >
                       Ngừng Chiếu
                     </button>
-                  </div>
-                </div>
-
-                {/* Adult 18+ Toggle Card */}
-                <div
-                  onClick={() => setEditAdult(!editAdult)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                    editAdult
-                      ? 'bg-rose-50 border-rose-200 text-rose-800'
-                      : 'bg-white border-gray-200 text-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className={`p-2 rounded-xl ${editAdult ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      <ShieldAlert className="w-4 h-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold">Phim Giới Hạn Độ Tuổi 18+ (C18 / Adult)</span>
-                      <span className="text-[11px] text-slate-400 font-medium">Bật nếu phim có nội dung dành riêng cho người lớn</span>
-                    </div>
-                  </div>
-                  <div className={`w-5 h-5 rounded-lg border flex items-center justify-center ${editAdult ? 'bg-rose-500 border-rose-500 text-white' : 'border-gray-300'}`}>
-                    {editAdult && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
                 </div>
 

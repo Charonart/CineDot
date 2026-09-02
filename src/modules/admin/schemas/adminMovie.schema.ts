@@ -20,7 +20,7 @@ export const createMovieSchema = z.object({
     .string({ required_error: 'Vui lòng chọn ngày khởi chiếu' })
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày khởi chiếu phải theo định dạng YYYY-MM-DD'),
   originalLanguage: z.string().default('vi'),
-  adult: z.boolean().default(false),
+  ageRating: z.string().default('P'),
   popularity: z.number().min(0).default(0),
   durationMinutes: z
     .number({ required_error: 'Vui lòng nhập thời lượng phim (phút)' })
@@ -50,6 +50,9 @@ export const createMovieSchema = z.object({
     .url('Đường dẫn Trailer YouTube không hợp lệ')
     .optional()
     .or(z.literal('')),
+  voteAverage: z.number().min(0).max(10).optional(),
+  voteCount: z.number().int().min(0).optional(),
+  imdbId: z.string().max(20).optional().or(z.literal('')),
 });
 
 export type CreateMovieFormValues = z.infer<typeof createMovieSchema>;

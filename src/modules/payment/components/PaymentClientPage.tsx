@@ -16,6 +16,7 @@ import { SeatTimeoutModal } from '@/modules/booking/components/SeatTimeoutModal'
 import { MOCK_PAYMENT_METHODS } from '../mocks/mockPaymentData';
 import { resetBookingTimer } from '@/modules/booking/services/bookingTimerService';
 import { updateBookingSession } from '@/modules/booking/services/bookingSessionService';
+import { useAuthStore } from '@/shared/store/useAuthStore';
 
 interface PaymentClientPageProps {
   showtimeId?: string;
@@ -110,11 +111,14 @@ export function PaymentClientPage({
           );
         }
       } else {
-
-        alert((res as any)?.message || 'Thanh toán thất bại, vui lòng thử lại.');
+        if ((res as any)?.needsAuth) {
+          useAuthStore.getState().openAuthModal('login', 'Vui lòng đăng nhập tài khoản để tiến hành thanh toán.');
+          return;
+        }
+        alert(res?.message || (res as any)?.message || 'Thanh toán thất bại, vui lòng thử lại.');
       }
-    } catch {
-      alert('Đã có lỗi xảy ra trong quá trình xử lý thanh toán.');
+    } catch (err: any) {
+      alert(err?.message || 'Đã có lỗi xảy ra trong quá trình xử lý thanh toán.');
     } finally {
       setIsProcessing(false);
     }

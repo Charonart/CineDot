@@ -53,9 +53,15 @@ export const adminStaffMapper = {
       }
     }
 
+    const resolvedName =
+      dto.name ||
+      dto.fullname ||
+      dto.full_name ||
+      (dto.email ? dto.email.split('@')[0] : 'Nhân Viên');
+
     return {
       id: String(dto.id),
-      name: dto.name || 'Nhân Viên',
+      name: resolvedName,
       email: dto.email,
       phone: dto.phone || 'Chưa cập nhật',
       role,

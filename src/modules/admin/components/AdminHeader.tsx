@@ -20,9 +20,8 @@ import { AdminNotificationCenter } from './notifications/AdminNotificationCenter
 
 const PAGE_TITLES: Record<string, { group: string; title: string }> = {
   '/admin': { group: 'Tổng Quan', title: 'Bảng Điều Hành' },
-  '/admin/movies': { group: 'Phim & Sản Phẩm', title: 'Quản Lý Phim' },
+  '/admin/movies': { group: 'Phim & Sản Phẩm', title: 'Kho Phim Chiếu' },
   '/admin/movies/genres': { group: 'Phim & Sản Phẩm', title: 'Thể Loại Phim' },
-  '/admin/movies/reviews': { group: 'Phim & Sản Phẩm', title: 'Đánh Giá Phim' },
   '/admin/persons': { group: 'Phim & Sản Phẩm', title: 'Đạo Diễn & Diễn Viên' },
   '/admin/cinemas': { group: 'Vận Hành', title: 'Quản Lý Rạp & Phòng Chiếu' },
   '/admin/showtimes': { group: 'Vận Hành', title: 'Quản Lý Suất Chiếu' },

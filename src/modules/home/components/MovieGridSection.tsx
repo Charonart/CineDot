@@ -10,7 +10,7 @@ interface MovieGridSectionProps {
 }
 
 export const MovieGridSection: React.FC<MovieGridSectionProps> = ({ movies, isLoading }) => {
-  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>('now-showing');
+  const [activeTab, setActiveTab] = useState<'now_showing' | 'upcoming'>('now_showing');
 
   const filteredMovies = movies.filter((m) => m.status === activeTab);
 
@@ -24,9 +24,9 @@ export const MovieGridSection: React.FC<MovieGridSectionProps> = ({ movies, isLo
         </div>
         <div className="flex items-center space-x-2 bg-[var(--surface-muted)] p-1 rounded-full">
           <button
-            onClick={() => setActiveTab('now-showing')}
+            onClick={() => setActiveTab('now_showing')}
             className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === 'now-showing'
+              activeTab === 'now_showing'
                 ? 'bg-[#7C6FE8] text-white shadow-sm'
                 : 'text-[var(--muted)] hover:text-[var(--text)]'
             }`}
@@ -34,9 +34,9 @@ export const MovieGridSection: React.FC<MovieGridSectionProps> = ({ movies, isLo
             ĐANG CHIẾU
           </button>
           <button
-            onClick={() => setActiveTab('coming-soon')}
+            onClick={() => setActiveTab('upcoming')}
             className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === 'coming-soon'
+              activeTab === 'upcoming'
                 ? 'bg-[#7C6FE8] text-white shadow-sm'
                 : 'text-[var(--muted)] hover:text-[var(--text)]'
             }`}

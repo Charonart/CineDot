@@ -5,6 +5,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Timer, Ticket, ShieldCheck, ArrowRight, ShoppingBag, Sparkles, Tag, Lock } from 'lucide-react';
 import { AppliedPricingRuleSummary, TicketPriceComposition } from '../hooks/usePayment';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
+import { getAgeRatingInfo } from '@/shared/utils/ageRatingHelper';
 
 interface SelectedFoodItem {
   id: string;
@@ -109,9 +111,7 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
             <span className="px-2 py-0.5 rounded-md bg-[#7C6FE8] text-white text-[9px] font-black uppercase tracking-wider">
               {movieFormat}
             </span>
-            <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[9px] font-bold border border-amber-200/80">
-              Khán giả {ageRating}
-            </span>
+            <AgeRatingBadge ageRating={ageRating} size="xs" variant="soft" />
           </div>
 
           <h3 className="font-extrabold text-sm text-gray-950 leading-snug line-clamp-2">
@@ -345,6 +345,14 @@ export const PaymentSidebar: React.FC<PaymentSidebarProps> = ({
         <span>{isProcessing ? 'ĐANG XỬ LÝ GIAO DỊCH...' : 'XÁC NHẬN THANH TOÁN'}</span>
         <ArrowRight className="w-4 h-4" />
       </motion.button>
+
+      {/* 10. Age Policy Commitment */}
+      {getAgeRatingInfo(ageRating).isRestricted && (
+        <p className="text-[10px] text-gray-400 text-center leading-relaxed px-1">
+          Bằng việc thanh toán, bạn xác nhận khán giả xem phim đáp ứng độ tuổi{' '}
+          <span className="font-extrabold text-gray-600">{getAgeRatingInfo(ageRating).code}</span> theo quy định. Vui lòng mang theo CCCD khi đến rạp.
+        </p>
+      )}
     </aside>
   );
 };

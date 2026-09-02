@@ -87,10 +87,10 @@ const handleMockFilter = (url: string, params: any, responseData: any) => {
 
     // Filter by category
     if (params.category) {
-      if (params.category === 'now-showing') {
-        results = results.filter((m: any) => m.status === 'now-showing');
-      } else if (params.category === 'coming-soon') {
-        results = results.filter((m: any) => m.status === 'coming-soon');
+      if (params.category === 'now-showing' || params.category === 'now_showing') {
+        results = results.filter((m: any) => m.status === 'now_showing' || m.status === 'now-showing');
+      } else if (params.category === 'coming-soon' || params.category === 'upcoming') {
+        results = results.filter((m: any) => m.status === 'upcoming' || m.status === 'coming-soon');
       } else {
         results = results.filter((m: any) => m.categories && m.categories.includes(params.category));
       }

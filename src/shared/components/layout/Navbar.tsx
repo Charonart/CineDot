@@ -52,6 +52,7 @@ export const Navbar: React.FC = () => {
   // Prevent SSR Hydration Mismatch & initialize session check
   useEffect(() => {
     setMounted(true);
+    useAuthStore.getState().initAuthStore();
     useAuthStore.getState().fetchMe();
 
     const handleScroll = () => {

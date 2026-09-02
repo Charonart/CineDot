@@ -1,3 +1,5 @@
+import { MovieStatus } from '@/shared/utils/movieStatusHelper';
+
 export interface PromoBanner {
   id: string;
   title: string;
@@ -13,9 +15,12 @@ export interface MovieCardItem {
   genre: string;
   duration: string;
   rating: number;
+  voteCount?: number;
+  imdbId?: string;
+  imdbUrl?: string;
   ageRating: string;
   posterUrl: string;
-  status: 'now-showing' | 'coming-soon';
+  status: MovieStatus;
   isHot?: boolean;
   formatBadge?: string; // e.g. 'IMAX', '4DX', '2D', 'Dolby Atmos'
   trailerUrl?: string;

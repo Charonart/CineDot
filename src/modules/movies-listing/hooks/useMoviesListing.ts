@@ -5,7 +5,7 @@ import { MovieListingItem, MovieListingTab } from '../types/movies-listing.types
 import { fetchMoviesListing } from '../services/movies-listing.service';
 import { masterDataService, GenreItem } from '@/shared/services/masterData.service';
 
-export function useMoviesListing(initialTab: MovieListingTab = 'now-showing') {
+export function useMoviesListing(initialTab: MovieListingTab = 'now_showing') {
   const [activeTab, setActiveTab] = useState<MovieListingTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenreId, setSelectedGenreId] = useState<string | number>('all');

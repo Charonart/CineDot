@@ -14,13 +14,12 @@ interface RoutePermissionConfig {
 }
 
 const ROUTE_PERMISSIONS: RoutePermissionConfig[] = [
-  { pathPrefix: '/admin/users-staff', requiredPermission: 'staff.manage', allowedRoles: ['SUPER_ADMIN'] },
+  { pathPrefix: '/admin/users-staff', requiredPermission: 'staff.manage', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/campaign', requiredPermission: 'vouchers.view', allowedRoles: ['SUPER_ADMIN', 'MARKETING'] },
   { pathPrefix: '/admin/vouchers', requiredPermission: 'vouchers.view', allowedRoles: ['SUPER_ADMIN', 'MARKETING'] },
   { pathPrefix: '/admin/pricing-rules', requiredPermission: 'pricing.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/settings', requiredPermission: 'settings.manage', allowedRoles: ['SUPER_ADMIN'] },
   { pathPrefix: '/admin/movies/genres', requiredPermission: 'movies.genres.manage', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
-  { pathPrefix: '/admin/movies/reviews', requiredPermission: 'reviews.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/persons', requiredPermission: 'movies.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/movies', requiredPermission: 'movies.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },
   { pathPrefix: '/admin/cinemas', requiredPermission: 'cinemas.view', allowedRoles: ['SUPER_ADMIN', 'CINEMA_MANAGER'] },

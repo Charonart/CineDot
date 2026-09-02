@@ -1,4 +1,6 @@
-export type MovieListingTab = 'now-showing' | 'coming-soon';
+import { MovieStatus } from '@/shared/utils/movieStatusHelper';
+
+export type MovieListingTab = 'now-showing' | 'coming-soon' | 'now_showing' | 'upcoming';
 
 export interface MovieListingItem {
   id: string;
@@ -13,6 +15,9 @@ export interface MovieListingItem {
   duration: string;
   releaseDate: string;
   rating: number;
-  status: 'NOW_SHOWING' | 'COMING_SOON';
+  voteCount?: number;
+  imdbId?: string;
+  imdbUrl?: string;
+  status: MovieStatus;
   isHot?: boolean;
 }

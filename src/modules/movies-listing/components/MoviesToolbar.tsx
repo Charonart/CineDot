@@ -34,16 +34,16 @@ export const MoviesToolbar: React.FC<MoviesToolbarProps> = ({
         <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-white border border-gray-200/80 shadow-sm w-fit">
           <button
             type="button"
-            onClick={() => onSelectTab('now-showing')}
+            onClick={() => onSelectTab('now_showing')}
             className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'now-showing'
+              activeTab === 'now_showing' || activeTab === 'now-showing'
                 ? 'bg-[#7C6FE8] text-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             <Film className="w-3.5 h-3.5" />
             <span>Phim Đang Chiếu</span>
-            {activeTab === 'now-showing' && typeof totalCount === 'number' && (
+            {(activeTab === 'now_showing' || activeTab === 'now-showing') && typeof totalCount === 'number' && (
               <span className="ml-1 px-1.5 py-0.2 bg-white/20 rounded-full text-[10px]">
                 {totalCount}
               </span>
@@ -52,16 +52,16 @@ export const MoviesToolbar: React.FC<MoviesToolbarProps> = ({
 
           <button
             type="button"
-            onClick={() => onSelectTab('coming-soon')}
+            onClick={() => onSelectTab('upcoming')}
             className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'coming-soon'
+              activeTab === 'upcoming' || activeTab === 'coming-soon'
                 ? 'bg-[#7C6FE8] text-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
             <span>Phim Sắp Chiếu</span>
-            {activeTab === 'coming-soon' && typeof totalCount === 'number' && (
+            {(activeTab === 'upcoming' || activeTab === 'coming-soon') && typeof totalCount === 'number' && (
               <span className="ml-1 px-1.5 py-0.2 bg-white/20 rounded-full text-[10px]">
                 {totalCount}
               </span>

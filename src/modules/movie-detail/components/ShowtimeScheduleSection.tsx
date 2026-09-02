@@ -5,13 +5,18 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ChevronDown, Bell, Loader2, MapPin, Film, Building2 } from 'lucide-react';
 import { useAuthStore } from '@/shared/store/useAuthStore';
+import { getStoredAuthToken } from '@/shared/utils/authStorage';
 import { fetchMovieShowtimes } from '../services/movie-detail.service';
 import { CinemaShowtimeGroup } from '../types/movie-detail.types';
 import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
+import { AgeRatingBadge } from '@/shared/components/ui/AgeRatingBadge';
+import { getAgeWarningNotice } from '@/shared/utils/ageRatingHelper';
+import { ShieldAlert } from 'lucide-react';
 
 interface ShowtimeScheduleSectionProps {
   movieSlug?: string;
   isComingSoon?: boolean;
+  ageRating?: string;
 }
 
 const TECH_FORMAT_FILTERS = [
@@ -41,6 +46,7 @@ const generateDateOptions = () => {
 export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = ({
   movieSlug = 'conan-movie-27',
   isComingSoon = false,
+  ageRating,
 }) => {
   const router = useRouter();
   const { isAuthenticated, openAuthModal } = useAuthStore();
@@ -58,11 +64,9 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const comingSoonSlugs = ['joker-folie-a-deux', 'venom-the-last-dance', 'gladiator-2', 'wicked-part-one'];
-  const isComingSoonMovie = isComingSoon || comingSoonSlugs.includes(movieSlug);
+  const isComingSoonMovie = Boolean(isComingSoon);
 
   useEffect(() => {
-    if (isComingSoonMovie) return;
     setLoadingSchedule(true);
 
     const isSoundTech = selectedTechFilter === 'dolby_atmos' || selectedTechFilter === 'imax_sound' || selectedTechFilter === 'surround_71';
@@ -73,10 +77,13 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
       .then((data) => {
         setSchedule(data);
       })
+      .catch(() => {
+        setSchedule([]);
+      })
       .finally(() => {
         setLoadingSchedule(false);
       });
-  }, [movieSlug, selectedDateStr, selectedRegion, selectedTechFilter, isComingSoonMovie]);
+  }, [movieSlug, selectedDateStr, selectedRegion, selectedTechFilter]);
 
   const handleScrollLeft = () => {
     if (scrollRef.current) {
@@ -91,7 +98,8 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
   };
 
   const handleShowtimeClick = (targetUrl: string) => {
-    if (!isAuthenticated) {
+    const isAuthed = isAuthenticated || Boolean(useAuthStore.getState().token || getStoredAuthToken());
+    if (!isAuthed) {
       openAuthModal('login', 'Vui lòng đăng nhập tài khoản để chọn ghế và đặt vé trực tuyến.', targetUrl);
       return;
     }
@@ -134,6 +142,8 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
       .filter((cinema) => cinema.formatGroups.length > 0);
   }, [schedule, selectedCinemaFilter, selectedDateStr]);
 
+  const hasAnyShowtimes = schedule.length > 0;
+
   return (
     <div id="showtime-schedule" className="w-full flex flex-col gap-6 pt-4">
       {/* Title */}
@@ -142,10 +152,35 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
           <span className="w-1.5 h-5 bg-[#7C6FE8] rounded-full inline-block" />
           <span>Lịch Chiếu Phim</span>
         </h2>
+        {isComingSoonMovie && hasAnyShowtimes && (
+          <span className="px-3 py-1 rounded-full bg-purple-100 text-[#7C6FE8] text-xs font-extrabold border border-purple-200 uppercase tracking-wide animate-pulse">
+            🌟 Suất Chiếu Sớm / Mở Bán Trước
+          </span>
+        )}
       </div>
 
-      {isComingSoonMovie ? (
-        /* Coming Soon Notice Card */
+      {/* Age Restriction Notice Banner (Fast & Frictionless Flow) */}
+      {getAgeWarningNotice(ageRating) && (
+        <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-950">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs">
+              <AgeRatingBadge ageRating={ageRating} size="xs" variant="solid" />
+              <span className="font-semibold text-amber-900 leading-snug">
+                {getAgeWarningNotice(ageRating)}
+              </span>
+            </div>
+          </div>
+          <span className="hidden sm:inline-block text-[11px] font-medium text-amber-800/80 italic shrink-0">
+            Lưu ý mang theo CCCD khi đến rạp
+          </span>
+        </div>
+      )}
+
+      {isComingSoonMovie && !hasAnyShowtimes && !loadingSchedule ? (
+        /* Coming Soon Notice Card if no showtimes yet */
         <div className="w-full p-8 sm:p-10 rounded-3xl bg-amber-50/90 border border-amber-200 text-center flex flex-col items-center gap-3 shadow-sm">
           <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shadow-xs">
             <Bell className="w-6 h-6" />
@@ -154,7 +189,7 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
             Phim Sắp Khởi Chiếu — Chưa Mở Bán Vé Trực Tuyến
           </h3>
           <p className="text-xs text-amber-800 max-w-md leading-relaxed font-medium">
-            Bộ phim này hiện đang ở trạng thái sắp khởi chiếu. Quý khách vui lòng bấm nút nhận thông báo để được cập nhật lịch chiếu sớm nhất!
+            Bộ phim này hiện đang ở trạng thái sắp khởi chiếu và chưa có suất chiếu sớm. Quý khách vui lòng bấm nút nhận thông báo để được cập nhật lịch chiếu sớm nhất!
           </p>
           <button
             type="button"
@@ -170,6 +205,23 @@ export const ShowtimeScheduleSection: React.FC<ShowtimeScheduleSectionProps> = (
         </div>
       ) : (
         <>
+          {/* Sneak Show Highlight Bar for upcoming movies with showtimes */}
+          {isComingSoonMovie && hasAnyShowtimes && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white flex items-center justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-2.5">
+                <span className="text-lg">🎟️</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-xs sm:text-sm text-purple-200">
+                    Vé Đặt Trước & Suất Chiếu Sớm (Early Screening)
+                  </span>
+                  <span className="text-[11px] text-slate-300">
+                    Phim sắp ra mắt nhưng đã mở bán vé trước cho các suất chiếu sớm đặc biệt bên dưới!
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Top Toolbar Bar - Date Selector & Dropdown Filters */}
           <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 sm:p-2.5 rounded-2xl bg-white border border-gray-200/90 shadow-sm relative z-30">
             {/* Left: Date Selector Carousel */}

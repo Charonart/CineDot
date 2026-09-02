@@ -4,9 +4,13 @@ export interface DigitalTicketInfo {
   movieTitle: string;
   movieSlug: string;
   posterUrl: string;
+  backdropUrl?: string;
   movieFormat: string;
   ageRating: string;
+  audioFormat?: string;
+  durationMinutes?: number;
   cinemaName: string;
+  cinemaAddress?: string;
   roomName: string;
   showTime: string;
   showDate: string;
@@ -16,6 +20,7 @@ export interface DigitalTicketInfo {
   totalPaid: number;
   paidAt: string;
   paymentMethodName: string;
+  transactionNo?: string;
   status: string;
   combos?: {
     name: string;
@@ -24,4 +29,3 @@ export interface DigitalTicketInfo {
     image: string;
   }[];
 }
-

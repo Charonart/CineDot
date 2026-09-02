@@ -12,7 +12,7 @@ interface MoviesListingClientPageProps {
   initialTab?: MovieListingTab;
 }
 
-export function MoviesListingClientPage({ initialTab = 'now-showing' }: MoviesListingClientPageProps) {
+export function MoviesListingClientPage({ initialTab = 'now_showing' }: MoviesListingClientPageProps) {
   const {
     activeTab,
     setActiveTab,
@@ -49,7 +49,7 @@ export function MoviesListingClientPage({ initialTab = 'now-showing' }: MoviesLi
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-950">
-              {activeTab === 'now-showing' ? 'Phim Đang Chiếu' : 'Phim Sắp Chiếu'}
+              {(activeTab === 'now_showing' || activeTab === 'now-showing') ? 'Phim Đang Chiếu' : 'Phim Sắp Chiếu'}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 max-w-2xl leading-relaxed">
               Khám phá danh sách phim bom tấn mới nhất với định dạng IMAX 3D Laser, 4DX sống động và hệ thống âm thanh vòm Dolby Atmos tại CineDot.

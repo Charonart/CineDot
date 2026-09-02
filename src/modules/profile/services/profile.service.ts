@@ -170,7 +170,7 @@ export async function fetchUserTickets(filterTab?: TicketFilterStatus): Promise<
             movieSlug: movie.slug || 'movie-detail',
             posterUrl: imageHelper.getPosterUrl(movie.poster_url || movie.poster_path),
             movieFormat: b.price_breakdown?.metadata?.format || room.room_type || '2D Phụ Đề',
-            ageRating: movie.age_rating || (movie.adult ? 'T18' : 'P'),
+            ageRating: movie.age_rating || movie.ageRating || 'P',
             duration: movie.duration ? Number(movie.duration) : undefined,
             cinemaName: cinema.cinema_name || 'CineDot Landmark 81',
             roomName: room.room_name || 'Phòng 01',

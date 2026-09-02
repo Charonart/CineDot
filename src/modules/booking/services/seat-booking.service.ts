@@ -238,10 +238,11 @@ export const seatBookingService = {
         message: res.data?.message || 'Không thể giữ ghế. Ghế có thể đã có người chọn.',
       };
     } catch (err: any) {
-      if (err?.response?.status === 401) {
+      const is401 = err?.status === 401 || err?.code === '401' || err?.response?.status === 401;
+      if (is401) {
         return {
           success: false,
-          message: 'Vui lòng đăng nhập để đặt vé.',
+          message: 'Vui lòng đăng nhập để tiếp tục đặt vé.',
           needsAuth: true,
         } as any;
       }

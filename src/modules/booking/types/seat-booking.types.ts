@@ -106,6 +106,7 @@ export interface HoldSeatsResult {
   booking_code?: string;
   expires_in_seconds?: number;
   expires_at?: string;
+  needsAuth?: boolean;
 }
 
 export interface SeatStatusUpdatedEvent {

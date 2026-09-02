@@ -45,10 +45,16 @@ export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ movies }
                 </h4>
                 <p className="text-[11px] text-gray-500 truncate">{movie.genre}</p>
                 <div className="flex items-center justify-between text-[11px] pt-1">
-                  <span className="flex items-center gap-1 text-amber-500 font-bold">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    <span>{movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'}</span>
-                  </span>
+                  {movie.rating > 0 ? (
+                    <span className="flex items-center gap-1 font-bold text-gray-800">
+                      <span className="px-1 py-0.2 rounded bg-[#F5C518] text-black font-black text-[9px] leading-tight">
+                        IMDb
+                      </span>
+                      <span className="text-amber-600 font-extrabold">{movie.rating.toFixed(1)}</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-gray-400 italic">Chưa có đánh giá</span>
+                  )}
                   <span className="px-2 py-0.2 rounded-full bg-[#7C6FE8]/15 text-[#7C6FE8] text-[9px] font-extrabold uppercase">
                     {movie.formatBadge || '2D'}
                   </span>

@@ -22,7 +22,9 @@ export const MOCK_MOVIE_DETAIL_SPIDERMAN: MovieDetail = {
     'Theo sau các sự kiện chấn động toàn cầu, Peter Parker phải học cách cân bằng lại cuộc sống cá nhân và trách nhiệm của một siêu anh hùng khi một mối đe dọa vũ trụ hoàn toàn mới xuất hiện tại thành phố New York.',
   rating: 9.2,
   voteCount: 14820,
-  status: 'NOW_SHOWING',
+  imdbId: 'tt10872600',
+  imdbUrl: 'https://www.imdb.com/title/tt10872600',
+  status: 'now_showing',
 };
 
 export const MOCK_RECOMMENDED_MOVIES: MovieCardItem[] = [
@@ -36,7 +38,7 @@ export const MOCK_RECOMMENDED_MOVIES: MovieCardItem[] = [
     formatBadge: 'IMAX 2D',
     duration: '110 phút',
     ageRating: 'P',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'rec-2',
@@ -48,7 +50,7 @@ export const MOCK_RECOMMENDED_MOVIES: MovieCardItem[] = [
     formatBadge: '2D Lồng Tiếng',
     duration: '131 phút',
     ageRating: 'T18',
-    status: 'now-showing',
+    status: 'now_showing',
   },
   {
     id: 'rec-3',
@@ -60,7 +62,7 @@ export const MOCK_RECOMMENDED_MOVIES: MovieCardItem[] = [
     formatBadge: '3D Lồng Tiếng',
     duration: '96 phút',
     ageRating: 'P',
-    status: 'now-showing',
+    status: 'now_showing',
   },
 ];
 
@@ -86,7 +88,9 @@ export const MOCK_MOVIE_DETAIL_COMING_SOON_MAP: Record<string, MovieDetail> = {
       'Hành trình tiếp nối đầy điên rồ của Arthur Fleck tại Viện tâm thần Arkham nơi hắn gặp gỡ mối tình định mệnh Harley Quinn trong một vũ trụ âm nhạc độc đáo và u tối.',
     rating: 9.0,
     voteCount: 8900,
-    status: 'COMING_SOON',
+    imdbId: 'tt11315808',
+    imdbUrl: 'https://www.imdb.com/title/tt11315808',
+    status: 'upcoming',
   },
   'venom-the-last-dance': {
     id: 'm-8',
@@ -109,7 +113,9 @@ export const MOCK_MOVIE_DETAIL_COMING_SOON_MAP: Record<string, MovieDetail> = {
       'Eddie và Venom bị săn đuổi bởi cả hai thế giới loài người và các Symbiote ngoài hành tinh. Trận chiến cuối cùng sẽ quyết định số phận của bộ đôi này.',
     rating: 8.8,
     voteCount: 6500,
-    status: 'COMING_SOON',
+    imdbId: 'tt16366836',
+    imdbUrl: 'https://www.imdb.com/title/tt16366836',
+    status: 'upcoming',
   },
   'gladiator-2': {
     id: 'm-9',
@@ -132,7 +138,9 @@ export const MOCK_MOVIE_DETAIL_COMING_SOON_MAP: Record<string, MovieDetail> = {
       'Câu chuyện tiếp nối nhiều năm sau cái chết của Maximus, theo chân Lucius khi anh trở lại đấu trường La Mã để đòi lại danh dự và sự tự do.',
     rating: 9.3,
     voteCount: 11200,
-    status: 'COMING_SOON',
+    imdbId: 'tt9660502',
+    imdbUrl: 'https://www.imdb.com/title/tt9660502',
+    status: 'upcoming',
   },
   'wicked-part-one': {
     id: 'm-10',
@@ -153,9 +161,11 @@ export const MOCK_MOVIE_DETAIL_COMING_SOON_MAP: Record<string, MovieDetail> = {
     cast: ['Cynthia Erivo', 'Ariana Grande', 'Jonathan Bailey'],
     synopsis:
       'Câu chuyện chưa từng kể về tình bạn và hành trình biến đổi giữa Elphaba - Phù thủy phương Tây độc ác và Glinda - Phù thủy phương Đông tốt lành.',
-    rating: 9.1,
-    voteCount: 7800,
-    status: 'COMING_SOON',
+    rating: 0,
+    voteCount: 0,
+    imdbId: 'tt1423570',
+    imdbUrl: 'https://www.imdb.com/title/tt1423570',
+    status: 'upcoming',
   },
 };
 
@@ -221,6 +231,7 @@ export const MOCK_CINEMA_GROUPS: CinemaShowtimeGroup[] = [
     ],
   },
 ];
+
 export const MOCK_MOVIE_CREDITS: { cast: MovieCastMember[]; crew: MovieCrewMember[] } = {
   cast: [
     {

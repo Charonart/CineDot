@@ -17,7 +17,9 @@ export interface AssignUserRoleRequestDTO {
 
 export interface AdminStaffItemDTO {
   id: string | number;
-  name: string;
+  name?: string;
+  fullname?: string;
+  full_name?: string;
   email: string;
   phone?: string | null;
   role: string;

@@ -10,6 +10,7 @@ import {
 import { MovieCardItem } from '@/modules/home/types/home.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
 import { isShowtimePassed } from '@/shared/utils/showtimeHelper';
+import { normalizeMovieStatus } from '@/shared/utils/movieStatusHelper';
 import {
   MOCK_MOVIE_DETAIL_SPIDERMAN,
   MOCK_MOVIE_DETAIL_COMING_SOON_MAP,
@@ -47,7 +48,7 @@ export async function fetchMovieDetail(slug: string): Promise<MovieDetail | null
         ? `${m.duration} phút`
         : m.duration || '';
 
-      const status = (m.status || '').toLowerCase().includes('coming') ? 'COMING_SOON' : 'NOW_SHOWING';
+      const status = normalizeMovieStatus(m.status);
 
       return {
         id: String(m.id || m.movie_id || ''),
@@ -94,8 +95,11 @@ export async function fetchMovieDetail(slug: string): Promise<MovieDetail | null
           thumbnailUrl: (v.key || v.key_value) ? `https://img.youtube.com/vi/${v.key || v.key_value}/hqdefault.jpg` : undefined,
         })) : [],
         synopsis: m.overview || m.synopsis || '',
-        rating: Number(m.rating || m.vote_average || 0),
-        voteCount: Number(m.voteCount || m.vote_count || 0),
+        rating: Number(m.vote_average ?? m.rating ?? 0),
+        voteCount: Number(m.vote_count ?? m.voteCount ?? 0),
+        imdbId: m.imdb_id || m.imdbId || (m.id ? `tt${String(m.id).padStart(7, '0')}` : undefined),
+        imdbUrl: m.imdb_url || m.imdbUrl || (m.imdb_id ? `https://www.imdb.com/title/${m.imdb_id}` : undefined),
+        tmdbId: m.tmdb_id || m.tmdbId,
         status,
       };
     }

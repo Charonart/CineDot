@@ -121,7 +121,6 @@ export const AdminSidebar: React.FC = () => {
         { name: 'Kho Phim Chiếu', href: '/admin/movies', permission: 'movies.view' },
         { name: 'Thể Loại Phim', href: '/admin/movies/genres', permission: 'movies.genres.manage' },
         { name: 'Đạo Diễn & Diễn Viên', href: '/admin/persons', permission: 'movies.view' },
-        { name: 'Đánh Giá & Review', href: '/admin/movies/reviews', permission: 'reviews.view' },
       ],
     },
     {
@@ -141,9 +140,10 @@ export const AdminSidebar: React.FC = () => {
       id: 'marketing',
       name: 'Marketing & Bảng Giá',
       icon: Tag,
-      primaryHref: '/admin/campaign/voucher',
+      primaryHref: '/admin/campaign',
       permission: 'vouchers.manage',
       subitems: [
+        { name: 'Chiến Dịch Khuyến Mãi', href: '/admin/campaign', permission: 'vouchers.manage' },
         { name: 'Mã Giảm Giá (Vouchers)', href: '/admin/campaign/voucher', permission: 'vouchers.manage' },
         { name: 'Banner Quảng Cáo', href: '/admin/campaign/banner', permission: 'vouchers.manage' },
         { name: 'Bảng Giá Vé & Phụ Thu', href: '/admin/pricing-rules', permission: 'vouchers.manage' },

@@ -15,7 +15,7 @@ export const metadata = {
 
 export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   const { tab } = await searchParams;
-  const initialTab: MovieListingTab = tab === 'coming-soon' ? 'coming-soon' : 'now-showing';
+  const initialTab: MovieListingTab = (tab === 'upcoming' || tab === 'coming-soon') ? 'upcoming' : 'now_showing';
 
   return <MoviesListingClientPage initialTab={initialTab} />;
 }

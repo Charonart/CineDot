@@ -2,16 +2,11 @@ import { AdminMovieItemDTO, TmdbSearchResultDTO } from '../dto/adminMovie.dto';
 import { MovieCreditItemDTO } from '../dto/adminCredit.dto';
 import { AdminMovieItem, AdminMovieCredit, GenreItem, MovieStatus } from '../types/adminMovie.types';
 import { imageHelper } from '@/shared/utils/imageHelper';
+import { normalizeMovieStatus } from '@/shared/utils/movieStatusHelper';
 
 export const adminMovieMapper = {
   toDomain(dto: AdminMovieItemDTO): AdminMovieItem {
-    const rawStatus = (dto.status || 'now_showing').toLowerCase();
-    let status: MovieStatus = 'NOW_SHOWING';
-    if (rawStatus.includes('coming') || rawStatus.includes('upcoming')) {
-      status = 'COMING_SOON';
-    } else if (rawStatus.includes('stop') || rawStatus.includes('end')) {
-      status = 'STOPPED';
-    }
+    const status: MovieStatus = normalizeMovieStatus(dto.status);
 
     // Extract genres list
     const genres: GenreItem[] = [];
@@ -55,9 +50,15 @@ export const adminMovieMapper = {
         ? dto.duration
         : parseInt(String(dto.duration || '120'), 10) || 120;
 
-    const ratingNum = typeof dto.rating === 'number'
+    const ratingNum = typeof dto.vote_average === 'number'
+      ? dto.vote_average
+      : typeof dto.rating === 'number'
       ? dto.rating
-      : parseFloat(String(dto.vote_average || dto.rating || '4.8')) || 4.8;
+      : parseFloat(String(dto.vote_average || dto.rating || '0')) || 0;
+
+    const voteCount = Number(dto.vote_count ?? dto.voteCount ?? 0);
+    const imdbId = dto.imdb_id || dto.imdbId || (dto.movie_id ? `tt${String(dto.movie_id).padStart(7, '0')}` : undefined);
+    const imdbUrl = dto.imdb_url || dto.imdbUrl || (imdbId ? `https://www.imdb.com/title/${imdbId}` : undefined);
 
     const rawPoster = dto.poster_path || dto.poster_url || dto.posterUrl || '';
     const rawBackdrop = dto.backdrop_path || dto.backdrop_url || dto.backdropUrl || '';
@@ -70,7 +71,7 @@ export const adminMovieMapper = {
       overview: dto.overview || dto.synopsis || dto.description || '',
       releaseDate: dto.release_date || dto.releaseDate || new Date().toISOString().split('T')[0],
       originalLanguage: dto.original_language || dto.originalLanguage || 'vi',
-      adult: Boolean(dto.adult),
+      adult: (dto.age_rating || dto.ageRating) === 'T18',
       popularity: typeof dto.popularity === 'number' ? dto.popularity : (parseFloat(String(dto.popularity)) || 0),
       durationMinutes: durationNum,
       duration: `${durationNum} phút`,
@@ -84,8 +85,13 @@ export const adminMovieMapper = {
       genreIds: genreIds.length > 0 ? genreIds : [1],
       genres: genres.length > 0 ? genres : [{ id: 1, name: 'Hành động' }],
       genre: genreNames.length > 0 ? genreNames : ['Hành động'],
-      rating: Math.min(5, Math.max(0, ratingNum > 5 ? ratingNum / 2 : ratingNum)),
+      rating: ratingNum,
+      voteCount,
+      imdbId,
+      rawImdbId: imdbId,
+      imdbUrl,
       formatBadge: 'IMAX 3D',
+      ageRating: dto.age_rating || dto.ageRating || 'P',
     };
   },
 
@@ -107,7 +113,10 @@ export const adminMovieMapper = {
     const rawPoster = dto.poster_path || '';
     const rawBackdrop = dto.backdrop_path || '';
 
-    const rating5 = dto.vote_average ? Number((dto.vote_average / 2).toFixed(1)) : 4.5;
+    const voteAvg = dto.vote_average ? Number(dto.vote_average.toFixed(1)) : 0;
+    const voteCount = Number(dto.vote_count ?? 0);
+    const imdbId = dto.imdb_id || (dto.id ? `tt${String(dto.id).padStart(7, '0')}` : undefined);
+    const imdbUrl = imdbId ? `https://www.imdb.com/title/${imdbId}` : undefined;
 
     const genreNames = Array.isArray(dto.genres)
       ? dto.genres.map((g) => (typeof g === 'string' ? g : g.name || g.genre_name || ''))
@@ -121,11 +130,11 @@ export const adminMovieMapper = {
       overview: dto.overview || '',
       releaseDate: dto.release_date || new Date().toISOString().split('T')[0],
       originalLanguage: 'en',
-      adult: false,
+      ageRating: 'P',
       popularity: 0,
       durationMinutes: 120,
       duration: '120 phút',
-      status: 'NOW_SHOWING',
+      status: 'now_showing',
       rawStatus: 'now_showing',
       rawPosterPath: rawPoster,
       posterUrl: imageHelper.getPosterUrl(rawPoster, 'lg'),
@@ -135,7 +144,11 @@ export const adminMovieMapper = {
       genreIds: [1],
       genres: [{ id: 1, name: 'Hành động' }],
       genre: genreNames.length > 0 ? genreNames : ['Hành động'],
-      rating: rating5,
+      rating: voteAvg,
+      voteCount,
+      imdbId,
+      rawImdbId: imdbId,
+      imdbUrl,
       formatBadge: 'IMAX 3D',
     };
   },

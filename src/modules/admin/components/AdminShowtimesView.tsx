@@ -119,17 +119,21 @@ export function AdminShowtimesView() {
     }
   }, [cinemas, selectedCinemaId]);
 
-  // Generate 7 consecutive date pills from today
+  // State to dismiss staggering suggestion banner if user doesn't want to see it
+  const [isStaggeringDismissed, setIsStaggeringDismissed] = useState(false);
+
+  // Generate 30 consecutive date pills (-2 days to +27 days from today)
   const datePills = useMemo(() => {
     const pills = [];
     const today = new Date();
-    const dayNames = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = -2; i < 28; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
       const key = d.toISOString().split('T')[0];
-      const dayName = i === 0 ? 'Hôm nay' : i === 1 ? 'Ngày mai' : dayNames[d.getDay()];
+      const dayName =
+        i === 0 ? 'Hôm nay' : i === 1 ? 'Ngày mai' : i === -1 ? 'Hôm qua' : dayNames[d.getDay()];
       const label = `${dayName}, ${d.getDate() < 10 ? '0' + d.getDate() : d.getDate()}/${
         d.getMonth() + 1 < 10 ? '0' + (d.getMonth() + 1) : d.getMonth() + 1
       }`;
@@ -152,7 +156,7 @@ export function AdminShowtimesView() {
     return minutesToTime(endM);
   }, [selectedAddMovie, addStartTime]);
 
-  // Staggering Conflicts Detection
+  // Staggering Conflicts Detection (Between different rooms: <= 10 mins close starts)
   const staggeringConflicts = useMemo(() => {
     const list = [...showtimes].sort((a, b) => a.startMinutes - b.startMinutes);
     const conflicts: Array<{ st1: AdminShowtimeGridItem; st2: AdminShowtimeGridItem; diff: number }> = [];
@@ -172,6 +176,7 @@ export function AdminShowtimesView() {
 
   // Open Add Modal Helper
   const handleOpenAddModal = (roomId?: number, defaultStartTime?: string, movie?: AdminMovieOption) => {
+    if (viewingShowtime) return;
     if (movie) {
       setAddMovieId(movie.id);
     } else if (!addMovieId && movies.length > 0) {
@@ -328,6 +333,27 @@ export function AdminShowtimesView() {
     return [...lockedOrBookedDbShowtimes, ...draftGridItems];
   }, [showtimes, hasDraft, draftData, rooms, movies, selectedCinemaId]);
 
+  // Same-Room Real Collision Detection (Actual Error: 2 movies overlap in the same room)
+  const roomCollisions = useMemo(() => {
+    const roomMap = new Map<number, AdminShowtimeGridItem[]>();
+    for (const st of effectiveShowtimes) {
+      if (!roomMap.has(st.roomId)) roomMap.set(st.roomId, []);
+      roomMap.get(st.roomId)!.push(st);
+    }
+    const collisions: Array<{ st1: AdminShowtimeGridItem; st2: AdminShowtimeGridItem; roomName: string }> = [];
+    for (const [_, list] of roomMap.entries()) {
+      const sorted = [...list].sort((a, b) => a.startMinutes - b.startMinutes);
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const curr = sorted[i];
+        const next = sorted[i + 1];
+        if (curr.endMinutes + curr.cleaningBufferMinutes > next.startMinutes) {
+          collisions.push({ st1: curr, st2: next, roomName: curr.roomName });
+        }
+      }
+    }
+    return collisions;
+  }, [effectiveShowtimes]);
+
   // Handle Delete Submit
   const handleDeleteSubmit = async () => {
     if (!deletingShowtime) return;
@@ -467,17 +493,38 @@ export function AdminShowtimesView() {
         />
       )}
 
-      {/* 3. Inline Staggering Conflict Warning Banner */}
-      {!hasDraft && staggeringConflicts.length > 0 && (
-        <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/80 flex items-center gap-2 text-xs text-amber-900">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-          <div className="flex-1">
-            <strong>Giãn cách sảnh:</strong> Phát hiện {staggeringConflicts.length} cặp suất chiếu bắt đầu cách nhau <strong>&le; 10 phút</strong> giữa các phòng. Khuyến nghị giãn cách 15 phút để giảm tải sảnh bắp nước và cửa soát vé.
+      {/* 3. Real Same-Room Collision Alert Banner */}
+      {roomCollisions.length > 0 && (
+        <div className="px-4 py-2 bg-rose-50 border-b border-rose-200 flex items-center justify-between text-xs text-rose-900">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            <div>
+              <strong>Cảnh báo trùng lịch phòng:</strong> Phát hiện {roomCollisions.length} cặp suất chiếu bị đè giờ trong cùng phòng (<strong>{roomCollisions[0].roomName}</strong>: {roomCollisions[0].st1.startTime} và {roomCollisions[0].st2.startTime}). Vui lòng dời giờ để tránh xung đột vận hành!
+            </div>
           </div>
         </div>
       )}
 
-      {/* 4. Integrated Split Workspace: Left Movie Tray (260px) + Right Gantt Canvas */}
+      {/* 4. Dismissible Lobby Staggering Suggestion Banner */}
+      {!hasDraft && !isStaggeringDismissed && staggeringConflicts.length > 0 && roomCollisions.length === 0 && (
+        <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/80 flex items-center justify-between text-xs text-amber-900">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="flex-1">
+              <strong>Gợi ý giãn cách sảnh:</strong> Có {staggeringConflicts.length} cặp suất chiếu bắt đầu cách nhau &le; 10 phút giữa các phòng khác nhau. (Khuyến nghị giãn cách 15 phút nếu muốn giảm tải sảnh bắp nước).
+            </div>
+          </div>
+          <button
+            onClick={() => setIsStaggeringDismissed(true)}
+            className="p-1 text-amber-700 hover:text-amber-900 hover:bg-amber-100/70 rounded-md transition-colors cursor-pointer shrink-0 ml-2"
+            title="Đóng gợi ý này"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* 5. Integrated Split Workspace: Left Movie Tray (260px) + Right Gantt Canvas */}
       <div className="flex flex-col lg:flex-row min-h-[640px]">
         {/* Left Movie Catalog Tray */}
         <div className="w-full lg:w-64 shrink-0">
@@ -498,7 +545,10 @@ export function AdminShowtimesView() {
             snapMinutes={snapMinutes}
             selectedDateKey={selectedDateKey}
             onOpenAddModal={handleOpenAddModal}
-            onViewShowtime={(st) => setViewingShowtime(st)}
+            onViewShowtime={(st) => {
+              setIsAddModalOpen(false);
+              setViewingShowtime(st);
+            }}
             onEditShowtime={(st) => {
               setEditingShowtime(st);
               setEditStartTime(st.startTime);

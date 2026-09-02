@@ -1,4 +1,4 @@
-export type MovieStatus = 'NOW_SHOWING' | 'COMING_SOON' | 'STOPPED';
+export type MovieStatus = 'now_showing' | 'upcoming' | 'ended';
 
 export interface GenreItem {
   id: number;
@@ -14,7 +14,7 @@ export interface AdminMovieItem {
   overview: string;
   releaseDate: string;
   originalLanguage: string;
-  adult: boolean;
+  adult?: boolean;
   popularity: number;
   durationMinutes: number;
   duration: string;
@@ -29,7 +29,12 @@ export interface AdminMovieItem {
   genres: GenreItem[];
   genre: string[];
   rating: number;
+  voteCount?: number;
+  imdbId?: string;
+  rawImdbId?: string;
+  imdbUrl?: string;
   formatBadge?: string;
+  ageRating?: string;
 }
 
 export interface AdminMovieCredit {

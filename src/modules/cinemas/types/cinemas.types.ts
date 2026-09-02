@@ -1,3 +1,49 @@
+export interface CinemaRoomItem {
+  id: string | number;
+  roomId: string | number;
+  name: string;
+  roomName: string;
+  roomType: string;
+  totalSeats: number;
+  screenType?: string;
+  soundTechnology?: string;
+  screenConfig?: {
+    shape?: string;
+    aspect_ratio?: string;
+    width?: number;
+    curve_depth?: number;
+    label?: string;
+    side_walls?: boolean;
+  };
+  features?: string[];
+  isActive?: boolean;
+}
+
+export interface RoomLayoutSeat {
+  seat_id: string;
+  type: string;
+  cx: number;
+  cy: number;
+  angle?: number;
+}
+
+export interface RoomScreenConfig {
+  label: string;
+  shape: 'curved' | 'flat' | 'led_wall' | string;
+  width: number;
+  curve_depth?: number;
+  aspect_ratio?: string;
+  side_walls?: boolean;
+}
+
+export interface RoomLayoutData {
+  room_id: number | string;
+  room_name: string;
+  screen: RoomScreenConfig;
+  total_seats: number;
+  seats: RoomLayoutSeat[];
+}
+
 export interface CinemaItem {
   id: string;
   slug: string;
@@ -11,6 +57,7 @@ export interface CinemaItem {
   mapUrl: string;
   googleMapsEmbedUrl?: string;
   description: string;
+  rooms?: CinemaRoomItem[];
 }
 
 export type PricingFormatTab = '2d' | '3d' | 'imax';
@@ -35,6 +82,8 @@ export interface CinemaShowtimeSlot {
   time: string;
   format: string;
   roomName: string;
+  price?: string | number;
+  screenType?: string;
 }
 
 export interface CinemaMovieShowtime {
