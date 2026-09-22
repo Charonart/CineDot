@@ -80,19 +80,19 @@ flowchart TB
         RESEND["Resend SMTP Mailer"]
     end
 
-    UP -->|HTTP / JSON| HTTP
-    AP -->|HTTP / JSON| HTTP
+    UP -->|HTTP Request| HTTP
+    AP -->|HTTP Request| HTTP
     HTTP --> API
     API --> SVC
 
-    SVC -->|Atomic Lock & Hold Pipeline| REDIS
-    SVC -->|Relational Data & ACID Transactions| PG
+    SVC -->|Atomic Lock and Hold Pipeline| REDIS
+    SVC -->|Relational Data and ACID Transactions| PG
     SVC -->|Push Background Jobs| QUEUE
     QUEUE --> RESEND
-    SVC -->|Initiate Payment / IPN Webhook| VNPAY
+    SVC -->|Initiate Payment and Webhook| VNPAY
 
     SVC -->|Broadcast Realtime Events| WS
-    WS -.->|Sync Seat Status (Hold/Release)| UP
+    WS -.->|Sync Seat Status - Hold or Release| UP
 ```
 
 ---
@@ -282,7 +282,7 @@ Hệ thống đã chuẩn bị sẵn tài khoản demo tương ứng với cơ s
 
 ## 👨‍💻 Author & Contact / Tác Giả
 
-- **Developer & Designer**: [Charonart (Hải Đăng)](https://github.com/Charonart)
+- **Lead Developer**: **Lê Bá Quý** ([Charonart](https://github.com/Charonart) / Lê Quý)
 - **Frontend Repository**: [Charonart/CineDot](https://github.com/Charonart/CineDot)
 - **Backend Repository**: [Charonart/CineDot_BE](https://github.com/Charonart/CineDot_BE)
 
