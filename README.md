@@ -282,7 +282,7 @@ Hệ thống đã chuẩn bị sẵn tài khoản demo tương ứng với cơ s
 
 ## 👨‍💻 Author & Contact / Tác Giả
 
-- **Developer & Designer**: [Charonart (Hải Đăng)](https://github.com/Charonart)
+- **Developer & Designer**: [Charonart (Quý Lê)](https://github.com/Charonart)
 - **Frontend Repository**: [Charonart/CineDot](https://github.com/Charonart/CineDot)
 - **Backend Repository**: [Charonart/CineDot_BE](https://github.com/Charonart/CineDot_BE)
 
